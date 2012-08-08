@@ -9,7 +9,7 @@
   <meta name="author" content="Alex Matchneer">
 
   
-  <meta name="description" content="I&#8217;m working on a heavily animated, mobile-accessible kids&#8217; website and was getting some exceptionally slow performance from Firefox &hellip;">
+  <meta name="description" content="I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -93,9 +93,11 @@
   </header>
 
 
-  <div class="entry-content"><p>I&#8217;m working on a heavily animated, mobile-accessible kids&#8217; website and was getting some exceptionally slow performance from Firefox during supposedly GPU-accelerated CSS3 transitions.</p>
+  <div class="entry-content"><p>I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during supposedly GPU-accelerated CSS3 transitions.</p>
 
-<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663776">Turns out there&#8217;s a bug</a>, still unaddressed, that lubricates Gecko with jank molasses anytime it has to animate a transition involving the <code>scale()</code> property. The solution? Add a dash of <code>rotate(0.01deg)</code> to your <code>transform</code> property and the problem magically goes aways. So if you&#8217;d like to set <code>-moz-transform</code> to <code>scale(2)</code>, set it to <code>scale(2) rotate(0.01deg)</code> and you won&#8217;t have any problems.</p>
+<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663776">Turns out there&#8217;s a bug</a>, still unaddressed, that lubricates Gecko with jank molasses anytime it has to animate a transition involving the <code>scale()</code> property. The solution? Add a dash of <code>rotate(0.01deg)</code> to your <code>transform</code> property and the problem magically goes away. Somehow, adding a small degree of unnoticeable rotation renders the transition way more smoothly, and this goes for both CSS3 transitions and animations in Firefox.</p>
+
+<p>So if you&#8217;d like to transition <code>-moz-transform</code> to <code>scale(2)</code>, set it instead to <code>scale(2) rotate(0.01deg)</code> and watch the jank magically disappear.</p>
 </div>
   
   
