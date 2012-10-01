@@ -4,7 +4,7 @@
   <title><![CDATA[Category: dry | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/dry/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2012-09-29T12:59:50-04:00</updated>
+  <updated>2012-10-01T10:05:14-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -18,7 +18,9 @@
     <link href="http://machty.github.com/blog/2012/09/28/dry-your-ember-routes/"/>
     <updated>2012-09-28T13:54:00-04:00</updated>
     <id>http://machty.github.com/blog/2012/09/28/dry-your-ember-routes</id>
-    <content type="html"><![CDATA[<p>A common complaint about Ember.js routing is that seems to force you to
+    <content type="html"><![CDATA[<h4>UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues</h4>
+
+<p>A common complaint about Ember.js routing is that seems to force you to
 create pairs of extremely light-weight, useless Views and Controllers
 for each new route you create. Another is that it's not particular
 obvious how data ought to be shared between routes/controllers. Here's
@@ -32,7 +34,7 @@ that describes an application that allows you to create new Campaigns,
 but the forms for filling out all the information about a Campaign are
 split between multiple pages.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.rb  </span></figcaption>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -84,12 +86,12 @@ split between multiple pages.</p>
 </span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
 </span><span class='line'>      <span class="c1"># 2. Create BasicInfoController and BasicInfoView, inject</span>
 </span><span class='line'>      <span class="c1"># into the NewCampaignView outlet.</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaign&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;basicInfo&#39;</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;basicInfo&#39;</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
 </span><span class='line'>    <span class="nv">route: </span><span class="s">&#39;/more_info&#39;</span>
 </span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaign&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;moreInfo&#39;</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;moreInfo&#39;</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="c1">#... a third page</span>
 </span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
@@ -108,7 +110,7 @@ Controllers, namely:</li>
 </ol>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.rb  </span></figcaption>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -165,12 +167,12 @@ Controllers via the following:</p>
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
 </span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;new_campaign&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
 </span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
 </span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;new_campaign&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
 </span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">MoreInfoView</span>
 </span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
 </span><span class='line'>
@@ -214,13 +216,79 @@ encourage you to really dig into the Ember source, particularly the test
 cases that deal with these kinds of issues. For example, tucked right in
 the middle of <code>controller_test.js</code> is</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.rb  </span></figcaption>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;if the controller is explicitly set to null while connecting an outlet, the instantiated view will inherit its controller from its parent view&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Which isn't exactly what's happening regarding context resolution, but still clued me into this
 approach.</p>
+
+<h3>Update: Infinite Loop Gotcha</h3>
+
+<p>I've been refactoring like a madman since discovering this and in some
+cases I was getting stack overflows that were hard to trace down, but I
+found the cause: if the <code>viewClass</code> you specify has an unnamed
+<code></code> in its template, you'll get an infinite loop. I'm 90% sure
+the reason why is that when you use the <code>viewClass</code>-only form of
+connectOutlet, the default outlet name resolves to <code>view</code> (the default)
+and steps on the namespace toes of the parent view outlet that 1) had
+the same name (view) and was 2) (more importantly) tied to the same
+single controller. So, there's namespace collisions. You can avoid this
+by either getting rid of the leaf view's <code></code> (which might be
+the case if you've been unquestioningly throwing outlets into templates
+that don't actually inject child views... we're probably all guilty of
+this at some point in our struggles with the router), or, if you
+actually need the outlet, just give it a sensible name that won't
+collide with any other outlet attached to the shared controller. Then
+when you want to inject a view into <em>that</em> outlet, you can do:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nv">route: </span><span class="s">&#39;/basic_info&#39;</span>
+</span><span class='line'><span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>    <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">index: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">route: </span><span class="s">&#39;/&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">captcha: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">route: </span><span class="s">&#39;/captcha&#39;</span>
+</span><span class='line'>  <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1"># Assume theres an  in the basic_info template.</span>
+</span><span class='line'>    <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>      <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">CaptchaView</span>
+</span><span class='line'>      <span class="nv">outletName: </span><span class="s">&#39;captcha&#39;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   
