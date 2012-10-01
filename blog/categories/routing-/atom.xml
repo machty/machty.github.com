@@ -4,7 +4,7 @@
   <title><![CDATA[Category: routing, | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/routing-/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2012-10-01T10:05:14-04:00</updated>
+  <updated>2012-10-01T10:10:29-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -167,12 +167,12 @@ Controllers via the following:</p>
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
 </span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
 </span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
 </span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
 </span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">MoreInfoView</span>
 </span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
 </span><span class='line'>
@@ -272,7 +272,7 @@ when you want to inject a view into <em>that</em> outlet, you can do:</p>
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nv">route: </span><span class="s">&#39;/basic_info&#39;</span>
 </span><span class='line'><span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
 </span><span class='line'>    <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
 </span><span class='line'>
 </span><span class='line'><span class="nv">index: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
@@ -282,7 +282,7 @@ when you want to inject a view into <em>that</em> outlet, you can do:</p>
 </span><span class='line'>  <span class="nv">route: </span><span class="s">&#39;/captcha&#39;</span>
 </span><span class='line'>  <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
 </span><span class='line'>    <span class="c1"># Assume theres an  in the basic_info template.</span>
-</span><span class='line'>    <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>    <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
 </span><span class='line'>      <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">CaptchaView</span>
 </span><span class='line'>      <span class="nv">outletName: </span><span class="s">&#39;captcha&#39;</span>
 </span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
