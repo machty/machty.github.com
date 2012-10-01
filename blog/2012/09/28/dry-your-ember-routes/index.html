@@ -288,13 +288,13 @@ approach.</p>
 <p>I&#8217;ve been refactoring like a madman since discovering this and in some
 cases I was getting stack overflows that were hard to trace down, but I
 found the cause: if the <code>viewClass</code> you specify has an unnamed
-<code>in its template, you'll get an infinite loop. I'm 90% sure
-the reason why is that when you use the `viewClass`-only form of
-connectOutlet, the default outlet name resolves to `view` (the default)
+<code>outlet</code> in its template, you&#8217;ll get an infinite loop. I&#8217;m 90% sure
+the reason why is that when you use the <code>viewClass</code>-only form of
+connectOutlet, the default outlet name resolves to <code>view</code> (the default)
 and steps on the namespace toes of the parent view outlet that 1) had
 the same name (view) and was 2) (more importantly) tied to the same
-single controller. So, there's namespace collisions. You can avoid this
-by either getting rid of the leaf view's</code> (which might be
+single controller. So, there&#8217;s namespace collisions. You can avoid this
+by either getting rid of the leaf view&#8217;s <code>outlet</code> (which might be
 the case if you&#8217;ve been unquestioningly throwing outlets into templates
 that don&#8217;t actually inject child views&#8230; we&#8217;re probably all guilty of
 this at some point in our struggles with the router), or, if you

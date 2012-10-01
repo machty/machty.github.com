@@ -4,7 +4,7 @@
   <title><![CDATA[Category: routing, | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/routing-/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2012-10-01T10:11:48-04:00</updated>
+  <updated>2012-10-01T14:28:50-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -229,13 +229,13 @@ approach.</p>
 <p>I've been refactoring like a madman since discovering this and in some
 cases I was getting stack overflows that were hard to trace down, but I
 found the cause: if the <code>viewClass</code> you specify has an unnamed
-<code></code> in its template, you'll get an infinite loop. I'm 90% sure
+<code>outlet</code> in its template, you'll get an infinite loop. I'm 90% sure
 the reason why is that when you use the <code>viewClass</code>-only form of
 connectOutlet, the default outlet name resolves to <code>view</code> (the default)
 and steps on the namespace toes of the parent view outlet that 1) had
 the same name (view) and was 2) (more importantly) tied to the same
 single controller. So, there's namespace collisions. You can avoid this
-by either getting rid of the leaf view's <code></code> (which might be
+by either getting rid of the leaf view's <code>outlet</code> (which might be
 the case if you've been unquestioningly throwing outlets into templates
 that don't actually inject child views... we're probably all guilty of
 this at some point in our struggles with the router), or, if you
