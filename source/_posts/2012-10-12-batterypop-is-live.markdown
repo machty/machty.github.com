@@ -18,13 +18,17 @@ same.
 
 <!-- more -->
 
+## Ember.js Meetup Presentation
+
+Here's the slides from my lightning talk on Architecting batteryPOP from
+the last [NYC Ember Meetup](http://www.meetup.com/EmberJS-NYC/).
+
+<script async class="speakerdeck-embed" data-id="5059e707e4ce5c0002054198" data-ratio="1.4840579710144928" src="//speakerdeck.com/assets/embed.js"></script>
+
 ## Repositionables
 
-I'd [presented](https://speakerdeck.com/u/machty/p/ember-meetup) on some
-of the challenges and lessons learned from building batteryPOP as a
-lightning talk at the last 
-[NYC Ember Meetup](http://www.meetup.com/EmberJS-NYC/), specifically
-focusing on how to use a `Repositionable` mixin in conjunction with
+One of the major focuses of that presentation was on 
+how to use a `Repositionable` mixin in conjunction with
 position formulas so that views can automatically get notified when
 browser dimensions change and automatically animate themselves to the
 correct new position and scale. This is what facilitates the nifty
