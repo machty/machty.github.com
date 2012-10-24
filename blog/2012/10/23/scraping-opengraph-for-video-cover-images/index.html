@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Scraping OpenGraph for Video Cover Images - Useful Dude</title>
+  <meta name="author" content="Alex Matchneer">
+
+  
+  <meta name="description" content="I&#8217;m working on a site for a record company, and the folk in charge of
+the content usually just host their videos on YouTube, Vimeo, or some &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Useful Dude" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Useful Dude</a></h1>
+  
+    <h2>The Dev Side of UsefulRobot.io</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:machty.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Scraping OpenGraph for Video Cover Images</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-23T21:35:00-04:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I&#8217;m working on a site for a record company, and the folk in charge of
+the content usually just host their videos on YouTube, Vimeo, or some
+hosting service, so I needed to come up with a simple way for them to
+enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
+could be added to a gallery.</p>
+
+<p>This site also does a lot of magical things with images that
+require us to know ahead of time the dimensions of the images we&#8217;re working with,
+so it was also important for us to be able to store the thumbnail for the video internally
+(and also allow this automatically selected thumbnail to be overridden
+with an image of their choice).</p>
+
+<!-- more -->
+
+
+<h2>OpenGraph for Thumbnail Selection</h2>
+
+<p>I&#8217;d originally toyed with the idea of using a suite of Regex&#8217;s to reason
+the video ID from the YouTube/Vimeo/Whatever link that the user provided
+and then use that ID to query a thumbnail from that particular service.
+Problems with that idea:</p>
+
+<ul>
+<li>Annoying to have to research all the different URL formats to support
+in a giant Regex whack-a-mole</li>
+<li>What if the service adds a new format of URL that my regex suite
+doesn&#8217;t catch?</li>
+<li>What if they want to use a new service?</li>
+<li>YouTube has <a href="http://www.tonylea.com/2011/how-to-get-youtube-thumbnail-images/">publicly accessible</a>
+thumbnails if you&#8217;ve parsed the ID, but I think for Vimeo (and other
+services), you need to jump through the hoops of integrating their
+API.</li>
+</ul>
+
+
+<p>Turns out there&#8217;s a much lazier and more flexible alternative to a Regex
+suite, and that is to information freely available on Facebook&#8217;s
+<a href="http://developers.facebook.com/docs/opengraph/">Open Graph</a>. In short,
+Open Graph is a protocol for tagging content (both concrete things like
+places/restaurants/etc and virtual content like videos/photos/etc) by
+properly setting meta tags on in the <code>&lt;head&gt;</code> tag on the web pages that
+represent that content. If a web page adheres to the OG protocol, you
+can just scrape the page&#8217;s meta tags for things like a title,
+description, and, you guessed it, a representative image for that
+content.</p>
+
+<p>So, you can just navigate to <a href="http://www.youtube.com/watch?v=6GggY4TEYbk">a random video&#8217;s URL</a>,
+open the source, and find the following nested in the <code>&lt;head&gt;</code> tag:</p>
+
+<p><code>&lt;meta property="og:image" content="http://i3.ytimg.com/vi/6GggY4TEYbk/mqdefault.jpg"&gt;</code></p>
+
+<p>which makes for a perfect cover image:</p>
+
+<p><img src="http://i3.ytimg.com/vi/6GggY4TEYbk/mqdefault.jpg" alt="OG Thumbnail" /></p>
+
+<p>This will work for any video hosting service that supports OG, which is
+probably all of them, since they&#8217;d be cutting themselves out of
+optimized Facebook sharing if they didn&#8217;t provide those tags. Also, the
+image provided is a lot more likely to be formatted for general use
+rather than, say, using the previously linked YouTube approach for
+determining a thumbnail URL, which might yield a thumbnail that&#8217;s
+cropped or black-bar&#8217;d for internal YouTube use.</p>
+
+<h2>Using Nokogiri to Scrape for OG Tags</h2>
+
+<p>I used the <a href="http://nokogiri.org/">Nokogiri</a> gem to scrape the
+user-provided video URL for the og:image tag value via the following
+code:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">before_validation</span> <span class="ss">:set_attachment</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">protected</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">set_attachment</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">if</span> <span class="n">attachment</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Download and parse the video URL</span>
+</span><span class='line'>    <span class="n">doc</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">video_url</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Use CSS selection to query og:image url.</span>
+</span><span class='line'>    <span class="n">image_url</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_css</span><span class="p">(</span><span class="s1">&#39;meta[property=&quot;og:image&quot;]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:[]</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Save the downloaded thumbnail image to paperclip attachment.</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">attachment</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">rescue</span>
+</span><span class='line'>    <span class="n">errors</span><span class="o">.</span><span class="n">add</span> <span class="ss">:attachment</span><span class="p">,</span> <span class="s2">&quot;couldn&#39;t be determined by the video URL you supplied&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This fails quietly if there are no og:image tags at the provided URL
+(which just means the user will have to uplaod their own thumbnail).</p>
+
+<h2>On the front-end</h2>
+
+<p>Once you&#8217;ve got the video cover image into your back-end, you can use
+any number of free or commercial plugins that handle the gallery
+presentation of images, videos, Flash, etc. I used
+<a href="http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/">prettyPhoto</a>
+since it was free and easy enough to hack.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Alex Matchneer</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-23T21:35:00-04:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/opengraph/'>OpenGraph</a>, <a class='category' href='/blog/categories/video/'>video</a>, <a class='category' href='/blog/categories/vimeo/'>vimeo</a>, <a class='category' href='/blog/categories/youtube/'>youtube</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/" data-via="" data-counturl="http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/10/12/batterypop-is-live/" title="Previous Post: batteryPOP is Live">&laquo; batteryPOP is Live</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">Scraping OpenGraph for Video Cover Images</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/10/12/batterypop-is-live/">batteryPOP is Live</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/09/28/dry-your-ember-routes/">DRY and Tie Your Ember Routes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/">Speeding up Firefox CSS3 transform transitions with rotate(0.01deg)</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Alex Matchneer -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/';
+        var disqus_url = 'http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: OpenGraph | Useful Dude]]></title>
+  <link href="http://machty.github.com/blog/categories/opengraph/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2012-10-23T22:32:36-04:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Scraping OpenGraph for Video Cover Images]]></title>
+    <link href="http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/"/>
+    <updated>2012-10-23T21:35:00-04:00</updated>
+    <id>http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images</id>
+    <content type="html"><![CDATA[<p>I'm working on a site for a record company, and the folk in charge of
+the content usually just host their videos on YouTube, Vimeo, or some
+hosting service, so I needed to come up with a simple way for them to
+enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
+could be added to a gallery.</p>
+
+<p>This site also does a lot of magical things with images that
+require us to know ahead of time the dimensions of the images we're working with,
+so it was also important for us to be able to store the thumbnail for the video internally
+(and also allow this automatically selected thumbnail to be overridden
+with an image of their choice).</p>
+
+<!-- more -->
+
+
+<h2>OpenGraph for Thumbnail Selection</h2>
+
+<p>I'd originally toyed with the idea of using a suite of Regex's to reason
+the video ID from the YouTube/Vimeo/Whatever link that the user provided
+and then use that ID to query a thumbnail from that particular service.
+Problems with that idea:</p>
+
+<ul>
+<li>Annoying to have to research all the different URL formats to support
+in a giant Regex whack-a-mole</li>
+<li>What if the service adds a new format of URL that my regex suite
+doesn't catch?</li>
+<li>What if they want to use a new service?</li>
+<li>YouTube has <a href="http://www.tonylea.com/2011/how-to-get-youtube-thumbnail-images/">publicly accessible</a>
+thumbnails if you've parsed the ID, but I think for Vimeo (and other
+services), you need to jump through the hoops of integrating their
+API.</li>
+</ul>
+
+
+<p>Turns out there's a much lazier and more flexible alternative to a Regex
+suite, and that is to information freely available on Facebook's
+<a href="http://developers.facebook.com/docs/opengraph/">Open Graph</a>. In short,
+Open Graph is a protocol for tagging content (both concrete things like
+places/restaurants/etc and virtual content like videos/photos/etc) by
+properly setting meta tags on in the <code>&lt;head&gt;</code> tag on the web pages that
+represent that content. If a web page adheres to the OG protocol, you
+can just scrape the page's meta tags for things like a title,
+description, and, you guessed it, a representative image for that
+content.</p>
+
+<p>So, you can just navigate to <a href="http://www.youtube.com/watch?v=6GggY4TEYbk">a random video's URL</a>,
+open the source, and find the following nested in the <code>&lt;head&gt;</code> tag:</p>
+
+<p><code>&lt;meta property="og:image" content="http://i3.ytimg.com/vi/6GggY4TEYbk/mqdefault.jpg"&gt;</code></p>
+
+<p>which makes for a perfect cover image:</p>
+
+<p><img src="http://i3.ytimg.com/vi/6GggY4TEYbk/mqdefault.jpg" alt="OG Thumbnail" /></p>
+
+<p>This will work for any video hosting service that supports OG, which is
+probably all of them, since they'd be cutting themselves out of
+optimized Facebook sharing if they didn't provide those tags. Also, the
+image provided is a lot more likely to be formatted for general use
+rather than, say, using the previously linked YouTube approach for
+determining a thumbnail URL, which might yield a thumbnail that's
+cropped or black-bar'd for internal YouTube use.</p>
+
+<h2>Using Nokogiri to Scrape for OG Tags</h2>
+
+<p>I used the <a href="http://nokogiri.org/">Nokogiri</a> gem to scrape the
+user-provided video URL for the og:image tag value via the following
+code:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  before_validation :set_attachment&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">protected</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  def set_attachment&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">return</span> <span class="k">if</span> <span class="n">attachment</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Download and parse the video URL</span>
+</span><span class='line'><span class="n">doc</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">video_url</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Use CSS selection to query og:image url.</span>
+</span><span class='line'><span class="n">image_url</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_css</span><span class="p">(</span><span class="s1">&#39;meta[property=&quot;og:image&quot;]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:[]</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Save the downloaded thumbnail image to paperclip attachment.</span>
+</span><span class='line'><span class="nb">self</span><span class="o">.</span><span class="n">attachment</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">rescue</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;errors.add :attachment, &quot;couldn&#39;t be determined by the video URL you supplied&quot;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This fails quietly if there are no og:image tags at the provided URL
+(which just means the user will have to uplaod their own thumbnail).</p>
+
+<h2>On the front-end</h2>
+
+<p>Once you've got the video cover image into your back-end, you can use
+any number of free or commercial plugins that handle the gallery
+presentation of images, videos, Flash, etc. I used
+<a href="http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/">prettyPhoto</a>
+since it was free and easy enough to hack.</p>
+]]></content>
+  </entry>
+  
+</feed>
