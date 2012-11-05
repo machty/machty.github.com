@@ -25,11 +25,17 @@
         <lastmod>2012-11-03T02:26:58-04:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://machty.github.com/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/
+        </loc>
+        <lastmod>2012-11-05T00:45:36-05:00</lastmod>
+    </url>
+    <url>
         <loc>http://machty.github.com/blog/archives/</loc>
-        <lastmod>2012-11-03T02:26:58-04:00</lastmod>
+        <lastmod>2012-11-05T00:45:36-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/</loc>
-        <lastmod>2012-11-03T02:26:58-04:00</lastmod>
+        <lastmod>2012-11-05T00:45:36-05:00</lastmod>
     </url>
 </urlset>
