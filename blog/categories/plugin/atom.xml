@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: plugin | Useful Dude]]></title>
+  <link href="http://machty.github.com/blog/categories/plugin/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2012-11-12T04:56:31-05:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Accelerated Hover Scroll]]></title>
+    <link href="http://machty.github.com/blog/2012/11/12/jquery-accelerated-hover-scroll/"/>
+    <updated>2012-11-12T03:43:00-05:00</updated>
+    <id>http://machty.github.com/blog/2012/11/12/jquery-accelerated-hover-scroll</id>
+    <content type="html"><![CDATA[<p>Working on a small-ish brochure app for a beach resort, and there's one
+section that called for a horizontal scrolling container based on where
+the mouse was hovering over the container. The closer you hover to the
+edge, the faster the container scrolls. This is by no means a new user
+interaction, but I couldn't find a suitable plugin for my needs, so I
+wrote one, and you can check it out / download it
+<a href="https://github.com/useful-robot/jquery.accel-hover-scroll">here</a>.</p>
+
+<p>I took perhaps 3 separate stabs at this surprisingly awkward problem,
+and here's what I learned...</p>
+
+<!--more-->
+
+
+<h3>Debounce!</h3>
+
+<p><a href="http://unscriptable.com/2009/03/20/debouncing-javascript-methods/">Read this article</a>
+on debouncing your JavaScript methods.  In particular:</p>
+
+<blockquote><p>Debouncing means to coalesce several temporally close signals into one signal.</p></blockquote>
+
+<p>In the JavaScript/UI/jQuery world, a focus on debouncing has resulted in
+some popular solutions to common jank you're probably familiar with.
+Here's one:</p>
+
+<p>Don't fire off expensive resize/relayout/repaints every time your
+browser window resizes. Most likely, the user is probably still
+actively resizing the window, and an expensive relayout/repaint is
+just going to jank up a simple browser resize.
+<a href="http://paulirish.com/2009/throttled-smartresize-jquery-event-handler/">One solution</a>
+is to coalesce all of those resize events into on relayout/repaint,
+which is pretty easy to do: just set a timer for a few hundred
+milliseconds once a resize event is received, and in that time,
+if another resize event is received, reset the timer, and don't do
+anything until that timer has elapsed.</p>
+
+<p>So how does this apply to accelerated-hover-scroll?</p>
+
+<h3>mousemove</h3>
+
+<p>I tried a bunch of different approaches to solving the problem of
+how to smoothly alter the scroll speed while the container was actively
+scrolling. The algorithm I landed on goes like this:</p>
+
+<ul>
+<li>Once the user hovers over the the scroll area, ANYWHERE in the
+container, start listening for mousemove events.</li>
+<li>Once a mousemove event comes in, figure out how close to the edge the
+cursor is and decided whether the container should be scrolling at
+all, and at what speed.</li>
+<li>Now figure out how far the container is from a full scroll either left
+or right. If the container's currently scrolled 100 pixels, and it
+could scroll 300px total before all the inner content is revealed,
+this calculated scrollable distance would be 200px.</li>
+<li>Start an animation from the current scroll to to the max possible
+scroll using this calculated duration. If you don't move your mouse
+again, the container will continue all the way to the and stop when it
+gets there. There's no more plugin maintenance to, say, calculate the
+pixel amount that the container should scroll for each tick, or
+anything messy like that. If the user moves their mouse again, you can
+recalculate the new speed based on edge proximity, stop the existing
+animation, and start again going all the way to the max scroll, only
+at a different duration this time around.</li>
+</ul>
+
+
+<p>A decent solution, but still marred by slowness if the user was moving
+their mouse around frequently. If the user was moving their mouse around
+over the container while the container was scrolling, all sorts of jank
+would happen. And why? Because I wasn't debouncing mousemove. If the
+user moved the mouse a single pixel, I'd have halt the animation,
+recalculate some things, and start of the animation again with a
+negligibly different duration. So how does one debounce a spatial event,
+rather than the typical debouncing definition which addresses temporal
+events? I used "slices".</p>
+
+<h3>Slices</h3>
+
+<p>If you look at the CoffeeScript source for this plugin, in the
+<code>_onMouseMove</code> function, there's a part that calculates the "slice"
+that this mouse move falls into. A slice is just a region a few pixels
+wide that doesn't show up in any visual sense, but is used to debounce a
+spatial mousemove event. Basically, if we've already started animating
+the container and a mousemove event is received that is just a few
+pixels away, we can very simply calculate that the mouseevent falls into
+the same slice as the original mouse event that launched the animation,
+and discard the newer event rather than slow everything down so that we can
+have a pixel perfect scroll velocity mapping.</p>
+
+<p>So, whether or not I'm butchering the term "debounce" by applying it to
+spatial events, the lesson is the same, which is that you should avoid
+pixel-perfect/millisecond-perfect granularity if at all possible. Most
+likely no one will notice the downgrade in strict continuity, but they
+will notice if a bunch of frequent, redundant, complicated
+redraws/relayouts/repaints fire off for every little insignificant
+event.</p>
+]]></content>
+  </entry>
+  
+</feed>
