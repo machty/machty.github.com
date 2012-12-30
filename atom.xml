@@ -4,7 +4,7 @@
   <title><![CDATA[Useful Dude]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2012-11-12T04:56:31-05:00</updated>
+  <updated>2012-12-29T19:12:09-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,134 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rake Pipeline Filter for Syncing with Client-Managed Static Site]]></title>
+    <link href="http://machty.github.com/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/"/>
+    <updated>2012-12-29T17:47:00-05:00</updated>
+    <id>http://machty.github.com/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site</id>
+    <content type="html"><![CDATA[<p>Just rolled out a quick <a href="http://megancoxmusic.com/">single-pager for my bandmate</a>,
+which is just a super simple static site that she&#8217;ll be updating herself
+via FTP. Problem is, at some point in the future I&#8217;ll be called upon to
+make some change to the JS, or the player widget, or something messy
+enough that my non-developer client would be rightfully reluctant to fidget with.
+If she updates the headers or the paragraph descriptions, and I want to
+make changes to the rest of the page, I&#8217;ll have to go through the
+annoying process of copying her raw HTML modifications into my freshly
+regenerated local HTML.</p>
+
+<!--more-->
+
+
+<h2>Rake Pipeline</h2>
+
+<p>I built this extremely simple site using
+<a href="https://github.com/livingsocial/rake-pipeline">Rake Pipeline</a>, which is
+a Ruby-based asset pipeline that maps input files to output files, and
+lets you determine all the processing filters used to generate all the
+output files. So, you can quickly throw in a Sass or CoffeeScript
+filter to generate CSS/JS, and then concatenate your files together,
+rename them, ompress them, etc. etc. Most of the filters you&#8217;d ever
+want for anything web-related can be found in
+<a href="https://github.com/wycats/rake-pipeline-web-filters">this gem</a>.</p>
+
+<p>You can also very easily define your own filters if the above gem
+doesn&#8217;t cover your needs, which is exactly what I did to handle the
+problem of syncing/merging changes made directly to HTML via FTP by my client
+and the changes I&#8217;d be making the the original input code.</p>
+
+<h2>Custom Filter using Nokogiri</h2>
+
+<p>I agreed with my client that she should only make changes within
+<code>&lt;div class="content"&gt;</code>s. This makes it so that all I need to do to sync
+her changes with mine is take my Rake Pipeline-generated HTML and
+replace <em>its</em> content div with the content div from her FTP-updated
+HTML. <a href="http://nokogiri.org/">Nokogiri</a> is just the HTML-processing tool
+for such a job.</p>
+
+<p>The code is simple enough:
+<a href="https://gist.github.com/4409814">check out the gist</a>.</p>
+
+<p>What it does is:</p>
+
+<ol>
+<li>Determine the remote URL of the already-published file based on
+a <code>host</code> parameter passed into the filter and the relative path
+of the file at that point in the pipeline (which means if part of
+your processing involves changing the output filename of the HTML
+file (e.g. from <code>html/index.haml</code> to <code>index.html</code>) you&#8217;ll want to
+invoke this filter after any output-path-changing filters.</li>
+<li>Download the remote file and parse it for content using CSS selectors
+passed into the filter (this is what the Nokogiri gem does).</li>
+<li>Parse the input file for the same CSS selectors and replace it with
+the remote file&#8217;s selected content.</li>
+</ol>
+
+
+<p>(This is kind of similar to how some AJAX sites update content:
+the server will render some hidden HTML, and the success handler will
+loop through all the root level elements rendered and replace
+similarly-classed or id&#8217;d elements on the visible page with what the
+server returned.)</p>
+
+<h3>Convenience Method</h3>
+
+<p>You&#8217;ll notice this at the bottom of the gist:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rake</span><span class="o">::</span><span class="no">Pipeline</span><span class="o">::</span><span class="no">DSL</span><span class="o">::</span><span class="no">PipelineDSL</span><span class="o">.</span><span class="n">module_eval</span> <span class="k">do</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">remote_replace</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">filter</span><span class="p">(</span><span class="no">RemoteReplaceFilter</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This makes it possible to use</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">remote_replace</span> <span class="s2">&quot;http://www.megancoxmusic.com/new2/&quot;</span><span class="p">,</span> <span class="s2">&quot;.content&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>in your Assetfile instead of the more verbose</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">filter</span><span class="p">(</span><span class="no">RemoteReplaceFilter</span><span class="p">,</span> <span class="s2">&quot;http://www.yourstaticsite.com/root_of_content&quot;</span><span class="p">,</span> <span class="s2">&quot;.content&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Skipping the filter while running <code>rakep server</code></h3>
+
+<p>You can run <code>rakep server</code> to launch a Rack-based server the hosts the
+output files specified by your <code>Assetfile</code>. This is much more convenient
+than running <code>rakep build</code> every time you want to test a change to your
+input files. That said, if you&#8217;re developing without an internet
+connection, or you have lots of files to sync, you can skip this
+(potentially slow) filter
+by adding <code>unless defined?(::Rake::Pipeline::Server)</code> to the end of your
+<code>remote_replace</code> statement. The reason this works is that the file
+containing <code>Rake::Pipeline::Server</code> only gets required when <code>rakep
+server</code> is run.</p>
+
+<h3>Whoops</h3>
+
+<p>I ended up making the filter depend on the
+<a href="https://github.com/wycats/rake-pipeline-web-filters">rake-pipeline-web-filters gem</a>
+so that I could use their
+<code>Rake::Pipeline::Web::Filters::FilterWithDependencies</code> module for
+making sure <code>nokogiri</code> was properly required in the <code>Gemfile</code>. Except,
+now I realize that was kind of silly, since my little custom filter
+isn&#8217;t part of any larger collection of web filters where it&#8217;d be important not
+to require all the filters&#8217; dependencies by default. Whoops. But, should
+this be a sensible fit for the web-filters gem (it&#8217;s not) it shall be
+ready. Consider it an understudy last in line.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[jQuery Accelerated Hover Scroll]]></title>
