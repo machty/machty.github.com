@@ -5,11 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Speeding up Firefox CSS3 transform transitions with rotate(0.01deg) - Useful Dude</title>
+  <title>Quick Ember Subclassing Refactor - Useful Dude</title>
   <meta name="author" content="Alex Matchneer">
 
   
-  <meta name="description" content="I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during &hellip;">
+  <meta name="description" content="Simple post here. Just wanted to point out that the two following
+codeblocks are functionally equivalent in Ember (and probably most
+other JS) apps: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://machty.github.com/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/">
+  <link rel="canonical" href="http://machty.github.com/blog/2013/01/06/quick-ember-subclassing-refactor/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -67,7 +69,7 @@
   
   <header>
     
-      <h1 class="entry-title">Speeding Up Firefox CSS3 Transform Transitions With rotate(0.01deg)</h1>
+      <h1 class="entry-title">Quick Ember Subclassing Refactor</h1>
     
     
       <p class="meta">
@@ -83,18 +85,52 @@
   
 
 
-<time datetime="2012-08-07T02:53:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+<time datetime="2013-01-06T13:10:00-05:00" pubdate data-updated="true">Jan 6<span>th</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during supposedly GPU-accelerated CSS3 transitions.</p>
+<div class="entry-content"><p>Simple post here. Just wanted to point out that the two following
+codeblocks are functionally equivalent in Ember (and probably most
+other JS) apps:</p>
 
-<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663776">Turns out there&#8217;s a bug</a>, still unaddressed, that lubricates Gecko with jank molasses anytime it has to animate a transition involving the <code>scale()</code> property. The solution? Add a dash of <code>rotate(0.01deg)</code> to your <code>transform</code> property and the problem magically goes away. Somehow, adding a small degree of unnoticeable rotation renders the transition way more smoothly, and this goes for both CSS3 transitions and animations in Firefox.</p>
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">ParentControllerClass = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">someSharedProperty: </span><span class="kc">true</span>
+</span><span class='line'>  <span class="nv">someSharedFunction: </span><span class="o">-&gt;</span> <span class="nx">alert</span> <span class="s">&quot;woo&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.NewCampaignController = </span><span class="nx">ParentControllerClass</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span><span class='line'><span class="nv">App.EditCampaignController = </span><span class="nx">ParentControllerClass</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<p>So if you&#8217;d like to transition <code>-moz-transform</code> to <code>scale(2)</code>, set it instead to <code>scale(2) rotate(0.01deg)</code> and watch the jank magically disappear.</p>
+
+<p>&#8230;can be simplified to&#8230;</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.NewCampaignController =</span>
+</span><span class='line'><span class="nv">App.EditCampaignController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">someSharedProperty: </span><span class="kc">true</span>
+</span><span class='line'>  <span class="nv">someSharedFunction: </span><span class="o">-&gt;</span> <span class="nx">alert</span> <span class="s">&quot;woo&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically, if you need to expose a view or controller class to your
+App&#8217;s namespace, and it shares all of the features of a &#8220;parent&#8221; class, you don&#8217;t
+actually need to do full <code>.extend()</code>; rather, you can just assign any of
+the &#8220;subclasses&#8221; to exactly the same class object as the parent class.
+This can help reduce the amount of code you have to write, and also
+shaves off a tiny bit of overhead by skipping an unnecessary call to
+<code>extend</code>.</p>
 </div>
 
 
@@ -117,12 +153,12 @@
   
 
 
-<time datetime="2012-08-07T02:53:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
+<time datetime="2013-01-06T13:10:00-05:00" pubdate data-updated="true">Jan 6<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/css3/'>CSS3</a>, <a class='category' href='/blog/categories/firefox/'>Firefox</a>, <a class='category' href='/blog/categories/rotate/'>rotate</a>, <a class='category' href='/blog/categories/transitions/'>transitions</a>
+    <a class='category' href='/blog/categories/ember/'>Ember</a>, <a class='category' href='/blog/categories/inheritance/'>Inheritance</a>, <a class='category' href='/blog/categories/refactoring/'>Refactoring</a>, <a class='category' href='/blog/categories/subclass/'>Subclass</a>
   
 </span>
 
@@ -131,7 +167,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://machty.github.com/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/" data-via="" data-counturl="http://machty.github.com/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://machty.github.com/blog/2013/01/06/quick-ember-subclassing-refactor/" data-via="" data-counturl="http://machty.github.com/blog/2013/01/06/quick-ember-subclassing-refactor/" >Tweet</a>
   
   
   
@@ -140,8 +176,8 @@
     
     <p class="meta">
       
+        <a class="basic-alignment left" href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/" title="Previous Post: Rake Pipeline Filter for Syncing with Client-Managed Static Site">&laquo; Rake Pipeline Filter for Syncing with Client-Managed Static Site</a>
       
-        <a class="basic-alignment right" href="/blog/2012/09/28/dry-your-ember-routes/" title="Next Post: DRY and Tie Your Ember Routes">DRY and Tie Your Ember Routes &raquo;</a>
       
     </p>
   </footer>
@@ -208,8 +244,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://machty.github.com/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/';
-        var disqus_url = 'http://machty.github.com/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/';
+        var disqus_identifier = 'http://machty.github.com/blog/2013/01/06/quick-ember-subclassing-refactor/';
+        var disqus_url = 'http://machty.github.com/blog/2013/01/06/quick-ember-subclassing-refactor/';
         var disqus_script = 'embed.js';
       
     (function () {

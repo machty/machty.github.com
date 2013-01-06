@@ -9,9 +9,9 @@
   <meta name="author" content="Alex Matchneer">
 
   
-  <meta name="description" content="Just rolled out a quick single-pager for my bandmate,
-which is just a super simple static site that she&#8217;ll be updating herself
-via FTP. Problem &hellip;">
+  <meta name="description" content="Simple post here. Just wanted to point out that the two following
+codeblocks are functionally equivalent in Ember (and probably most
+other JS) apps: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,80 @@ via FTP. Problem &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/06/quick-ember-subclassing-refactor/">Quick Ember Subclassing Refactor</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-06T13:10:00-05:00" pubdate data-updated="true">Jan 6<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Simple post here. Just wanted to point out that the two following
+codeblocks are functionally equivalent in Ember (and probably most
+other JS) apps:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">ParentControllerClass = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">someSharedProperty: </span><span class="kc">true</span>
+</span><span class='line'>  <span class="nv">someSharedFunction: </span><span class="o">-&gt;</span> <span class="nx">alert</span> <span class="s">&quot;woo&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">App.NewCampaignController = </span><span class="nx">ParentControllerClass</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span><span class='line'><span class="nv">App.EditCampaignController = </span><span class="nx">ParentControllerClass</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&#8230;can be simplified to&#8230;</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.NewCampaignController =</span>
+</span><span class='line'><span class="nv">App.EditCampaignController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">someSharedProperty: </span><span class="kc">true</span>
+</span><span class='line'>  <span class="nv">someSharedFunction: </span><span class="o">-&gt;</span> <span class="nx">alert</span> <span class="s">&quot;woo&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically, if you need to expose a view or controller class to your
+App&#8217;s namespace, and it shares all of the features of a &#8220;parent&#8221; class, you don&#8217;t
+actually need to do full <code>.extend()</code>; rather, you can just assign any of
+the &#8220;subclasses&#8221; to exactly the same class object as the parent class.
+This can help reduce the amount of code you have to write, and also
+shaves off a tiny bit of overhead by skipping an unnecessary call to
+<code>extend</code>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -394,6 +468,8 @@ same.</p>
 
   <div class="entry-content"><h4>UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues</h4>
 
+<h4>UPDATE 1/6/12: this post is deprecated since the new <a href="http://emberjs.com/guides/routing/defining-your-routes/">Ember Router v2 API</a> came out.</h4>
+
 <p>A common complaint about Ember.js routing is that seems to force you to
 create pairs of extremely light-weight, useless Views and Controllers
 for each new route you create. Another is that it&#8217;s not particular
@@ -464,6 +540,10 @@ one way to cut down on the seeming boilerplate while linking your data.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/01/06/quick-ember-subclassing-refactor/">Quick Ember Subclassing Refactor</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/">Rake Pipeline Filter for Syncing with Client-Managed Static Site</a>
       </li>
     
@@ -477,10 +557,6 @@ one way to cut down on the seeming boilerplate while linking your data.</p>
     
       <li class="post">
         <a href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/">SpreeCommerce meets Ember.js</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">Scraping OpenGraph for Video Cover Images</a>
       </li>
     
   </ul>
@@ -497,7 +573,7 @@ one way to cut down on the seeming boilerplate while linking your data.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - Alex Matchneer -
+  Copyright &copy; 2013 - Alex Matchneer -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
