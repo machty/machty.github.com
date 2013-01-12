@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Useful Dude</title>
+  <title>Everything You Never Wanted to Know About the Ember Run Loop - Useful Dude</title>
   <meta name="author" content="Alex Matchneer">
 
   
@@ -19,7 +19,7 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://machty.github.com/">
+  <link rel="canonical" href="http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -63,15 +63,12 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/">Everything You Never Wanted to Know About the Ember Run Loop</a></h1>
+      <h1 class="entry-title">Everything You Never Wanted to Know About the Ember Run Loop</h1>
     
     
       <p class="meta">
@@ -94,7 +91,7 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
   </header>
 
 
-  <div class="entry-content"><p>Just posted a
+<div class="entry-content"><p>Just posted a
 <a href="http://stackoverflow.com/questions/13597869/what-is-ember-runloop-and-how-does-it-work/14296339#14296339">Giant Ass Response on Stack Overflow</a> about the Ember Run Loop. I&#8217;ve reproduced the text below. The question basically was: What is the Run Loop? How long does it take? When does it fire up? Can I expect views to be rendered to the DOM by the end of the run loop? etc. etc. Take a look, I think there&#8217;s some good stuff in there. Without further ado:</p>
 
 <p>First off, read these:</p>
@@ -178,96 +175,16 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
 
 <p>Hope this helps. I definitely had to learn quite a bit just to write this thing, which was kind of the point.</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/01/06/quick-ember-subclassing-refactor/">Quick Ember Subclassing Refactor</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
   
 
+<span class="byline author vcard">Posted by <span class="fn">Alex Matchneer</span></span>
 
-<time datetime="2013-01-06T13:10:00-05:00" pubdate data-updated="true">Jan 6<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Simple post here. Just wanted to point out that the two following
-codeblocks are functionally equivalent in Ember (and probably most
-other JS) apps:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">ParentControllerClass = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">someSharedProperty: </span><span class="kc">true</span>
-</span><span class='line'>  <span class="nv">someSharedFunction: </span><span class="o">-&gt;</span> <span class="nx">alert</span> <span class="s">&quot;woo&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">App.NewCampaignController = </span><span class="nx">ParentControllerClass</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
-</span><span class='line'><span class="nv">App.EditCampaignController = </span><span class="nx">ParentControllerClass</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>&#8230;can be simplified to&#8230;</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.NewCampaignController =</span>
-</span><span class='line'><span class="nv">App.EditCampaignController = </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">someSharedProperty: </span><span class="kc">true</span>
-</span><span class='line'>  <span class="nv">someSharedFunction: </span><span class="o">-&gt;</span> <span class="nx">alert</span> <span class="s">&quot;woo&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Basically, if you need to expose a view or controller class to your
-App&#8217;s namespace, and it shares all of the features of a &#8220;parent&#8221; class, you don&#8217;t
-actually need to do full <code>.extend()</code>; rather, you can just assign any of
-the &#8220;subclasses&#8221; to exactly the same class object as the parent class.
-This can help reduce the amount of code you have to write, and also
-shaves off a tiny bit of overhead by skipping an unnecessary call to
-<code>extend</code>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/">Rake Pipeline Filter for Syncing With Client-Managed Static Site</a></h1>
-    
-    
-      <p class="meta">
-        
 
 
 
@@ -279,377 +196,44 @@ shaves off a tiny bit of overhead by skipping an unnecessary call to
   
 
 
-<time datetime="2012-12-29T17:47:00-05:00" pubdate data-updated="true">Dec 29<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Just rolled out a quick <a href="http://megancoxmusic.com/">single-pager for my bandmate</a>,
-which is just a super simple static site that she&#8217;ll be updating herself
-via FTP. Problem is, at some point in the future I&#8217;ll be called upon to
-make some change to the JS, or the player widget, or something messy
-enough that my non-developer client would be rightfully reluctant to fidget with.
-If she updates the headers or the paragraph descriptions, and I want to
-make changes to the rest of the page, I&#8217;ll have to go through the
-annoying process of copying her raw HTML modifications into my freshly
-regenerated local HTML.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
+<time datetime="2013-01-12T13:09:00-05:00" pubdate data-updated="true">Jan 12<span>th</span>, 2013</time>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/12/jquery-accelerated-hover-scroll/">jQuery Accelerated Hover Scroll</a></h1>
-    
-    
-      <p class="meta">
-        
 
-
-
-
-
-
-
-
+<span class="categories">
   
+    <a class='category' href='/blog/categories/binding-w/'>binding:w</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
+  
+</span>
 
 
-<time datetime="2012-11-12T03:43:00-05:00" pubdate data-updated="true">Nov 12<span>th</span>, 2012</time>
-        
-      </p>
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><p>Working on a small-ish brochure app for a beach resort, and there&#8217;s one
-section that called for a horizontal scrolling container based on where
-the mouse was hovering over the container. The closer you hover to the
-edge, the faster the container scrolls. This is by no means a new user
-interaction, but I couldn&#8217;t find a suitable plugin for my needs, so I
-wrote one, and you can check it out / download it
-<a href="https://github.com/useful-robot/jquery.accel-hover-scroll">here</a>.</p>
-
-<p>I took perhaps 3 separate stabs at this surprisingly awkward problem,
-and here&#8217;s what I learned&#8230;</p>
-
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/" data-via="" data-counturl="http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/" >Tweet</a>
+  
+  
+  
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/12/jquery-accelerated-hover-scroll/">Read on &rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  
-    <article>
+    
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/">Transferring S3-Enabled Heroku Apps Between Dev/Staging/Prod</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-05T00:01:00-05:00" pubdate data-updated="true">Nov 5<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>You know, I could just write this in my Evernote and reference as
-needed, but I&#8217;m writing it here, because I love you. But I&#8217;m in a hurry.</p>
-
-<p>Here are the steps I take for transferring apps from my development
-server to Heroku staging/production servers, which can get somewhat
-complicated if Amazon S3 is involved.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
+        <a class="basic-alignment left" href="/blog/2013/01/06/quick-ember-subclassing-refactor/" title="Previous Post: Quick Ember Subclassing Refactor">&laquo; Quick Ember Subclassing Refactor</a>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/">SpreeCommerce Meets Ember.js</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-02T20:44:00-04:00" pubdate data-updated="true">Nov 2<span>nd</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&#8217;m working on a record label website in Ember.js with all sorts of
-lovely dynamic goodies, infinite scrolling feeds, embedded music player,
-blah blah blah, and most challengingly a full-on store where user&#8217;s can
-browse albums, shirts, whatevers, add them to their cart, and eventually
-check out. This post covers a few lessons learned in getting a dynamic
-JS website to play nicely with Spree, an open source e-commerce
-framework.</p>
-
-<p>Things you might learn from this article:
-* Digging into gem source code
-* Passing Javascript data in and out of iframes
-* Converting non-prototype-extended data into prototype-extended data</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">Scraping OpenGraph for Video Cover Images</a></h1>
-    
-    
-      <p class="meta">
-        
+    </p>
+  </footer>
+</article>
 
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-23T21:35:00-04:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&#8217;m working on a site for a record company, and the folk in charge of
-the content usually just host their videos on YouTube, Vimeo, or some
-hosting service, so I needed to come up with a simple way for them to
-enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
-could be added to a gallery.</p>
-
-<p>This site also does a lot of magical things with images that
-require us to know ahead of time the dimensions of the images we&#8217;re working with,
-so it was also important for us to be able to store the thumbnail for the video internally
-(and also allow this automatically selected thumbnail to be overridden
-with an image of their choice).</p>
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">Read on &rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/10/12/batterypop-is-live/">batteryPOP Is Live</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-12T10:50:00-04:00" pubdate data-updated="true">Oct 12<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>You can check out the latest <a href="http://www.usefulrobot.io">Useful Robot</a>
-project at <a href="http://www.batterypop.com">batteryPOP.com</a>.</p>
-
-<p>batteryPOP is a children&#8217;s website featuring a bubbly, animated,
-tree-based menu that drives kids to the videos they want to watch and
-articles they want to read. It was written in
-<a href="http://www.emberjs.com">Ember.js</a>/Rails and had to look good on the
-iPad, so we couldn&#8217;t use any Flash, though the effect is largely the
-same.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/10/12/batterypop-is-live/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/09/28/dry-your-ember-routes/">DRY and Tie Your Ember Routes</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-28T13:54:00-04:00" pubdate data-updated="true">Sep 28<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues</h4>
-
-<h4>UPDATE 1/6/12: this post is deprecated since the new <a href="http://emberjs.com/guides/routing/defining-your-routes/">Ember Router v2 API</a> came out.</h4>
-
-<p>A common complaint about Ember.js routing is that seems to force you to
-create pairs of extremely light-weight, useless Views and Controllers
-for each new route you create. Another is that it&#8217;s not particular
-obvious how data ought to be shared between routes/controllers. Here&#8217;s
-one way to cut down on the seeming boilerplate while linking your data.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/09/28/dry-your-ember-routes/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/">Speeding Up Firefox CSS3 Transform Transitions With rotate(0.01deg)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-07T02:53:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during supposedly GPU-accelerated CSS3 transitions.</p>
-
-<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663776">Turns out there&#8217;s a bug</a>, still unaddressed, that lubricates Gecko with jank molasses anytime it has to animate a transition involving the <code>scale()</code> property. The solution? Add a dash of <code>rotate(0.01deg)</code> to your <code>transform</code> property and the problem magically goes away. Somehow, adding a small degree of unnoticeable rotation renders the transition way more smoothly, and this goes for both CSS3 transitions and animations in Firefox.</p>
-
-<p>So if you&#8217;d like to transition <code>-moz-transform</code> to <code>scale(2)</code>, set it instead to <code>scale(2) rotate(0.01deg)</code> and watch the jank magically disappear.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
@@ -687,6 +271,7 @@ one way to cut down on the seeming boilerplate while linking your data.</p>
   
 </aside>
 
+
     </div>
   </div>
   <footer role="contentinfo"><p>
@@ -701,7 +286,10 @@ one way to cut down on the seeming boilerplate while linking your data.</p>
       var disqus_shortname = 'usefuldude';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/';
+        var disqus_url = 'http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
