@@ -101,6 +101,9 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
 
 <p>They&#8217;re not 100% accurate to Ember, but the core concepts and motivation behind the RunLoop still generally apply to Ember; only some implementation details differ. But, on to your questions:</p>
 
+<!-- more -->
+
+
 <h3>When does Ember RunLoop start. Is it dependant on Router or Views or Controllers or something else?</h3>
 
 <p>All of the basic user events (e.g. keyboard events, mouse events, etc) will fire up the run loop. This guarantees that whatever changes made to bound properties by the captured (mouse/keyboard/timer/etc) event are fully propagated throughout Ember&#8217;s data-binding system before returning control back to the system. So, moving your mouse, pressing a key, clicking a button, etc., all launch the run loop.</p>

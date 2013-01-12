@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ember.js | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/ember-js/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-01-12T13:19:42-05:00</updated>
+  <updated>2013-01-12T13:20:55-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -27,6 +27,9 @@
 <a href="http://blog.sproutcore.com/the-run-loop-part-2/">Sproutcore Run Loop, part 2</a></p>
 
 <p>They're not 100% accurate to Ember, but the core concepts and motivation behind the RunLoop still generally apply to Ember; only some implementation details differ. But, on to your questions:</p>
+
+<!-- more -->
+
 
 <h3>When does Ember RunLoop start. Is it dependant on Router or Views or Controllers or something else?</h3>
 

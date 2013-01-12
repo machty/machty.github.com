@@ -104,81 +104,12 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
 
 <p>They&#8217;re not 100% accurate to Ember, but the core concepts and motivation behind the RunLoop still generally apply to Ember; only some implementation details differ. But, on to your questions:</p>
 
-<h3>When does Ember RunLoop start. Is it dependant on Router or Views or Controllers or something else?</h3>
-
-<p>All of the basic user events (e.g. keyboard events, mouse events, etc) will fire up the run loop. This guarantees that whatever changes made to bound properties by the captured (mouse/keyboard/timer/etc) event are fully propagated throughout Ember&#8217;s data-binding system before returning control back to the system. So, moving your mouse, pressing a key, clicking a button, etc., all launch the run loop.</p>
-
-<h3>how long does it approximately take (I know this is rather silly to asks and dependant on many things but I am looking for a general idea, or maybe if there is a minimum or maximum time a runloop may take)</h3>
-
-<p>At no point will the RunLoop ever keep track of how much time it&#8217;s taking to propagate all the changes through the system and then halt the RunLoop after reaching a maximum time limit; rather, the RunLoop will always run to completion, and won&#8217;t stop until all the expired timers have been called, bindings propagated, and perhaps <em>their</em> bindings propagated, and so on. Obviously, the more changes that need to be propagated from a single event, the longer the RunLoop will take to finish. Here&#8217;s a (pretty unfair) example of how the RunLoop can get bogged down with propagating changes compared to another framework (Backbone) that doesn&#8217;t have a run loop: http://jsfiddle.net/jashkenas/CGSd5/ . Moral of the story: the RunLoop&#8217;s really fast for most things you&#8217;d ever want to do in Ember, and it&#8217;s where much of Ember&#8217;s power lies, but if you find yourself wanting to animate 30 circles with Javascript at 60 frames per second, there might be better ways to go about it than relying on Ember&#8217;s RunLoop.</p>
-
-<h3>Is RunLoop being executed at all times, or is it just indicating a period of time from beginning to end of execution and may not run for some time.</h3>
-
-<p>It is not executed at all times &#8211; it has to return control back to the system at some point or else your app would hang &#8211; it&#8217;s different from, say, a run loop on a server that has a <code>while(true)</code> and goes on for infinity until the server gets a signal to shut down&#8230; the Ember RunLoop has no such <code>while(true)</code> but is only spun up in response to user/timer events.</p>
-
-<h3>If a view is created from within one RunLoop, is it guaranteed that all its content will make it into the DOM by the time the loop ends?</h3>
-
-<p>Let&#8217;s see if we can figure that out. One of the big changes from SC to Ember RunLoop is that, instead of looping back and forth between <code>invokeOnce</code> and <code>invokeLast</code> (which you see in the diagram in the first link about SproutCore&#8217;s RL), Ember provides you a list of &#8216;queues&#8217; that, in the course of a run loop, you can schedule actions (functions to be called during the run loop) to by specifying which queue the action belongs in (example from the source: <code>Ember.run.scheduleOnce('render', bindView, 'rerender');</code>).</p>
-
-<p>If you look at <code>run_loop.js</code> in the source code, you see <code>Ember.run.queues = ['sync', 'actions', 'destroy', 'timers'];</code>, yet if you open your JavaScript debugger in the browser in an Ember app and evaluate <code>Ember.run.queues</code>, you get a fuller list of queues: <code>["sync", "actions", "render", "afterRender", "destroy", "timers"]</code>. Ember keeps their codebase pretty modular, and they make it possible for your code, as well as its own code in a separate part of the library, to insert more queues. In this case, the Ember Views library inserts <code>render</code> and <code>afterRender</code> queues, specifically after the <code>actions</code> queue. I&#8217;ll get to why that might be in a second. First, the RunLoop algorithm:</p>
-
-<p>The RunLoop algorithm is pretty much the same as described in the SC run loop articles above:</p>
-
-<ul>
-<li>You run your code between RunLoop <code>.begin()</code> and <code>.end()</code>, only in Ember you&#8217;ll want to instead run your code within <code>Ember.run</code>, which will internally call <code>begin</code> and <code>end</code> for you. (Only internal run loop code in the Ember code base still uses <code>begin</code> and <code>end</code>, so you should just stick with <code>Ember.run</code>)</li>
-<li>After <code>end()</code> is called, the RunLoop then kicks into gear to propagate every single change made by the chunk of code passed to the <code>Ember.run</code> function. This includes propagating the values of bound properties, rendering view changes to the DOM, etc etc. The order in which these actions (binding, rendering DOM elements, etc) are performed is determined by the <code>Ember.run.queues</code> array described above:</li>
-<li>The run loop will start off on the first queue, which is <code>sync</code>. It&#8217;ll run all of the actions that were scheduled into the <code>sync</code> queue by the <code>Ember.run</code> code. These actions may themselves also schedule more actions to be performed during this same RunLoop, and it&#8217;s up to the RunLoop to make sure it performs every action until all the queues are flushed. The way it does this is, at the end of every queue, the RunLoop will look through all the previously flushed queues and see if any new actions have been scheduled. If so, it has to start at the beginning of the earliest queue with unperformed scheduled actions and flush out the queue, continuing to trace its steps and start over when necessary until all of the queues are completely empty.</li>
-</ul>
-
-
-<p>That&#8217;s the essence of the algorithm. That&#8217;s how bound data gets propagated through the app. You can expect that once a RunLoop runs to completion, all of the bound data will be fully propagated. So, what about DOM elements?</p>
-
-<p>The order of the queues, including the ones added in by the Ember Views library, is important here. Notice that <code>render</code> and <code>afterRender</code> come after <code>sync</code>, and <code>action</code>. The <code>sync</code> queue contains all the actions for propagating bound data. (<code>action</code>, after that, is only sparsely used in the Ember source). Based on the above algorithm, it is guaranteed that by the time the RunLoop gets to the <code>render</code> queue, all of the data-bindings will have finished synchronizing. This is by design: you wouldn&#8217;t want to perform the expensive task of rendering DOM elements <em>before</em> sync&#8217;ing the data-bindings, since that would likely require re-rendering DOM elements with updated data &#8211; obviously a very inefficient and error-prone way of emptying all of the RunLoop queues. So Ember intelligently blasts through all the data-binding work it can before rendering the DOM elements in the <code>render</code> queue.</p>
-
-<p>So, finally, to answer your question, yes, you can expect that any necessary DOM renderings will have taken place by the time <code>Ember.run</code> finishes. Here&#8217;s a jsFiddle to demonstrate: http://jsfiddle.net/machty/6p6XJ/324/</p>
-
-<h2>Other things to know about the RunLoop</h2>
-
-<h3>Observers vs. Bindings</h3>
-
-<p>It&#8217;s important to note that Observers and Bindings, while having the similar functionality of responding to changes in a &#8220;watched&#8221; property, behave totally differently in the context of a RunLoop. Binding propagation, as we&#8217;ve seen, gets scheduled into the <code>sync</code> queue to eventually be executed by the RunLoop. Observers, on the other hand, fire <em>immediately</em> when the watched property changes without having to be first scheduled into a RunLoop queue. If an Observer and a binding all &#8220;watch&#8221; the same property, the observer will always be called 100% of the time earlier than the binding will be updated.</p>
-
-<h3><code>scheduleOnce</code> and <code>Ember.run.once</code></h3>
-
-<p>One of the big efficiency boosts in Ember&#8217;s auto-updating templates is based on the fact that, thanks to the RunLoop, identical RunLoop actions can be coalesced (&#8220;debounced&#8221;, if you will) into a action. If you look into the <code>run_loop.js</code> internals, you&#8217;ll see the functions that facilitate this behavior are the related functions <code>scheduleOnce</code> and <code>Em.run.once</code>. The difference between them isn&#8217;t so important as knowing they exist, and how they can discard duplicate actions in queue to prevent a lot of bloated, wasteful calculation during the run loop.</p>
-
-<h3>What about timers?</h3>
-
-<p>Even though &#8216;timers&#8217; is one of the default queues listed above, Ember only makes reference to the queue in their RunLoop test cases. It seems that such a queue would have been used in the SproutCore days based on some of the descriptions from the above articles about timers being the last thing to fire. In Ember, the <code>timers</code> queue isn&#8217;t used. Instead, the RunLoop can be spun up by an internally managed <code>setTimeout</code> event (see the <code>invokeLaterTimers</code> function), which is intelligent enough to loop through all the existing timers, fire all the ones that have expired, determine the earliest future timer, and set an internal <code>setTimeout</code> for that event only, which will spin up the RunLoop again when it fires. This approach is more efficient than having each timer call setTimeout and wake itself up, since in this case, only one setTimeout call needs to be made, and the RunLoop is smart enough to fire all the different timers that might be going off at the same time.</p>
-
-<h3>Further debouncing with the <code>sync</code> queue</h3>
-
-<p>Here&#8217;s a snippet from the run loop, in the middle of a loop through all the queues in the run loop. Note the special case for the <code>sync</code> queue: because <code>sync</code> is a particularly volatile queue, in which data is being propagated in every direction, <code>Ember.beginPropertyChanges()</code> is called to prevent any observers from being fired, followed by a call to <code>Ember.endPropertyChanges</code>. This is wise: if in the course of flushing the <code>sync</code> queue, it&#8217;s entirely possible that a property on an object will change multiple times before resting on its final value, and you wouldn&#8217;t want to waste resources by immediately firing observers per every single change.</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">queueName</span> <span class="o">===</span> <span class="s1">&#39;sync&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>           <span class="nx">log</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">LOG_BINDINGS</span><span class="p">;</span>
-</span><span class='line'>           <span class="k">if</span> <span class="p">(</span><span class="nx">log</span><span class="p">)</span> <span class="p">{</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Begin: Flush Sync Queue&#39;</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>           <span class="nx">Ember</span><span class="p">.</span><span class="nx">beginPropertyChanges</span><span class="p">();</span>
-</span><span class='line'>           <span class="nx">Ember</span><span class="p">.</span><span class="nx">tryFinally</span><span class="p">(</span><span class="nx">tryable</span><span class="p">,</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">endPropertyChanges</span><span class="p">);</span>
-</span><span class='line'>           <span class="k">if</span> <span class="p">(</span><span class="nx">log</span><span class="p">)</span> <span class="p">{</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;End: Flush Sync Queue&#39;</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>           <span class="nx">forEach</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">queue</span><span class="p">,</span> <span class="nx">iter</span><span class="p">);</span>
-</span><span class='line'>        <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Hope this helps. I definitely had to learn quite a bit just to write this thing, which was kind of the point.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/">Read on &rarr;</a>
+    </footer>
   
 
 
