@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: vim | Useful Dude]]></title>
+  <link href="http://machty.github.com/blog/categories/vim/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2013-01-13T16:42:28-05:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Quickly Peruse Gem Source: Vim + Tmux + bundle open]]></title>
+    <link href="http://machty.github.com/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/"/>
+    <updated>2013-01-13T15:45:00-05:00</updated>
+    <id>http://machty.github.com/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open</id>
+    <content type="html"><![CDATA[<p>Ever find yourself
+working on a project and needing to dig into the source code of a Gem
+you're using? In the past I used to just go to the github for that gem
+and use their project explorer, searching for particular commands using
+their ultra helpful <code>t</code> command, but I got sick of having to do that, so
+I found a better way using Vim + tmux + <code>bundle open</code>. The result is a
+command I can run in Vim, which autocompletes gem names by looking
+through <code>Gemfile.lock</code>, which splits the current tmux pane and runs a
+new instance of Vim in the root directory of the Gem I'm looking for.</p>
+
+<p>Even if you don't
+share my exact configuration, you might learn something about any of the
+following: Tmux, Vim, <code>bundle open</code>, and some Unix commands, and the end
+result code is pretty easily modifiable.</p>
+
+<!-- more -->
+
+
+<h2>My setup</h2>
+
+<p>I do all my work on the <a href="http://www.iterm2.com" title="iTerm2">iTerm2</a>
+terminal, using <a href="http://tmux.sourceforge.net/">tmux</a> as better
+screen-splitting replacement for <code>screen</code>, and Vim as my editor
+(with the <a href="https://github.com/carlhuda/janus">Janus</a> plugin bundle).</p>
+
+<p><img src="/images/tmuxsetup.jpg"></p>
+
+<p>I figured the easiest way for me to address the above need for quick Gem
+source code perusal would be to split my Vim pane and open a new
+instance of Vim in the root directory of the Gem source code.
+<code>bundle open</code> to the rescue.</p>
+
+<h2><code>bundle open</code></h2>
+
+<p><code>bundle open &lt;GEMNAME&gt;</code> will open whatever editor you've provided in the
+<code>$EDITOR</code> environment variable to the root of the provided gem name.
+Thanks to <a href="https://github.com/ghempton">Gordon</a> for keying me into this;
+it's extremely useful.</p>
+
+<h2>Custom Vim command</h2>
+
+<p>Here's what I ended up throwing into my .vimrc (actually .vimrc.after
+since I'm using Janus).</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="c">&quot; Split current tmux window, running &lt;code&gt;bundle open&lt;/code&gt; on the</span>
+</span><span class='line'><span class="c">&quot; argument-specified Gem name. Auto-completes from Gemfile.lock.</span>
+</span><span class='line'>command<span class="p">!</span> <span class="p">-</span>nargs<span class="p">=</span>* <span class="p">-</span><span class="nb">complete</span><span class="p">=</span>custom<span class="p">,</span>ListGems BundleOpen <span class="k">silent</span> execute <span class="s2">&quot;!tmux splitw &#39;bundle open &lt;args&gt;&#39;&quot;</span><span class="p">&lt;</span>/<span class="k">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="k">p</span><span class="p">&gt;</span>&quot; The <span class="k">function</span> used <span class="k">to</span> produce the autocomplete results.
+</span><span class='line'><span class="k">fun</span> ListGems<span class="p">(</span>A<span class="p">,</span>L<span class="p">,</span><span class="k">P</span><span class="p">)</span>
+</span><span class='line'><span class="c">  &quot; Note that vim will filter for us... no need to do anything with A args.</span>
+</span><span class='line'>  <span class="k">return</span> system<span class="p">(</span><span class="s2">&quot;grep -s &#39;^ &#39; Gemfile.lock | sed &#39;s/^ *//&#39; | cut -d &#39; &#39;  -f1 | sed &#39;s/!//&#39; | sort | uniq&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">endfun</span><span class="p">&lt;</span>/<span class="k">p</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">&lt;</span><span class="k">p</span><span class="p">&gt;</span>&quot; Shortcut mapping.
+</span><span class='line'>nmap <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">o</span> :BundleOpen
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Basically, <code>command!</code> declares the command that tells Tmux to split the
+current pane and call <code>bundle open</code> with whatever I pass to the Vim
+function. The <code>-complete=custom,ListGems</code> portion tells it that it
+should use the output of the custom function <code>ListGems</code> as its
+auto-complete dictionary, which is a <em>completely awesome</em> feature.</p>
+
+<p>The auto-complete dictionary I used is all the gems found in the
+Gemfile.lock file if it exists. From left to right I (<code>grep</code>) filter out
+lines that don't begin with gem names, (<code>sed</code>) get rid of preceding
+whitespace, (<code>cut</code>) filter out everything after the first space, (<code>sed</code>)
+get rid of exclamation points (apparently they're used for <code>git</code> repo
+gems in Gemfile.lock), <code>sort</code> the list, and <code>uniq</code> to remove duplicates
+(<code>sort</code> and <code>uniq</code> are probably optional but they're harmless and I didn't
+want to fidget).</p>
+
+<p>Finally, I create a mapping so that when I'm in normal mode, I can just
+type <code>\o</code> and Vim will start filling out the command <code>BundleOpen</code> so
+that all I have to type is the gem name, which I can autocomplete.</p>
+]]></content>
+  </entry>
+  
+</feed>
