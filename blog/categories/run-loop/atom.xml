@@ -4,7 +4,7 @@
   <title><![CDATA[Category: run loop | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/run-loop/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-01-12T13:20:55-05:00</updated>
+  <updated>2013-01-12T19:18:53-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -72,7 +72,7 @@
 
 <h3><code>scheduleOnce</code> and <code>Ember.run.once</code></h3>
 
-<p>One of the big efficiency boosts in Ember's auto-updating templates is based on the fact that, thanks to the RunLoop, identical RunLoop actions can be coalesced ("debounced", if you will) into a action. If you look into the <code>run_loop.js</code> internals, you'll see the functions that facilitate this behavior are the related functions <code>scheduleOnce</code> and <code>Em.run.once</code>. The difference between them isn't so important as knowing they exist, and how they can discard duplicate actions in queue to prevent a lot of bloated, wasteful calculation during the run loop.</p>
+<p>One of the big efficiency boosts in Ember's auto-updating templates is based on the fact that, thanks to the RunLoop, multiple identical RunLoop actions can be coalesced ("debounced", if you will) into a single action. If you look into the <code>run_loop.js</code> internals, you'll see the functions that facilitate this behavior are the related functions <code>scheduleOnce</code> and <code>Em.run.once</code>. The difference between them isn't so important as knowing they exist, and how they can discard duplicate actions in queue to prevent a lot of bloated, wasteful calculation during the run loop.</p>
 
 <h3>What about timers?</h3>
 

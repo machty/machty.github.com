@@ -145,7 +145,7 @@ Giant Ass Response on Stack Overflow about the Ember Run Loop. I&#8217;ve reprod
 
 <h3><code>scheduleOnce</code> and <code>Ember.run.once</code></h3>
 
-<p>One of the big efficiency boosts in Ember&#8217;s auto-updating templates is based on the fact that, thanks to the RunLoop, identical RunLoop actions can be coalesced (&#8220;debounced&#8221;, if you will) into a action. If you look into the <code>run_loop.js</code> internals, you&#8217;ll see the functions that facilitate this behavior are the related functions <code>scheduleOnce</code> and <code>Em.run.once</code>. The difference between them isn&#8217;t so important as knowing they exist, and how they can discard duplicate actions in queue to prevent a lot of bloated, wasteful calculation during the run loop.</p>
+<p>One of the big efficiency boosts in Ember&#8217;s auto-updating templates is based on the fact that, thanks to the RunLoop, multiple identical RunLoop actions can be coalesced (&#8220;debounced&#8221;, if you will) into a single action. If you look into the <code>run_loop.js</code> internals, you&#8217;ll see the functions that facilitate this behavior are the related functions <code>scheduleOnce</code> and <code>Em.run.once</code>. The difference between them isn&#8217;t so important as knowing they exist, and how they can discard duplicate actions in queue to prevent a lot of bloated, wasteful calculation during the run loop.</p>
 
 <h3>What about timers?</h3>
 
