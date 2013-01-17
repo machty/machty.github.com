@@ -4,7 +4,7 @@
   <title><![CDATA[Category: run loop | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/run-loop/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-01-17T14:53:09-05:00</updated>
+  <updated>2013-01-17T17:39:36-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -62,7 +62,7 @@
 
 <p>The order of the queues, including the ones added in by the Ember Views library, is important here. Notice that <code>render</code> and <code>afterRender</code> come after <code>sync</code>, and <code>action</code>. The <code>sync</code> queue contains all the actions for propagating bound data. (<code>action</code>, after that, is only sparsely used in the Ember source). Based on the above algorithm, it is guaranteed that by the time the RunLoop gets to the <code>render</code> queue, all of the data-bindings will have finished synchronizing. This is by design: you wouldn't want to perform the expensive task of rendering DOM elements <em>before</em> sync'ing the data-bindings, since that would likely require re-rendering DOM elements with updated data -- obviously a very inefficient and error-prone way of emptying all of the RunLoop queues. So Ember intelligently blasts through all the data-binding work it can before rendering the DOM elements in the <code>render</code> queue.</p>
 
-<p>So, finally, to answer your question, yes, you can expect that any necessary DOM renderings will have taken place by the time <code>Ember.run</code> finishes. Here's a jsFiddle to demonstrate: http://jsfiddle.net/machty/6p6XJ/324/</p>
+<p>So, finally, to answer your question, yes, you can expect that any necessary DOM renderings will have taken place by the time <code>Ember.run</code> finishes. Here's a jsFiddle to demonstrate: http://jsfiddle.net/machty/6p6XJ/328/</p>
 
 <h2>Other things to know about the RunLoop</h2>
 
