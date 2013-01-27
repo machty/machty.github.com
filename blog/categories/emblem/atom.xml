@@ -4,7 +4,7 @@
   <title><![CDATA[Category: emblem | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/emblem/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-01-27T17:04:48-05:00</updated>
+  <updated>2013-01-27T17:07:57-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -346,10 +346,14 @@ meant taking code like</p>
 <p>Now that it's in the tokenized form, you could write PEG grammar like
 the following, which will match the above <code>p</code> as an
 <code>htmlTagAndOptionalAttributes</code> and detect (due to the indentation) that
-the <code>span What's up</code> is the nested content in the (optional) block.
-This technique is how Emblem decides whether a certain line of Emblem
-code is in
-block form or not, whether it's a Handlebars helper or an HTML element.</p>
+the <code>span What's up</code> is the nested content in the (optional) block.</p>
+
+<p><code>
+htmlElementMaybeBlock = h:htmlTagAndOptionalAttributes _ TERM c:(INDENT content DEDENT)?
+</code></p>
+
+<p>This technique is how Emblem decides whether a certain line of Emblem
+code is in block form or not, whether it's a Handlebars helper or an HTML element.</p>
 
 <h2>Conclusion</h2>
 
