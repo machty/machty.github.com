@@ -4,7 +4,7 @@
   <title><![CDATA[Category: indentation | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/indentation/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-01-27T17:35:55-05:00</updated>
+  <updated>2013-01-27T17:39:45-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -363,7 +363,7 @@ go.</p>
 
 <p>Emblem's getting there, but it's still not as polished as I would like.
 I'd definitely appreciate whatever help I can get, so if you're feeling
-saucy, check out the <a href="http://www.emblemjs.com">Github Repo</a>, and submit
+saucy, check out the <a href="https://github.com/machty/emblem.js">Github Repo</a>, and submit
 a PR. I'll continue to post updates to the syntax over the coming weeks.
 Let me know how you think it's shaping up.</p>
 ]]></content>
