@@ -4,7 +4,7 @@
   <title><![CDATA[Category: pegjs | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/pegjs/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-01-27T17:07:57-05:00</updated>
+  <updated>2013-01-27T17:35:55-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -26,7 +26,7 @@ planned as far as syntax enhancements/refinements, but what's there is
 pretty solid and I hope you'll take it for a test drive and give me some
 feedback, or better yet submit a PR or two.</p>
 
-<p>You can check out a zany little demo <a href="http://www.jsbin.com">here</a>, which
+<p>You can check out a zany little demo <a href="http://jsbin.com/ulegec/17/edit">here</a>, which
 gives you an opportunity to try out some syntactical experiments
 yourself.</p>
 
