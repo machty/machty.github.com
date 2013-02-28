@@ -4,7 +4,7 @@
   <title><![CDATA[Useful Dude]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-02-28T01:20:55-05:00</updated>
+  <updated>2013-02-28T01:25:56-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -93,7 +93,7 @@ the gem. Example:</p>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;handlebars/source&#39;</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">context</span> <span class="o">=</span> <span class="no">ExecJS</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="no">Handlebars</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path</span><span class="p">))</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">context</span><span class="o">.</span><span class="n">call</span> <span class="s1">&#39;Handlebars.precompile&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">context</span><span class="o">.</span><span class="n">call</span> <span class="s1">&#39;Handlebars.precompile&#39;</span><span class="p">,</span> <span class="s1">&#39;{{hello}}&#39;</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1"># =&gt;</span>
 </span><span class='line'><span class="c1"># function (Handlebars,depth0,helpers,partials,data) {</span>
