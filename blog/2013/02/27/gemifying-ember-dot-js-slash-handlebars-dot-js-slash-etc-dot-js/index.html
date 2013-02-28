@@ -1,0 +1,423 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Slaying the Ember/Handlebars JS-RB Dependency Demons with Gem Wrappers - Useful Dude</title>
+  <meta name="author" content="Alex Matchneer">
+
+  
+  <meta name="description" content="Ember.js devotees may have noticed a series of related commits that I
+put in recently with reference to &#8220;removing vendored .js files in favor &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://machty.github.com/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Useful Dude" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Useful Dude</a></h1>
+  
+    <h2>The Dev Side of UsefulRobot.io</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:machty.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Slaying the Ember/Handlebars JS-RB Dependency Demons With Gem Wrappers</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-27T23:28:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Ember.js devotees may have noticed a series of related commits that I
+put in recently with reference to &#8220;removing vendored .js files in favor
+of ember-source, handlebars-source, etc&#8221;, or something of the like.
+They&#8217;re all checked in now, and I think they&#8217;ve gone a long way towards
+alleviating the dependency hell stemming from multiple gems packaging
+vendored .js files.</p>
+
+<p>For a better understanding of the motivation behind these
+changes and how they might affect you, read on.</p>
+
+<!--more-->
+
+
+<h2>The Problem</h2>
+
+<p>You&#8217;re using <code>ember-rails</code> to build an Ember v1.0.0.pre4 app hosted by your Rails
+server. Your Handlebars (or <a href="http://emblemjs.com">Emblem</a>) templates are
+being precompiled by the <a href="https://github.com/tchak/barber">barber gem</a>
+used by <code>ember-rails</code>, which uses Handlebars.js rc2.</p>
+
+<p>You wisely decide to upgrade to Ember v1.0.0.rc1, only to find that
+Ember rc1 now depends on Handlebars rc3 (instead of rc2). Even though
+you&#8217;ve overridden <code>ember-rails</code> to serve the latest Ember and Handlebars
+to the browser, the <code>barber</code> gem is still using its Handlebars rc2 to
+compile your templates, and when you run your app, you&#8217;re greeted with
+the following error.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Ember Handlebars requires Handlebars 1.0.0-rc.3 or greater</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You hurriedly submit a pull request to <code>barber</code> with a freshly bundled
+handlebars rc3 along with 8 other people, but Parisian Paul won&#8217;t be
+awake for another 8 hours to merge the PR, so you duck-punch your way to
+temporary solution, cluttering your app with its very own vendored
+Handlebars.js.</p>
+
+<p>The situation normalizes in a few days, only to repeat itself for the
+next backwards-incompatible version bump.</p>
+
+<h2>Lightweight Gem Wrappers around JS Libs</h2>
+
+<p>To prevent this sort of thing from happening in the future, there&#8217;s a
+now a lightweight gem wrapper for the following:</p>
+
+<ul>
+<li><a href="https://rubygems.org/gems/handlebars-source">handlebars-source</a></li>
+<li><a href="https://rubygems.org/gems/ember-source">ember-source</a></li>
+<li><a href="https://rubygems.org/gems/ember-data-source">ember-data-source</a></li>
+<li><a href="https://rubygems.org/gems/emblem-source">emblem-source</a></li>
+</ul>
+
+
+<p>These gems contain nothing more than .js files and just enough Ruby code
+to help you determine an absolute path to the .js file contained within
+the gem. Example:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;handlebars/source&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">context</span> <span class="o">=</span> <span class="no">ExecJS</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="no">Handlebars</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path</span><span class="p">))</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">context</span><span class="o">.</span><span class="n">call</span> <span class="s1">&#39;Handlebars.precompile&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt;</span>
+</span><span class='line'><span class="c1"># function (Handlebars,depth0,helpers,partials,data) {</span>
+</span><span class='line'><span class="c1">#   this.compilerInfo = [2,&#39;&gt;= 1.0.0-rc.3&#39;];</span>
+</span><span class='line'><span class="c1">#   helpers = helpers || Handlebars.helpers; data = data || {};</span>
+</span><span class='line'><span class="c1">#   var stack1, functionType=&quot;function&quot;, escapeExpression=this.escapeExpression;</span>
+</span><span class='line'><span class="c1"># </span>
+</span><span class='line'><span class="c1">#   if (stack1 = helpers.hello) { stack1 = stack1.call(depth0, {hash:{},data:data}); }</span>
+</span><span class='line'><span class="c1">#   else { stack1 = depth0.hello; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }</span>
+</span><span class='line'><span class="c1">#   return escapeExpression(stack1);</span>
+</span><span class='line'><span class="c1">#   }</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>At the time of writing, most of the gems you&#8217;d ever use for your Ember
+projects use these gems, and since they don&#8217;t specify dependencies upon
+any particular versions of these gems, the app using these gems has full
+control over which versions of the JS libs these gems will use for
+precompiling, asset packaging, etc.</p>
+
+<p>So, coming back to the dependency hell scenario above, if you&#8217;re writing
+an app in Ember rc1, and Ember rc2 comes out with a dependency on a
+new, backwards incompatible Handlebars, all you have to do to upgrade to
+the latest Ember/Handlebars and have your precompilation /
+asset-packaging libs do the same is put the following in your Gemfile:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem 'ember-source', '1.0.0.rc2'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And run <code>bundle update ember-source</code>. <code>ember-source</code> has a dependency on
+a particularly version range of <code>handlebars-source</code>, so that&#8217;ll be
+updated to an appropriate version as well, and all the gems that use
+<code>ember-source</code> and <code>handlebars-source</code> will magically start using the
+new .js files.</p>
+
+<h2>Caveat</h2>
+
+<p>The versions chosen for the <code>____-source</code> gems match as closely as possible
+the current version of the bundled JS lib. The only problem with this is
+that the latest Ember and Handlebars versions are release candidates,
+and the letters in the versions (e.g. <code>1.0.0.rc1</code>) trigger special
+(annoying) pre-release version resolution logic for both RubyGems and
+Bundler.  All this means is that you have to be very specific about
+the version of <code>____-source</code> you want to use, and you won&#8217;t be able to
+use the pessimistic <code>~&gt;</code> version operator, since that&#8217;ll kick out to the
+nearest non-pre-release version of the gem it can find, rather than
+staying within the bounds of an <code>rc</code> sub-version. So, TL;DR, do the
+following:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;ember-source&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0.0.rc1.2&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># This won&#39;t work.</span>
+</span><span class='line'><span class="c1"># gem &#39;ember-source&#39;, &#39;~&gt; 1.0.0.rc1.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Appendix: Getting the .js files out of the <code>___-source</code> gems</h2>
+
+<p>Handlebars:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;handlebars-source&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Code</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;handlebars/source&#39;</span>
+</span><span class='line'><span class="no">Handlebars</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path</span> <span class="c1"># =&gt; &quot;/Users/.../handlebars.js&quot;</span>
+</span><span class='line'><span class="no">Handlebars</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">runtime_bundled_path</span> <span class="c1"># =&gt; &quot;/Users/.../handlebars.runtime.js&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ember / Ember Data:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;ember-source&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;ember-data-source&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Code</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;ember/source&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;ember/data/source&#39;</span>
+</span><span class='line'><span class="no">Ember</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path_for</span><span class="p">(</span><span class="s2">&quot;ember.js&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;/Users/.../ember.js&quot;</span>
+</span><span class='line'><span class="no">Ember</span><span class="o">::</span><span class="no">Data</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path_for</span><span class="p">(</span><span class="s2">&quot;ember-data.js&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;/Users/.../ember-data.js&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Alex Matchneer</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-27T23:28:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/emblem-source/'>emblem-source</a>, <a class='category' href='/blog/categories/gemifying/'>gemifying</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://machty.github.com/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/" data-via="" data-counturl="http://machty.github.com/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/" title="Previous Post: Emblem.js - Indented templating targeting Handlebars.js and Ember.js">&laquo; Emblem.js - Indented templating targeting Handlebars.js and Ember.js</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">Slaying the Ember/Handlebars JS-RB Dependency Demons with Gem Wrappers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/">Emblem.js - Indented templating targeting Handlebars.js and Ember.js</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/">Quickly Peruse Gem Source: Vim + Tmux + bundle open</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/">Everything You Never Wanted to Know About the Ember Run Loop</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/">Rake Pipeline Filter for Syncing with Client-Managed Static Site</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Alex Matchneer -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/';
+        var disqus_url = 'http://machty.github.com/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
