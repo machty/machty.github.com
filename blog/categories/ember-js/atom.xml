@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ember.js | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/ember-js/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-02-28T21:20:12-05:00</updated>
+  <updated>2013-02-28T21:25:20-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,21 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[NYC Ember.js Meetup Run Loop Slides]]></title>
+    <link href="http://machty.github.com/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/"/>
+    <updated>2013-02-28T21:22:00-05:00</updated>
+    <id>http://machty.github.com/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides</id>
+    <content type="html"><![CDATA[<p>Just did a talk on the Ember run loop at the
+<a href="http://www.meetup.com/EmberJS-NYC/">NYC Ember.js Meetup</a>.
+You can check them out
+<a href="http://machty.github.com/blog/ember_run_loop_talk">here</a>.
+There's also a blurb on the <code>ember-source</code>, <code>handlebars-source</code> stuff
+I <a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">wrote about
+yesterday</a>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Everything You Never Wanted to Know About the Ember Run Loop]]></title>

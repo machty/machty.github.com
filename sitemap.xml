@@ -65,11 +65,17 @@
         <lastmod>2013-02-28T01:25:33-05:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://machty.github.com/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/
+        </loc>
+        <lastmod>2013-02-28T21:24:52-05:00</lastmod>
+    </url>
+    <url>
         <loc>http://machty.github.com/blog/archives/</loc>
-        <lastmod>2013-02-28T01:25:33-05:00</lastmod>
+        <lastmod>2013-02-28T21:24:52-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/</loc>
-        <lastmod>2013-02-28T01:25:33-05:00</lastmod>
+        <lastmod>2013-02-28T21:24:52-05:00</lastmod>
     </url>
 </urlset>
