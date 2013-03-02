@@ -418,14 +418,13 @@
       <pre class="code">
 App.MasonryView = Ember.CollectionView.extend({
   didInsertElement: function() {
-    // At this point, no child elements have been rendered.
-    Ember.run.scheduleOnce('afterRender', this, function(){
-      // At this point, we know the child elements have been
-      // rendered since this callback is run in the 'afterRender'
-      // queue, which runs right after the 'render' queue 
-      // where DOM elements are rendered. 
-      this.$().masonry();
-    });
+    // At this point, no child elements have been rendered, so
+    // schedule buildMasonry to run after the child elements
+    // have rendered.
+    Ember.run.scheduleOnce('afterRender', this, 'buildMasonry');
+  },
+  buildMasonry: function() {
+    this.$().masonry();
   }
 }); </pre>
     </div>
