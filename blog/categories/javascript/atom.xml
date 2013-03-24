@@ -4,7 +4,7 @@
   <title><![CDATA[Category: JavaScript | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-03-24T13:41:21-04:00</updated>
+  <updated>2013-03-24T18:18:36-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -87,7 +87,9 @@ Date.prototype.valueOf = originalDateValueOf;</p>
 
 
 <p>So, there you have it when you need it; stubbed determinism when futzing
-with JavaScript timers.</p>
+with JavaScript timers.
+<a href="https://github.com/emberjs/ember.js/pull/2341/files">Here's</a> how it
+looked in the fixed Ember.js run loop test case.</p>
 ]]></content>
   </entry>
   
