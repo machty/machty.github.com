@@ -104,80 +104,12 @@ test cases.</p>
 <p>In short, you can stub out the <code>Date</code> class&#8217;s <code>valueOf</code> method to return
 a value you expect for the duration of the test case.</p>
 
-<h2>The Problem</h2>
-
-<p>I recently did some work on Ember.js&#8217;s run loop, particularly improving
-a few oddities about <code>Ember.run.later</code>, and adding better coverage to
-their run loop test suite. But we were noticing that one of my test
-cases would very occasionally fail, most often when the testing
-workstation was under heavy computational load. The problem, boiled down
-to its essence, was that I&#8217;d made the poor assumption that consecutive
-calls to <code>+ new Date()</code>, a shorthand for returning the number of
-milliseconds from 1970, would return the same value.</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456789 &lt;-- boom</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Duh, right? Time does have a weird OCD habit of elapsing, but I needed,
-for the assumptions of
-<a href="https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/tests/run_loop/later_test.js#L114">this particular test</a>,
-the JavaScript clock to return the same value for consecutive calls to
-<code>+ new Date</code>.</p>
-
-<h2><code>Date::valueOf</code></h2>
-
-<p>Turns out that the function ultimately called when using the <code>+ new Date</code>
-shorthand is the <code>valueOf</code> function on the <code>Date</code> class. That&#8217;s where
-the numeric millisecond return value comes from.</p>
-
-<p>The solution to the test case&#8217;s brittleness was to force all the
-consecutively-run timer-dependent code to all get the same numeric
-millisecond value from their own internal calls to <code>+ new Date</code>. To do
-this, I stubbed the <code>valueOf</code> function as follows:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>var now = + new Date(); // 123456788
-</span><span class='line'>var originalDateValueOf = Date.prototype.valueOf;
-</span><span class='line'>Date.prototype.valueOf = function() { return now };
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>
-</span><span class='line'>// ... it will continue to return this value until
-</span><span class='line'>// I return `valueOf` back to its original native function.
-</span><span class='line'>Date.prototype.valueOf = originalDateValueOf;
-</span><span class='line'>
-</span><span class='line'>+ new Date(); // 123456789</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So, there you have it when you need it; stubbed determinism when futzing
-with JavaScript timers.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/">Read on &rarr;</a>
+    </footer>
   
 
 

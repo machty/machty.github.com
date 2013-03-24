@@ -4,7 +4,7 @@
   <title><![CDATA[Category: determinism | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/determinism/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-03-24T13:39:36-04:00</updated>
+  <updated>2013-03-24T13:40:16-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -26,6 +26,9 @@ test cases.</p>
 
 <p>In short, you can stub out the <code>Date</code> class's <code>valueOf</code> method to return
 a value you expect for the duration of the test case.</p>
+
+<!-- more -->
+
 
 <h2>The Problem</h2>
 
