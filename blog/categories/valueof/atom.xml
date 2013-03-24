@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: valueOf | Useful Dude]]></title>
+  <link href="http://machty.github.com/blog/categories/valueof/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2013-03-24T13:39:36-04:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Stubbing Date::valueOf for Benefit of Make Great Good Determinism]]></title>
+    <link href="http://machty.github.com/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/"/>
+    <updated>2013-03-24T13:20:00-04:00</updated>
+    <id>http://machty.github.com/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism</id>
+    <content type="html"><![CDATA[<p>Quick thing: if you ever find yourself in the situation of writing
+JavaScript test cases that involve <code>setTimeout</code> or some other timer
+logic where the order of timers firing is the subject of testing, you
+might find this trick handy to get rid of brittle, non-deterministic
+test cases.</p>
+
+<p>In short, you can stub out the <code>Date</code> class's <code>valueOf</code> method to return
+a value you expect for the duration of the test case.</p>
+
+<h2>The Problem</h2>
+
+<p>I recently did some work on Ember.js's run loop, particularly improving
+a few oddities about <code>Ember.run.later</code>, and adding better coverage to
+their run loop test suite. But we were noticing that one of my test
+cases would very occasionally fail, most often when the testing
+workstation was under heavy computational load. The problem, boiled down
+to its essence, was that I'd made the poor assumption that consecutive
+calls to <code>+ new Date()</code>, a shorthand for returning the number of
+milliseconds from 1970, would return the same value.</p>
+
+<p><code>
++ new Date(); // 123456788
++ new Date(); // 123456788
++ new Date(); // 123456788
++ new Date(); // 123456789 &lt;-- boom
+</code></p>
+
+<p>Duh, right? Time does have a weird OCD habit of elapsing, but I needed,
+for the assumptions of
+<a href="https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/tests/run_loop/later_test.js#L114">this particular test</a>,
+the JavaScript clock to return the same value for consecutive calls to
+<code>+ new Date</code>.</p>
+
+<h2><code>Date::valueOf</code></h2>
+
+<p>Turns out that the function ultimately called when using the <code>+ new Date</code>
+shorthand is the <code>valueOf</code> function on the <code>Date</code> class. That's where
+the numeric millisecond return value comes from.</p>
+
+<p>The solution to the test case's brittleness was to force all the
+consecutively-run timer-dependent code to all get the same numeric
+millisecond value from their own internal calls to <code>+ new Date</code>. To do
+this, I stubbed the <code>valueOf</code> function as follows:</p>
+
+<p>```
+var now = + new Date(); // 123456788
+var originalDateValueOf = Date.prototype.valueOf;
+Date.prototype.valueOf = function() { return now };
++ new Date(); // 123456788
++ new Date(); // 123456788
++ new Date(); // 123456788
++ new Date(); // 123456788
++ new Date(); // 123456788
++ new Date(); // 123456788</p>
+
+<p>// ... it will continue to return this value until
+// I return <code>valueOf</code> back to its original native function.
+Date.prototype.valueOf = originalDateValueOf;</p>
+
+<ul>
+<li>new Date(); // 123456789
+```</li>
+</ul>
+
+
+<p>So, there you have it when you need it; stubbed determinism when futzing
+with JavaScript timers.</p>
+]]></content>
+  </entry>
+  
+</feed>
