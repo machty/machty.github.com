@@ -115,14 +115,15 @@ to its essence, was that I&#8217;d made the poor assumption that consecutive
 calls to <code>+ new Date()</code>, a shorthand for returning the number of
 milliseconds from 1970, would return the same value.</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456789 &lt;-- boom</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456789 &lt;-- boom</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Duh, right? Time does have a weird OCD habit of elapsing, but I needed,
@@ -142,7 +143,7 @@ consecutively-run timer-dependent code to all get the same numeric
 millisecond value from their own internal calls to <code>+ new Date</code>. To do
 this, I stubbed the <code>valueOf</code> function as follows:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -157,21 +158,22 @@ this, I stubbed the <code>valueOf</code> function as follows:</p>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>var now = + new Date(); // 123456788
-</span><span class='line'>var originalDateValueOf = Date.prototype.valueOf;
-</span><span class='line'>Date.prototype.valueOf = function() { return now };
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
-</span><span class='line'>+ new Date(); // 123456788
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">now</span> <span class="o">=</span> <span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">originalDateValueOf</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">;</span>
+</span><span class='line'><span class="nb">Date</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">valueOf</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">now</span> <span class="p">};</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456788</span>
 </span><span class='line'>
-</span><span class='line'>// ... it will continue to return this value until
-</span><span class='line'>// I return `valueOf` back to its original native function.
-</span><span class='line'>Date.prototype.valueOf = originalDateValueOf;
+</span><span class='line'><span class="c1">// ... it will continue to return this value until</span>
+</span><span class='line'><span class="c1">// I return `valueOf` back to its original native function.</span>
+</span><span class='line'><span class="nb">Date</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">valueOf</span> <span class="o">=</span> <span class="nx">originalDateValueOf</span><span class="p">;</span>
 </span><span class='line'>
-</span><span class='line'>+ new Date(); // 123456789</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="o">+</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="c1">// 123456789</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>So, there you have it when you need it; stubbed determinism when futzing

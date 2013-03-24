@@ -4,7 +4,7 @@
   <title><![CDATA[Category: JavaScript | Useful Dude]]></title>
   <link href="http://machty.github.com/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-03-24T13:40:16-04:00</updated>
+  <updated>2013-03-24T13:41:21-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -41,7 +41,7 @@ to its essence, was that I'd made the poor assumption that consecutive
 calls to <code>+ new Date()</code>, a shorthand for returning the number of
 milliseconds from 1970, would return the same value.</p>
 
-<p><code>
+<p><code>javascript
 + new Date(); // 123456788
 + new Date(); // 123456788
 + new Date(); // 123456788
@@ -65,7 +65,7 @@ consecutively-run timer-dependent code to all get the same numeric
 millisecond value from their own internal calls to <code>+ new Date</code>. To do
 this, I stubbed the <code>valueOf</code> function as follows:</p>
 
-<p>```
+<p>```javascript
 var now = + new Date(); // 123456788
 var originalDateValueOf = Date.prototype.valueOf;
 Date.prototype.valueOf = function() { return now };
