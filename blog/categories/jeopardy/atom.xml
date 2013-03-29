@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Jeopardy | Useful Dude]]></title>
+  <link href="http://machty.github.com/blog/categories/jeopardy/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2013-03-29T16:13:22-04:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Jeopardy]]></title>
+    <link href="http://machty.github.com/blog/2013/03/29/ember-jeopardy/"/>
+    <updated>2013-03-29T15:36:00-04:00</updated>
+    <id>http://machty.github.com/blog/2013/03/29/ember-jeopardy</id>
+    <content type="html"><![CDATA[<p>At last night's <a href="http://www.meetup.com/EmberJS-NYC/events/106490682/">NYC Ember Meetup</a>,
+I led the gang through a somewhat enduring session of Jeopardy,
+featuring a ton of different Ember.js trivia questions. The app itself
+was written in Ember.js and the source code is mostly good, and
+certainly well-commented. Have a look see:</p>
+
+<p><a href="http://ember-jeopardy.herokuapp.com/">Ember Jeopardy</a></p>
+
+<p><a href="https://github.com/machty/ember-jeopardy">Source code</a></p>
+
+<p>It's (somewhat needlessly) hosted within a Rails app, but you can find the
+Ember-specific code in <code>app/assets/javascripts/</code>. It presently only
+works on non-retina Safari/Chrome, given all the 3D stuff going on, but
+if you can figure out how to slay the remaining CSS3 demons, I'd
+definitely appreciate a pull request.</p>
+]]></content>
+  </entry>
+  
+</feed>
