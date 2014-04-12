@@ -6,6 +6,7 @@ comments: true
 categories: ember.js routing dry
 ---
 #### UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues
+#### UPDATE 1/6/12: this post is deprecated since the new [Ember Router v2 API](http://emberjs.com/guides/routing/defining-your-routes/) came out.
 
 A common complaint about Ember.js routing is that seems to force you to
 create pairs of extremely light-weight, useless Views and Controllers

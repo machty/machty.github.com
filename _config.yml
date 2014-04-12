@@ -3,11 +3,11 @@
 # ----------------------- #
 
 url: http://machty.github.com
-title: Useful Dude
-subtitle: The Dev Side of UsefulRobot.io
+title: machty's thoughtz
+subtitle: Ember.js, random thoughts, journal
 author: Alex Matchneer
 simple_search: http://google.com/search
-description: The Dev Side of the Useful Robot
+description: I'm on Ember core and contribute to lots of stuff prefixed with "Em".
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in

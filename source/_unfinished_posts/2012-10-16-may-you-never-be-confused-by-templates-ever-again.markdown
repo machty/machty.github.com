@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "May You Never Be Confused by Ember.js Templates Ever Again"
-date: 2012-10-16 08:44
+date: 2012-11-30 18:18
 comments: true
 categories: 
 - ember.js
@@ -105,7 +105,7 @@ the term `content`, and that's with `Ember.ObjectProxy` and
 `Ember.ArrayProxy`. If you're new to Ember, you might be thinking,
 "Boy Howdy, another brick in the wall of the seemingly vertical learning curve."
 Fortunately, `[Object|Array]Proxy`'s are the easiest of concepts to
-understand. Ready? K.
+understand.
 
 An `ObjectProxy` is just an `Ember.Object` with one magical feature: if
 you set the `content` property of an `ObjectProxy`, then any properties
