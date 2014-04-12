@@ -4,88 +4,104 @@
         <loc>
             http://machty.github.com/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/
         </loc>
-        <lastmod>2012-08-08T11:37:15-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/2012/09/28/dry-your-ember-routes/</loc>
-        <lastmod>2013-01-06T13:13:33-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/2012/10/12/batterypop-is-live/</loc>
-        <lastmod>2012-10-12T12:50:30-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/
         </loc>
-        <lastmod>2012-10-23T22:32:15-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/2012/11/02/spreecommerce-meets-ember-dot-js/</loc>
-        <lastmod>2012-11-03T02:26:58-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/
         </loc>
-        <lastmod>2012-11-05T00:45:36-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/2012/11/12/jquery-accelerated-hover-scroll/</loc>
-        <lastmod>2012-11-12T04:56:10-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/
         </loc>
-        <lastmod>2012-12-29T19:08:36-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/
         </loc>
-        <lastmod>2013-01-17T17:39:25-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/
         </loc>
-        <lastmod>2013-01-13T16:40:48-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/
         </loc>
-        <lastmod>2013-01-27T17:39:33-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/
         </loc>
-        <lastmod>2013-02-28T01:25:33-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/
         </loc>
-        <lastmod>2013-02-28T21:24:52-05:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>
             http://machty.github.com/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/
         </loc>
-        <lastmod>2013-03-24T18:18:23-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/2013/03/29/ember-jeopardy/</loc>
-        <lastmod>2013-03-29T16:13:04-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2014/04/12/daily-thoughts/</loc>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/archives/</loc>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/archives/</loc>
-        <lastmod>2013-03-29T16:13:04-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/</loc>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/</loc>
-        <lastmod>2013-03-29T16:13:04-04:00</lastmod>
+        <lastmod>2014-04-12T18:25:56-04:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/robots.txt</loc>
+        <lastmod>2014-04-12T18:11:02-04:00</lastmod>
     </url>
 </urlset>

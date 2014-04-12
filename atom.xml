@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Useful Dude]]></title>
+  <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-03-29T16:13:22-04:00</updated>
+  <updated>2014-04-12T18:25:56-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,23 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily thoughts]]></title>
+    <link href="http://machty.github.com/blog/2014/04/12/daily-thoughts/"/>
+    <updated>2014-04-12T18:16:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/04/12/daily-thoughts</id>
+    <content type="html"><![CDATA[<p>Long time no blog, been busy with Ember stuff. Much has transpired since
+the last post, including getting added to Ember Core, making the Ember
+router reasonable, and other things. About time I get back into the
+blog-groove. Don&#8217;t expect quality; I&#8217;m probably gonna use this to jot
+down daily learnings because I am immensely forgetful, which rears its
+ugly head when I spend hours / days on a hard problem, only to forget
+the various realizations that would prevent me from having to solve the
+same shit over and over again. It&#8217;s gotten pretty bad; hopefully this
+will help.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ember Jeopardy]]></title>

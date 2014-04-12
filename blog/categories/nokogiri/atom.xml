@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: nokogiri | Useful Dude]]></title>
+  <title><![CDATA[Category: nokogiri | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/nokogiri/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2013-03-29T16:13:22-04:00</updated>
+  <updated>2014-04-12T18:25:56-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
