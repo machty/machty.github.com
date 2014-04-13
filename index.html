@@ -96,6 +96,124 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/04/12/blog-flashcards/">
+		
+			Blog Flashcards</a>
+	</h2>
+	<div class="entry-content">
+		<p>I&#8217;m a very forgetful person and have been looking for a way to integrate
+flashcards into my daily routine as a means of keeping track of the
+random dev-related things I learn throughout the day, and I think I&#8217;ve
+finally cracked the nut:</p>
+
+<p>I&#8217;ve built flashcards into this blog: specifically, for each entry in
+this Jekyll/Octopress-based static site, I can optionally specify a list
+of flashcards in the YAML configuration, and these flashcards get
+compiled at site generation/deployment time and uploaded to
+<a href="http://Cram.com">Cram</a>, a free site for hosting flashcards (they also
+have nice iOS/Android apps).</p>
+
+<p>The point of all of this is that part of the blog-writing process will
+be to jot down some quick flashcards for myself and everyone else who
+might be interested in having a quizzable TL;DR for each entry. Of
+course, it all comes down to how committed I remain to writing regular
+blog entries, but I think it&#8217;s a pretty cool idea and I&#8217;d love it if
+other bloggers I followed did something similar (or accepted pull
+requests from community flashcard-writers).</p>
+
+<p>You can check out all the flashcards associated with this blog
+<a href="http://www.cram.com/flashcards/alexmatchneercom-4692833">here</a>.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-12T20:38:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/04/12/ember-cli-and-npm-fights/">
+		
+			Ember CLI and NPM Fights</a>
+	</h2>
+	<div class="entry-content">
+		<p>Daily Journal: 4/12/14</p>
+
+<p>I&#8217;ve been giving <a href="https://github.com/stefanpenner/ember-cli">ember-cli</a>
+a whirl the last few days; it&#8217;s still extremely alpha but it&#8217;s extremely
+cool. It leverages <a href="https://github.com/joliss/broccoli">Broccoli</a> as a
+highly performant build tool, which minimifies the amount of rebuilding
+that must occur when a file changes in your project; in this way it&#8217;s a
+major improvement over previous iterations of Ember tooling, such as
+<a href="https://github.com/stefanpenner/ember-app-kit">Ember App Kit</a>, which
+falls prey to all of the gotchas involved with teaching Grunt, a
+JavaScript task runner, to act like a build tool, but because Grunt
+doesn&#8217;t have any built-in primitives for describing/tracking
+dependencies between files, or any other primitives convenient for use
+as a build tool without a plethora of plugins/addons, it&#8217;s very
+difficult to arrive at a Grunt setup that:</p>
+
+<ol>
+<li>Minimizes rebuilding in response to file changes</li>
+<li>Has configuration that is easy to reason about</li>
+<li>Locks your server during rebuilds (so that you&#8217;re not serving
+files from a half-compiled project folder)</li>
+</ol>
+
+
+<p>Anyway, onward to stuff I actually learned.</p>
+
+
+		
+		<a href="/blog/2014/04/12/ember-cli-and-npm-fights/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-12T18:30:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/04/12/daily-thoughts/">
 		
 			Daily Thoughts</a>
@@ -500,109 +618,6 @@ result code is pretty easily modifiable.</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/binding-w/'>binding:w</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/">
-		
-			Rake Pipeline Filter for Syncing With Client-Managed Static Site</a>
-	</h2>
-	<div class="entry-content">
-		<p>Just rolled out a quick <a href="http://megancoxmusic.com/">single-pager for my bandmate</a>,
-which is just a super simple static site that she&#8217;ll be updating herself
-via FTP. Problem is, at some point in the future I&#8217;ll be called upon to
-make some change to the JS, or the player widget, or something messy
-enough that my non-developer client would be rightfully reluctant to fidget with.
-If she updates the headers or the paragraph descriptions, and I want to
-make changes to the rest of the page, I&#8217;ll have to go through the
-annoying process of copying her raw HTML modifications into my freshly
-regenerated local HTML.</p>
-
-
-		
-		<a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-29T17:47:00-05:00" pubdate data-updated="true">Dec 29<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/nokogiri/'>nokogiri</a>, <a class='category' href='/blog/categories/rake-pipeline/'>rake pipeline</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/11/12/jquery-accelerated-hover-scroll/">
-		
-			jQuery Accelerated Hover Scroll</a>
-	</h2>
-	<div class="entry-content">
-		<p>Working on a small-ish brochure app for a beach resort, and there&#8217;s one
-section that called for a horizontal scrolling container based on where
-the mouse was hovering over the container. The closer you hover to the
-edge, the faster the container scrolls. This is by no means a new user
-interaction, but I couldn&#8217;t find a suitable plugin for my needs, so I
-wrote one, and you can check it out / download it
-<a href="https://github.com/useful-robot/jquery.accel-hover-scroll">here</a>.</p>
-
-<p>I took perhaps 3 separate stabs at this surprisingly awkward problem,
-and here&#8217;s what I learned&#8230;</p>
-
-
-		
-		<a href="/blog/2012/11/12/jquery-accelerated-hover-scroll/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-12T03:43:00-05:00" pubdate data-updated="true">Nov 12<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/hover/'>hover</a>, <a class='category' href='/blog/categories/jquery/'>jquery</a>, <a class='category' href='/blog/categories/plugin/'>plugin</a>, <a class='category' href='/blog/categories/scroll/'>scroll</a>
 
 </div>
 

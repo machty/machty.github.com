@@ -1,0 +1,255 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Ember CLI and NPM fights  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Ember CLI and NPM Fights</h2>
+	<div class="entry-content"><p>Daily Journal: 4/12/14</p>
+
+<p>I&#8217;ve been giving <a href="https://github.com/stefanpenner/ember-cli">ember-cli</a>
+a whirl the last few days; it&#8217;s still extremely alpha but it&#8217;s extremely
+cool. It leverages <a href="https://github.com/joliss/broccoli">Broccoli</a> as a
+highly performant build tool, which minimifies the amount of rebuilding
+that must occur when a file changes in your project; in this way it&#8217;s a
+major improvement over previous iterations of Ember tooling, such as
+<a href="https://github.com/stefanpenner/ember-app-kit">Ember App Kit</a>, which
+falls prey to all of the gotchas involved with teaching Grunt, a
+JavaScript task runner, to act like a build tool, but because Grunt
+doesn&#8217;t have any built-in primitives for describing/tracking
+dependencies between files, or any other primitives convenient for use
+as a build tool without a plethora of plugins/addons, it&#8217;s very
+difficult to arrive at a Grunt setup that:</p>
+
+<ol>
+<li>Minimizes rebuilding in response to file changes</li>
+<li>Has configuration that is easy to reason about</li>
+<li>Locks your server during rebuilds (so that you&#8217;re not serving
+files from a half-compiled project folder)</li>
+</ol>
+
+
+<p>Anyway, onward to stuff I actually learned.</p>
+
+<!-- more -->
+
+
+<h3><code>npm link</code> to locally develop <code>ember-cli</code></h3>
+
+<p><code>npm install -g ember-cli</code> installs <code>ember-cli</code> globally so that its
+binaries are installed and accessible to the whole system. But what
+about if you&#8217;re contributing to <code>ember-cli</code> and want to test the binary
+you&#8217;re actively developing?</p>
+
+<pre><code>git clone https://github.com/stefanpenner/ember-cli
+cd ember-cli
+
+# Point ember-cli binaries to this project folder
+npm link
+</code></pre>
+
+<p>Now when you run the <code>ember</code> command it&#8217;ll run the code in your local
+development <code>ember-cli</code>. I verified this by doing
+<code>git checkout SOME_OLD_TAG</code> and running <code>npm link</code> again, and then
+when I ran <code>ember --version</code>, it spat out the version I&#8217;d just checked
+out. Baby stuff, right? Maybe, but I find the node world mysterious and
+frightening and this was a nice sanity check.</p>
+
+<p>Now, if you create a new Ember project via <code>ember new some-proj</code>, it may
+come as a surprise that <code>ember-cli</code> libraries installed in
+<code>some-proj/node_modules</code> is not the local <code>ember-cli</code> that you
+<code>npm link</code>&#8216;ed; this seems ok to me as a default, but if you also want
+your <code>ember new</code>-generated project to internally use your local
+<code>ember-cli</code> code, <code>cd</code> into <code>some-proj</code> and then run
+<code>npm link ember-cli</code>, which will install symlinks in <code>node_modules</code>
+pointing <code>ember-cli</code> to the same place that your development <code>ember-cli</code>
+was linked into:</p>
+
+<pre><code>some-proj:: ls -l node_modules/ember-cli
+lrwxr-xr-x  1 machty  staff  37 Apr 12 17:05 node_modules/ember-cli -&gt; /usr/local/lib/node_modules/ember-cli
+</code></pre>
+
+<p>I find the overloading of <code>npm link</code> here extremely confusing; the
+present/absence of the last param to <code>npm link</code> causes the command to
+do drastically different things, but maybe that&#8217;s just me.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-12T18:30:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/04/12/ember-cli-and-npm-fights/';
+        var disqus_url = 'http://machty.github.com/blog/2014/04/12/ember-cli-and-npm-fights/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
