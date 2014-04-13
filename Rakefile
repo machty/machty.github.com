@@ -1,6 +1,11 @@
 require "rubygems"
 require "bundler/setup"
 require "stringex"
+require 'fileutils'
+require 'httparty'
+require 'json'
+require 'ostruct'
+require 'yaml'
 
 ## -- Rsync Deploy config -- ##
 # Be sure your public key is listed in your server's ~/.ssh/authorized_keys file
@@ -217,6 +222,7 @@ task :deploy do
 
   Rake::Task[:copydot].invoke(source_dir, public_dir)
   Rake::Task["#{deploy_default}"].execute
+  Rake::Task[:flashcards].execute
 end
 
 desc "Generate website and deploy"
@@ -299,7 +305,7 @@ task :setup_github_pages, :repo do |t, args|
   if args.repo
     repo_url = args.repo
   else
-    puts "Enter the read/write url for your repository" 
+    puts "Enter the read/write url for your repository"
     puts "(For example, 'git@github.com:your_username/your_username.github.com)"
     repo_url = get_stdin("Repository url: ")
   end
@@ -377,3 +383,115 @@ task :list do
   puts "Tasks: #{(Rake::Task.tasks - [Rake::Task[:list]]).join(', ')}"
   puts "(type rake -T for more detail)\n\n"
 end
+
+def set_id
+  "4692833"
+end
+
+def get_card_set(auth_token)
+  url = "https://api.Cram.com/v2/sets/#{set_id}"
+  response = HTTParty.get(url, {
+    headers: {
+      "Authorization" => "Bearer #{auth_token}"
+    }
+  })
+  JSON.parse(response.body).first
+end
+
+def get_blog_cards
+  cards = []
+  Dir.glob('source/_posts/*.markdown').each do |filename|
+    hash = YAML.load_file(filename)
+    next unless hash.is_a?(Hash)
+    flashcards = hash['flashcards']
+    next unless flashcards
+    flashcards.each do |fc|
+      slug = filename.split('/').last.sub(/.markdown$/, '')
+
+      y,m,d,*rest = slug.split('-')
+      path = [y,m,d,rest.join('-')].join('/')
+
+      hint = "http://alexmatchneer.com/blog/#{path}"
+
+      fc['hint'] = hint
+      cards.push OpenStruct.new(fc)
+    end
+  end
+  cards
+end
+
+def upload_cards!(cards, auth_token)
+  cards.each do |card|
+
+    card_data = {
+      front: card.front,
+      back:  card.back,
+      hint:  card.hint,
+    }
+
+    request_data = {
+      body: card_data,
+      headers: {
+        "Authorization" => "Bearer #{auth_token}"
+      }
+    }
+
+    url = "https://api.Cram.com/v2/sets/#{set_id}/cards"
+    if card.card_id
+      url += "/#{card.card_id}"
+      puts url
+      response = HTTParty.put(url, request_data)
+      puts "Updated '#{card.front}'"
+    else
+      puts url
+      response = HTTParty.post(url, request_data)
+      puts "Added '#{card.front}'"
+    end
+    puts response
+  end
+end
+
+def cards_different?(a,b)
+  return a.front != b.front ||
+    a.back != b.back ||
+    a.hint != b.hint
+end
+
+desc "compile and upload flashcards"
+task :flashcards do
+
+  puts "generating/uploading flashcards"
+
+  cram_id, cram_secret, auth_token = File.read('./.cram').split(' ')
+
+  # Note to future self, if auth_token goes invalid,
+  # run the rack server tmpoauth.ru
+
+  set = get_card_set(auth_token)
+  cards = set['cards']
+
+  cards_hash = {} # front => Card OpenStruct
+  cards.each do |c|
+    card = OpenStruct.new(c)
+    cards_hash[card.front] = card
+  end
+
+  cards_to_update = []
+
+  blog_cards = get_blog_cards
+  blog_cards.each do |card|
+    prev_card = cards_hash[card.front]
+
+    if prev_card
+      if cards_different?(card, prev_card)
+        card.card_id = prev_card.card_id
+        cards_to_update << card
+      end
+    else
+      cards_to_update << card
+    end
+  end
+
+  upload_cards!(cards_to_update, auth_token)
+end
+
