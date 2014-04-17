@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-04-17T13:30:17-04:00</updated>
+  <updated>2014-04-17T16:26:17-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -38,6 +38,25 @@ config.logger.level = Logger.const_get(
   ENV['LOG_LEVEL'] ? ENV['LOG_LEVEL'].upcase : 'DEBUG'
 )
 </code></pre>
+
+<h5>Update 4/17/14: Use TaggedLogging</h5>
+
+<p>Actually, if you want to use <code>config</code> options like <code>log_tags</code>, you&#8217;ll
+want to use an instance of <code>TaggedLogging</code> instead of <code>Logger</code>:</p>
+
+<pre><code>config.logger = ActiveSupport::TaggedLogging.new(Logger.new($stdout))
+
+# Prepend all log lines with the following tags.
+config.log_tags = [
+  :uuid,
+  -&gt; request {
+    request.env["HTTP_USER_AGENT"]
+  }
+]
+</code></pre>
+
+<p>Vanilla <code>Logger</code> doesn&#8217;t make use of the <code>log_tags</code> config, among other
+config vars.</p>
 
 <h3>Prevent expensive debug logs</h3>
 
