@@ -26,6 +26,24 @@ configure the Rails logger to print to STDOUT in
       ENV['LOG_LEVEL'] ? ENV['LOG_LEVEL'].upcase : 'DEBUG'
     )
 
+##### Update 4/17/14: Use TaggedLogging
+
+Actually, if you want to use `config` options like `log_tags`, you'll
+want to use an instance of `TaggedLogging` instead of `Logger`:
+
+    config.logger = ActiveSupport::TaggedLogging.new(Logger.new($stdout))
+
+    # Prepend all log lines with the following tags.
+    config.log_tags = [
+      :uuid,
+      -> request {
+        request.env["HTTP_USER_AGENT"]
+      }
+    ]
+
+Vanilla `Logger` doesn't make use of the `log_tags` config, among other
+config vars.
+
 ### Prevent expensive debug logs
 
 This is coming from an old ass Railscast, but thought it was cool: if
