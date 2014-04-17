@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-04-12T22:22:57-04:00</updated>
+  <updated>2014-04-17T13:28:41-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,62 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/04/16/daily-journal/"/>
+    <updated>2014-04-16T13:31:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/04/16/daily-journal</id>
+    <content type="html"><![CDATA[<h3>Heroku + Unicorn + Rails Logging</h3>
+
+<p>We&#8217;re using Unicorn on Heroku and would like to log just about
+everything, particularly incoming JSON request payloads, but it seemed
+like the Heroku logs (which we forward to Papertrail) weren&#8217;t properly
+logging everything the way they do with <code>rails server</code>.
+<a href="http://dave.is/unicorn.html">This article</a> points out the problem and
+offers the solution; specifically, <code>rails s</code> adds
+<code>Rails::Rack::LogTailer</code> middleware which tails the log files and prints
+their contents to <code>stdout</code>, but if you run your server via <code>unicorn</code>,
+that middleware doesn&#8217;t get added, so if you want a Unicorn-driven Rails
+server to have the same logging behavior as <code>rails s</code>, you&#8217;ll have to
+configure the Rails logger to print to STDOUT in
+<code>config/application.rb</code>:</p>
+
+<pre><code>config.logger = Logger.new(STDOUT)
+config.logger.level = Logger.const_get(
+  ENV['LOG_LEVEL'] ? ENV['LOG_LEVEL'].upcase : 'DEBUG'
+)
+</code></pre>
+
+<h3>Prevent expensive debug logs</h3>
+
+<p>This is coming from an old ass Railscast, but thought it was cool: if
+you do <code>logger.debug "some #{expensive_calc}"</code>, it&#8217;ll only print this
+out if your log level is <code>:debug</code>, but the <code>expensive_calc</code> is still
+performed; to actually prevent the calculation unless you&#8217;re on
+<code>:debug</code>, you can write this as:</p>
+
+<pre><code>logger.debug { "some #{expensive_calc}" }
+</code></pre>
+
+<h3><code>Hash#values_at</code></h3>
+
+<p>In Ruby, use <code>Hash#values_at</code> to query a Hash for multiple and return an
+array of those values, e.g.</p>
+
+<pre><code>hash = { some: "value", other: "lame value" }
+hash.values_at(:some, :other) # =&gt; ["value", "lame value"]
+</code></pre>
+
+<p>This plays nicely with multiple assignment:</p>
+
+<pre><code>some,other = hash.values_at(:some, :other)
+# now some and other have been assigned values from the hash
+</code></pre>
+
+<p>This is the Ruby equivalent of <code>Ember.getProperties(obj, vals)</code>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Blog Flashcards]]></title>
