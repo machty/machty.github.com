@@ -112,6 +112,187 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/04/21/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
+
+<p>In a Unicorn setting, shared resources like database connections
+need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
+in <code>after_hook</code>. This is so that you don&#8217;t wind up in a situation where
+two forked instances of your server try to write to a DB socket at the
+same time, which can result in a Protocol Error. This makes sense; if
+two protocol-adhering processes write to the socket at the same time,
+the message delivered to the other side obviously won&#8217;t adhere to the
+protocol. TODO: at what point does this actually break? How bout writing
+a quick Ruby script to prove this :) :) :)</p>
+
+<p>Resources:</p>
+
+<ul>
+<li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
+</ul>
+
+
+<h2>Sidekiq: why</h2>
+
+<h2>Copy-on-write: implications on threaded vs forked code</h2>
+
+<p>Resources:</p>
+
+<ul>
+<li>http://blog.plataformatec.com.br/tag/eager-load/</li>
+</ul>
+
+
+<h3><code>autoload</code></h3>
+
+<p><code>autoload</code> has traditionally not been thread-safe, but is thread-safe
+since Ruby 2.0 and JRuby 1.7+. If you&#8217;re in an environment where
+<code>autoload</code> is not thread safe, and you&#8217;re in a multi-threaded server
+environment, you&#8217;ll want to eager load these classes/modules instead.
+Alternatively, you could just require these classes/modules after
+creating a new thread. Why wouldn&#8217;t this work????</p>
+
+<p>Possible answers:</p>
+
+<ul>
+<li></li>
+</ul>
+
+
+<h3>Eager loading</h3>
+
+<p>There are two approaches to achieving concurrency in your web server,
+both which involve two different approaches to &#8220;splitting&#8221; your code&#8217;s
+execution into two (or more):</p>
+
+<ul>
+<li>threading: your single server process creates a new thread with access
+to the same memory</li>
+</ul>
+
+
+<h4>Forking</h4>
+
+<p>Forking means your operating system will split a process into two and
+make a copy of all the memory of the source process such that forked
+instances can&#8217;t clobber each other&#8217;s data when they write to memory.</p>
+
+<h3>Copy-on-Write</h3>
+
+<p>That being said, it&#8217;s common for operating systems to provide
+<a href="http://en.wikipedia.org/wiki/Copy-on-write">Copy-on-Write semantics</a></p>
+
+<p>Question: COW is used for forking and threading, right? All the time?
+Which operating systems / libraries? Forking is only operating system&#8230;
+but threading is at the library level? No? wtf is the difference between
+them&#8230;</p>
+
+<p>server process is split into two (or N) by your operating
+system; the new instance gets a copy of the original instance&#8217;s memory
+such that writing to this memory by either the original or clone
+instance will not overwrite the memory of any other instance.</p>
+
+<p>  and writing to this
+  memory will not clobb</p>
+
+<p>  and each split server instance is guaranteed that writing to
+  memory will be isolated to each</p>
+
+<h2>The difference between a process and a thread</h2>
+
+<p>A Process has:</p>
+
+<ul>
+<li>A group of resources</li>
+<li>A Thread of Execution</li>
+</ul>
+
+
+<p>The group of resources includes:</p>
+
+<ul>
+<li>Address space where program text and data lives in memory</li>
+<li>Global variables</li>
+<li>Open files</li>
+<li>Child processes</li>
+<li>Pending alarms</li>
+<li>Signals and signal handlers</li>
+<li>Accounting information</li>
+</ul>
+
+
+<p>A Thread (of Execution) has:</p>
+
+<ul>
+<li>Program counter</li>
+<li>Registers (of course these aren&#8217;t shared b/w threads; that&#8217;s crazy)</li>
+<li>Stack</li>
+<li>State</li>
+</ul>
+
+
+<p>A Thread must execute in a Process, but they are separate entities.</p>
+
+<p>There are multiple types of threads:</p>
+
+<ul>
+<li>User-space threads: super-fast thread switching because no kernel trap
+is required. Fine-grain control over thread scheduling. Unable to do
+blocking I/O though, since this blocks the entire process and all
+user threads.</li>
+<li>Kernel-threads: can using blocking IO, defers scheduling to the OS,
+but each thread switch means a slow kernel trap, but then again if
+you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
+<li>Combined: multiple kernel threads have multiple userspace threads.</li>
+</ul>
+
+
+<p>Questions:</p>
+
+<ul>
+<li>So user-space threads; is concurrency even possible with them alone?
+Is that what Node uses internally?</li>
+</ul>
+
+
+<p>Resources:
+  - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
+  - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
+  - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-21T09:41:00-04:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/04/16/daily-journal/">
 		
 			Daily Journal</a>
@@ -629,62 +810,6 @@ motivation and architecture behind Emblem.</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/ember/'>ember</a>, <a class='category' href='/blog/categories/emblem/'>emblem</a>, <a class='category' href='/blog/categories/handlebars/'>handlebars</a>, <a class='category' href='/blog/categories/indentation/'>indentation</a>, <a class='category' href='/blog/categories/parsing/'>parsing</a>, <a class='category' href='/blog/categories/pegjs/'>pegjs</a>, <a class='category' href='/blog/categories/templates/'>templates</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/">
-		
-			Quickly Peruse Gem Source: Vim + Tmux + Bundle Open</a>
-	</h2>
-	<div class="entry-content">
-		<p>Ever find yourself
-working on a project and needing to dig into the source code of a Gem
-you&#8217;re using? In the past I used to just go to the github for that gem
-and use their project explorer, searching for particular commands using
-their ultra helpful <code>t</code> command, but I got sick of having to do that, so
-I found a better way using Vim + tmux + <code>bundle open</code>. The result is a
-command I can run in Vim, which autocompletes gem names by looking
-through <code>Gemfile.lock</code>, which splits the current tmux pane and runs a
-new instance of Vim in the root directory of the Gem I&#8217;m looking for.</p>
-
-<p>Even if you don&#8217;t
-share my exact configuration, you might learn something about any of the
-following: Tmux, Vim, <code>bundle open</code>, and some Unix commands, and the end
-result code is pretty easily modifiable.</p>
-
-
-		
-		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-13T15:45:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/bundle/'>bundle</a>, <a class='category' href='/blog/categories/gems/'>gems</a>, <a class='category' href='/blog/categories/tmux/'>tmux</a>, <a class='category' href='/blog/categories/vim/'>vim</a>
 
 </div>
 
