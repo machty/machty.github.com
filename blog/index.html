@@ -117,7 +117,10 @@ $(document).ready(
 			Daily Journal</a>
 	</h2>
 	<div class="entry-content">
-		<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
+		<p>This is a half-finished journal. Most of the value lies in the fact that
+there&#8217;s a crap-ton of flashcards associated with what I learned.</p>
+
+<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
 
 <p>In a Unicorn setting, shared resources like database connections
 need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
@@ -135,72 +138,6 @@ a quick Ruby script to prove this :) :) :)</p>
 <li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
 </ul>
 
-
-<h2>Sidekiq: why</h2>
-
-<h2>Copy-on-write: implications on threaded vs forked code</h2>
-
-<p>Resources:</p>
-
-<ul>
-<li>http://blog.plataformatec.com.br/tag/eager-load/</li>
-</ul>
-
-
-<h3><code>autoload</code></h3>
-
-<p><code>autoload</code> has traditionally not been thread-safe, but is thread-safe
-since Ruby 2.0 and JRuby 1.7+. If you&#8217;re in an environment where
-<code>autoload</code> is not thread safe, and you&#8217;re in a multi-threaded server
-environment, you&#8217;ll want to eager load these classes/modules instead.
-Alternatively, you could just require these classes/modules after
-creating a new thread. Why wouldn&#8217;t this work????</p>
-
-<p>Possible answers:</p>
-
-<ul>
-<li></li>
-</ul>
-
-
-<h3>Eager loading</h3>
-
-<p>There are two approaches to achieving concurrency in your web server,
-both which involve two different approaches to &#8220;splitting&#8221; your code&#8217;s
-execution into two (or more):</p>
-
-<ul>
-<li>threading: your single server process creates a new thread with access
-to the same memory</li>
-</ul>
-
-
-<h4>Forking</h4>
-
-<p>Forking means your operating system will split a process into two and
-make a copy of all the memory of the source process such that forked
-instances can&#8217;t clobber each other&#8217;s data when they write to memory.</p>
-
-<h3>Copy-on-Write</h3>
-
-<p>That being said, it&#8217;s common for operating systems to provide
-<a href="http://en.wikipedia.org/wiki/Copy-on-write">Copy-on-Write semantics</a></p>
-
-<p>Question: COW is used for forking and threading, right? All the time?
-Which operating systems / libraries? Forking is only operating system&#8230;
-but threading is at the library level? No? wtf is the difference between
-them&#8230;</p>
-
-<p>server process is split into two (or N) by your operating
-system; the new instance gets a copy of the original instance&#8217;s memory
-such that writing to this memory by either the original or clone
-instance will not overwrite the memory of any other instance.</p>
-
-<p>  and writing to this
-  memory will not clobb</p>
-
-<p>  and each split server instance is guaranteed that writing to
-  memory will be isolated to each</p>
 
 <h2>The difference between a process and a thread</h2>
 
@@ -248,14 +185,6 @@ user threads.</li>
 but each thread switch means a slow kernel trap, but then again if
 you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
 <li>Combined: multiple kernel threads have multiple userspace threads.</li>
-</ul>
-
-
-<p>Questions:</p>
-
-<ul>
-<li>So user-space threads; is concurrency even possible with them alone?
-Is that what Node uses internally?</li>
 </ul>
 
 
