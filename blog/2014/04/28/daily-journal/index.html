@@ -1,0 +1,319 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2><code>npm install</code> git repos</h2>
+
+<p>NOTE: this section is not complete; placeholding for later.</p>
+
+<p>After many abortive attempts to find the right syntax for running
+<code>npm install</code>, I figured I&#8217;d delve into what URL syntax it actually
+expected, and why.</p>
+
+<p>Here&#8217;s a bunch of stuff that didn&#8217;t work:</p>
+
+<pre><code>npm install git+ssh@github.com:stefanpenner/ember-cli.git
+npm install https://github.com/stefanpenner/ember-cli.git
+</code></pre>
+
+<p>Why couldn&#8217;t <code>npm install</code> just figure out what I meant? Well, I don&#8217;t
+know, but here&#8217;s a breakdown of the above.</p>
+
+<p><em>This is a helpful resoure: https://help.github.com/articles/which-remote-url-should-i-use</em></p>
+
+<p>Basically, you can clone GitHub repos either with HTTPS or SSH urls. SSH
+urls require an SSH keypair to generated on your computer and registered
+to your GitHub accounts.</p>
+
+<p>So here&#8217;s the first thing I tried:</p>
+
+<pre><code>https://help.github.com/articles/using-ssh-agent-forwarding
+</code></pre>
+
+<p>This is an HTTPS url.</p>
+
+<p>Q: Why does/did GitHub even require a password for cloning a repo?
+What&#8217;s insecure about that read info? Possible answer: even if you don&#8217;t
+have read access to a repo, a man in the middle might tell you you do,
+and then you&#8217;re sending priv data, blah blah blah.</p>
+
+<h2><code>Gdiff</code>, diffing in vim</h2>
+
+<p>This was a very helpful resource:</p>
+
+<p>http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/</p>
+
+<pre><code>:Gdiff
+:ls # list all the open buffers in their names
+:diffget BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:diffput BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:only # close all buffer except this one
+</code></pre>
+
+<p>I ended up adding the following to my <code>.vimrc.after</code>:</p>
+
+<pre><code>:nnoremap &lt;Leader&gt;dg :diffget &lt;CR&gt;
+:nnoremap &lt;Leader&gt;dp :diffput &lt;CR&gt;
+</code></pre>
+
+<p>Note that this arg-less form is useful when diffing between local
+changes and your last checkin; I use it a bunch for <code>ember-cli</code> when I
+call <code>ember init</code> to reset my app structure to the latest <code>ember-cli</code>
+blueprint (note that this process is still pretty miserable).</p>
+
+<h2>Broccoli <code>ignoredModules</code> and <code>legacyFilesToAppend</code></h2>
+
+<p>These options come from the <code>broccoli-es6-concatenator</code>.</p>
+
+<ul>
+<li><code>ignoredModules</code>: don&#8217;t transpile this module or add it to the list of
+importable modules. This is useful when you have a file that&#8217;s already
+in AMD format (not ES6), and you want to be able to es6 <code>import</code> that
+module, so you put it in <code>ignoredModules</code> so it&#8217;s not treated as an
+es6 file that needs to be imported.</li>
+<li><code>legacyFilesToAppend</code>: non-es6 files (global libraries) that should be
+appended to the end of the final output JS file.</li>
+</ul>
+
+
+<p>Note: <code>loaderFile</code> is automatically added as a legacy files, why, duh,
+because the loader file obviously needs to be a global, non-module file.</p>
+
+<p>So, wtf does this mean (the latest iteration of the blueprint
+Brocfile.js from ember-cli):</p>
+
+<pre><code>if (app.env !== 'production') {
+  push.apply(app.ignoredModules, [
+    'qunit',
+    'ember-qunit'
+  ]);
+
+  push.apply(app.legacyFilesToAppend, [
+    'test-shims.js',
+    'ember-qunit/dist/named-amd/main.js'
+  ]);
+}
+</code></pre>
+
+<p>Well, thanks to the geniuses in freenode IRC <code>#ember-cli</code>, I&#8217;ve learned
+that:</p>
+
+<ul>
+<li>This shouldn&#8217;t be in the blueprint Brocfile.js, but rather should be
+in the ember-cli lib <code>EmberApp</code> abstraction over the Brocfile.js, but
+anyway:</li>
+<li>The intent is that by specifying an <code>ignoredModules</code> item, you&#8217;re
+basically saying &#8220;I intent to import a module with this name, and
+because I&#8217;m opting out of generating it now via an ES6 file, I&#8217;ll be
+adding an AMD module for this file later&#8221;</li>
+</ul>
+
+
+<p>And if you try to <code>import something from 'nonexistent-module'</code>, you&#8217;ll
+get a loader error.</p>
+
+<p>This all seems really obvious, right? Naw, it&#8217;s really freaking hard for
+me to keep in my dumb brain. :(</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-28T14:11:00-04:00" pubdate data-updated="true">Apr 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/04/28/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/04/28/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-04-28T14:11:38-04:00</updated>
+  <updated>2014-04-28T18:27:40-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/04/28/daily-journal/"/>
+    <updated>2014-04-28T14:11:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/04/28/daily-journal</id>
+    <content type="html"><![CDATA[<h2><code>npm install</code> git repos</h2>
+
+<p>NOTE: this section is not complete; placeholding for later.</p>
+
+<p>After many abortive attempts to find the right syntax for running
+<code>npm install</code>, I figured I&#8217;d delve into what URL syntax it actually
+expected, and why.</p>
+
+<p>Here&#8217;s a bunch of stuff that didn&#8217;t work:</p>
+
+<pre><code>npm install git+ssh@github.com:stefanpenner/ember-cli.git
+npm install https://github.com/stefanpenner/ember-cli.git
+</code></pre>
+
+<p>Why couldn&#8217;t <code>npm install</code> just figure out what I meant? Well, I don&#8217;t
+know, but here&#8217;s a breakdown of the above.</p>
+
+<p><em>This is a helpful resoure: https://help.github.com/articles/which-remote-url-should-i-use</em></p>
+
+<p>Basically, you can clone GitHub repos either with HTTPS or SSH urls. SSH
+urls require an SSH keypair to generated on your computer and registered
+to your GitHub accounts.</p>
+
+<p>So here&#8217;s the first thing I tried:</p>
+
+<pre><code>https://help.github.com/articles/using-ssh-agent-forwarding
+</code></pre>
+
+<p>This is an HTTPS url.</p>
+
+<p>Q: Why does/did GitHub even require a password for cloning a repo?
+What&#8217;s insecure about that read info? Possible answer: even if you don&#8217;t
+have read access to a repo, a man in the middle might tell you you do,
+and then you&#8217;re sending priv data, blah blah blah.</p>
+
+<h2><code>Gdiff</code>, diffing in vim</h2>
+
+<p>This was a very helpful resource:</p>
+
+<p>http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/</p>
+
+<pre><code>:Gdiff
+:ls # list all the open buffers in their names
+:diffget BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:diffput BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:only # close all buffer except this one
+</code></pre>
+
+<p>I ended up adding the following to my <code>.vimrc.after</code>:</p>
+
+<pre><code>:nnoremap &lt;Leader&gt;dg :diffget &lt;CR&gt;
+:nnoremap &lt;Leader&gt;dp :diffput &lt;CR&gt;
+</code></pre>
+
+<p>Note that this arg-less form is useful when diffing between local
+changes and your last checkin; I use it a bunch for <code>ember-cli</code> when I
+call <code>ember init</code> to reset my app structure to the latest <code>ember-cli</code>
+blueprint (note that this process is still pretty miserable).</p>
+
+<h2>Broccoli <code>ignoredModules</code> and <code>legacyFilesToAppend</code></h2>
+
+<p>These options come from the <code>broccoli-es6-concatenator</code>.</p>
+
+<ul>
+<li><code>ignoredModules</code>: don&#8217;t transpile this module or add it to the list of
+importable modules. This is useful when you have a file that&#8217;s already
+in AMD format (not ES6), and you want to be able to es6 <code>import</code> that
+module, so you put it in <code>ignoredModules</code> so it&#8217;s not treated as an
+es6 file that needs to be imported.</li>
+<li><code>legacyFilesToAppend</code>: non-es6 files (global libraries) that should be
+appended to the end of the final output JS file.</li>
+</ul>
+
+
+<p>Note: <code>loaderFile</code> is automatically added as a legacy files, why, duh,
+because the loader file obviously needs to be a global, non-module file.</p>
+
+<p>So, wtf does this mean (the latest iteration of the blueprint
+Brocfile.js from ember-cli):</p>
+
+<pre><code>if (app.env !== 'production') {
+  push.apply(app.ignoredModules, [
+    'qunit',
+    'ember-qunit'
+  ]);
+
+  push.apply(app.legacyFilesToAppend, [
+    'test-shims.js',
+    'ember-qunit/dist/named-amd/main.js'
+  ]);
+}
+</code></pre>
+
+<p>Well, thanks to the geniuses in freenode IRC <code>#ember-cli</code>, I&#8217;ve learned
+that:</p>
+
+<ul>
+<li>This shouldn&#8217;t be in the blueprint Brocfile.js, but rather should be
+in the ember-cli lib <code>EmberApp</code> abstraction over the Brocfile.js, but
+anyway:</li>
+<li>The intent is that by specifying an <code>ignoredModules</code> item, you&#8217;re
+basically saying &#8220;I intent to import a module with this name, and
+because I&#8217;m opting out of generating it now via an ES6 file, I&#8217;ll be
+adding an AMD module for this file later&#8221;</li>
+</ul>
+
+
+<p>And if you try to <code>import something from 'nonexistent-module'</code>, you&#8217;ll
+get a loader error.</p>
+
+<p>This all seems really obvious, right? Naw, it&#8217;s really freaking hard for
+me to keep in my dumb brain. :(</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -2393,264 +2515,6 @@ elements are added/removed from the array.</li>
 totally ripped off the pattern from the source for
 <code>Ember.CollectionView</code>. Definitely take a look at the <code>CollectionView</code>
 source for better commenting and less CoffeeScript and curse words.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[DRY and Tie Your Ember Routes]]></title>
-    <link href="http://machty.github.com/blog/2012/09/28/dry-your-ember-routes/"/>
-    <updated>2012-09-28T13:54:00-04:00</updated>
-    <id>http://machty.github.com/blog/2012/09/28/dry-your-ember-routes</id>
-    <content type="html"><![CDATA[<h4>UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues</h4>
-
-<h4>UPDATE 1/6/12: this post is deprecated since the new <a href="http://emberjs.com/guides/routing/defining-your-routes/">Ember Router v2 API</a> came out.</h4>
-
-<p>A common complaint about Ember.js routing is that seems to force you to
-create pairs of extremely light-weight, useless Views and Controllers
-for each new route you create. Another is that it&#8217;s not particular
-obvious how data ought to be shared between routes/controllers. Here&#8217;s
-one way to cut down on the seeming boilerplate while linking your data.</p>
-
-<!--more-->
-
-
-<p>Consider the following example router
-that describes an application that allows you to create new Campaigns,
-but the forms for filling out all the information about a Campaign are
-split between multiple pages.</p>
-
-<figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.Router = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Router</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">root: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>    <span class="c1"># ... index route, redirect-to&#39;s, etc.</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">new_campaign: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>      <span class="nv">route: </span><span class="s">&#39;/new_campaign&#39;</span>
-</span><span class='line'>      <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>        <span class="c1"># 1. Instantiate a NewCampaignController and NewCampaignView,</span>
-</span><span class='line'>        <span class="c1"># and inject the latter into applicationController&#39;s outlet.</span>
-</span><span class='line'>        <span class="c1"># also create the empty Campaign object that will be </span>
-</span><span class='line'>        <span class="c1"># shared between the multiple pages of forms and pass it in</span>
-</span><span class='line'>        <span class="c1"># as the context object to the controller.</span>
-</span><span class='line'>        <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;newCampaign&#39;</span><span class="p">,</span> <span class="nx">App</span><span class="p">.</span><span class="nx">Campaign</span><span class="p">.</span><span class="nx">createRecord</span><span class="p">())</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>        <span class="nv">route: </span><span class="s">&#39;/basic_info&#39;</span>
-</span><span class='line'>        <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>          <span class="c1"># 2. Create BasicInfoController and BasicInfoView, inject</span>
-</span><span class='line'>          <span class="c1"># into the NewCampaignView outlet.</span>
-</span><span class='line'>          <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;basicInfo&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>        <span class="nv">route: </span><span class="s">&#39;/more_info&#39;</span>
-</span><span class='line'>        <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>          <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;moreInfo&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="c1">#... a third page</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>There&#8217;s two main problems with the code above:</p>
-
-<ol>
-<li>The <code>basic_info</code> and <code>more_info</code> child state controllers haven&#8217;t yet
-been connected to the Campaign object created for the parent
-<code>new_campaign</code> state.</li>
-<li>Already, you&#8217;ve got to implement a bunch of nearly empty Views and
-Controllers, namely:</li>
-</ol>
-
-
-<figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.NewCampaignView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">templateName: </span><span class="s">&quot;new_campaign&quot;</span>
-</span><span class='line'><span class="nv">App.NewCampaignController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">App.BasicInfoView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">templateName: </span><span class="s">&quot;basic_info&quot;</span>
-</span><span class='line'><span class="nv">App.BasicInfoController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">App.MoreInfoView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">templateName: </span><span class="s">&quot;more_info&quot;</span>
-</span><span class='line'><span class="nv">App.MoreInfoController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>First off, if you&#8217;re a 1-to-1 class-to-file kind of person, your
-codebase, app namespace, and editor tab space will bloat with nearly
-empty View and Controller definitions. Sucks.</p>
-
-<p>Fortunately, if the <code>connectOutlet</code> function comes in all sorts of
-flavors, one where you you can pass in an options hash rather than
-a string to specify exactly which Views / Controllers to create and what
-your context option should be. Let us kill off the <code>BasicInfo</code>- and <code>MoreInfo</code>-
-Controllers via the following:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="c1"># App.Router = ...</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>        <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>          <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
-</span><span class='line'>            <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>        <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>          <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
-</span><span class='line'>            <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">MoreInfoView</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Turns out we&#8217;ve actually solved both problems: we no longer need
-<code>BasicInfoController</code> or <code>MoreInfoController</code>, and we&#8217;ve actually
-tied the templates for <code>BasicInfoView</code> and <code>MoreInfoView</code> correctly
-to the Campaign object in NewCampaignController, and how exactly does
-that work?</p>
-
-<h3>Default Context Resolution: parentView</h3>
-
-<p>Well, ever since
-<a href="https://gist.github.com/2494968">Ember changed the way it resolves contexts</a>,
-the context of a template is determined, by default, by looking up the
-<code>controller</code> property of the View and using that if it exists, otherwise
-it checks up the chain of <code>parentView</code>s to see if any of them have
-defined a <code>controller</code> property to use as the context. <code>BasicInfoView</code>
-and <code>MoreInfoView</code> don&#8217;t have controllers set (since we&#8217;re using the
-<code>viewClass</code>-only form of <code>connectOutlet</code>), so their contexts resolve to
-their <code>parentView</code>&#8217;s <code>controller</code>, namely <code>NewCampaignController</code>.
-Therefore, the Handlebars templates for <code>BasicInfoView</code> and
-<code>MoreInfoView</code> now use the <code>Campaign</code> object as their context.</p>
-
-<h3>Can we do better?</h3>
-
-<p>You might be itching to get rid of <code>BasicInfo-</code> and <code>MoreInfoView</code> as
-well, since all they do is specify their <code>templateName</code>. You could do
-this, if you wanted, by doing
-<code>viewClass: Em.View.extend(templateName: "basic_info")</code>, but that seems
-like overkill to me. Plus, you&#8217;d lose the benefits of being able to,
-say, automatically focus a text field via the View&#8217;s <code>didInsertElement</code>
-hook.</p>
-
-<h3>Where can I learn more?</h3>
-
-<p>Documentation on Ember routing is still pretty meager, so I&#8217;d definitely
-encourage you to really dig into the Ember source, particularly the test
-cases that deal with these kinds of issues. For example, tucked right in
-the middle of <code>controller_test.js</code> is</p>
-
-<figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;if the controller is explicitly set to null while connecting an outlet, the instantiated view will inherit its controller from its parent view&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Which isn&#8217;t exactly what&#8217;s happening regarding context resolution, but still clued me into this
-approach.</p>
-
-<h3>Update: Infinite Loop Gotcha</h3>
-
-<p>I&#8217;ve been refactoring like a madman since discovering this and in some
-cases I was getting stack overflows that were hard to trace down, but I
-found the cause: if the <code>viewClass</code> you specify has an unnamed
-<code>outlet</code> in its template, you&#8217;ll get an infinite loop. I&#8217;m 90% sure
-the reason why is that when you use the <code>viewClass</code>-only form of
-connectOutlet, the default outlet name resolves to <code>view</code> (the default)
-and steps on the namespace toes of the parent view outlet that 1) had
-the same name (view) and was 2) (more importantly) tied to the same
-single controller. So, there&#8217;s namespace collisions. You can avoid this
-by either getting rid of the leaf view&#8217;s <code>outlet</code> (which might be
-the case if you&#8217;ve been unquestioningly throwing outlets into templates
-that don&#8217;t actually inject child views&#8230; we&#8217;re probably all guilty of
-this at some point in our struggles with the router), or, if you
-actually need the outlet, just give it a sensible name that won&#8217;t
-collide with any other outlet attached to the shared controller. Then
-when you want to inject a view into <em>that</em> outlet, you can do:</p>
-
-<figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>    <span class="nv">route: </span><span class="s">&#39;/basic_info&#39;</span>
-</span><span class='line'>    <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
-</span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">index: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>      <span class="nv">route: </span><span class="s">&#39;/&#39;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">captcha: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>      <span class="nv">route: </span><span class="s">&#39;/captcha&#39;</span>
-</span><span class='line'>      <span class="nv">connectOutlets: </span><span class="nf">(router) -&gt;</span>
-</span><span class='line'>        <span class="c1"># Assume theres an outlet named captcha in the basic_info template.</span>
-</span><span class='line'>        <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
-</span><span class='line'>          <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">CaptchaView</span>
-</span><span class='line'>          <span class="nv">outletName: </span><span class="s">&#39;captcha&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
 ]]></content>
   </entry>
   
