@@ -112,6 +112,65 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/">
+		
+			Emblem.js - Indented Templating Targeting Handlebars.js and Ember.js</a>
+	</h2>
+	<div class="entry-content">
+		<p>I wrote a templating language called
+<a href="https://github.com/machty/emblem.js">Emblem</a> which you can use instead
+of Handlebars to write templates for your views in Ember.js (and soon,
+in any other setting). It&#8217;s still very new, and I definitely have more
+planned as far as syntax enhancements/refinements, but what&#8217;s there is
+pretty solid and I hope you&#8217;ll take it for a test drive and give me some
+feedback, or better yet submit a PR or two.</p>
+
+<p>You can check out a zany little demo <a href="http://jsbin.com/ulegec/17/edit">here</a>, which
+gives you an opportunity to try out some syntactical experiments
+yourself.</p>
+
+<p>Aaand
+<a href="https://speakerdeck.com/machty/emblem-dot-js-ember-targeting-indentation-based-templates">here</a>
+are the slides from the presentation at made at the NYC Ember.js meetup
+I made this week. The rest of this post goes into some of the
+motivation and architecture behind Emblem.</p>
+
+
+		
+		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-27T14:13:00-05:00" pubdate data-updated="true">Jan 27<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember/'>ember</a>, <a class='category' href='/blog/categories/emblem/'>emblem</a>, <a class='category' href='/blog/categories/handlebars/'>handlebars</a>, <a class='category' href='/blog/categories/indentation/'>indentation</a>, <a class='category' href='/blog/categories/parsing/'>parsing</a>, <a class='category' href='/blog/categories/pegjs/'>pegjs</a>, <a class='category' href='/blog/categories/templates/'>templates</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/">
 		
 			Quickly Peruse Gem Source: Vim + Tmux + Bundle Open</a>
@@ -575,56 +634,12 @@ one way to cut down on the seeming boilerplate while linking your data.</p>
 	
 </div></article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/">
-		
-			Speeding Up Firefox CSS3 Transform Transitions With rotate(0.01deg)</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during supposedly GPU-accelerated CSS3 transitions.</p>
-
-<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663776">Turns out there&#8217;s a bug</a>, still unaddressed, that lubricates Gecko with jank molasses anytime it has to animate a transition involving the <code>scale()</code> property. The solution? Add a dash of <code>rotate(0.01deg)</code> to your <code>transform</code> property and the problem magically goes away. Somehow, adding a small degree of unnoticeable rotation renders the transition way more smoothly, and this goes for both CSS3 transitions and animations in Firefox.</p>
-
-<p>So if you&#8217;d like to transition <code>-moz-transform</code> to <code>scale(2)</code>, set it instead to <code>scale(2) rotate(0.01deg)</code> and watch the jank magically disappear.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-07T02:53:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/css3/'>CSS3</a>, <a class='category' href='/blog/categories/firefox/'>Firefox</a>, <a class='category' href='/blog/categories/rotate/'>rotate</a>, <a class='category' href='/blog/categories/transitions/'>transitions</a>
-
-</div>
-
-
-	
-</div></article>
-
 <nav id="pagenavi">
     
         <a href="/" class="prev">Prev</a>
     
+    
+        <a href="/blog/page/3/" class="next">Next</a>
     
     <div class="center"><a href="/archives">Blog Archives</a></div>
 </nav></div>
