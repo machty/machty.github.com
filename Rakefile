@@ -395,7 +395,8 @@ def get_card_set(auth_token)
       "Authorization" => "Bearer #{auth_token}"
     }
   })
-  JSON.parse(response.body).first
+  result = JSON.parse(response.body).first
+  result.is_a?(Hash) ? result['cards'] : []
 end
 
 def get_blog_cards
@@ -466,9 +467,7 @@ task :flashcards do
 
   # Note to future self, if auth_token goes invalid,
   # run the rack server tmpoauth.ru
-
-  set = get_card_set(auth_token)
-  cards = set['cards']
+  cards = get_card_set(auth_token)
 
   cards_hash = {} # front => Card OpenStruct
   cards.each do |c|

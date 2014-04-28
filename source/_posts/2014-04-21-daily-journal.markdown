@@ -60,7 +60,7 @@ flashcards:
     back: Goliath (http://postrank-labs.github.io/goliath/)
   - front: Nginx, Beanstalkd, EventMachine, Twisted, Node.js are all
       examples of servers that embrace this pattern
-    back: Reactor pattern (source: http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/)
+    back: Reactor pattern (http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/)
   - front: What word describes the act of interrupting a task without
       its cooperation? How does this term apply to the various
       concurrency models?
