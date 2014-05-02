@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-04-28T18:27:40-04:00</updated>
+  <updated>2014-05-01T22:45:52-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,68 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/01/daily-journal/"/>
+    <updated>2014-05-01T08:59:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/01/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Normalize / Denormalize</h2>
+
+<p>From <a href="http://en.wikipedia.org/wiki/Database_normalization">Wikipedia</a>:</p>
+
+<p>Database normalization is the process of organizing the fields and
+tables of a relational database to minimize redundancy.</p>
+
+<p>Source: Gary Bernhardt saying &#8220;we denormalize by passing in
+<code>person_name</code> in addition to the person object&#8221;. Normalizing means
+keeping all the data in one place, reducing redundancy. Denormalizing
+means redundancy, which normally affords</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Denormalization">Denormalization</a>:</p>
+
+<blockquote><p>In computing, denormalization is the process of attempting to
+optimize the read performance of a database by adding redundant
+data or by grouping data. In some cases, denormalization
+is a means of addressing performance or scalability in relational
+database software.</p></blockquote>
+
+<p>Generally speaking, denormalizing means you&#8217;ve duplicated some piece of
+data for some reason, probably optimization.</p>
+
+<h2>Stub a method in ruby</h2>
+
+<p>As simple as</p>
+
+<pre><code>def stubbed_method(*args)
+  # accept any number of args, do nothing with them.
+end
+</code></pre>
+
+<h2>Use <code>fetch</code>, not <code>[]</code> for <code>Hash</code> / <code>Array</code></h2>
+
+<p>I already know this, just keep on forgetting to use it;</p>
+
+<pre><code>{}[123] # =&gt; nil
+{}.fetch(123) # =&gt; KeyError: key not found: 123
+</code></pre>
+
+<h2>Directory stack: <code>pushd</code> / <code>popd</code></h2>
+
+<p>Forgot about this from my Bloomberg days; use <code>pushd</code> and <code>popd</code> for
+saving which directory you&#8217;re in (<code>pushd</code>) so that you can screw around,
+change directories, and then ultimately <code>popd</code> back to whichever directory
+you were in before you ran <code>pushd</code>.</p>
+
+<pre><code>cd /foo/bar/baz
+pushd /some/other/dir
+pwd # =&gt; /some/other/dir
+cd /go/to/some/strange/land
+popd
+pwd # =&gt; /foo/bar/baz
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -2116,405 +2178,6 @@ any number of free or commercial plugins that handle the gallery
 presentation of images, videos, Flash, etc. I used
 <a href="http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/">prettyPhoto</a>
 since it was free and easy enough to hack.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[batteryPOP is Live]]></title>
-    <link href="http://machty.github.com/blog/2012/10/12/batterypop-is-live/"/>
-    <updated>2012-10-12T10:50:00-04:00</updated>
-    <id>http://machty.github.com/blog/2012/10/12/batterypop-is-live</id>
-    <content type="html"><![CDATA[<p>You can check out the latest <a href="http://www.usefulrobot.io">Useful Robot</a>
-project at <a href="http://www.batterypop.com">batteryPOP.com</a>.</p>
-
-<p>batteryPOP is a children&#8217;s website featuring a bubbly, animated,
-tree-based menu that drives kids to the videos they want to watch and
-articles they want to read. It was written in
-<a href="http://www.emberjs.com">Ember.js</a>/Rails and had to look good on the
-iPad, so we couldn&#8217;t use any Flash, though the effect is largely the
-same.</p>
-
-<!-- more -->
-
-
-<h2>Ember.js Meetup Presentation</h2>
-
-<p>Here&#8217;s the slides from my lightning talk on Architecting batteryPOP from
-the last <a href="http://www.meetup.com/EmberJS-NYC/">NYC Ember Meetup</a>.</p>
-
-<script async class="speakerdeck-embed" data-id="5059e707e4ce5c0002054198" data-ratio="1.4840579710144928" src="http://machty.github.com//speakerdeck.com/assets/embed.js"></script>
-
-
-<h2>Repositionables</h2>
-
-<p>One of the major focuses of that presentation was on
-how to use a <code>Repositionable</code> mixin in conjunction with
-position formulas so that views can automatically get notified when
-browser dimensions change and automatically animate themselves to the
-correct new position and scale. This is what facilitates the nifty
-auto-adjust feature on batteryPOP.com when you scale the browser window.
-Try it. It&#8217;s nifty.</p>
-
-<p>It&#8217;s also what allows the site to &#8216;just work&#8217; when
-viewed on a variety of different devices; there&#8217;s no special iPad
-version of the site, or device-specific CSS, just a bunch of Views that
-know how to scale and position themselves based on browser dimensions
-and a suite of reusable position formulas.</p>
-
-<h2>PagedNodeOrchestrator</h2>
-
-<p>Also discussed was what I called the <code>PagedNodeOrchestrator</code>, which
-handles the paging and animation of children nodes at a certain level in
-the tree-based menu structure. If you go to batteryPOP.com and click
-What&#8217;s Poppin&#8217;, you&#8217;re 1 level deep in the tree menu, and there are (at
-present) 12 nodes to display which get split into 2 pages of 6. Paging
-left and right causes nodes to animate in and out of existence.</p>
-
-<p>Furthermore, there are instances when user actions cause nodes to be
-added/removed from the list (adding/removing items from your homepage),
-and the menu will need to automagically rebalance and occasionally
-collapse 2 pages into one and so on and so on. Due to all of the insane
-whack-a-mole corner cases that presented themselves once I started in on
-the more dynamic user homepage, the only solution was to write a
-<code>PagedNodeOrchestrator</code>, which (similar to and based on
-<code>Ember.CollectionView</code>) responds to changes in an underlying array of
-models and automatically handles the generation, deletion, and animation
-of their associated views as models are added/removed to the underlying
-array and the <code>currentPageNumber</code> changes. Once I&#8217;d nailed down the code
-to handle the basic paging/addition/deletion, all of those corner cases
-resolved themselves. You can imagine my fist-pumping, Adderall-fueled
-delight at Fourthmeal o&#8217;clock.</p>
-
-<h3>Code Excerpt</h3>
-
-<p>Here&#8217;s all the important bits of the <code>PagedNodeOrchestrator</code> for anyone
-who&#8217;s interested in constructing a similar View-ish structure that
-responds to changes in an underlying array. I&#8217;ve left some of the more
-Shakespearian commenting intact.</p>
-
-<figure class='code'><figcaption><span>paged_node_orchestrator.js.coffee  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-<span class='line-number'>116</span>
-<span class='line-number'>117</span>
-<span class='line-number'>118</span>
-<span class='line-number'>119</span>
-<span class='line-number'>120</span>
-<span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
-<span class='line-number'>127</span>
-<span class='line-number'>128</span>
-<span class='line-number'>129</span>
-<span class='line-number'>130</span>
-<span class='line-number'>131</span>
-<span class='line-number'>132</span>
-<span class='line-number'>133</span>
-<span class='line-number'>134</span>
-<span class='line-number'>135</span>
-<span class='line-number'>136</span>
-<span class='line-number'>137</span>
-<span class='line-number'>138</span>
-<span class='line-number'>139</span>
-<span class='line-number'>140</span>
-<span class='line-number'>141</span>
-<span class='line-number'>142</span>
-<span class='line-number'>143</span>
-<span class='line-number'>144</span>
-<span class='line-number'>145</span>
-<span class='line-number'>146</span>
-<span class='line-number'>147</span>
-<span class='line-number'>148</span>
-<span class='line-number'>149</span>
-<span class='line-number'>150</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.PagedNodeOrchestrator = </span><span class="nx">Em</span><span class="p">.</span><span class="nb">Object</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">init: </span><span class="o">-&gt;</span>
-</span><span class='line'>    <span class="nx">@set</span> <span class="s">&quot;nodeViews&quot;</span><span class="p">,</span> <span class="p">[]</span>
-</span><span class='line'>    <span class="nx">@_nodeModelsDidChange</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># When nodeModels changes, handle observer changes and</span>
-</span><span class='line'>  <span class="c1"># notify our callback. Note that a change in nodeModels</span>
-</span><span class='line'>  <span class="c1"># means that someone changed the entire fucking</span>
-</span><span class='line'>  <span class="c1"># array, and not just a few elements in there.</span>
-</span><span class='line'>  <span class="c1"># We take this opportunity to let our arrayWillChange</span>
-</span><span class='line'>  <span class="c1"># observer know what&#39;s up.</span>
-</span><span class='line'>  <span class="nv">_nodeModelsWillChange: </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">beforeObserver</span><span class="p">((</span><span class="o">-&gt;</span>
-</span><span class='line'>    <span class="k">if</span> <span class="nv">nodeModels = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;nodeModels&#39;</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">nodeModels</span><span class="p">.</span><span class="nx">removeArrayObserver</span> <span class="nx">@</span>
-</span><span class='line'>    <span class="nv">len = </span><span class="k">if</span> <span class="nx">nodeModels</span> <span class="k">then</span> <span class="nx">nodeModels</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&quot;length&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="nx">@arrayWillChange</span><span class="p">(</span><span class="nx">nodeModels</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">),</span> <span class="s">&#39;nodeModels&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">_nodeModelsDidChange: </span><span class="nx">Ember</span><span class="p">.</span><span class="nx">observer</span><span class="p">((</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="k">if</span> <span class="nv">nodeModels = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&#39;nodeModels&#39;</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">nodeModels</span><span class="p">.</span><span class="nx">addArrayObserver</span> <span class="nx">@</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">len = </span><span class="k">if</span> <span class="nx">nodeModels</span> <span class="k">then</span> <span class="nx">nodeModels</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&quot;length&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="nx">@arrayDidChange</span><span class="p">(</span><span class="nx">nodeModels</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">len</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">),</span> <span class="s">&#39;nodeModels&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Ember.sendEvent(this, &#39;@array:before&#39;, [this, startIdx, removeAmt, addAmt]);</span>
-</span><span class='line'>  <span class="nv">arrayWillChange: </span><span class="nf">(___, start, removedCount) -&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Basically, I need to cast away and destroy the nodeViews</span>
-</span><span class='line'>    <span class="c1"># associated with the deleted nodeModels in nodeModels. I&#39;ll</span>
-</span><span class='line'>    <span class="c1"># shorten the nodeViews array here and then add to it</span>
-</span><span class='line'>    <span class="c1"># in didChange</span>
-</span><span class='line'>    <span class="nx">@destroyNodeViewRange</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">removedCount</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Now remove those nodeViews from the list.</span>
-</span><span class='line'>    <span class="nx">@get</span><span class="p">(</span><span class="s">&quot;nodeViews&quot;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">removedCount</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">arrayDidChange: </span><span class="nf">(nodeModels, start, removed, added) -&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Fill in nodeViews with undefined space. </span>
-</span><span class='line'>    <span class="nv">nodeViews = </span><span class="nx">get</span><span class="p">(</span><span class="nx">@</span><span class="p">,</span> <span class="s">&#39;nodeViews&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">nodeViews</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">added</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">modelLen = </span><span class="k">if</span> <span class="nx">nodeModels</span> <span class="k">then</span> <span class="nx">nodeModels</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&quot;length&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="nv">viewLen  = </span><span class="k">if</span> <span class="nx">nodeViews</span> <span class="k">then</span> <span class="nx">nodeViews</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&quot;length&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="nx">Ember</span><span class="p">.</span><span class="nx">assert</span><span class="p">(</span><span class="nx">fmt</span><span class="p">(</span><span class="s">&quot;Node arrays out of sync! %@ vs. %@&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nx">modelLen</span><span class="p">,</span> <span class="nx">viewLen</span><span class="p">]),</span> <span class="nx">modelLen</span> <span class="o">==</span> <span class="nx">viewLen</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">@refreshDisplay</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">currentPaging: </span><span class="p">(</span> <span class="o">-&gt;</span>
-</span><span class='line'>    <span class="c1"># First, determine the balanced page size.</span>
-</span><span class='line'>    <span class="nv">TARGET_PAGE_SIZE = </span><span class="mi">6</span>
-</span><span class='line'>    <span class="nv">nodeModels = </span><span class="nx">@get</span> <span class="s">&quot;nodeModels&quot;</span>
-</span><span class='line'>    <span class="nv">len = </span><span class="k">if</span> <span class="nx">nodeModels</span> <span class="k">then</span> <span class="nx">nodeModels</span><span class="p">.</span><span class="nx">length</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="nv">numPages = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">ceil</span><span class="p">(</span><span class="nx">len</span> <span class="o">/</span> <span class="nx">TARGET_PAGE_SIZE</span><span class="p">)</span> <span class="o">||</span> <span class="mi">1</span>
-</span><span class='line'>    <span class="nv">nodesPerPage = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">ceil</span><span class="p">(</span><span class="nx">len</span> <span class="o">/</span> <span class="nx">numPages</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Now determine the range of visible node indexes</span>
-</span><span class='line'>    <span class="c1"># given the currentPageIndex. We also have to make sure</span>
-</span><span class='line'>    <span class="c1"># to stay within the bounds in case we lost a bunch of nodes</span>
-</span><span class='line'>    <span class="c1"># and we were on a later page.</span>
-</span><span class='line'>    <span class="nv">currentPageIndex = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">@get</span><span class="p">(</span><span class="s">&quot;currentPageIndex&quot;</span><span class="p">),</span> <span class="nx">numPages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>    <span class="nv">visibleStart = </span><span class="nx">currentPageIndex</span> <span class="o">*</span> <span class="nx">nodesPerPage</span>
-</span><span class='line'>    <span class="nv">visibleEnd = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">len</span><span class="p">,</span> <span class="nx">visibleStart</span> <span class="o">+</span> <span class="nx">nodesPerPage</span><span class="p">)</span>
-</span><span class='line'>    <span class="nv">currentPageSize = </span><span class="nx">visibleEnd</span> <span class="o">-</span> <span class="nx">visibleStart</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="nv">numPages: </span><span class="nx">numPages</span>
-</span><span class='line'>      <span class="nv">currentPageIndex: </span><span class="nx">currentPageIndex</span>
-</span><span class='line'>      <span class="nv">maxNodesPerPage: </span><span class="nx">nodesPerPage</span>
-</span><span class='line'>      <span class="nv">currentPageSize: </span><span class="nx">currentPageSize</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="c1"># Indexes controlling which nodes are currently displayed:</span>
-</span><span class='line'>      <span class="c1"># [ visibleStart, visibleEnd )</span>
-</span><span class='line'>      <span class="nv">visibleStart: </span><span class="nx">visibleStart</span>
-</span><span class='line'>      <span class="nv">visibleEnd: </span><span class="nx">visibleEnd</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">).</span><span class="nx">property</span><span class="p">(</span><span class="s">&quot;currentPageIndex&quot;</span><span class="p">,</span> <span class="s">&quot;nodeModels.length&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">refreshDisplay: </span><span class="nf">(force = false) -&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">nodeModels = </span><span class="nx">@get</span> <span class="s">&quot;nodeModels&quot;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Calculate paging and update properties.</span>
-</span><span class='line'>    <span class="nv">currentPaging = </span><span class="nx">@get</span> <span class="s">&quot;currentPaging&quot;</span>
-</span><span class='line'>    <span class="nx">@set</span> <span class="s">&quot;numPages&quot;</span><span class="p">,</span> <span class="nx">currentPaging</span><span class="p">.</span><span class="nx">numPages</span>
-</span><span class='line'>    <span class="nx">@set</span> <span class="s">&quot;currentPageIndex&quot;</span><span class="p">,</span> <span class="nx">currentPaging</span><span class="p">.</span><span class="nx">currentPageIndex</span>
-</span><span class='line'>    <span class="nv">visibleStart = </span><span class="nx">currentPaging</span><span class="p">.</span><span class="nx">visibleStart</span>
-</span><span class='line'>    <span class="nv">visibleEnd = </span><span class="nx">currentPaging</span><span class="p">.</span><span class="nx">visibleEnd</span>
-</span><span class='line'>    <span class="nv">currentPageSize = </span><span class="nx">currentPaging</span><span class="p">.</span><span class="nx">currentPageSize</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Loop through all models, creating nodeViews in the visible spectrum</span>
-</span><span class='line'>    <span class="c1"># and hiding the ones that aren&#39;t supposed to be there.</span>
-</span><span class='line'>    <span class="nv">nodeViews = </span><span class="nx">@get</span><span class="p">(</span><span class="s">&quot;nodeViews&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">for</span> <span class="nx">idx</span> <span class="k">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">...(</span><span class="nx">nodeModels</span><span class="p">.</span><span class="nx">length</span><span class="p">)]</span>
-</span><span class='line'>      <span class="nv">nodeModel = </span><span class="nx">nodeModels</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span>
-</span><span class='line'>      <span class="nv">nodeView = </span><span class="nx">nodeViews</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">nodeView</span>
-</span><span class='line'>        <span class="c1"># NodeView has been created. Should it be here?</span>
-</span><span class='line'>        <span class="k">if</span> <span class="nx">visibleStart</span> <span class="o">&lt;=</span> <span class="nx">idx</span> <span class="o">&lt;</span> <span class="nx">visibleEnd</span>
-</span><span class='line'>          <span class="c1"># Yes, it should. Make sure it&#39;s in the right place.</span>
-</span><span class='line'>          <span class="nx">@presentNodeView</span><span class="p">(</span><span class="nx">nodeView</span><span class="p">,</span> <span class="p">(</span><span class="nx">idx</span> <span class="o">-</span> <span class="nx">visibleStart</span><span class="p">)</span> <span class="o">/</span> <span class="nx">currentPageSize</span> <span class="o">+</span> <span class="nx">overlapOffset</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">else</span>
-</span><span class='line'>          <span class="c1"># No, it shouldn&#39;t be here. Send it in the proper direction</span>
-</span><span class='line'>          <span class="c1"># if it&#39;s actually visible</span>
-</span><span class='line'>          <span class="k">continue</span> <span class="k">if</span> <span class="nx">nodeView</span><span class="p">.</span><span class="nx">getPath</span><span class="p">(</span><span class="s">&quot;displayProperties.opacity&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span>
-</span><span class='line'>          <span class="nv">positionFormula = </span><span class="k">if</span> <span class="nx">idx</span> <span class="o">&lt;</span> <span class="nx">visibleStart</span>
-</span><span class='line'>            <span class="nx">App</span><span class="p">.</span><span class="nx">PagedOutRightPosition</span>
-</span><span class='line'>          <span class="k">else</span>
-</span><span class='line'>            <span class="nx">App</span><span class="p">.</span><span class="nx">PagedOutLeftPosition</span>
-</span><span class='line'>          <span class="nx">nodeView</span><span class="p">.</span><span class="nx">set</span> <span class="s">&quot;positionFormula&quot;</span><span class="p">,</span> <span class="nx">positionFormula</span>
-</span><span class='line'>          <span class="nx">nodeView</span><span class="p">.</span><span class="nx">notifyPropertyChange</span> <span class="s">&quot;positionFormula&quot;</span>
-</span><span class='line'>      <span class="k">else</span>
-</span><span class='line'>        <span class="c1"># No nodeview exists in this slot yet. Should we create on?</span>
-</span><span class='line'>        <span class="k">if</span> <span class="nx">visibleStart</span> <span class="o">&lt;=</span> <span class="nx">idx</span> <span class="o">&lt;</span> <span class="nx">visibleEnd</span>
-</span><span class='line'>          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&quot;Index </span><span class="si">#{</span><span class="nx">idx</span><span class="si">}</span><span class="s">: Creating node here&quot;</span>
-</span><span class='line'>          <span class="c1"># Yes we should.</span>
-</span><span class='line'>          <span class="nv">nodeView = </span><span class="nx">App</span><span class="p">.</span><span class="nx">nodeViewFactory</span><span class="p">(</span><span class="nx">nodeModel</span><span class="p">)</span>
-</span><span class='line'>          <span class="nx">nodeViews</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nx">nodeView</span>
-</span><span class='line'>          <span class="nx">@presentNodeView</span><span class="p">(</span><span class="nx">nodeView</span><span class="p">,</span> <span class="p">(</span><span class="nx">idx</span> <span class="o">-</span> <span class="nx">visibleStart</span><span class="p">)</span> <span class="o">/</span> <span class="nx">currentPageSize</span> <span class="o">+</span> <span class="nx">overlapOffset</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">presentNodeView: </span><span class="nf">(nodeView, orbitRatio, firstDisplay = false) -&gt;</span>
-</span><span class='line'>    <span class="nx">nodeView</span><span class="p">.</span><span class="nx">set</span> <span class="s">&quot;stackController&quot;</span><span class="p">,</span> <span class="nx">@</span>
-</span><span class='line'>    <span class="nx">nodeView</span><span class="p">.</span><span class="nx">set</span> <span class="s">&quot;orbitRatio&quot;</span><span class="p">,</span> <span class="nx">orbitRatio</span>
-</span><span class='line'>    <span class="nx">nodeView</span><span class="p">.</span><span class="nx">set</span> <span class="s">&quot;positionFormula&quot;</span><span class="p">,</span> <span class="nx">App</span><span class="p">.</span><span class="nx">PrePresentPosition</span> <span class="k">if</span> <span class="nx">firstDisplay</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># TODO: combine into one timer event?</span>
-</span><span class='line'>    <span class="nv">positioner = </span><span class="o">=&gt;</span>
-</span><span class='line'>      <span class="c1">#debugger</span>
-</span><span class='line'>      <span class="nx">nodeView</span><span class="p">.</span><span class="nx">set</span> <span class="s">&quot;positionFormula&quot;</span><span class="p">,</span> <span class="nx">App</span><span class="p">.</span><span class="nx">OrbitingPosition</span>
-</span><span class='line'>      <span class="nx">nodeView</span><span class="p">.</span><span class="nx">notifyPropertyChange</span> <span class="s">&quot;positionFormula&quot;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span> <span class="nx">firstDisplay</span>
-</span><span class='line'>      <span class="nx">runLater</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">positioner</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="nx">positioner</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># @param {callback}: function(nodeView, index)</span>
-</span><span class='line'>  <span class="nv">forEachVisibleNodeView: </span><span class="nf">(callback) -&gt;</span>
-</span><span class='line'>    <span class="nv">currentPaging = </span><span class="nx">@get</span> <span class="s">&quot;currentPaging&quot;</span>
-</span><span class='line'>    <span class="nv">nodeViews = </span><span class="nx">@get</span> <span class="s">&quot;nodeViews&quot;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">visibleStart = </span><span class="nx">currentPaging</span><span class="p">.</span><span class="nx">visibleStart</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">for</span> <span class="nx">idx</span> <span class="k">in</span> <span class="p">[</span><span class="nx">visibleStart</span><span class="p">...(</span><span class="nx">currentPaging</span><span class="p">.</span><span class="nx">visibleEnd</span><span class="p">)]</span>
-</span><span class='line'>      <span class="nv">nodeView = </span><span class="nx">nodeViews</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span>
-</span><span class='line'>      <span class="nv">newNodeView = </span><span class="nx">callback</span> <span class="nx">nodeView</span><span class="p">,</span> <span class="nx">idx</span> <span class="o">-</span> <span class="nx">visibleStart</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Monitoring Changes on an Underlying Array</h3>
-
-<p>So, to create any sort of object that responds to changes in an
-underlying array (in Ember.js), one must</p>
-
-<ol>
-<li>Observe changes to the entire array property (i.e. handle the case
-when someone sets <code>content</code> to an entirely different array, rather
-than just adding to / removing from the existing array)</li>
-<li>Use this observer to call <code>addArrayObserver</code>/<code>removeArrayObserver</code> on the
-new/old array so that we can receive notifications on when individual
-elements are added/removed from the array.</li>
-</ol>
-
-
-<p>This is the pattern that my <code>PagedNodeOrchestrator</code> follows, which
-totally ripped off the pattern from the source for
-<code>Ember.CollectionView</code>. Definitely take a look at the <code>CollectionView</code>
-source for better commenting and less CoffeeScript and curse words.</p>
 ]]></content>
   </entry>
   
