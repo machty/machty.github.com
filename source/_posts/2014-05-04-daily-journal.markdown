@@ -76,3 +76,26 @@ http://en.wikipedia.org/wiki/Cisgender
 > related types of gender identity where an individual's experience of
 > their own gender matches the sex they were assigned at birth.
 
+## Hypermedia API
+
+Hyper = above
+
+Media = well, media, but not just hypertext because more things than
+just text can be conveyed
+
+Examples:
+
+- http://jsonapi.org/
+- HAL - Hypermedia Application Language
+
+Why JSON API over HAL? http://jsonapi.org/faq/
+
+- HAL embeds child docs recursively; JSON API flattens the entire graph
+  at the top level.
+- JSON API uses IDs for linkage (as opposed to HAL's what)?
+- See [Dan Gebhart](https://github.com/dgeb)'s response here re linkage:
+  https://github.com/json-api/json-api/pull/123/files#r12265234
+
+
+
+
