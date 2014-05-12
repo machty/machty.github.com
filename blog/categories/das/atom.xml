@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: DAS | machty's thoughtz]]></title>
+  <link href="http://machty.github.com/blog/categories/das/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2014-05-12T14:56:35-04:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/04/daily-journal/"/>
+    <updated>2014-05-04T10:11:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/04/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Vim surround</h2>
+
+<p>https://github.com/tpope/vim-surround</p>
+
+<ul>
+<li>ysiw] : surround a word in ]</li>
+<li>ysiW] : surround a chunk word in ]</li>
+<li>cs"' : change surrounding " to '</li>
+<li>ds" : delete surrounding "</li>
+<li>yss( : wrap line in parens</li>
+</ul>
+
+
+<h2>DAS: Conflicting Principles</h2>
+
+<ul>
+<li>User/profile/account
+
+<ul>
+<li>All this other stuff that relates to that single giant model</li>
+</ul>
+</li>
+<li>User
+
+<ul>
+<li><code>disable!</code></li>
+<li><code>send_disable_notication</code></li>
+</ul>
+</li>
+<li>Law of demeter
+
+<ul>
+<li>Motivation for decomposition</li>
+<li>move controller logic to model <code>enforce_good_standing!</code></li>
+</ul>
+</li>
+<li>User model will get huge; lots of complexity there.</li>
+<li>Pull out service classes, e.g. GoodStandingPolicy, or
+AccountStandingPolicy
+
+<ul>
+<li><code>#initialize(user)</code></li>
+<li><code>enforce!</code>
+
+<ul>
+<li>still breaks law of demeter.</li>
+<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
+<li>but this breaks Tell Don't Ask
+
+<ul>
+<li>TDA means asking an object about properties and deciding what to
+do instead of telling it to do things and giving it enough info
+to do so.</li>
+</ul>
+</li>
+<li>TDA vs Single Responsibility Principle (SRP)?
+
+<ul>
+<li>If you follow TDA, you end up putting responsibility back into
+User class, but now User class has much responsibility</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Pick one: SRP often makes sense</li>
+</ul>
+
+
+<h2>DAS: Wrapping Third Party APIs</h2>
+
+<ul>
+<li>e.g. accepting Braintree payment from secure redirect back to your
+site with data in QPs</li>
+<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
+<li>Goal: move traversal of these objs to a different class.</li>
+<li>Spec
+
+<ul>
+<li>Had to stub deeply nested crap</li>
+</ul>
+</li>
+<li>TDD
+
+<ul>
+<li>it "konws the newest credit card"</li>
+<li>qp is a stub</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Pend-out an Rspec test</h2>
+
+<pre><code>it "does something" {}
+</code></pre>
+
+<p>can be made pending via <code>xit</code></p>
+
+<pre><code>xit "does something" {}
+</code></pre>
+
+<h2>Cisgender</h2>
+
+<p>http://en.wikipedia.org/wiki/Cisgender</p>
+
+<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
+related types of gender identity where an individual's experience of
+their own gender matches the sex they were assigned at birth.</p></blockquote>
+
+<h2>Hypermedia API</h2>
+
+<p>Hyper = above</p>
+
+<p>Media = well, media, but not just hypertext because more things than
+just text can be conveyed</p>
+
+<p>Examples:</p>
+
+<ul>
+<li>http://jsonapi.org/</li>
+<li>HAL - Hypermedia Application Language</li>
+</ul>
+
+
+<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
+
+<ul>
+<li>HAL embeds child docs recursively; JSON API flattens the entire graph
+at the top level.</li>
+<li>JSON API uses IDs for linkage (as opposed to HAL's what)?</li>
+<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>'s response here re linkage:
+https://github.com/json-api/json-api/pull/123/files#r12265234</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

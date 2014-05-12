@@ -1,0 +1,288 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>Ruby <code>Module#===</code></h2>
+
+<p>Ran into <a href="https://github.com/hassox/warden/blob/master/lib/warden.rb#L33-L34">this piece of
+code</a>
+from the Warden repo:</p>
+
+<pre><code>def self.test_mode!
+  unless Warden::Test::WardenHelpers === Warden
+    Warden.extend Warden::Test::WardenHelpers
+    Warden::Manager.on_request do |proxy|
+      unless proxy.asset_request?
+        while blk = Warden._on_next_request.shift
+          blk.call(proxy)
+        end
+      end
+    end
+  end
+  true
+end
+</code></pre>
+
+<p>I hadn&#8217;t seen this usage of <code>===</code> before; I&#8217;m mostly familiar with it as
+an unidiomatic alias of <code>is_a?</code>, e.g.:</p>
+
+<pre><code>Array === []    #=&gt; true
+[].is_a?(Array) #=&gt; true
+</code></pre>
+
+<p><code>#===</code> is the Case Equality operator or
+<a href="http://stackoverflow.com/questions/4527220/3-equals-or-case-equality-operator"><em>subsumption</em> operator</a>;
+it is overridden by subclasses to provide context-specific / semantic
+meaning, for example:</p>
+
+<ul>
+<li><code>Regexp === /asd/</code> #=> true</li>
+<li><code>Fixnum === 5</code> #=> true</li>
+<li><code>Object === {}</code> #=> true</li>
+</ul>
+
+
+<p>Important things to keep in mind about <code>===</code>:</p>
+
+<ol>
+<li>It is not commutative (A===B does not imply B===A)</li>
+<li>It is a method of the object on the left side of an expression,
+e.g. <code>A===B</code> is shorthand for <code>A.===B</code> or <code>A.send(:===, //)</code></li>
+<li>It has nothing to do with equality; beware, JavaScripters.</li>
+</ol>
+
+
+<p>ANYWAY: back to the Warden example: in this case, the <code>Module</code> class has
+an instance method <code>===</code> that returns if the object on the right side
+has extended the methods on the Module that <code>===</code> is called on, so:</p>
+
+<pre><code>module M; end
+class Foo; end
+
+f = Foo.new
+M === f #=&gt; false
+
+# reopen
+class Foo
+  include M
+end
+
+M === f #=&gt; true
+</code></pre>
+
+<p>So we turned <code>===</code> from false to true by including <code>M</code> on class <code>Foo</code>.
+The Warden example is similar, except that the way the module&#8217;s methods
+were mixed in was via <code>extend</code> vs <code>include</code>. <code>extend</code> is a somewhat more
+direct form of <code>include</code> in that it can be called on instances to put
+methods directly on that instance, rather than having to open an
+instance&#8217;s class and add an <code>include</code> statement, which adds all of those
+methods to subclasses.</p>
+
+<p>So when we check</p>
+
+<pre><code>  Warden::Test::WardenHelpers === Warden
+</code></pre>
+
+<p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
+&#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-12T13:14:00-04:00" pubdate data-updated="true">May 12<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/05/12/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/05/12/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,347 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>Vim surround</h2>
+
+<p>https://github.com/tpope/vim-surround</p>
+
+<ul>
+<li>ysiw] : surround a word in ]</li>
+<li>ysiW] : surround a chunk word in ]</li>
+<li>cs&#8221;&#8217; : change surrounding &#8221; to &#8217;</li>
+<li>ds&#8221; : delete surrounding &#8221;</li>
+<li>yss( : wrap line in parens</li>
+</ul>
+
+
+<h2>DAS: Conflicting Principles</h2>
+
+<ul>
+<li>User/profile/account
+
+<ul>
+<li>All this other stuff that relates to that single giant model</li>
+</ul>
+</li>
+<li>User
+
+<ul>
+<li><code>disable!</code></li>
+<li><code>send_disable_notication</code></li>
+</ul>
+</li>
+<li>Law of demeter
+
+<ul>
+<li>Motivation for decomposition</li>
+<li>move controller logic to model <code>enforce_good_standing!</code></li>
+</ul>
+</li>
+<li>User model will get huge; lots of complexity there.</li>
+<li>Pull out service classes, e.g. GoodStandingPolicy, or
+AccountStandingPolicy
+
+<ul>
+<li><code>#initialize(user)</code></li>
+<li><code>enforce!</code>
+
+<ul>
+<li>still breaks law of demeter.</li>
+<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
+<li>but this breaks Tell Don&#8217;t Ask
+
+<ul>
+<li>TDA means asking an object about properties and deciding what to
+do instead of telling it to do things and giving it enough info
+to do so.</li>
+</ul>
+</li>
+<li>TDA vs Single Responsibility Principle (SRP)?
+
+<ul>
+<li>If you follow TDA, you end up putting responsibility back into
+User class, but now User class has much responsibility</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Pick one: SRP often makes sense</li>
+</ul>
+
+
+<h2>DAS: Wrapping Third Party APIs</h2>
+
+<ul>
+<li>e.g. accepting Braintree payment from secure redirect back to your
+site with data in QPs</li>
+<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
+<li>Goal: move traversal of these objs to a different class.</li>
+<li>Spec
+
+<ul>
+<li>Had to stub deeply nested crap</li>
+</ul>
+</li>
+<li>TDD
+
+<ul>
+<li>it &#8220;konws the newest credit card&#8221;</li>
+<li>qp is a stub</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Pend-out an Rspec test</h2>
+
+<pre><code>it "does something" {}
+</code></pre>
+
+<p>can be made pending via <code>xit</code></p>
+
+<pre><code>xit "does something" {}
+</code></pre>
+
+<h2>Cisgender</h2>
+
+<p>http://en.wikipedia.org/wiki/Cisgender</p>
+
+<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
+related types of gender identity where an individual&#8217;s experience of
+their own gender matches the sex they were assigned at birth.</p></blockquote>
+
+<h2>Hypermedia API</h2>
+
+<p>Hyper = above</p>
+
+<p>Media = well, media, but not just hypertext because more things than
+just text can be conveyed</p>
+
+<p>Examples:</p>
+
+<ul>
+<li>http://jsonapi.org/</li>
+<li>HAL - Hypermedia Application Language</li>
+</ul>
+
+
+<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
+
+<ul>
+<li>HAL embeds child docs recursively; JSON API flattens the entire graph
+at the top level.</li>
+<li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
+<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
+https://github.com/json-api/json-api/pull/123/files#r12265234</li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-04T10:11:00-04:00" pubdate data-updated="true">May 4<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/das/'>DAS</a>
+
+</div>
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/05/04/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/05/04/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

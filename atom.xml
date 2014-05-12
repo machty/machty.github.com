@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-05-01T22:45:52-04:00</updated>
+  <updated>2014-05-12T14:56:35-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,293 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/12/daily-journal/"/>
+    <updated>2014-05-12T13:14:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/12/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Ruby <code>Module#===</code></h2>
+
+<p>Ran into <a href="https://github.com/hassox/warden/blob/master/lib/warden.rb#L33-L34">this piece of
+code</a>
+from the Warden repo:</p>
+
+<pre><code>def self.test_mode!
+  unless Warden::Test::WardenHelpers === Warden
+    Warden.extend Warden::Test::WardenHelpers
+    Warden::Manager.on_request do |proxy|
+      unless proxy.asset_request?
+        while blk = Warden._on_next_request.shift
+          blk.call(proxy)
+        end
+      end
+    end
+  end
+  true
+end
+</code></pre>
+
+<p>I hadn&#8217;t seen this usage of <code>===</code> before; I&#8217;m mostly familiar with it as
+an unidiomatic alias of <code>is_a?</code>, e.g.:</p>
+
+<pre><code>Array === []    #=&gt; true
+[].is_a?(Array) #=&gt; true
+</code></pre>
+
+<p><code>#===</code> is the Case Equality operator or
+<a href="http://stackoverflow.com/questions/4527220/3-equals-or-case-equality-operator"><em>subsumption</em> operator</a>;
+it is overridden by subclasses to provide context-specific / semantic
+meaning, for example:</p>
+
+<ul>
+<li><code>Regexp === /asd/</code> #=> true</li>
+<li><code>Fixnum === 5</code> #=> true</li>
+<li><code>Object === {}</code> #=> true</li>
+</ul>
+
+
+<p>Important things to keep in mind about <code>===</code>:</p>
+
+<ol>
+<li>It is not commutative (A===B does not imply B===A)</li>
+<li>It is a method of the object on the left side of an expression,
+e.g. <code>A===B</code> is shorthand for <code>A.===B</code> or <code>A.send(:===, //)</code></li>
+<li>It has nothing to do with equality; beware, JavaScripters.</li>
+</ol>
+
+
+<p>ANYWAY: back to the Warden example: in this case, the <code>Module</code> class has
+an instance method <code>===</code> that returns if the object on the right side
+has extended the methods on the Module that <code>===</code> is called on, so:</p>
+
+<pre><code>module M; end
+class Foo; end
+
+f = Foo.new
+M === f #=&gt; false
+
+# reopen
+class Foo
+  include M
+end
+
+M === f #=&gt; true
+</code></pre>
+
+<p>So we turned <code>===</code> from false to true by including <code>M</code> on class <code>Foo</code>.
+The Warden example is similar, except that the way the module&#8217;s methods
+were mixed in was via <code>extend</code> vs <code>include</code>. <code>extend</code> is a somewhat more
+direct form of <code>include</code> in that it can be called on instances to put
+methods directly on that instance, rather than having to open an
+instance&#8217;s class and add an <code>include</code> statement, which adds all of those
+methods to subclasses.</p>
+
+<p>So when we check</p>
+
+<pre><code>  Warden::Test::WardenHelpers === Warden
+</code></pre>
+
+<p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
+&#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/04/daily-journal/"/>
+    <updated>2014-05-04T10:11:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/04/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Vim surround</h2>
+
+<p>https://github.com/tpope/vim-surround</p>
+
+<ul>
+<li>ysiw] : surround a word in ]</li>
+<li>ysiW] : surround a chunk word in ]</li>
+<li>cs&#8221;&#8217; : change surrounding &#8221; to &#8217;</li>
+<li>ds&#8221; : delete surrounding &#8221;</li>
+<li>yss( : wrap line in parens</li>
+</ul>
+
+
+<h2>DAS: Conflicting Principles</h2>
+
+<ul>
+<li>User/profile/account
+
+<ul>
+<li>All this other stuff that relates to that single giant model</li>
+</ul>
+</li>
+<li>User
+
+<ul>
+<li><code>disable!</code></li>
+<li><code>send_disable_notication</code></li>
+</ul>
+</li>
+<li>Law of demeter
+
+<ul>
+<li>Motivation for decomposition</li>
+<li>move controller logic to model <code>enforce_good_standing!</code></li>
+</ul>
+</li>
+<li>User model will get huge; lots of complexity there.</li>
+<li>Pull out service classes, e.g. GoodStandingPolicy, or
+AccountStandingPolicy
+
+<ul>
+<li><code>#initialize(user)</code></li>
+<li><code>enforce!</code>
+
+<ul>
+<li>still breaks law of demeter.</li>
+<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
+<li>but this breaks Tell Don&#8217;t Ask
+
+<ul>
+<li>TDA means asking an object about properties and deciding what to
+do instead of telling it to do things and giving it enough info
+to do so.</li>
+</ul>
+</li>
+<li>TDA vs Single Responsibility Principle (SRP)?
+
+<ul>
+<li>If you follow TDA, you end up putting responsibility back into
+User class, but now User class has much responsibility</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Pick one: SRP often makes sense</li>
+</ul>
+
+
+<h2>DAS: Wrapping Third Party APIs</h2>
+
+<ul>
+<li>e.g. accepting Braintree payment from secure redirect back to your
+site with data in QPs</li>
+<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
+<li>Goal: move traversal of these objs to a different class.</li>
+<li>Spec
+
+<ul>
+<li>Had to stub deeply nested crap</li>
+</ul>
+</li>
+<li>TDD
+
+<ul>
+<li>it &#8220;konws the newest credit card&#8221;</li>
+<li>qp is a stub</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Pend-out an Rspec test</h2>
+
+<pre><code>it "does something" {}
+</code></pre>
+
+<p>can be made pending via <code>xit</code></p>
+
+<pre><code>xit "does something" {}
+</code></pre>
+
+<h2>Cisgender</h2>
+
+<p>http://en.wikipedia.org/wiki/Cisgender</p>
+
+<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
+related types of gender identity where an individual&#8217;s experience of
+their own gender matches the sex they were assigned at birth.</p></blockquote>
+
+<h2>Hypermedia API</h2>
+
+<p>Hyper = above</p>
+
+<p>Media = well, media, but not just hypertext because more things than
+just text can be conveyed</p>
+
+<p>Examples:</p>
+
+<ul>
+<li>http://jsonapi.org/</li>
+<li>HAL - Hypermedia Application Language</li>
+</ul>
+
+
+<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
+
+<ul>
+<li>HAL embeds child docs recursively; JSON API flattens the entire graph
+at the top level.</li>
+<li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
+<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
+https://github.com/json-api/json-api/pull/123/files#r12265234</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal 2]]></title>
+    <link href="http://machty.github.com/blog/2014/05/01/daily-journal-2/"/>
+    <updated>2014-05-01T22:46:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/01/daily-journal-2</id>
+    <content type="html"><![CDATA[<h2>Cryptoballs</h2>
+
+<pre><code>openssl speed rsa
+openssl speed aes
+</code></pre>
+
+<h3>RSA</h3>
+
+<p>Encryption key is public. Decryption key is secret.
+Used for generating symmetric key in TLS.</p>
+
+<p>AES is way faster.</p>
+
+<h2>Active-model serializers</h2>
+
+<p>How do tell an attribute to use a serializer?</p>
+
+<p>Trick question: you don&#8217;t; rather, if it has a serializer, it&#8217;s probably
+an association, not an attribute, so you probably want something like</p>
+
+<pre><code>has_many :action_items, serializer: ActionItemSerializer
+has_one :originator, serializer: OriginatorSerializer
+</code></pre>
+
+<p>and in both cases you can probably remove <code>serializer</code> once you de-stub
+<code>action_items</code> and <code>originator</code>.</p>
+
+<h2>QUnit filter</h2>
+
+<p>In Mocha JS test suites if you click a suite header, it&#8217;ll run tests
+only from that module or children by way of a <code>grep=blahlbahbl</code> query
+param. I&#8217;m using <a href="https://github.com/square/qunit-bdd">qunit-bdd</a>, which
+is a layer over QUnit, which generates a bunch of concatenated module
+names based on the nested <code>describe</code>s and <code>context</code>s, which doesn&#8217;t let
+you easily run all the nested child modules of a top-level describe if
+you&#8217;re used to using the Module dropdown on the upper right.</p>
+
+<p>If you want to run a family of describe modules, you can manually
+provide a <code>filter</code> query param, e.g.:</p>
+
+<pre><code>http://localhost:4200/tests?filter=LiveQuery
+</code></pre>
+
+<p>This runs all modules w &#8220;LiveQuery&#8221; is part of their name.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -1573,611 +1860,6 @@ likely no one will notice the downgrade in strict continuity, but they
 will notice if a bunch of frequent, redundant, complicated
 redraws/relayouts/repaints fire off for every little insignificant
 event.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Transferring S3-Enabled Heroku Apps Between Dev/Staging/Prod]]></title>
-    <link href="http://machty.github.com/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/"/>
-    <updated>2012-11-05T00:01:00-05:00</updated>
-    <id>http://machty.github.com/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod</id>
-    <content type="html"><![CDATA[<p>You know, I could just write this in my Evernote and reference as
-needed, but I&#8217;m writing it here, because I love you. But I&#8217;m in a hurry.</p>
-
-<p>Here are the steps I take for transferring apps from my development
-server to Heroku staging/production servers, which can get somewhat
-complicated if Amazon S3 is involved.</p>
-
-<!--more-->
-
-
-<h3>Database</h3>
-
-<p>You&#8217;ve already pushed your code to Heroku. That&#8217;s the easy part. Now for the
-database:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>rvm use 1.9.2
-</span><span class='line'>heroku db:push</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>heroku db:push</code> uses <code>taps</code> to serialize and transmit all of your dev
-database to the Heroku database. We rvm to Ruby 1.9.2 because Ruby 1.9.3
-has mad issues serializing Datetimes. I think it was datetimes.
-Something involving Psych. Anyway, just use 1.9.2.</p>
-
-<h3>S3</h3>
-
-<p>Let&#8217;s assume you&#8217;ve started building the app/site using your own S3
-bucket because you didn&#8217;t want to wait for your client to get their
-Amazon AWS account up and running. Now you need to take all the stuff
-uploaded to your S3 bucket and move it to your client&#8217;s bucket. This is
-a scoatch tricky, but we shall prevail.</p>
-
-<p>First, log into your client&#8217;s AWS account and go to S3. Create the
-bucket you&#8217;ll be using, then open the bucket&#8217;s properties, and click
-<code>Add Bucket Policy</code>. Then paste in this, replacing the ALL CAPS
-BUCKETNAME with the production bucket name you&#8217;ll be using:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>     "Version": "2008-10-17",
-</span><span class='line'>     "Statement": [
-</span><span class='line'>          {
-</span><span class='line'>               "Sid": "AllowPublicRead",
-</span><span class='line'>               "Effect": "Allow",
-</span><span class='line'>               "Principal": {
-</span><span class='line'>                    "AWS": "*"
-</span><span class='line'>               },
-</span><span class='line'>               "Action": "s3:GetObject",
-</span><span class='line'>               "Resource": "arn:aws:s3:::BUCKETNAME/*"
-</span><span class='line'>          }
-</span><span class='line'>     ]
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The purpose of this is to prepare for the next step, in which we&#8217;ll be
-pasting a bunch of files into this bucket, and we want them to go in
-with public-read access rather than the default of, well, zero access
-for anybody, ever, including the admin. If you think I&#8217;m going about
-this wrong way, Disqus me them comments, but I don&#8217;t think there&#8217;s an
-easier way.</p>
-
-<p>Second, let&#8217;s copy your dev buckets to disk. Download/open
-<a href="http://www.3hubapp.com/">3hub</a>, and put in your
-dev S3 account credentials, log in, select your dev bucket, and drag and
-drop your root-level files to your desktop. Now take a 3 minute nap.</p>
-
-<p>Wake up, grab a brush and put a little make up, then disconnect 3hub
-from your dev account and log into your client&#8217;s S3 account, and drag
-those downloaded files from your desktop to your client&#8217;s bucket. 5
-minute nap. You&#8217;ve earned it. Now all your S3 files have been
-transferred and have proper access permissions, thanks to your magic
-bucket policy incantation.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SpreeCommerce meets Ember.js]]></title>
-    <link href="http://machty.github.com/blog/2012/11/02/spreecommerce-meets-ember-dot-js/"/>
-    <updated>2012-11-02T20:44:00-04:00</updated>
-    <id>http://machty.github.com/blog/2012/11/02/spreecommerce-meets-ember-dot-js</id>
-    <content type="html"><![CDATA[<p>I&#8217;m working on a record label website in Ember.js with all sorts of
-lovely dynamic goodies, infinite scrolling feeds, embedded music player,
-blah blah blah, and most challengingly a full-on store where user&#8217;s can
-browse albums, shirts, whatevers, add them to their cart, and eventually
-check out. This post covers a few lessons learned in getting a dynamic
-JS website to play nicely with Spree, an open source e-commerce
-framework.</p>
-
-<p>Things you might learn from this article:
-* Digging into gem source code
-* Passing Javascript data in and out of iframes
-* Converting non-prototype-extended data into prototype-extended data</p>
-
-<!--more-->
-
-
-<h2>Spree</h2>
-
-<p><a href="http://spreecommerce.com/">Spree</a> is an extensible e-commerce framework written
-in Ruby-on-Rails that&#8217;s been around for quite a number of years. Spree
-follows the same pattern of CMS+front-end RoR plugins like
-<a href="http://www.refinerycms.com">RefineryCMS</a>, where, in order to achieve
-the desired customized design, the developer is encouraged to bend as
-many rules as possible given the CMS design, and then when it comes to
-breaking the rules, you&#8217;re provided some mechanism of overriding/embellishing
-the default source code, which usually takes one of two forms:</p>
-
-<ol>
-<li>If you&#8217;re overriding something like a view template, figure out the
-path of that view by digging through the Spree/Refinery source code
-and then duplicate that path in your <code>/app</code> directory, and if you&#8217;ve
-named the override correctly, the plugin will use your view rather
-than the stock default.</li>
-<li>If you&#8217;re overriding something like a model/controller, you use a
-decorator, wherein you run a <code>class_eval</code> on a the model/controller,
-say <code>Refinery::PagesController</code> in
-<code>app/decorators/controllers/refinery/pages_controller_decorator.rb</code>
-and define any of the overrides / extra methods you need.</li>
-</ol>
-
-
-<p>Spree utilizes both of these methods, as well as a third method
-seemingly absent from Refinery, which uses the
-<a href="https://github.com/railsdog/deface">Deface</a> gem to dig into raw
-.erb files and replace certain chunks of it with your desired overrides.
-It&#8217;s basically a mechanism that allows you to override view&#8217;s without
-totally overwriting an .erb file, and, while messy in its own way,
-allows your overrides to play nicely with other plugins&#8217; overrides if
-you&#8217;re careful enough to take a more conservative approach to the kinds
-of overrides you make (e.g. add this partial after this elements rather
-than then completely replace this giant ass element that all these other
-plugins rely on as an anchor).</p>
-
-<p>That&#8217;s enough of an overview. The rest of this post is how I managed to
-use chunks of Spree to build my own Ajax-y store for a record label
-website.</p>
-
-<h2>Maintaining am AJAX Shopping Cart</h2>
-
-<p>By default, vanilla Spree doesn&#8217;t provide you any AJAX functionality;
-every action, from viewing a product to adding it to your cart causes a
-full page refresh, so getting it to work in an AJAX fashion takes a bit
-of finesse. Step 1 is finding the appropriate controller actions that
-you need to override. The first thing I wanted to override was adding a
-product to a cart. The easiest way to figure out how to do this was to
-navigate to my local server hosting a sample Spree website and add a
-product to my shopping cart while observing <code>log/development.log</code> in my
-Rails app folder:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ : tail -F log/development.log
-</span><span class='line'>
-</span><span class='line'>// Add an item to the shopping cart from the browser
-</span><span class='line'>
-</span><span class='line'>Started POST "/store/orders/populate" for 127.0.0.1 at 2012-11-02 21:48:41 -0400
-</span><span class='line'>Processing by Spree::OrdersController#populate as HTML
-</span><span class='line'>  Parameters: {"utf8"=>"✓", "authenticity_token"=>"6kdui/lTyLCBTSZTsEQAR1UgUxyqaY8mhBaUouwjhXA=", "products"=>{"12"=>"45"}, "quantity"=>"1"}
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Ah hah, the controller that handles adding items to the shopping cart is
-<code>Spree::OrdersController</code> and the action is <code>populate</code>. Now all I have
-to do is figure out a way to modify that controller action to accept
-AJAX requests and spit out a JSON response of the updated state of the
-cart so that I can display the contents of the cart from my Ember site.</p>
-
-<p>This means you have to start digging into the Spree source code.
-Whenever I need to dig into the source code of a plugin I&#8217;m using (which
-is pretty much all the damn time) I either go to the plugin&#8217;s github
-page and search through the directory (or press <code>t</code> on the homepage and
-fuzzy search) or, most often, I just <code>git clone</code> the repository so I can
-have the whole project locally to inspect and prod. I find a file called
-<code>orders_controller.rb</code>, and here&#8217;s an excerpt of its <code>def populate</code>
-block:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>      <span class="n">fire_event</span><span class="p">(</span><span class="s1">&#39;spree.cart.add&#39;</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">fire_event</span><span class="p">(</span><span class="s1">&#39;spree.order.contents_changed&#39;</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">respond_with</span><span class="p">(</span><span class="vi">@order</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span> <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">cart_path</span> <span class="p">}</span> <span class="p">}</span>
-</span><span class='line'>    <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Balls, they&#8217;ve got it hard-wired in there to respond only to <code>html</code>
-requests. How so? Because in the <code>respond_with</code> block, they only
-specify what should happen when the format of the incoming request is
-html, rather than, say, json or xml or any of the other kinds of
-requests that can come in. This is problematic for us since we want to
-use this function so that it can handle JSON requests from our
-JavaScript app. I don&#8217;t know how to do this other than rewriting the
-entire function to eventually respond with JSON. Perhaps Railscasting
-Ryna Bates or Yehuda Katz could think of a way to do this, but have no
-idea how something like that would be accomplished, so let&#8217;s just go the
-obvious route and override that entire function so that it&#8217;ll respond to
-our JS app&#8217;s JSON AJAX requests.</p>
-
-<h3>Using Decorators to Override Spree Controllers</h3>
-
-<p>We need to override the <code>populate</code> function of the spree controller to
-return JSON. To do this, you have to use a &#8216;decorator&#8217;. The term
-&#8216;decorator&#8217; is used in a lot of different contexts in the programming
-world, but most generally, it implies that you&#8217;ll be decorating an
-underlying class with more methods (or, in this case, overriding a
-method entirely). So let&#8217;s create our decorator for the
-<code>OrdersController</code> in <code>app/controllers/orders_controller_decorator.rb</code>.
-In this file, we&#8217;ll use <code>class_eval</code> to reopen the class and override
-the <code>populate</code> method so that it returns the JSON we need. And exactly
-what JSON do we need? Well, we do want our our Ember app to properly
-display updates to the shopping cart as they come in, and what better
-way to get an updated state of the shopping cart other than right when
-we add items to it?</p>
-
-<p>For this reason we <code>render json: current_order</code> after we&#8217;ve added an
-item to the cart. Our <code>orders_controller_decorator.rb</code> looks something
-like this:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Spree</span><span class="o">::</span><span class="no">OrdersController</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">populate</span>
-</span><span class='line'>    <span class="vi">@order</span> <span class="o">=</span> <span class="n">current_order</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">#...</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">fire_event</span><span class="p">(</span><span class="s1">&#39;spree.cart.add&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">fire_event</span><span class="p">(</span><span class="s1">&#39;spree.order.contents_changed&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">respond_with</span><span class="p">(</span><span class="vi">@order</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
-</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="n">cart_path</span> <span class="p">}</span>
-</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">json</span> <span class="p">{</span> <span class="n">render</span> <span class="n">json</span><span class="p">:</span> <span class="n">current_order</span> <span class="p">}</span> <span class="c1"># &lt;----</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Storing Cart Updates in Ember.js</h3>
-
-<p>This part&#8217;s pretty straight-forward. We use a controller to maintain the
-state of the cart. It&#8217;s initially populated on page load by the current
-value of the cart (an easy exercise to figure out once you understand
-the general techniques applied in this article).</p>
-
-<p>The important thing to pay attention to here is that in the <code>success</code>
-handler in the Ajax call, we take the <code>current_order</code> JSON returned from
-our modified <code>populate</code> action and save it to the controller, so that
-anything that&#8217;s bound to the controller&#8217;s cart properties get
-automatically updated.</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.CartController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
-</span><span class='line'>  <span class="nv">content: </span><span class="nb">window</span><span class="p">.</span><span class="nx">cart</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">saving: </span><span class="kc">false</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nv">addItem: </span><span class="nf">(variantId, quantity, callback) -&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nv">variants = </span><span class="p">{}</span>
-</span><span class='line'>    <span class="nx">variants</span><span class="p">[</span><span class="nx">variantId</span><span class="p">]</span> <span class="o">=</span> <span class="nx">quantity</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">@set</span> <span class="s">&#39;saving&#39;</span><span class="p">,</span> <span class="kc">true</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span> <span class="s">&#39;/add_item.json&#39;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nv">type: </span><span class="s">&#39;POST&#39;</span>
-</span><span class='line'>      <span class="nv">data:</span>
-</span><span class='line'>        <span class="nv">variants: </span><span class="nx">variants</span>
-</span><span class='line'>      <span class="nv">success: </span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span>
-</span><span class='line'>        <span class="nx">@set</span> <span class="s">&#39;content&#39;</span><span class="p">,</span> <span class="nx">data</span>
-</span><span class='line'>        <span class="nx">callback</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="k">if</span> <span class="nx">callback</span>
-</span><span class='line'>      <span class="nv">error: </span><span class="nf">(data) -&gt;</span>
-</span><span class='line'>        <span class="nx">alert</span> <span class="s">&quot;Error adding item to Shopping Cart. Please try again.&quot;</span>
-</span><span class='line'>        <span class="nx">callback</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span> <span class="k">if</span> <span class="nx">callback</span>
-</span><span class='line'>      <span class="nv">complete: </span><span class="o">=&gt;</span>
-</span><span class='line'>        <span class="nx">@set</span> <span class="s">&#39;saving&#39;</span><span class="p">,</span> <span class="kc">false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Checkout</h3>
-
-<p>Ok, adding items to the cart is easy enough (note that I&#8217;m skipping over
-the easier parts, like querying the server for products and displaying
-them with Handlebars templates), but what about the checkout phase?</p>
-
-<p>Well, I don&#8217;t have the gumption to re-tool Spree to work in an Ember.js
-setting. Maybe someday I&#8217;ll write the gem for that, but not today.
-Today, we&#8217;ll just use an iFrame to display the normal checkout page
-that&#8217;s included with Spree. To do this, you&#8217;ll create a new route in
-your router called <code>checkout</code> which connects outlets to a view that has
-an iFrame in it pointing to <code>/store/checkout/address</code> (address just
-happens to the first page of checkout, i.e. billing and shipping
-address). The rest mostly just works out of the box, but there is one
-last thing we need to get working, which is, how do we notify the Ember
-portion of our app that the shopping cart has been cleared after the
-user has made a purchase?</p>
-
-<p>We&#8217;d like our Ember.js shopping cart to immediately empty once the
-user&#8217;s made a successful purchase. We could just randomly poll the
-server to sync the state of the cart, but that&#8217;s a little messy and
-resource intensive. Arguably a better way to go would be to have the
-iframe pass its parent Ember.js app information about the state of the
-cart at each page load, so that for every page of the checkout, you
-re-flash the shopping cart, and when you&#8217;ve successfully checked out,
-you flash the shopping cart with an empty cart, and that&#8217;s how your
-Ember.js app knows the shopping cart&#8217;s been paid for.</p>
-
-<h3>Deface</h3>
-
-<p>To do this, we&#8217;ll add a Deface override to inject some Javascript at the
-top of every Spree page. This Javascript will attempt to grab the
-<code>current_order</code>, if it exists, serialize it, and pass it to the parent
-frame, if it exists. The Deface override looks like this:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Deface</span><span class="o">::</span><span class="no">Override</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:virtual_path</span> <span class="o">=&gt;</span> <span class="s2">&quot;spree/layouts/spree_application&quot;</span><span class="p">,</span>
-</span><span class='line'>                     <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;cart_updater&quot;</span><span class="p">,</span>
-</span><span class='line'>                     <span class="ss">:insert_bottom</span> <span class="o">=&gt;</span> <span class="s2">&quot;[data-hook=&#39;inside_head&#39;]&quot;</span><span class="p">,</span>
-</span><span class='line'>                     <span class="ss">:partial</span> <span class="o">=&gt;</span> <span class="s2">&quot;store_overrides/cart_updater&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This can reside in <code>app/overrides/overrides.rb</code>. Basically, this says
-that we&#8217;re overriding the Spree template in the Spree source code at
-<code>spree/layouts/spree_application</code> by inserting the <code>cart_updater</code>
-partial at the bottom of the <code>inside_head</code> data hook in the
-<code>spree_application.erb.html</code> template.</p>
-
-<p>Now we&#8217;ll need to
-create the <code>cart_updater</code> that&#8217;s referenced. We&#8217;ll do that by creating a
-file called <code>app/store_overrides/_cart_updater.html.erb</code>, which looks
-something like this:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">parent</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">shopCallback</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">cart</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">&lt;%</span> <span class="k">if</span> <span class="nx">current_order</span> <span class="o">%&gt;</span>
-</span><span class='line'>    <span class="nx">cart</span> <span class="o">=</span> <span class="o">&lt;%=</span> <span class="nx">OrderSerializer</span><span class="p">.</span><span class="k">new</span><span class="p">(</span><span class="nx">current_order</span><span class="p">).</span><span class="nx">to_json</span><span class="p">.</span><span class="nx">html_safe</span> <span class="o">%&gt;</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">&lt;%</span> <span class="k">else</span> <span class="o">%&gt;</span>
-</span><span class='line'>    <span class="nx">cart</span> <span class="o">=</span> <span class="o">&lt;%=</span> <span class="nx">nil</span><span class="p">.</span><span class="nx">to_json</span><span class="p">.</span><span class="nx">html_safe</span> <span class="o">%&gt;</span><span class="p">;</span>
-</span><span class='line'>  <span class="o">&lt;%</span> <span class="nx">end</span> <span class="o">%&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">shopCallback</span><span class="p">(</span><span class="nx">cart</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This chunk of code passes a serialized order to the parent page, if it
-exists. Now all we need to do is add the <code>shopCallback</code> function.</p>
-
-<h3>Prototype Extension Gotcha</h3>
-
-<p>Jumping a bit ahead, here&#8217;s the code for the <code>window.shopCallback</code>
-function.</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">shopCallback = </span><span class="nf">(cartJson) -&gt;</span>
-</span><span class='line'>  <span class="c1"># Have to $.extend to reconstruct object in Emberized environment</span>
-</span><span class='line'>  <span class="c1"># so that we get prototype extensions on the arrays.</span>
-</span><span class='line'>  <span class="nx">Chimera</span><span class="p">.</span><span class="nx">router</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;cartController.content&#39;</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="p">{},</span> <span class="nx">cartJson</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Note that we don&#8217;t just set <code>content</code> to <code>cartJson</code>, but rather to
-<code>$.extend(true, {}, cartJson))</code>. Why is this? Well, prepare yourself for
-a bizarre corner-case that you&#8217;ll occasionally have to be on your guard
-against. The problem stems from the fact that <code>cartJson</code> is created
-within the iframe context, which knows nothing about Ember, and then
-<code>cartJson</code> is passed to the parent Emver.js page. One of the things the
-Ember.js library adds by default are a bunch of prototype overrides for
-the Array, String, and probably Object types. These prototype extensions
-allow properties of these objects to be observable, among other many things,
-but the <code>cartJson</code> object coming from the iframe doesn&#8217;t have that
-prototype extension, since it&#8217;s prototypes come from the unembellished
-iframe context. If you just set <code>cartController.content</code> to <code>cartJson</code>,
-you&#8217;ll very quickly run into bizarre errors about certain
-properties/functions not being defined on <code>cartJson</code>.</p>
-
-<p>The solution to this is to recreate the <code>cartJson</code> in the
-prototype-extended Ember.js context. A neat technique for doing this,
-which I learned from <code>gavacho</code> from the emberjs IRC, is to use the
-jQuery extend function, which can be used in a lot of different
-instances, but in this case, we&#8217;re using it to make a deep copy of the
-<code>cartJson</code> object. This recreates the object so that it&#8217;ll have the
-prototype extensions that Ember expects.</p>
-
-<p>I think that does it for this article. Let me know if you have any
-questions, and always always check out the Ember IRC and StackOverflow
-for some smart dude(tte)s ready to helpy you at your every turn.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Scraping OpenGraph for Video Cover Images]]></title>
-    <link href="http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images/"/>
-    <updated>2012-10-23T21:35:00-04:00</updated>
-    <id>http://machty.github.com/blog/2012/10/23/scraping-opengraph-for-video-cover-images</id>
-    <content type="html"><![CDATA[<p>I&#8217;m working on a site for a record company, and the folk in charge of
-the content usually just host their videos on YouTube, Vimeo, or some
-hosting service, so I needed to come up with a simple way for them to
-enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
-could be added to a gallery.</p>
-
-<p>This site also does a lot of magical things with images that
-require us to know ahead of time the dimensions of the images we&#8217;re working with,
-so it was also important for us to be able to store the thumbnail for the video internally
-(and also allow this automatically selected thumbnail to be overridden
-with an image of their choice).</p>
-
-<!-- more -->
-
-
-<h2>OpenGraph for Thumbnail Selection</h2>
-
-<p>I&#8217;d originally toyed with the idea of using a suite of Regex&#8217;s to reason
-the video ID from the YouTube/Vimeo/Whatever link that the user provided
-and then use that ID to query a thumbnail from that particular service.
-Problems with that idea:</p>
-
-<ul>
-<li>Annoying to have to research all the different URL formats to support
-in a giant Regex whack-a-mole</li>
-<li>What if the service adds a new format of URL that my regex suite
-doesn&#8217;t catch?</li>
-<li>What if they want to use a new service?</li>
-<li>YouTube has <a href="http://www.tonylea.com/2011/how-to-get-youtube-thumbnail-images/">publicly accessible</a>
-thumbnails if you&#8217;ve parsed the ID, but I think for Vimeo (and other
-services), you need to jump through the hoops of integrating their
-API.</li>
-</ul>
-
-
-<p>Turns out there&#8217;s a much lazier and more flexible alternative to a Regex
-suite, and that is to information freely available on Facebook&#8217;s
-<a href="http://developers.facebook.com/docs/opengraph/">Open Graph</a>. In short,
-Open Graph is a protocol for tagging content (both concrete things like
-places/restaurants/etc and virtual content like videos/photos/etc) by
-properly setting meta tags on in the <code>&lt;head&gt;</code> tag on the web pages that
-represent that content. If a web page adheres to the OG protocol, you
-can just scrape the page&#8217;s meta tags for things like a title,
-description, and, you guessed it, a representative image for that
-content.</p>
-
-<p>So, you can just navigate to <a href="http://www.youtube.com/watch?v=6GggY4TEYbk">a random video&#8217;s URL</a>,
-open the source, and find the following nested in the <code>&lt;head&gt;</code> tag:</p>
-
-<p><code>&lt;meta property="og:image" content="http://i3.ytimg.com/vi/6GggY4TEYbk/mqdefault.jpg"&gt;</code></p>
-
-<p>which makes for a perfect cover image:</p>
-
-<p><img src="http://i3.ytimg.com/vi/6GggY4TEYbk/mqdefault.jpg" alt="OG Thumbnail" /></p>
-
-<p>This will work for any video hosting service that supports OG, which is
-probably all of them, since they&#8217;d be cutting themselves out of
-optimized Facebook sharing if they didn&#8217;t provide those tags. Also, the
-image provided is a lot more likely to be formatted for general use
-rather than, say, using the previously linked YouTube approach for
-determining a thumbnail URL, which might yield a thumbnail that&#8217;s
-cropped or black-bar&#8217;d for internal YouTube use.</p>
-
-<h2>Using Nokogiri to Scrape for OG Tags</h2>
-
-<p>I used the <a href="http://nokogiri.org/">Nokogiri</a> gem to scrape the
-user-provided video URL for the og:image tag value via the following
-code:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">before_validation</span> <span class="ss">:set_attachment</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">protected</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_attachment</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">if</span> <span class="n">attachment</span><span class="o">.</span><span class="n">present?</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Download and parse the video URL</span>
-</span><span class='line'>    <span class="n">doc</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">video_url</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Use CSS selection to query og:image url.</span>
-</span><span class='line'>    <span class="n">image_url</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_css</span><span class="p">(</span><span class="s1">&#39;meta[property=&quot;og:image&quot;]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:[]</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1"># Save the downloaded thumbnail image to paperclip attachment.</span>
-</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">attachment</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
-</span><span class='line'>  <span class="k">rescue</span>
-</span><span class='line'>    <span class="n">errors</span><span class="o">.</span><span class="n">add</span> <span class="ss">:attachment</span><span class="p">,</span> <span class="s2">&quot;couldn&#39;t be determined by the video URL you supplied&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This fails quietly if there are no og:image tags at the provided URL
-(which just means the user will have to uplaod their own thumbnail).</p>
-
-<h2>On the front-end</h2>
-
-<p>Once you&#8217;ve got the video cover image into your back-end, you can use
-any number of free or commercial plugins that handle the gallery
-presentation of images, videos, Flash, etc. I used
-<a href="http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/">prettyPhoto</a>
-since it was free and easy enough to hack.</p>
 ]]></content>
   </entry>
   
