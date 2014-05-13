@@ -7,7 +7,7 @@ categories:
 - DAS
 flashcards:
   - front: SRP
-    back: Single Responbility Principle: a class should do only one thing
+    back: "Single Responbility Principle: a class should do only one thing"
   - front: TDA
     back: Tell Don't Ask - prefer telling an object to do something vs asking it its properties and deciding for yourself
 ---
