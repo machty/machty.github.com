@@ -112,6 +112,134 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/13/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Sharing ignored blank password fields in ActiveAdmin</h2>
+
+<p>I use ActiveAdmin for some stuff, and often you want to update
+some resource while leaving its password the same, but if you have
+a password field on the form, the form will POST with empty password
+and empty confirmation you&#8217;ll get a validation error from an empty
+password. You can override this with a <code>controller</code> block in your
+ActiveAdmin resource config via:</p>
+
+<pre><code>controller do
+  def update
+    param_obj = params['admin_user']
+    if param_obj[:password].blank?
+      param_obj.delete("password")
+      param_obj.delete("password_confirmation")
+    end
+    super
+  end
+end
+</code></pre>
+
+<p>But if you have multiple Devise-esque resources with passwords, it&#8217;d be
+nice to share this with multiple resources. It&#8217;s a bit tricky to solve
+this with idiomatic Ruby since you&#8217;re already in ActiveAdmin&#8217;s DSL land,
+but the following works:</p>
+
+<p><code>/lib/admin/ignore_blank_password.rb</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Admin</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">IgnoreBlankPassword</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ignore</span><span class="p">(</span><span class="n">dsl</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">dsl</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">controller</span> <span class="k">do</span>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>            <span class="n">param_key</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">model_name</span><span class="o">.</span><span class="n">param_key</span><span class="o">.</span><span class="n">to_sym</span>
+</span><span class='line'>            <span class="n">param_obj</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="n">param_key</span><span class="o">]</span>
+</span><span class='line'>            <span class="k">if</span> <span class="n">param_obj</span><span class="o">[</span><span class="ss">:password</span><span class="o">].</span><span class="n">blank?</span>
+</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password_confirmation&quot;</span><span class="p">)</span>
+</span><span class='line'>            <span class="k">end</span>
+</span><span class='line'>            <span class="k">super</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>/app/admin/admin_user.rb</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;admin/ignore_blank_password&#39;</span>
+</span><span class='line'><span class="no">ActiveAdmin</span><span class="o">.</span><span class="n">register</span> <span class="no">AdminUser</span> <span class="k">do</span>
+</span><span class='line'>  <span class="no">Admin</span><span class="o">::</span><span class="no">IgnoreBlankPassword</span><span class="o">.</span><span class="n">ignore</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-13T13:15:00-04:00" pubdate data-updated="true">May 13<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/active-admin/'>Active Admin</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/12/daily-journal/">
 		
 			Daily Journal</a>
@@ -1057,67 +1185,6 @@ requests from community flashcard-writers).</p>
 
 
 <time datetime="2014-04-12T20:38:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/12/ember-cli-and-npm-fights/">
-		
-			Ember CLI and NPM Fights</a>
-	</h2>
-	<div class="entry-content">
-		<p>Daily Journal: 4/12/14</p>
-
-<p>I&#8217;ve been giving <a href="https://github.com/stefanpenner/ember-cli">ember-cli</a>
-a whirl the last few days; it&#8217;s still extremely alpha but it&#8217;s extremely
-cool. It leverages <a href="https://github.com/joliss/broccoli">Broccoli</a> as a
-highly performant build tool, which minimifies the amount of rebuilding
-that must occur when a file changes in your project; in this way it&#8217;s a
-major improvement over previous iterations of Ember tooling, such as
-<a href="https://github.com/stefanpenner/ember-app-kit">Ember App Kit</a>, which
-falls prey to all of the gotchas involved with teaching Grunt, a
-JavaScript task runner, to act like a build tool, but because Grunt
-doesn&#8217;t have any built-in primitives for describing/tracking
-dependencies between files, or any other primitives convenient for use
-as a build tool without a plethora of plugins/addons, it&#8217;s very
-difficult to arrive at a Grunt setup that:</p>
-
-<ol>
-<li>Minimizes rebuilding in response to file changes</li>
-<li>Has configuration that is easy to reason about</li>
-<li>Locks your server during rebuilds (so that you&#8217;re not serving
-files from a half-compiled project folder)</li>
-</ol>
-
-
-<p>Anyway, onward to stuff I actually learned.</p>
-
-
-		
-		<a href="/blog/2014/04/12/ember-cli-and-npm-fights/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-12T18:30:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
 	
 
 
