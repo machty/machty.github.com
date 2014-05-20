@@ -1,0 +1,286 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>Uniform Type Identifiers</h2>
+
+<p>Turns out I never understood why Java and other languages/frameworks
+embraces this style of &#8220;com.domain.somepackage&#8221;. First off, this is
+called <a href="http://en.wikipedia.org/wiki/Reverse_domain_name_notation">Reverse domain name notation</a>.</p>
+
+<p>The purpose of this naming convention is two-fold:</p>
+
+<h4>Avoids naming collisions from two different vendors</h4>
+
+<p>By prefixing the package name with any sort of
+unique identifier, &#8220;SOME-PREFIX-A.packageName&#8221; won&#8217;t conflict with
+&#8220;SOME-PREFIX-B.packageName&#8221;.</p>
+
+<h4>Sensible sort order / grouping</h4>
+
+<p>You want packages from the same
+vendor to be grouped together in sensible way; if you use the <code>apple</code>
+and <code>carrots</code> packages from <code>food.somevendor.com</code> and the <code>bikes</code> package
+from <code>things.somevendor.com</code>, if you didn&#8217;t reverse the domain order, you might
+end up with the following folder structure</p>
+
+<pre><code>food/
+  somevendor/
+    com/
+      apple
+      carrots
+things/
+  somevendor/
+    com/
+      bikes
+</code></pre>
+
+<p>This is undesirable since you can&#8217;t tell from this structure that apple,
+bikes, and carrots all come from somevendor. Also, you there&#8217;s a
+needless repetition of the <code>somevendor/com</code> path in both directory
+trees. If the domain name were inverted, you&#8217;d end up with:</p>
+
+<pre><code>com/
+  somevendor/
+    food/
+      apple
+      carrots
+    things/
+      bikes
+</code></pre>
+
+<p>Less folders, less repetition, and more information is being conveyed.</p>
+
+<p>Another way to think about it is that domain names are somewhat
+backwards; we know that <code>.com</code>, <code>.net</code>, and
+<a href="http://sandwich.technology"><code>.technology</code></a> are top-level domains (TLD),
+but how/why is something top level appended at the end of a name? It
+definitely makes domain names with subdomains harder to sort in a
+meaningful way. I guess there&#8217;s probably a good reason for this, worth
+investigating in another journal entry.</p>
+
+<p>Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123</p>
+
+<h2>LevelDB</h2>
+
+<ul>
+<li>require(&#8216;leveldbdatabase&#8217;)</li>
+<li>key value pair</li>
+<li>scales, web scale</li>
+<li>PolicyMic is sponsoring folk to work on it</li>
+</ul>
+
+
+<h2>Vim: Visual Line</h2>
+
+<p>Shift-V in vim goes into visual line mode, which means you select entire
+lines for yanking/cutting, rather than having to precisely position your
+cursor at the beginning or end of a line so as to not accidentally yank/cut
+only part of a line.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T11:38:00-04:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/uniform-type-identifiers/'>Uniform Type Identifiers</a>
+
+</div>
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/05/15/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/05/15/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

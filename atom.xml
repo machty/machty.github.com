@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-05-13T13:21:33-04:00</updated>
+  <updated>2014-05-20T11:20:40-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/19/daily-journal/"/>
+    <updated>2014-05-19T07:38:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/19/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Active Model: GlobalID</h2>
+
+<p>https://github.com/rails/activemodel-globalid/</p>
+
+<p>GlobalID is a way of serializing a model into a string so that
+it can be looked up later; rather than serializing all of the
+object&#8217;s data into a string, you merely serialize just enough
+information so that you can look up the rest.</p>
+
+<p>I&#8217;m already doing something similar with model dep state in Ember,
+only extending it such that part of the &#8220;GlobalID&#8221;, which we&#8217;ll
+use internally for binding into a cache bucket, might be a prefixing
+controller name to uniquely identify a cache bucket to a specific
+controller, but in cases where you want to share information about
+a model with other controllers, you&#8217;d leave this prefix off.</p>
+
+<p>Anyway, nice to see other folk arriving at a similar thing, though
+I personally wouldn&#8217;t call this sort of thing &#8220;serializing&#8221; but rather
+&#8220;paramaterizing&#8221;, since you&#8217;re not actually storing all the data in
+string form but just enough to uniquely identify it so that some
+other operation can restore the object.</p>
+
+<h2>Strings have read-only props in &#8220;use strict&#8221; Safari</h2>
+
+<p>The following throws an exception only in Safari (not Chrome or FF):</p>
+
+<pre><code>(function(){"use strict"; ("a").b = 'writing to a string'; })();
+TypeError: Attempted to assign to readonly property.
+</code></pre>
+
+<p>But not if you leave off the &#8220;use strict&#8221;.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/15/daily-journal/"/>
+    <updated>2014-05-15T11:38:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/15/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Uniform Type Identifiers</h2>
+
+<p>Turns out I never understood why Java and other languages/frameworks
+embraces this style of &#8220;com.domain.somepackage&#8221;. First off, this is
+called <a href="http://en.wikipedia.org/wiki/Reverse_domain_name_notation">Reverse domain name notation</a>.</p>
+
+<p>The purpose of this naming convention is two-fold:</p>
+
+<h4>Avoids naming collisions from two different vendors</h4>
+
+<p>By prefixing the package name with any sort of
+unique identifier, &#8220;SOME-PREFIX-A.packageName&#8221; won&#8217;t conflict with
+&#8220;SOME-PREFIX-B.packageName&#8221;.</p>
+
+<h4>Sensible sort order / grouping</h4>
+
+<p>You want packages from the same
+vendor to be grouped together in sensible way; if you use the <code>apple</code>
+and <code>carrots</code> packages from <code>food.somevendor.com</code> and the <code>bikes</code> package
+from <code>things.somevendor.com</code>, if you didn&#8217;t reverse the domain order, you might
+end up with the following folder structure</p>
+
+<pre><code>food/
+  somevendor/
+    com/
+      apple
+      carrots
+things/
+  somevendor/
+    com/
+      bikes
+</code></pre>
+
+<p>This is undesirable since you can&#8217;t tell from this structure that apple,
+bikes, and carrots all come from somevendor. Also, you there&#8217;s a
+needless repetition of the <code>somevendor/com</code> path in both directory
+trees. If the domain name were inverted, you&#8217;d end up with:</p>
+
+<pre><code>com/
+  somevendor/
+    food/
+      apple
+      carrots
+    things/
+      bikes
+</code></pre>
+
+<p>Less folders, less repetition, and more information is being conveyed.</p>
+
+<p>Another way to think about it is that domain names are somewhat
+backwards; we know that <code>.com</code>, <code>.net</code>, and
+<a href="http://sandwich.technology"><code>.technology</code></a> are top-level domains (TLD),
+but how/why is something top level appended at the end of a name? It
+definitely makes domain names with subdomains harder to sort in a
+meaningful way. I guess there&#8217;s probably a good reason for this, worth
+investigating in another journal entry.</p>
+
+<p>Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123</p>
+
+<h2>LevelDB</h2>
+
+<ul>
+<li>require(&#8216;leveldbdatabase&#8217;)</li>
+<li>key value pair</li>
+<li>scales, web scale</li>
+<li>PolicyMic is sponsoring folk to work on it</li>
+</ul>
+
+
+<h2>Vim: Visual Line</h2>
+
+<p>Shift-V in vim goes into visual line mode, which means you select entire
+lines for yanking/cutting, rather than having to precisely position your
+cursor at the beginning or end of a line so as to not accidentally yank/cut
+only part of a line.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -1629,228 +1751,6 @@ want to fidget).</p>
 <p>Finally, I create a mapping so that when I&#8217;m in normal mode, I can just
 type <code>\o</code> and Vim will start filling out the command <code>BundleOpen</code> so
 that all I have to type is the gem name, which I can autocomplete.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Everything You Never Wanted to Know About the Ember Run Loop]]></title>
-    <link href="http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/"/>
-    <updated>2013-01-12T13:09:00-05:00</updated>
-    <id>http://machty.github.com/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop</id>
-    <content type="html"><![CDATA[<p>Just posted a
-<a href="http://stackoverflow.com/questions/13597869/what-is-ember-runloop-and-how-does-it-work/14296339#14296339">Giant Ass Response on Stack Overflow</a> about the Ember Run Loop. I&#8217;ve reproduced the text below. The question basically was: What is the Run Loop? How long does it take? When does it fire up? Can I expect views to be rendered to the DOM by the end of the run loop? etc. etc. Take a look, I think there&#8217;s some good stuff in there. Without further ado:</p>
-
-<p>First off, read these:</p>
-
-<p><a href="http://blog.sproutcore.com/the-run-loop-part-1/">Sproutcore Run Loop, part 1</a>
-<a href="http://blog.sproutcore.com/the-run-loop-part-2/">Sproutcore Run Loop, part 2</a></p>
-
-<p>They&#8217;re not 100% accurate to Ember, but the core concepts and motivation behind the RunLoop still generally apply to Ember; only some implementation details differ. But, on to your questions:</p>
-
-<!-- more -->
-
-
-<h3>When does Ember RunLoop start. Is it dependant on Router or Views or Controllers or something else?</h3>
-
-<p>All of the basic user events (e.g. keyboard events, mouse events, etc) will fire up the run loop. This guarantees that whatever changes made to bound properties by the captured (mouse/keyboard/timer/etc) event are fully propagated throughout Ember&#8217;s data-binding system before returning control back to the system. So, moving your mouse, pressing a key, clicking a button, etc., all launch the run loop.</p>
-
-<h3>how long does it approximately take (I know this is rather silly to asks and dependant on many things but I am looking for a general idea, or maybe if there is a minimum or maximum time a runloop may take)</h3>
-
-<p>At no point will the RunLoop ever keep track of how much time it&#8217;s taking to propagate all the changes through the system and then halt the RunLoop after reaching a maximum time limit; rather, the RunLoop will always run to completion, and won&#8217;t stop until all the expired timers have been called, bindings propagated, and perhaps <em>their</em> bindings propagated, and so on. Obviously, the more changes that need to be propagated from a single event, the longer the RunLoop will take to finish. Here&#8217;s a (pretty unfair) example of how the RunLoop can get bogged down with propagating changes compared to another framework (Backbone) that doesn&#8217;t have a run loop: http://jsfiddle.net/jashkenas/CGSd5/ . Moral of the story: the RunLoop&#8217;s really fast for most things you&#8217;d ever want to do in Ember, and it&#8217;s where much of Ember&#8217;s power lies, but if you find yourself wanting to animate 30 circles with Javascript at 60 frames per second, there might be better ways to go about it than relying on Ember&#8217;s RunLoop.</p>
-
-<h3>Is RunLoop being executed at all times, or is it just indicating a period of time from beginning to end of execution and may not run for some time.</h3>
-
-<p>It is not executed at all times &#8211; it has to return control back to the system at some point or else your app would hang &#8211; it&#8217;s different from, say, a run loop on a server that has a <code>while(true)</code> and goes on for infinity until the server gets a signal to shut down&#8230; the Ember RunLoop has no such <code>while(true)</code> but is only spun up in response to user/timer events.</p>
-
-<h3>If a view is created from within one RunLoop, is it guaranteed that all its content will make it into the DOM by the time the loop ends?</h3>
-
-<p>Let&#8217;s see if we can figure that out. One of the big changes from SC to Ember RunLoop is that, instead of looping back and forth between <code>invokeOnce</code> and <code>invokeLast</code> (which you see in the diagram in the first link about SproutCore&#8217;s RL), Ember provides you a list of &#8216;queues&#8217; that, in the course of a run loop, you can schedule actions (functions to be called during the run loop) to by specifying which queue the action belongs in (example from the source: <code>Ember.run.scheduleOnce('render', bindView, 'rerender');</code>).</p>
-
-<p>If you look at <code>run_loop.js</code> in the source code, you see <code>Ember.run.queues = ['sync', 'actions', 'destroy', 'timers'];</code>, yet if you open your JavaScript debugger in the browser in an Ember app and evaluate <code>Ember.run.queues</code>, you get a fuller list of queues: <code>["sync", "actions", "render", "afterRender", "destroy", "timers"]</code>. Ember keeps their codebase pretty modular, and they make it possible for your code, as well as its own code in a separate part of the library, to insert more queues. In this case, the Ember Views library inserts <code>render</code> and <code>afterRender</code> queues, specifically after the <code>actions</code> queue. I&#8217;ll get to why that might be in a second. First, the RunLoop algorithm:</p>
-
-<p>The RunLoop algorithm is pretty much the same as described in the SC run loop articles above:</p>
-
-<ul>
-<li>You run your code between RunLoop <code>.begin()</code> and <code>.end()</code>, only in Ember you&#8217;ll want to instead run your code within <code>Ember.run</code>, which will internally call <code>begin</code> and <code>end</code> for you. (Only internal run loop code in the Ember code base still uses <code>begin</code> and <code>end</code>, so you should just stick with <code>Ember.run</code>)</li>
-<li>After <code>end()</code> is called, the RunLoop then kicks into gear to propagate every single change made by the chunk of code passed to the <code>Ember.run</code> function. This includes propagating the values of bound properties, rendering view changes to the DOM, etc etc. The order in which these actions (binding, rendering DOM elements, etc) are performed is determined by the <code>Ember.run.queues</code> array described above:</li>
-<li>The run loop will start off on the first queue, which is <code>sync</code>. It&#8217;ll run all of the actions that were scheduled into the <code>sync</code> queue by the <code>Ember.run</code> code. These actions may themselves also schedule more actions to be performed during this same RunLoop, and it&#8217;s up to the RunLoop to make sure it performs every action until all the queues are flushed. The way it does this is, at the end of every queue, the RunLoop will look through all the previously flushed queues and see if any new actions have been scheduled. If so, it has to start at the beginning of the earliest queue with unperformed scheduled actions and flush out the queue, continuing to trace its steps and start over when necessary until all of the queues are completely empty.</li>
-</ul>
-
-
-<p>That&#8217;s the essence of the algorithm. That&#8217;s how bound data gets propagated through the app. You can expect that once a RunLoop runs to completion, all of the bound data will be fully propagated. So, what about DOM elements?</p>
-
-<p>The order of the queues, including the ones added in by the Ember Views library, is important here. Notice that <code>render</code> and <code>afterRender</code> come after <code>sync</code>, and <code>action</code>. The <code>sync</code> queue contains all the actions for propagating bound data. (<code>action</code>, after that, is only sparsely used in the Ember source). Based on the above algorithm, it is guaranteed that by the time the RunLoop gets to the <code>render</code> queue, all of the data-bindings will have finished synchronizing. This is by design: you wouldn&#8217;t want to perform the expensive task of rendering DOM elements <em>before</em> sync&#8217;ing the data-bindings, since that would likely require re-rendering DOM elements with updated data &#8211; obviously a very inefficient and error-prone way of emptying all of the RunLoop queues. So Ember intelligently blasts through all the data-binding work it can before rendering the DOM elements in the <code>render</code> queue.</p>
-
-<p>So, finally, to answer your question, yes, you can expect that any necessary DOM renderings will have taken place by the time <code>Ember.run</code> finishes. Here&#8217;s a jsFiddle to demonstrate: http://jsfiddle.net/machty/6p6XJ/328/</p>
-
-<h2>Other things to know about the RunLoop</h2>
-
-<h3>Observers vs. Bindings</h3>
-
-<p>It&#8217;s important to note that Observers and Bindings, while having the similar functionality of responding to changes in a &#8220;watched&#8221; property, behave totally differently in the context of a RunLoop. Binding propagation, as we&#8217;ve seen, gets scheduled into the <code>sync</code> queue to eventually be executed by the RunLoop. Observers, on the other hand, fire <em>immediately</em> when the watched property changes without having to be first scheduled into a RunLoop queue. If an Observer and a binding all &#8220;watch&#8221; the same property, the observer will always be called 100% of the time earlier than the binding will be updated.</p>
-
-<h3><code>scheduleOnce</code> and <code>Ember.run.once</code></h3>
-
-<p>One of the big efficiency boosts in Ember&#8217;s auto-updating templates is based on the fact that, thanks to the RunLoop, multiple identical RunLoop actions can be coalesced (&#8220;debounced&#8221;, if you will) into a single action. If you look into the <code>run_loop.js</code> internals, you&#8217;ll see the functions that facilitate this behavior are the related functions <code>scheduleOnce</code> and <code>Em.run.once</code>. The difference between them isn&#8217;t so important as knowing they exist, and how they can discard duplicate actions in queue to prevent a lot of bloated, wasteful calculation during the run loop.</p>
-
-<h3>What about timers?</h3>
-
-<p>Even though &#8216;timers&#8217; is one of the default queues listed above, Ember only makes reference to the queue in their RunLoop test cases. It seems that such a queue would have been used in the SproutCore days based on some of the descriptions from the above articles about timers being the last thing to fire. In Ember, the <code>timers</code> queue isn&#8217;t used. Instead, the RunLoop can be spun up by an internally managed <code>setTimeout</code> event (see the <code>invokeLaterTimers</code> function), which is intelligent enough to loop through all the existing timers, fire all the ones that have expired, determine the earliest future timer, and set an internal <code>setTimeout</code> for that event only, which will spin up the RunLoop again when it fires. This approach is more efficient than having each timer call setTimeout and wake itself up, since in this case, only one setTimeout call needs to be made, and the RunLoop is smart enough to fire all the different timers that might be going off at the same time.</p>
-
-<h3>Further debouncing with the <code>sync</code> queue</h3>
-
-<p>Here&#8217;s a snippet from the run loop, in the middle of a loop through all the queues in the run loop. Note the special case for the <code>sync</code> queue: because <code>sync</code> is a particularly volatile queue, in which data is being propagated in every direction, <code>Ember.beginPropertyChanges()</code> is called to prevent any observers from being fired, followed by a call to <code>Ember.endPropertyChanges</code>. This is wise: if in the course of flushing the <code>sync</code> queue, it&#8217;s entirely possible that a property on an object will change multiple times before resting on its final value, and you wouldn&#8217;t want to waste resources by immediately firing observers per every single change.</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">queueName</span> <span class="o">===</span> <span class="s1">&#39;sync&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>           <span class="nx">log</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">LOG_BINDINGS</span><span class="p">;</span>
-</span><span class='line'>           <span class="k">if</span> <span class="p">(</span><span class="nx">log</span><span class="p">)</span> <span class="p">{</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Begin: Flush Sync Queue&#39;</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>           <span class="nx">Ember</span><span class="p">.</span><span class="nx">beginPropertyChanges</span><span class="p">();</span>
-</span><span class='line'>           <span class="nx">Ember</span><span class="p">.</span><span class="nx">tryFinally</span><span class="p">(</span><span class="nx">tryable</span><span class="p">,</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">endPropertyChanges</span><span class="p">);</span>
-</span><span class='line'>           <span class="k">if</span> <span class="p">(</span><span class="nx">log</span><span class="p">)</span> <span class="p">{</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;End: Flush Sync Queue&#39;</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>           <span class="nx">forEach</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">queue</span><span class="p">,</span> <span class="nx">iter</span><span class="p">);</span>
-</span><span class='line'>        <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Hope this helps. I definitely had to learn quite a bit just to write this thing, which was kind of the point.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rake Pipeline Filter for Syncing with Client-Managed Static Site]]></title>
-    <link href="http://machty.github.com/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/"/>
-    <updated>2012-12-29T17:47:00-05:00</updated>
-    <id>http://machty.github.com/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site</id>
-    <content type="html"><![CDATA[<p>Just rolled out a quick <a href="http://megancoxmusic.com/">single-pager for my bandmate</a>,
-which is just a super simple static site that she&#8217;ll be updating herself
-via FTP. Problem is, at some point in the future I&#8217;ll be called upon to
-make some change to the JS, or the player widget, or something messy
-enough that my non-developer client would be rightfully reluctant to fidget with.
-If she updates the headers or the paragraph descriptions, and I want to
-make changes to the rest of the page, I&#8217;ll have to go through the
-annoying process of copying her raw HTML modifications into my freshly
-regenerated local HTML.</p>
-
-<!--more-->
-
-
-<h2>Rake Pipeline</h2>
-
-<p>I built this extremely simple site using
-<a href="https://github.com/livingsocial/rake-pipeline">Rake Pipeline</a>, which is
-a Ruby-based asset pipeline that maps input files to output files, and
-lets you determine all the processing filters used to generate all the
-output files. So, you can quickly throw in a Sass or CoffeeScript
-filter to generate CSS/JS, and then concatenate your files together,
-rename them, ompress them, etc. etc. Most of the filters you&#8217;d ever
-want for anything web-related can be found in
-<a href="https://github.com/wycats/rake-pipeline-web-filters">this gem</a>.</p>
-
-<p>You can also very easily define your own filters if the above gem
-doesn&#8217;t cover your needs, which is exactly what I did to handle the
-problem of syncing/merging changes made directly to HTML via FTP by my client
-and the changes I&#8217;d be making the the original input code.</p>
-
-<h2>Custom Filter using Nokogiri</h2>
-
-<p>I agreed with my client that she should only make changes within
-<code>&lt;div class="content"&gt;</code>s. This makes it so that all I need to do to sync
-her changes with mine is take my Rake Pipeline-generated HTML and
-replace <em>its</em> content div with the content div from her FTP-updated
-HTML. <a href="http://nokogiri.org/">Nokogiri</a> is just the HTML-processing tool
-for such a job.</p>
-
-<p>The code is simple enough:
-<a href="https://gist.github.com/4409814">check out the gist</a>.</p>
-
-<p>What it does is:</p>
-
-<ol>
-<li>Determine the remote URL of the already-published file based on
-a <code>host</code> parameter passed into the filter and the relative path
-of the file at that point in the pipeline (which means if part of
-your processing involves changing the output filename of the HTML
-file (e.g. from <code>html/index.haml</code> to <code>index.html</code>) you&#8217;ll want to
-invoke this filter after any output-path-changing filters.</li>
-<li>Download the remote file and parse it for content using CSS selectors
-passed into the filter (this is what the Nokogiri gem does).</li>
-<li>Parse the input file for the same CSS selectors and replace it with
-the remote file&#8217;s selected content.</li>
-</ol>
-
-
-<p>(This is kind of similar to how some AJAX sites update content:
-the server will render some hidden HTML, and the success handler will
-loop through all the root level elements rendered and replace
-similarly-classed or id&#8217;d elements on the visible page with what the
-server returned.)</p>
-
-<h3>Convenience Method</h3>
-
-<p>You&#8217;ll notice this at the bottom of the gist:</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rake</span><span class="o">::</span><span class="no">Pipeline</span><span class="o">::</span><span class="no">DSL</span><span class="o">::</span><span class="no">PipelineDSL</span><span class="o">.</span><span class="n">module_eval</span> <span class="k">do</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">remote_replace</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">filter</span><span class="p">(</span><span class="no">RemoteReplaceFilter</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This makes it possible to use</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">remote_replace</span> <span class="s2">&quot;http://www.megancoxmusic.com/new2/&quot;</span><span class="p">,</span> <span class="s2">&quot;.content&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>in your Assetfile instead of the more verbose</p>
-
-<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">filter</span><span class="p">(</span><span class="no">RemoteReplaceFilter</span><span class="p">,</span> <span class="s2">&quot;http://www.yourstaticsite.com/root_of_content&quot;</span><span class="p">,</span> <span class="s2">&quot;.content&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Skipping the filter while running <code>rakep server</code></h3>
-
-<p>You can run <code>rakep server</code> to launch a Rack-based server the hosts the
-output files specified by your <code>Assetfile</code>. This is much more convenient
-than running <code>rakep build</code> every time you want to test a change to your
-input files. That said, if you&#8217;re developing without an internet
-connection, or you have lots of files to sync, you can skip this
-(potentially slow) filter
-by adding <code>unless defined?(::Rake::Pipeline::Server)</code> to the end of your
-<code>remote_replace</code> statement. The reason this works is that the file
-containing <code>Rake::Pipeline::Server</code> only gets required when <code>rakep
-server</code> is run.</p>
-
-<h3>Whoops</h3>
-
-<p>I ended up making the filter depend on the
-<a href="https://github.com/wycats/rake-pipeline-web-filters">rake-pipeline-web-filters gem</a>
-so that I could use their
-<code>Rake::Pipeline::Web::Filters::FilterWithDependencies</code> module for
-making sure <code>nokogiri</code> was properly required in the <code>Gemfile</code>. Except,
-now I realize that was kind of silly, since my little custom filter
-isn&#8217;t part of any larger collection of web filters where it&#8217;d be important not
-to require all the filters&#8217; dependencies by default. Whoops. But, should
-this be a sensible fit for the web-filters gem (it&#8217;s not) it shall be
-ready. Consider it an understudy last in line.</p>
 ]]></content>
   </entry>
   
