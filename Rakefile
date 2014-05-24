@@ -222,7 +222,7 @@ task :deploy do
 
   Rake::Task[:copydot].invoke(source_dir, public_dir)
   Rake::Task["#{deploy_default}"].execute
-  #Rake::Task[:flashcards].execute
+  Rake::Task[:flashcards].execute
 end
 
 desc "Generate website and deploy"
