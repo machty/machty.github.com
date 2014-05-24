@@ -108,82 +108,16 @@ $(document).ready(
 
 	<div id="content" class="inner"><article class="post">
 	<h2 class="title">Daily Journal</h2>
-	<div class="entry-content"><h2>Uniform Type Identifiers</h2>
+	<div class="entry-content"><h2>Array Computed / Reduce Computed</h2>
 
-<p>Turns out I never understood why Java and other languages/frameworks
-embraces this style of &#8220;com.domain.somepackage&#8221;. First off, this is
-called <a href="http://en.wikipedia.org/wiki/Reverse_domain_name_notation">Reverse domain name notation</a>.</p>
+<p>The difference between reduce computed properties and array computed
+properties in Ember is that reduce computed properties will boil down
+the contents of an array to <em>some value</em> using one-at-a-time semantics;
+Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
 
-<p>The purpose of this naming convention is two-fold:</p>
-
-<h4>Avoids naming collisions from two different vendors</h4>
-
-<p>By prefixing the package name with any sort of
-unique identifier, &#8220;SOME-PREFIX-A.packageName&#8221; won&#8217;t conflict with
-&#8220;SOME-PREFIX-B.packageName&#8221;.</p>
-
-<h4>Sensible sort order / grouping</h4>
-
-<p>You want packages from the same
-vendor to be grouped together in sensible way; if you use the <code>apple</code>
-and <code>carrots</code> packages from <code>food.somevendor.com</code> and the <code>bikes</code> package
-from <code>things.somevendor.com</code>, if you didn&#8217;t reverse the domain order, you might
-end up with the following folder structure</p>
-
-<pre><code>food/
-  somevendor/
-    com/
-      apple
-      carrots
-things/
-  somevendor/
-    com/
-      bikes
-</code></pre>
-
-<p>This is undesirable since you can&#8217;t tell from this structure that apple,
-bikes, and carrots all come from somevendor. Also, you there&#8217;s a
-needless repetition of the <code>somevendor/com</code> path in both directory
-trees. If the domain name were inverted, you&#8217;d end up with:</p>
-
-<pre><code>com/
-  somevendor/
-    food/
-      apple
-      carrots
-    things/
-      bikes
-</code></pre>
-
-<p>Less folders, less repetition, and more information is being conveyed.</p>
-
-<p>Another way to think about it is that domain names are somewhat
-backwards; we know that <code>.com</code>, <code>.net</code>, and
-<a href="http://sandwich.technology"><code>.technology</code></a> are top-level domains (TLD),
-but how/why is something top level appended at the end of a name? It
-definitely makes domain names with subdomains harder to sort in a
-meaningful way. I guess there&#8217;s probably a good reason for this, worth
-investigating in another journal entry.</p>
-
-<p>Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123</p>
-
-<h2>LevelDB</h2>
-
-<ul>
-<li>require(&#8216;leveldbdatabase&#8217;)</li>
-<li>key value pair</li>
-<li>scales, web scale</li>
-<li>PolicyMic is sponsoring folk to work on it</li>
-<li>IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol</li>
-</ul>
-
-
-<h2>Vim: Visual Line</h2>
-
-<p>Shift-V in vim goes into visual line mode, which means you select entire
-lines for yanking/cutting, rather than having to precisely position your
-cursor at the beginning or end of a line so as to not accidentally yank/cut
-only part of a line.</p>
+<p>So you can&#8217;t write a &#8220;sum&#8221; Array Computed; you&#8217;d just use reduce
+computed for that. And you <em>could</em> write your own hand-crafted &#8220;filter&#8221;
+reduced CP, but why not use the Array Computed API for that?</p>
 </div>
 
 
@@ -200,12 +134,12 @@ only part of a line.</p>
   
 
 
-<time datetime="2014-05-15T11:38:00-04:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time></div>
+<time datetime="2014-05-22T14:08:00-04:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time></div>
 	
 
 <div class="tags">
 
-	<a class='category' href='/blog/categories/uniform-type-identifiers/'>Uniform Type Identifiers</a>
+	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
 
 </div>
 
@@ -255,8 +189,8 @@ Powered by Octopress.
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://machty.github.com/blog/2014/05/15/daily-journal/';
-        var disqus_url = 'http://machty.github.com/blog/2014/05/15/daily-journal/';
+        var disqus_identifier = 'http://machty.github.com/blog/2014/05/22/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/05/22/daily-journal/';
         var disqus_script = 'embed.js';
       
     (function () {

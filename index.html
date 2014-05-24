@@ -112,6 +112,127 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/24/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Enterprise Integration Patterns</h3>
+
+<p>Reading this here Fowler book.</p>
+
+<p>Operating systems have begun to ship with messaging middleware and
+related tools:</p>
+
+<ul>
+<li>Windows: MS Message Queueing (MSMQ), accessible via APIS like COM
+components and System.Messaging (part of .NET).</li>
+</ul>
+
+
+<p>Application Servers</p>
+
+<ul>
+<li>Java Messaging Service (JMS)</li>
+</ul>
+
+
+<p>EAI (Enterprise Application Integration) suites:</p>
+
+<ul>
+<li>IBM WebSphere MQ</li>
+<li>Microsoft BizTalk</li>
+<li>TIBCO</li>
+<li>WebMethods</li>
+<li>SeeBeyond</li>
+<li>Vitria</li>
+<li>CrossWorlds</li>
+</ul>
+
+
+<p>Many of the above include JMS as a supported client API, while
+others focus on implementing merely JMS-compliant infrastructures.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-24T07:56:00-04:00" pubdate data-updated="true">May 24<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/22/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Array Computed / Reduce Computed</h2>
+
+<p>The difference between reduce computed properties and array computed
+properties in Ember is that reduce computed properties will boil down
+the contents of an array to <em>some value</em> using one-at-a-time semantics;
+Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
+
+<p>So you can&#8217;t write a &#8220;sum&#8221; Array Computed; you&#8217;d just use reduce
+computed for that. And you <em>could</em> write your own hand-crafted &#8220;filter&#8221;
+reduced CP, but why not use the Array Computed API for that?</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T14:08:00-04:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/19/daily-journal/">
 		
 			Daily Journal</a>
@@ -255,6 +376,7 @@ investigating in another journal entry.</p>
 <li>key value pair</li>
 <li>scales, web scale</li>
 <li>PolicyMic is sponsoring folk to work on it</li>
+<li>IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol</li>
 </ul>
 
 
@@ -538,6 +660,12 @@ methods to subclasses.</p>
 <time datetime="2014-05-12T13:14:00-04:00" pubdate data-updated="true">May 12<span>th</span>, 2014</time></div>
 	
 
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ruby/'>Ruby</a>
+
+</div>
+
 
 	
 </div></article>
@@ -739,7 +867,7 @@ openssl speed aes
 <p>Encryption key is public. Decryption key is secret.
 Used for generating symmetric key in TLS.</p>
 
-<p>AES is way faster.</p>
+<p>AES is way faster (TODO: wat?).</p>
 
 <h2>Active-model serializers</h2>
 
@@ -1030,190 +1158,6 @@ me to keep in my dumb brain. :(</p>
 
 
 <time datetime="2014-04-28T14:11:00-04:00" pubdate data-updated="true">Apr 28<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/26/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>JavaScript: <code>Object#constructor</code></h2>
-
-<pre><code>function A() {}
-function B() {}
-B.prototype = Object.create(A.prototype);
-console.log(new B().constructor); // "[Function: A]"
-</code></pre>
-
-<p>That&#8217;s not what we want. If we use <code>Object.create</code> on a parent class&#8217;s
-prototype, you need to also do</p>
-
-<pre><code>B.prototype.constructor = B;
-console.log(new B().constructor); // "[Function: B]"
-</code></pre>
-
-<p>TL;DR, you must manually set <code>constructor</code> on a subclass&#8217;s prototype to
-point to that subclass&#8217;s constructor function, or else <code>.constructor</code>
-will refer to a parent class&#8217;s constructor.</p>
-
-<h2>Duck duck go</h2>
-
-<p>Search engine that I should be using.</p>
-
-<h2><code>tree</code></h2>
-
-<p><code>tree</code> is a command you can install with <code>brew install tree</code> that
-gives you a visual, recursive display of a folder. Output looks like
-this:</p>
-
-<pre><code>app/routes
-├── ad.js
-├── application.js
-├── builds
-│   ├── form.js
-│   ├── index.js
-│   ├── select
-│   │   └── index.js
-│   └── select.js
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-26T14:49:00-04:00" pubdate data-updated="true">Apr 26<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/21/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<p>This is a half-finished journal. Most of the value lies in the fact that
-there&#8217;s a crap-ton of flashcards associated with what I learned.</p>
-
-<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
-
-<p>In a Unicorn setting, shared resources like database connections
-need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
-in <code>after_hook</code>. This is so that you don&#8217;t wind up in a situation where
-two forked instances of your server try to write to a DB socket at the
-same time, which can result in a Protocol Error. This makes sense; if
-two protocol-adhering processes write to the socket at the same time,
-the message delivered to the other side obviously won&#8217;t adhere to the
-protocol. TODO: at what point does this actually break? How bout writing
-a quick Ruby script to prove this :) :) :)</p>
-
-<p>Resources:</p>
-
-<ul>
-<li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
-</ul>
-
-
-<h2>The difference between a process and a thread</h2>
-
-<p>A Process has:</p>
-
-<ul>
-<li>A group of resources</li>
-<li>A Thread of Execution</li>
-</ul>
-
-
-<p>The group of resources includes:</p>
-
-<ul>
-<li>Address space where program text and data lives in memory</li>
-<li>Global variables</li>
-<li>Open files</li>
-<li>Child processes</li>
-<li>Pending alarms</li>
-<li>Signals and signal handlers</li>
-<li>Accounting information</li>
-</ul>
-
-
-<p>A Thread (of Execution) has:</p>
-
-<ul>
-<li>Program counter</li>
-<li>Registers (of course these aren&#8217;t shared b/w threads; that&#8217;s crazy)</li>
-<li>Stack</li>
-<li>State</li>
-</ul>
-
-
-<p>A Thread must execute in a Process, but they are separate entities.</p>
-
-<p>There are multiple types of threads:</p>
-
-<ul>
-<li>User-space threads: super-fast thread switching because no kernel trap
-is required. Fine-grain control over thread scheduling. Unable to do
-blocking I/O though, since this blocks the entire process and all
-user threads.</li>
-<li>Kernel-threads: can using blocking IO, defers scheduling to the OS,
-but each thread switch means a slow kernel trap, but then again if
-you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
-<li>Combined: multiple kernel threads have multiple userspace threads.</li>
-</ul>
-
-
-<p>Resources:
-  - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
-  - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
-  - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-21T09:41:00-04:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time></div>
 	
 
 

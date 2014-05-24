@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Array Computed / Reduce Computed | machty's thoughtz]]></title>
+  <link href="http://machty.github.com/blog/categories/array-computed-reduce-computed/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2014-05-24T09:25:07-04:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/22/daily-journal/"/>
+    <updated>2014-05-22T14:08:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/22/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Array Computed / Reduce Computed</h2>
+
+<p>The difference between reduce computed properties and array computed
+properties in Ember is that reduce computed properties will boil down
+the contents of an array to <em>some value</em> using one-at-a-time semantics;
+Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
+
+<p>So you can't write a "sum" Array Computed; you'd just use reduce
+computed for that. And you <em>could</em> write your own hand-crafted "filter"
+reduced CP, but why not use the Array Computed API for that?</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Uniform Type Identifiers | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/uniform-type-identifiers/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-05-20T11:20:40-04:00</updated>
+  <updated>2014-05-24T09:25:07-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -84,6 +84,7 @@ investigating in another journal entry.</p>
 <li>key value pair</li>
 <li>scales, web scale</li>
 <li>PolicyMic is sponsoring folk to work on it</li>
+<li>IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol</li>
 </ul>
 
 
