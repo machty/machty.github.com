@@ -4,6 +4,11 @@ title: "Daily Journal 2"
 date: 2014-05-01 22:46
 comments: true
 categories: 
+flashcards:
+  - front: "RSA"
+    back: "Encryption key is public, decryption secret. Used for generating symmetric key in TLS"
+  - front: "Query param for telling QUnit to grep module names"
+    back: "filter=wat"
 ---
 
 ## Cryptoballs
@@ -16,7 +21,7 @@ categories:
 Encryption key is public. Decryption key is secret.
 Used for generating symmetric key in TLS.
 
-AES is way faster.
+AES is way faster (TODO: wat?).
 
 ## Active-model serializers
 

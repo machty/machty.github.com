@@ -10,6 +10,25 @@ flashcards:
     back: "Single Responbility Principle: a class should do only one thing"
   - front: TDA
     back: Tell Don't Ask - prefer telling an object to do something vs asking it its properties and deciding for yourself
+flashcards:
+  - front: "Vim: surround a word in ']'"
+    back: "vsiw]"
+  - front: "Vim: surround a chunk word in ']'"
+    back: "vsiW]"
+  - front: "Vim: change surrounding ' to \""
+    back: "cs\"'"
+  - front: "Vim: delete surrounding \""
+    back: "ds\""
+  - front: "Vim: wrap line in parens"
+    back: "yss("
+  - front: "Design principles: How can TDA and SRP conflict?"
+    back: "Either you stuff all the things that the User class can handle in user domain-specific terms (which breaks Single Responsibility Principle), or you add additional classes that know enough about User to ask it for property and values and make transformations/decisions based on that knowledge (which breaks Tell Don't Ask)"
+  - front: "Quick way to mark an rspec test as pending"
+    back: "change `it` to `xit`"
+  - front: "Cisgender"
+    back: "aka cissexual; a person whose gender matches that assigned at birth"
+  - front: "HAL"
+    back: "Hypermedia Application Language; missing some features that make json api rad"
 ---
 
 ## Vim surround

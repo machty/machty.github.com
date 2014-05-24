@@ -6,6 +6,11 @@ comments: true
 categories: 
 - use strict
 - global id
+flashcards:
+  - front: "GlobalId"
+    back: "ActiveModel GlobalID: a way of serializing a model into a string so that it can be looked up by some later process"
+  - front: "var a = 'A'; a.foo='wat';"
+    back: "This doesn't work in use strict, breaks in Safari"
 ---
 
 ## Active Model: GlobalID

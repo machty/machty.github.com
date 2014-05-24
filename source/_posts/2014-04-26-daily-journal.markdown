@@ -4,6 +4,9 @@ title: "Daily Journal"
 date: 2014-04-26 14:49
 comments: true
 categories: 
+flashcards:
+  - front: "Why explicitly set constructor when creating a JS subclass?"
+    back: "Because otherwise constructor will refer to parent class constructor"
 ---
 
 ## JavaScript: `Object#constructor`

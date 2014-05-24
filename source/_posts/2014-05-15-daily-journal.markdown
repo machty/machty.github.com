@@ -5,6 +5,15 @@ date: 2014-05-15 11:38
 comments: true
 categories:
 - Uniform Type Identifiers
+flashcards:
+  - front: "Uniform Type Identifiers"
+    back: "Apple's system for uniquely describing a type, using reverse domain name notation"
+  - front: "Reverse domain name notation"
+    back: "e.g. com.alexmatchneer.StringBuffer; allows for more sensible sorting"
+  - front: "LevelDB"
+    back: "library (as opposed to database server) that provides kv storage; can wrap in an app via C++ API"
+  - front: "Shift V in Vim"
+    back: "Visual line mode; select whole lines"
 ---
 
 ## Uniform Type Identifiers
@@ -70,6 +79,7 @@ Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123
 - key value pair
 - scales, web scale
 - PolicyMic is sponsoring folk to work on it
+- IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol
 
 ## Vim: Visual Line
 

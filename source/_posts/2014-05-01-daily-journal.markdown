@@ -4,6 +4,15 @@ title: "Daily Journal"
 date: 2014-05-01 08:59
 comments: true
 categories: 
+flashcards:
+  - front: "denormalize"
+    back: "Adding duplication/redundancy to a system, e.g. storing a person's first name in multiple tables, often for the purpose of optimization"
+  - front: "quick way to stub out a Ruby method so that it accepts any number of args"
+    back: "def meth(*args)"
+  - front: "Fight nils by using this Hash/Array accessor instead"
+    back: "Hash#fetch or Array#fetch (note that there is no Enumerable#fetch)"
+  - front: "Command to change directories, saving the current location"
+    back: "pushd /some/place; popd"
 ---
 
 ## Normalize / Denormalize

@@ -4,6 +4,10 @@ title: "Daily Journal"
 date: 2014-05-12 13:14
 comments: true
 categories: 
+- Ruby
+flashcards:
+  - front: "=== in Ruby"
+    back: "subsumption or case equality operator; overridden by context-specific subclasses. Module#=== will return true if passed an object that has included that module"
 ---
 
 
