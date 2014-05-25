@@ -112,6 +112,54 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/25/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Web Notifications</h3>
+
+<p><a href="https://github.com/stefanpenner/ember-cli/pull/804">Web notifications were added to ember-cli</a>
+not long ago, and I forgot they were a thing. IRRCloud uses them too.
+Like so many other new HTML5-y things, there&#8217;s a
+<a href="http://www.w3.org/TR/notifications/">spec</a> for web notifications.
+Basically, you ask for permissions and then you can broadcast.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-25T13:26:00-04:00" pubdate data-updated="true">May 25<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/web-notifications/'>Web notifications</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/24/daily-journal/">
 		
 			Daily Journal</a>
@@ -1150,155 +1198,6 @@ pwd # =&gt; /foo/bar/baz
 
 
 <time datetime="2014-05-01T08:59:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/28/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2><code>npm install</code> git repos</h2>
-
-<p>NOTE: this section is not complete; placeholding for later.</p>
-
-<p>After many abortive attempts to find the right syntax for running
-<code>npm install</code>, I figured I&#8217;d delve into what URL syntax it actually
-expected, and why.</p>
-
-<p>Here&#8217;s a bunch of stuff that didn&#8217;t work:</p>
-
-<pre><code>npm install git+ssh@github.com:stefanpenner/ember-cli.git
-npm install https://github.com/stefanpenner/ember-cli.git
-</code></pre>
-
-<p>Why couldn&#8217;t <code>npm install</code> just figure out what I meant? Well, I don&#8217;t
-know, but here&#8217;s a breakdown of the above.</p>
-
-<p><em>This is a helpful resoure: https://help.github.com/articles/which-remote-url-should-i-use</em></p>
-
-<p>Basically, you can clone GitHub repos either with HTTPS or SSH urls. SSH
-urls require an SSH keypair to generated on your computer and registered
-to your GitHub accounts.</p>
-
-<p>So here&#8217;s the first thing I tried:</p>
-
-<pre><code>https://help.github.com/articles/using-ssh-agent-forwarding
-</code></pre>
-
-<p>This is an HTTPS url.</p>
-
-<p>Q: Why does/did GitHub even require a password for cloning a repo?
-What&#8217;s insecure about that read info? Possible answer: even if you don&#8217;t
-have read access to a repo, a man in the middle might tell you you do,
-and then you&#8217;re sending priv data, blah blah blah.</p>
-
-<h2><code>Gdiff</code>, diffing in vim</h2>
-
-<p>This was a very helpful resource:</p>
-
-<p>http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/</p>
-
-<pre><code>:Gdiff
-:ls # list all the open buffers in their names
-:diffget BUFSPEC # when inside a conflict region,
-                 # say which buffer to get content from
-:diffput BUFSPEC # when inside a conflict region,
-                 # say which buffer to get content from
-:only # close all buffer except this one
-</code></pre>
-
-<p>I ended up adding the following to my <code>.vimrc.after</code>:</p>
-
-<pre><code>:nnoremap &lt;Leader&gt;dg :diffget &lt;CR&gt;
-:nnoremap &lt;Leader&gt;dp :diffput &lt;CR&gt;
-</code></pre>
-
-<p>Note that this arg-less form is useful when diffing between local
-changes and your last checkin; I use it a bunch for <code>ember-cli</code> when I
-call <code>ember init</code> to reset my app structure to the latest <code>ember-cli</code>
-blueprint (note that this process is still pretty miserable).</p>
-
-<h2>Broccoli <code>ignoredModules</code> and <code>legacyFilesToAppend</code></h2>
-
-<p>These options come from the <code>broccoli-es6-concatenator</code>.</p>
-
-<ul>
-<li><code>ignoredModules</code>: don&#8217;t transpile this module or add it to the list of
-importable modules. This is useful when you have a file that&#8217;s already
-in AMD format (not ES6), and you want to be able to es6 <code>import</code> that
-module, so you put it in <code>ignoredModules</code> so it&#8217;s not treated as an
-es6 file that needs to be imported.</li>
-<li><code>legacyFilesToAppend</code>: non-es6 files (global libraries) that should be
-appended to the end of the final output JS file.</li>
-</ul>
-
-
-<p>Note: <code>loaderFile</code> is automatically added as a legacy files, why, duh,
-because the loader file obviously needs to be a global, non-module file.</p>
-
-<p>So, wtf does this mean (the latest iteration of the blueprint
-Brocfile.js from ember-cli):</p>
-
-<pre><code>if (app.env !== 'production') {
-  push.apply(app.ignoredModules, [
-    'qunit',
-    'ember-qunit'
-  ]);
-
-  push.apply(app.legacyFilesToAppend, [
-    'test-shims.js',
-    'ember-qunit/dist/named-amd/main.js'
-  ]);
-}
-</code></pre>
-
-<p>Well, thanks to the geniuses in freenode IRC <code>#ember-cli</code>, I&#8217;ve learned
-that:</p>
-
-<ul>
-<li>This shouldn&#8217;t be in the blueprint Brocfile.js, but rather should be
-in the ember-cli lib <code>EmberApp</code> abstraction over the Brocfile.js, but
-anyway:</li>
-<li>The intent is that by specifying an <code>ignoredModules</code> item, you&#8217;re
-basically saying &#8220;I intent to import a module with this name, and
-because I&#8217;m opting out of generating it now via an ES6 file, I&#8217;ll be
-adding an AMD module for this file later&#8221;</li>
-</ul>
-
-
-<p>And if you try to <code>import something from 'nonexistent-module'</code>, you&#8217;ll
-get a loader error.</p>
-
-<p>This all seems really obvious, right? Naw, it&#8217;s really freaking hard for
-me to keep in my dumb brain. :(</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-28T14:11:00-04:00" pubdate data-updated="true">Apr 28<span>th</span>, 2014</time></div>
 	
 
 

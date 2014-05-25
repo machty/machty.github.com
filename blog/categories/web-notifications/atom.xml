@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Web notifications | machty's thoughtz]]></title>
+  <link href="http://machty.github.com/blog/categories/web-notifications/atom.xml" rel="self"/>
+  <link href="http://machty.github.com/"/>
+  <updated>2014-05-25T14:50:53-04:00</updated>
+  <id>http://machty.github.com/</id>
+  <author>
+    <name><![CDATA[Alex Matchneer]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/25/daily-journal/"/>
+    <updated>2014-05-25T13:26:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/25/daily-journal</id>
+    <content type="html"><![CDATA[<h3>Web Notifications</h3>
+
+<p><a href="https://github.com/stefanpenner/ember-cli/pull/804">Web notifications were added to ember-cli</a>
+not long ago, and I forgot they were a thing. IRRCloud uses them too.
+Like so many other new HTML5-y things, there's a
+<a href="http://www.w3.org/TR/notifications/">spec</a> for web notifications.
+Basically, you ask for permissions and then you can broadcast.</p>
+]]></content>
+  </entry>
+  
+</feed>
