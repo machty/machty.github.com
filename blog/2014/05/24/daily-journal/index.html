@@ -143,6 +143,147 @@ components and System.Messaging (part of .NET).</li>
 
 <p>Many of the above include JMS as a supported client API, while
 others focus on implementing merely JMS-compliant infrastructures.</p>
+
+<h3>Pro Git</h3>
+
+<h4>VCS: Version Control System</h4>
+
+<p>Keeps patch sets between versions of files, reconstruct a version be
+applying/unapplying patches. Example: <code>rcs</code>.</p>
+
+<p>Git&#8217;s predecessor was BitKeeper, whose free-of-charge status was
+revoked in 2005.</p>
+
+<h4>git config</h4>
+
+<p><code>git config lol.wat "imadork"</code></p>
+
+<p>will put the following into <code>./.git/config</code>:</p>
+
+<pre><code>[lol]
+  wat = imadork
+</code></pre>
+
+<p>what if you did <code>git config a.b.c lol</code> ?</p>
+
+<pre><code>[a "b"]
+  c = lol
+</code></pre>
+
+<p>followed by <code>git config a.b.z lol</code>:</p>
+
+<pre><code>[a "b"]
+  c = lol
+  z = lol
+</code></pre>
+
+<p>So basically <code>git config</code> just prettily formats things into groups using
+everything about the key you provide except the trailing segment. Makes
+sense.</p>
+
+<h4>Staging</h4>
+
+<p>Staging means you&#8217;re building up snapshots for a commit. By the time you
+commit, you&#8217;re just creating a commit object with meta data that points
+to that same snapshot.</p>
+
+<h4>Simple git repo hosting via HTTP</h4>
+
+<p>You can host a git repo via HTTP file hosting, which implies:</p>
+
+<ul>
+<li>anonymity (no authentication, no way to know who&#8217;s cloning your repo)</li>
+<li>read-only access (can&#8217;t push, unless doing crazy WebDAV things)</li>
+</ul>
+
+
+<p>So just for fun, here&#8217;s the simplest number of steps to push to a
+localhost http git server.</p>
+
+<ol>
+<li>Create bare repo: <code>git init --bare fun.git</code>. This creates a folder
+called <code>/fun.git</code>. The <code>.git</code> extension is optional, but
+conventional.</li>
+<li>Start a server hosting <code>ruby -run -e httpd . -p 5000</code></li>
+<li>Try and clone via http: <code>git clone http://localhost:5000/fun.git</code></li>
+</ol>
+
+
+<p>This will give you an error:</p>
+
+<pre><code>fatal: repository 'http://localhost:5000/fun.git/' not found
+</code></pre>
+
+<p>and your Ruby server will show the log</p>
+
+<pre><code>[2014-05-25 12:03:13] ERROR `/fun.git/info/refs' not found.
+localhost - - [25/May/2014:12:03:13 EDT] "GET /fun.git/info/refs?service=git-upload-pack HTTP/1.1" 404 287
+- -&gt; /fun.git/info/refs?service=git-upload-pack
+</code></pre>
+
+<p>So it&#8217;s looking for files that aren&#8217;t there. If you look at various
+git manuals, it&#8217;ll tell you something about how you should
+<code>mv hooks/post-update.example hooks/post-update</code> and give it executable
+chmod permissions, but even if you do that and try and clone again,
+it&#8217;ll fail.</p>
+
+<p>The reason for the failure is that there are static files that need to
+be generated in order for a plain ol static http git hosting solution to
+work, and these files haven&#8217;t been generated yet. If you enabled the
+<code>post-update</code> hook and then pushed to the repo via some other means,
+those files would be generated, but just to get this example working,
+you can <code>cd</code> into <code>fun.git</code> and run</p>
+
+<pre><code>sh fun.git/hooks/post-update.example
+</code></pre>
+
+<p>or you can just run the single command that the above script runs:</p>
+
+<pre><code>git update-server-info
+</code></pre>
+
+<p>Then when you <code>git clone http://localhost:5000/fun.git</code>, the clone will
+succeed (though the repo&#8217;s still totally empty).</p>
+
+<h3><code>ruby -run</code></h3>
+
+<p>Also, here&#8217;s the breakdown of the <code>ruby -run -e httpd . -p 5001</code></p>
+
+<ul>
+<li>There&#8217;s a very intentionally-named Ruby library called <code>un</code>, which
+<a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/un/rdoc/index.html">contains some useful tools</a></li>
+<li>The <code>-r</code> option requires the following lib; <code>-run</code> requires <code>un.rb</code>,
+which is part of the Ruby standard library.</li>
+<li><code>un.rb</code> contains top-level method definitions, like <code>httpd</code></li>
+<li><code>-e httpd</code> executes the top-level <code>httpd</code> method in <code>un.rb</code>, which
+makes use of the rest of the command line args provided: <code>. -p 5001</code>,
+and starts up a WEBBrick server.</li>
+</ul>
+
+
+<p>Here&#8217;s another dumb example of a <code>ruby -r</code>:</p>
+
+<p>Put a file named <code>aunchy.rb</code> with the following contents into new
+subdirectory <code>ma</code>:</p>
+
+<pre><code>def lephant
+  puts "i am so raunchy"
+end
+</code></pre>
+
+<p>Then run <code>ruby -Ima -raunchy -elephant</code>:</p>
+
+<pre><code>i am so raunchy
+</code></pre>
+
+<p>This works because</p>
+
+<ul>
+<li><code>-Ima</code> adds <code>ma</code> to the load path (which <code>require</code> uses)</li>
+<li><code>-raunchy</code> requires <code>aunchy.rb</code></li>
+<li><code>-e</code> executes the method <code>lephant</code></li>
+</ul>
+
 </div>
 
 
