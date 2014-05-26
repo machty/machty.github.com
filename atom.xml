@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-05-25T14:50:53-04:00</updated>
+  <updated>2014-05-26T13:15:40-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -25,6 +25,15 @@ not long ago, and I forgot they were a thing. IRRCloud uses them too.
 Like so many other new HTML5-y things, there&#8217;s a
 <a href="http://www.w3.org/TR/notifications/">spec</a> for web notifications.
 Basically, you ask for permissions and then you can broadcast.</p>
+
+<h3>Not invented here (NIH)</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Not_invented_here">Wikipedia</a></p>
+
+<p>Antonym: Proudly Found Elsewhere (PFE)</p>
+
+<p>Often a criticism of OSS communities reinventing the wheels in
+already-solved problem spaces.</p>
 ]]></content>
   </entry>
   
