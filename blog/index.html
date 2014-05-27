@@ -112,6 +112,301 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/26/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>EIP: Notes</h3>
+
+<p>Consider reading <em>Data and Reality</em> by William Kent.</p>
+
+<p>Semantic dissonance is ironed out by shared database schema; each app is
+forced to conform its data to that schema before saving to that
+database.</p>
+
+<p>Coming up with unified schemas that meet the needs of multiple
+applications is extremely difficult, and there are political
+considerations; the delay of a flagship product so that a shared
+database can be adhered to often leads to splitting.</p>
+
+<h4>RPI: Remote Procedure Invocation</h4>
+
+<h4>Web Service / WSDL</h4>
+
+<p>Seems like I come across this term enough without actually knowing how
+it&#8217;s specifically defined; presumably a REST API is a kind of web
+service, but what&#8217;s the official definition?</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Web_service">Wikipedia says</a>:</p>
+
+<blockquote><p>A Web service is a method of communication between two electronic devices
+over a network. It is a software function provided at a network address
+over the web with the service always on as in the concept of utility computing.</p></blockquote>
+
+<p>A web service allows two software systems to interact with each other
+over the internet. You can interact with a web service so long as you
+have its publicly available address.</p>
+
+<p>Rules for communication between web services are defined in WSDLs (Web
+Services Description Language). A searchable dictionary of discoverable
+WSDLs is a UDDI (Universal Description, Discovery and Integration).
+Interacting with these services often involves using the SOAP protocol
+(Simple Object Access Protocol), an XML format for structuring messages
+for web services.</p>
+
+<h4>Messaging</h4>
+
+<p>Senders don&#8217;t just barf information into a messaging cloud but rather
+adds this information to a particular Message Channel, likewise w
+receivers who must explicitly specify Message Channels.</p>
+
+<p>Channels are &#8220;logical addresses&#8221; which hide implementation details of
+how the underlying messaging system actually delivers these messages.</p>
+
+<p>It&#8217;s often possible but rare for channels to be dynamically created at
+runtime; receivers would also need to know to look for such a channel,
+so channels are usually decided by deploy time (apparently there are
+exceptions?).</p>
+
+<p>In Java et all, <code>new MessageQueue</code> won&#8217;t actually create a new channel,
+but will just create a wrapper for a channel pre-defined in
+administrative tools.</p>
+
+<p>Channel names are generally boring ol alphanumeric names like
+<code>MyChannel</code>, but hierarchical conventions exist to, e.g.
+<code>BlahCorp/Prod/OrderProcessing/NewOrders</code>.</p>
+
+<p>Two types of Message Channels: - <em>Point-to-Point</em> and
+<em>Publish-Subscribe Channels</em>.</p>
+
+<p>From the application dev&#8217;s perspective, there are a few different types
+of messages:</p>
+
+<ul>
+<li>Command Message: invoke a procedure in another app</li>
+<li>Document Message: pass data to another app</li>
+<li>Event Message: notify another app of a change in this app</li>
+<li>Request-Reply: receiver should send back a response</li>
+</ul>
+
+
+<p>A SOAP message is a <em>Message</em>, but it itself could be wrapped in another
+outer message. Recursive, babeh.</p>
+
+<h3>Git: detached HEAD state</h3>
+
+<p><code>HEAD</code> is a reference to the currently checked-out commit. Usually it
+points to a branch you have checked out, but if you try and check out a
+specific commit, tag, or remote branch, you&#8217;ll go into detached HEAD
+state.</p>
+
+<p>Don&#8217;t call it &#8220;headless&#8221; state; you&#8217;re probably mixing terminology with
+headless webkit or something, like I did; there&#8217;s no &#8220;headless&#8221; state
+in Git, you always have a HEAD, but if it&#8217;s detached, it means you&#8217;re
+not tied to a branch any more.</p>
+
+<p>So <code>HEAD</code> always refers to the currently checkout out commit, which is
+why if you run <code>git checkout HEAD~1</code> many times in a row, you&#8217;ll be
+rewinding to a previous commit every time you run it rather than
+repeatedly checking out the tip of the current branch minus one, which is what I
+originally thought. Also, there is no &#8220;current branch&#8221; once you&#8217;re run
+<code>git checkout HEAD~1</code>; the commit you&#8217;ve checked out could be an
+ancestor in many different branches, so if you want to re-attach, you
+have to be explicit.</p>
+
+<h3>Filters and Pipes</h3>
+
+<p>A pipe connects filters. A filter is a single purpose component that can
+be reused. Filters have an input pipe and output pipe, and don&#8217;t
+generally have knowledge of where the output pipe is pointing.</p>
+
+<p>Why is it called a pipe and not a channel? Because a channel is named,
+and anyone pushing or pulling from it is doing so according to some
+logical intent, whereas filters are way dumber.</p>
+
+<p>Filters can/should be implement via an abstract pipe interface, so that
+all filtering could potentially happen within one machine, but at any
+point the pipe could be turned into a full on Message Channel that might
+go to some other machine.</p>
+
+<p>Filters lend themselves nicely to testability as individually testable components.</p>
+
+<p>Filters connected via async channels in their own processes/threads also
+allow for higher throughput for typical pipeline reasons; 3 messages
+that come in at the same time that need to be decrypted, authenticated,
+and deduped can begin w the decryptor, which, once finished with the
+first, can move on to the next. Assembly line style.</p>
+
+<p>Parallelizing filters works best if the filter is stateless, e.g.
+de-dupe would be a challenge to parallelize since it depends stores
+previous messages to check for dupes, and wouldn&#8217;t function unless that
+storage was shared.</p>
+
+<h3>Message Router</h3>
+
+<ul>
+<li>Doesn&#8217;t modify message contents</li>
+<li>Only decides destination message</li>
+<li>Message Routers are meant to decouple, but if list of destinations
+changes often, Router might become coupled bottleneck, in which case
+it&#8217;s better to let recipients (i.e. that which Router would output to)
+decide which messages they&#8217;re interested in, i.e. Pub Sub channel.</li>
+<li><em>Predictive routing</em> means putting control in Message Router; <em>reactive
+routing</em> means Pub Sub.</li>
+</ul>
+
+
+<p>Decoupling is nice but comes at the expense of reasonability about the
+system; harder to see a flow.</p>
+
+<p>Brainless router: single input, single output; meant as a stub for when
+we&#8217;re pretty sure we&#8217;ll want a more intelligent router later.</p>
+
+<p>Content-based router: decides where to go based on message content.</p>
+
+<p>Context-based routers: decide where to go based on environmental
+conditions, e.g. load-balancing, test, failover.</p>
+
+<p>Failover: switching to redundant / standby system automatically if
+primary one fails.</p>
+
+<p>Note that some Message Channels come with their own form of load balancing
+if Competing Consumers are consuming off the channel as fast as they
+can, but Message Routers have the benefit of being able to use more
+complicated logic, which a Competing Consumer free-for-all would not be
+able to make use of.</p>
+
+<p>Routers can connect to Control Bus to live-update decision criteria
+without requiring code change.</p>
+
+<p>Routers play in important role in Message Broker pattern, which is the
+integration equivalent to the Mediator GoF pattern.</p>
+
+<h3>EDI: Electronic Data Interchange</h3>
+
+<p>Source: EIP, using EDI 850 Purchase Order as an example.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Electronic_data_interchange">Wikipedia</a></p>
+
+<p>Electronic communication system that provides standards for exchanging
+data via any electronic means.</p>
+
+<p>Origins: military logistics</p>
+
+<p>ERP: Enterprise Resource Planning</p>
+
+<h3>Why HTTP isn&#8217;t a transport layer</h3>
+
+<p><a href="http://restpatterns.org/Articles/Why_HTTP_Isn't_A_Transport_Protocol">Source</a></p>
+
+<p>So many things to dissect. I&#8217;m sad I still don&#8217;t have this shit stuck in
+my brain. Gosh damn.</p>
+
+<p>Alright, what&#8217;s a transport layer? TCP&#8217;s a transport layer. It&#8217;s
+concerned with getting data from A to B and doesn&#8217;t care about the
+format of the data. UDP is also one, but doesn&#8217;t guarantee delivery,
+packet order, etc.</p>
+
+<p>HTTP (Hypertext Transfer Protocol) is an application-layer protocol.</p>
+
+<p>Good explanation of layers:</p>
+
+<pre><code>http://en.wikipedia.org/wiki/File:Internet_layering.svg
+</code></pre>
+
+<p>IP is the Internet layer, the addressing layer that describes how
+different systems can access each other.</p>
+
+<p>Blah blah blah. Anyway, armed with this knowledge, what does it mean for
+HTTP to even be considered a transport protocol?</p>
+
+<p>Some people expand HTTP to Hypertext <em>Transport</em> Protocol, which is NOT
+the same as the actual correct <em>Transfer</em> protocol.  It&#8217;s not transport,
+it&#8217;s transfer, you dummy.</p>
+
+<p>Subtle differences between transfer and transport:</p>
+
+<ul>
+<li>Transport as agnostically carrying something from A to B</li>
+<li>Transfer pays attention to the content of what&#8217;s being transferred.</li>
+</ul>
+
+
+<p>That&#8217;s why HTTP offers so many different verbs (GET POST PUT PATCH
+DELETE CONNECT OPTIONS HEAD) and status codes. You&#8217;d only need to GET/PUT and 200/500/400
+(success, server failure, client failure) if HTTP were a transport
+protocol, but the fact that it has all these expressive differences in
+intent implies it&#8217;s most of an application/transfer layer.</p>
+
+<p>OK, so well done, article, but terrible job at explaining exactly <em>who</em>
+is using HTTP as a transport layer protocol and how and what the cut off
+is. I still don&#8217;t know.</p>
+
+<p>Oh I get it, from the wiki article an example SOAP message:</p>
+
+<pre><code>POST /InStock HTTP/1.1
+Host: www.example.org
+Content-Type: application/soap+xml; charset=utf-8
+Content-Length: 299
+SOAPAction: "http://www.w3.org/2003/05/soap-envelope"
+
+&lt;?xml version="1.0"?&gt;
+&lt;soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"&gt;
+  &lt;soap:Header&gt;
+  &lt;/soap:Header&gt;
+  &lt;soap:Body&gt;
+    &lt;m:GetStockPrice xmlns:m="http://www.example.org/stock"&gt;
+      &lt;m:StockName&gt;IBM&lt;/m:StockName&gt;
+    &lt;/m:GetStockPrice&gt;
+  &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;
+</code></pre>
+
+<p>So in this case there is a SOAP message that itself adheres to an XML
+schema, but in most cases it is transported within the body of an HTTP
+request. So it uses HTTP as its transport layer. A SOAP message <em>could</em>
+be transported over TCP socket, but it&#8217;s generally done over HTTP.</p>
+
+<p>I&#8217;ve resolved my confusion: for any given message format, a message
+needs to be transported. SOAP is a message format, and it just so
+happens to be wrapped in HTTP. You could wrap a message in many
+different layers which might be intended as application layers, each one
+treating its wrapper as a transport layer.</p>
+
+<p>SOAP is shitty for caching because resources are not a first class
+consideration in the way they are for REST. HTTP headers and resource
+URLs provide information that lends itself nicely to caching.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-26T13:17:00-04:00" pubdate data-updated="true">May 26<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/25/daily-journal/">
 		
 			Daily Journal</a>
@@ -1118,95 +1413,6 @@ provide a <code>filter</code> query param, e.g.:</p>
 
 
 <time datetime="2014-05-01T22:46:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/01/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Normalize / Denormalize</h2>
-
-<p>From <a href="http://en.wikipedia.org/wiki/Database_normalization">Wikipedia</a>:</p>
-
-<p>Database normalization is the process of organizing the fields and
-tables of a relational database to minimize redundancy.</p>
-
-<p>Source: Gary Bernhardt saying &#8220;we denormalize by passing in
-<code>person_name</code> in addition to the person object&#8221;. Normalizing means
-keeping all the data in one place, reducing redundancy. Denormalizing
-means redundancy, which normally affords</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Denormalization">Denormalization</a>:</p>
-
-<blockquote><p>In computing, denormalization is the process of attempting to
-optimize the read performance of a database by adding redundant
-data or by grouping data. In some cases, denormalization
-is a means of addressing performance or scalability in relational
-database software.</p></blockquote>
-
-<p>Generally speaking, denormalizing means you&#8217;ve duplicated some piece of
-data for some reason, probably optimization.</p>
-
-<h2>Stub a method in ruby</h2>
-
-<p>As simple as</p>
-
-<pre><code>def stubbed_method(*args)
-  # accept any number of args, do nothing with them.
-end
-</code></pre>
-
-<h2>Use <code>fetch</code>, not <code>[]</code> for <code>Hash</code> / <code>Array</code></h2>
-
-<p>I already know this, just keep on forgetting to use it;</p>
-
-<pre><code>{}[123] # =&gt; nil
-{}.fetch(123) # =&gt; KeyError: key not found: 123
-</code></pre>
-
-<h2>Directory stack: <code>pushd</code> / <code>popd</code></h2>
-
-<p>Forgot about this from my Bloomberg days; use <code>pushd</code> and <code>popd</code> for
-saving which directory you&#8217;re in (<code>pushd</code>) so that you can screw around,
-change directories, and then ultimately <code>popd</code> back to whichever directory
-you were in before you ran <code>pushd</code>.</p>
-
-<pre><code>cd /foo/bar/baz
-pushd /some/other/dir
-pwd # =&gt; /some/other/dir
-cd /go/to/some/strange/land
-popd
-pwd # =&gt; /foo/bar/baz
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-01T08:59:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
 	
 
 
