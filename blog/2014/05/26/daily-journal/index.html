@@ -368,6 +368,273 @@ treating its wrapper as a transport layer.</p>
 <p>SOAP is shitty for caching because resources are not a first class
 consideration in the way they are for REST. HTTP headers and resource
 URLs provide information that lends itself nicely to caching.</p>
+
+<h3>ActiveX!!!</h3>
+
+<p>I never really knew what this was. It implies security risk and
+executable code within Internet Explorer. But wat it be?</p>
+
+<p><a href="http://en.wikipedia.org/wiki/ActiveX">Wikipedia</a></p>
+
+<p>It&#8217;s a Microsoft framework, picking up where Component Object Model
+(COM) left off. It enabled extra features in Internet Explorer but made
+it easy for malicious dicks to run code that was automatically
+downloaded from an <code>OBJECT</code> tag.</p>
+
+<p>There&#8217;s a word that keeps on getting thrown around: control. An ActiveX
+control. What kind of shitty name is that? Is that like the short-lived
+Ember.Control? What a control is?</p>
+
+<blockquote><p>ActiveX controls are essentially pieces of software and have access to your entire computer if you opt to install and run them.</p>
+
+<p>An object in a window or dialog box. Examples of controls include push-buttons, scroll bars, radio buttons, and pull-down menus.</p>
+
+<p>ActiveX controls are small programs, sometimes also called &#8220;add-ons,&#8221; used on the Internet. They can make browsing more enjoyable by allowing animation or they can help with tasks such as installing security updates at Windows Update.</p>
+
+<p>These are objects that are like small programs or &#8220;applets&#8221; and a number of Microsoft programs like Office and Internet Explorer (IE) are designed to be able to interact with them. An example is a spell checker. Since Word comes with a spell checker, other Microsoft programs such as Outlook Express can make use of it. In fact, any program with the appropriate interface can use this spell checker.</p></blockquote>
+
+<p>So they&#8217;re plugins / addons. Sometimes they&#8217;ve visible, other times
+they&#8217;re hidden. But they were originally used to enhance the
+functionality of Internet Explorer to view things like PDFs and
+Macromedia Flash. So basically, ActiveX controls are components that
+could be reused in many different settings. Building blocks. Yesterday&#8217;s
+technology: tomorrow.</p>
+
+<blockquote><p>ActiveX controls are actually not Internet Explorer-only. They also work in other Microsoft applications, such as Microsoft Office.</p></blockquote>
+
+<p>ActiveX increases the attack surface by malicious dicks; even a
+well-intentioned but carelessly implemented ActiveX control could
+open the door to hackery, such as the Java ActiveX control.</p>
+
+<h3>XSL: Extensible Stylesheet Language</h3>
+
+<h3>document.implementation</h3>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/document.implementation">MDN</a></p>
+
+<p>Returns a DOMImplementation object associated with the current document.</p>
+
+<p><code>document.implementation.createDocument(namespaceURI, qualifiedNameStr, documentType)</code>
+creates an XML doc.</p>
+
+<ul>
+<li><code>namespaceURI</code>, e.g. &#8216;http://www.w3.org/1999/xhtml&#8217;</li>
+<li><code>qualifiedNameStr</code>: qualified name of the document to be created,
+which is an optional prefix + the local root element name; if you&#8217;re
+creating an html document, you&#8217;ll provide &#8216;html&#8217; because that&#8217;s the
+root element name of an html doc.</li>
+<li><code>documentType</code>, optional, often just null</li>
+</ul>
+
+
+<p>Many examples use Document.load to load xml data, but it&#8217;s not part of
+the <a href="http://www.w3.org/TR/2004/REC-DOM-Level-3-LS-20040407/">Load and Save</a>
+spec any more, or it is, but Load and Save is really old?</p>
+
+<p>This spec is/was</p>
+
+<blockquote><p>a platform- and language-neutral interface that allows programs and scripts to dynamically load the content of an XML document into a DOM document and serialize a DOM document into an XML document</p></blockquote>
+
+<h3>Level N</h3>
+
+<p>DOM Level 3 wtf does it mean? I guess it just means a more complex
+layering on top of a previous level. Additional levels enhance and
+expand scope, while versions are meant to refine, fix issues, etc,
+limited to that scope. As DOM Levels increase, features are added that
+don&#8217;t conflict with lower DOM features but just add more stuff on top.
+So you can just use DOM Level 1 features and never touch anything above,
+but those above Levels will never thwart DOM Level 1.</p>
+
+<ul>
+<li>DOM Level 0: pre-specification DOM API, e.g. IE3</li>
+<li>DOM Level 1: (1998) full specification for HTML/XML doc, partly
+implemented by IE5</li>
+<li>DOM Level 2: (late 2000) added <code>getElementById</code> and an event model</li>
+<li>DOM Level 3: (late 2004) added XPath and keyboard event handling and
+support for serializing docs as XML (?)</li>
+<li>DOM Level 4: currently being developed, last call working draft
+released in Feb 2014.</li>
+</ul>
+
+
+<p>The terminology used as that DOM Level 3 is the latest &#8220;release&#8221;. But
+not to be confused with versions&#8230; presumably each level has its own
+version.</p>
+
+<h3>Events</h3>
+
+<p>Informed by this <a href="http://en.wikipedia.org/wiki/DOM_Events#DOM_Level_0">Wikipedia article</a></p>
+
+<p>DOM event handling has evolved over the years.</p>
+
+<h4>DOM Level 0 events</h4>
+
+<p>(DOM Level 0 meaning pre-spec DOM).</p>
+
+<ul>
+<li>inline, e.g. <code>onclick="alert('shit'); return false;"</code>, which
+essentially gets invoked as
+<code>(function() { alert('shit'); return false; }).call(clickedElement)</code></li>
+<li>traditional; event handlers can be added/removed by script, but only
+one event handler could be registered; <code>node.onclick = handler</code>,
+<code>node.onclick = newHandler;</code>, etc.</li>
+</ul>
+
+
+<p>Did you know that <code>document.onclick = someFn</code> still works? Ridiculous!</p>
+
+<h4>DOM Level 2 events</h4>
+
+<p><code>addEventListener</code>, <code>removeEventListener</code>, <code>dispatchEvent</code>, along with
+<code>stopPropagation</code> and <code>preventDefault</code>.</p>
+
+<p>Fun fact: I thought the third param to addEventListener was some
+ActionScript-y thing about weak references, but it&#8217;s actually
+<code>useCapture</code>. Capture events occur starting from the root of the DOM
+(document) and move toward the event target; any capture event listeners
+registered in that direct line will be invokved first and have the
+opportunity to <code>stopPropagation</code>.</p>
+
+<p>Fun fact; the ancestor chain of bubbling events is determined before the
+event is fired, so that any DOM modifications that happen
+(e.g. moving the EventTarget to some other part of the DOM) within an
+event handler doesn&#8217;t affect the predetermined chain.</p>
+
+<p><code>event.target</code> refers to the <code>EventTarget</code>; this is the receiver of the
+event</p>
+
+<h4>Event Delegation</h4>
+
+<p>From <a href="http://learn.jquery.com/events/event-delegation/">learn.jquery.com</a>:</p>
+
+<blockquote><p>Event delegation allows us to attach a single event listener, to a parent element, that will fire for all descendants matching a selector, whether those descendants exist now or are added in the future.</p></blockquote>
+
+<p>If this feature didn&#8217;t exist, then you would have to do a lot more
+manual adding and removing of event handlers as DOM elements were added
+and removed, whereas delegation allows you to define an event handler on
+a parent node that only fires when the event passes through a child
+described by a selector, e.g.</p>
+
+<pre><code>$('#table').on('click', 'td', function() { });
+</code></pre>
+
+<p>One of jQuery&#8217;s original APIs for event delegation was <code>.live</code>, e.g.
+<code>$('a').live(...)</code>, but this had some issues:</p>
+
+<ul>
+<li>The selector eagerly fired when it didn&#8217;t to (perf)</li>
+<li>Chaining methods didn&#8217;t work, which is a surprising and bad API,
+e.g. $(&#8216;a&#8217;).find(&#8216;p&#8217;).live(&#8216;click&#8217;);</li>
+<li><code>.live()</code> events always attached to <code>document</code>, which means events
+take the longest and slowest path before being handled, e.g. a click
+on an <code>a</code> tag 20 levels deep in the DOM needs to go all the way
+through those 20 levels before being handled.</li>
+<li><code>click</code> doesn&#8217;t bubble to <code>document</code> on iOS so <code>live</code> can&#8217;t work
+without other workarounds, e.g. (cursor:pointer), natively clickable
+elements, etc</li>
+<li>stopPropagation doesn&#8217;t work since event already propagated to
+<code>document</code> by the time <code>live</code> logic fires</li>
+<li><code>.live</code> interacted weird with other methods, e.g. <code>$(document).off()</code>
+would disable <code>live</code> handlers, even though <code>live</code> selector seemed to
+imply some other magic.</li>
+</ul>
+
+
+<p>That&#8217;s why things shifted to <code>delegate</code> and eventually <code>on</code>, which hits
+the sweet spot.</p>
+
+<pre><code>`$('#root').on('click', 'a', handler)`
+</code></pre>
+
+<p>Benefits of this approach include:</p>
+
+<ul>
+<li>&#8216;a&#8217; isn&#8217;t unnecessarily queried up front</li>
+<li>Chaining will work as expect (i.e. continued modifications to <code>#root</code>)</li>
+<li>No longer throw everything on <code>document</code></li>
+<li>Explicit syntax suggests workarounds for iOS</li>
+</ul>
+
+
+<h4>Historical shit</h4>
+
+<p><a href="http://www.quirksmode.org/js/events_order.html">source: quirksmode</a></p>
+
+<p>Netscape 4 had capture only.</p>
+
+<p>Microsoft had bubble only.</p>
+
+<p>jQuery provides event bubbling for all, along with event delegation,
+which <em>depends</em> on event bubbling in order to work (the italics are
+probably overkill; if you have event capture you can implement event
+bubbling&#8230; even if you didn&#8217;t have event capture, you can walk the tree
+and implement yourself).</p>
+
+<p>Proof that you can implement it yourself:</p>
+
+<p>http://jsbin.com/tofop/1/edit</p>
+
+<p>Just loop over parentNode until you get there.</p>
+
+<p>jQuery never provided an API for event capturing because it&#8217;s not
+possible on old IE. I guess it&#8217;s possible, but you&#8217;d have to introduce
+some async-ness, which would probably break other assumptions. So for
+IE6, which only supported bubbling, if you wanted something like</p>
+
+<pre><code>$('a').capture('click', handler);
+</code></pre>
+
+<p>you would have to first manually walk the tree up to the document,
+then refire a fake event back to the target, calling any capture
+handlers,</p>
+
+<p>So if all you had was Netscape</p>
+
+<p>Ember depends on jQuery for event delegation. This will probably go away
+soon.</p>
+
+<h3>What&#8217;s wrong w iOS anyway?</h3>
+
+<p>Non-native click events don&#8217;t bubble up to document unless</p>
+
+<ul>
+<li>the clicked thing is a native clickable, e.g. link or button</li>
+<li>the clicked thing has a handler explicitly attached to it, e.g.
+onclick= attr or addEventListener on that thing.</li>
+<li><a href="http://jsbin.com/xuwuvu/1/edit">example</a></li>
+</ul>
+
+
+<h3>W3C: World Wide Web Consortium</h3>
+
+<p>The standards organization founded and led by Tim Berners-Lee.</p>
+
+<p>W3C TAG is the Technical Architecture Group in charge of documenting and
+building consensus around principles of Web architecture. People whose
+names my dumb brain should remember on the TAG:</p>
+
+<ul>
+<li>Yehuda Katz</li>
+<li>Domenic Denicola</li>
+<li>David Herman</li>
+</ul>
+
+
+<p>Not to be confused with TC39, which standardizes ECMAScript. Membership
+can be determined by those present in the
+<a href="https://github.com/rwaldron/tc39-notes/blob/master/es6/2014-04/apr-9.md">meeting notes</a></p>
+
+<p>So W3C Tag reviews things like
+<a href="https://dvcs.w3.org/hg/quota/raw-file/tip/Overview.html">quote management</a>
+APIs and stuff that browsers need to expose, and TC39 handles language
+features for ECMAScript.</p>
+
+<h3>XSLT</h3>
+
+<p>OMG so many dumb things to learn. Here&#8217;s a
+<a href="http://jsbin.com/davew/1/edit">JSBin</a> for farting around w
+XSLT transformations. Kinda reminds me of <code>&lt;content select="asd"&gt;</code> in
+Web Components land, though probably way more complicated.</p>
 </div>
 
 
