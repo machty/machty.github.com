@@ -112,6 +112,388 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Rubymotion</h3>
+
+<p>The next version will support Android. Ruby on Android. By PHH.</p>
+
+<p>http://blog.rubymotion.com/post/87048665656/rubymotion-3-0-sneak-peek-android-support</p>
+
+<h3>Magnet Link</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Magnet_uri">Wikipedia</a></p>
+
+<p>e.g. for all my illegal torrent downloads</p>
+
+<pre><code>magnet:?xt=urn:btih:7O4OWESOQIXMYWY6U36MXWRICAUDB2OU&amp;dn=Louie.S04E05.HDTV.x264-LOL&amp;tr=udp://tracker.openbittorrent.com:80&amp;tr=udp://tracker.publicbt.com:80&amp;tr=udp://tracker.istole.it:80&amp;tr=udp://open.demonii.com:80&amp;tr=udp://tracker.coppersurfer.tk:80
+</code></pre>
+
+<ul>
+<li>&#8220;de facto&#8221; standard; no official spec</li>
+<li>The scheme is &#8220;magnet&#8221;, even though there&#8217;s not &#8220;magnent&#8221; protocol in
+the way &#8220;http&#8221; is a scheme that refers to the Hyper Text Transfer
+Protocol.</li>
+<li>URI has target file&#8217;s contents built into hash; anyone with the file
+can generate the URL without needing to refer to a central authority.
+This makes search results guaranteed; the server either has the thing
+you&#8217;re looking for or it doesn&#8217;t, and if you&#8217;d, say, like to continue
+downloading the latest episode of Louie from a source, you could
+search by content hash rather than by &#8220;Louie S04E07&#8221; which might yield
+a bunch of different encodings and other things you don&#8217;t actually
+want.</li>
+<li>magnet URIs have no <a href="http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax">hierarchical part</a>,
+but rather immediately begin with a query param.</li>
+<li><code>xt</code> query param refers to &#8220;exact topic&#8221;; this is followed by the hash
+type, such as sha1, or in the example above, &#8220;btih&#8221;, which is a SHA1
+hash of a BitTorrent Info Hash (TODO: write about bittorrent meta)</li>
+<li><code>dn</code> = display name, e.g. <code>Louie.S04E05.HDTV.x264-LOL</code></li>
+<li><code>tr</code> = tracker url for bittorrent downloads; note in the above sample
+magnet URL <code>tr</code> appears multiple types; wiki suggests appending an
+incrementing <code>.N</code> to query param keys, but I guess that&#8217;s not a
+requirement.</li>
+</ul>
+
+
+<blockquote><p>The Pirate Bay migrated from .torrent files to magnet URI in February 2012. This migration made the storage footprint of The Pirate Bay exceptionally small. A user demonstrated that the total size of The Pirate Bay magnets would be approximately 90MB of compressed data.[2]</p></blockquote>
+
+<h3>STOMP</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Streaming_Text_Oriented_Messaging_Protocol">Wikipedia</a></p>
+
+<p>Streaming Text Oriented Messaging Protocol: protocol designed for
+working with Message-Oriented Middleware (MOM). It&#8217;s language-agnostic,
+so you could have a Ruby STOMP client talking to a Java STOMP server,
+etc.</p>
+
+<p>Go figure the Ruby Server that I found depends on EventMachine. How
+could it not? I should probably figure out how servers queue up
+requests. Is that the job of Thin/Mongrel/Unicorn?</p>
+
+<h3>Ember overwriting get-only computed properties</h3>
+
+<p>Best explained in a <a href="http://emberjs.jsbin.com/ucanam/5139/edit">JSBin</a>.</p>
+
+<p>Setting a computed property that is get-only (which is determined
+by the fact that the supplied function has an arity of &lt;= 1) will
+overwrite that CP with whatever static value you&#8217;re setting it to.</p>
+
+<p>Relevant
+<a href="https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/lib/computed.js#L490-L492">Ember</a>
+<a href="https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/lib/computed.js#L1224-L1228">links</a></p>
+
+<h3>Defeaturify doesn&#8217;t get run before Ember API docs get generated</h3>
+
+<p>This is probably the least timeless thing I could write about.</p>
+
+<h3>Drop permissions in a server setting</h3>
+
+<p>It&#8217;s an OS requirement that running a server on port 80 requires root
+permissions, which means you need to be logged in as root or running
+sudo to start up a server on port 80, but it can be risky to leave a
+server running with full permissions, so it&#8217;s common practice to <em>drop
+permissions</em> after the server has been start up.</p>
+
+<p>I stumbled upon this concept while reading
+<a href="https://github.com/ruby/ruby/blob/trunk/lib/webrick.rb#L14-L15">WEBrick code</a>:</p>
+
+<pre><code># WEBrick also includes tools for daemonizing a process and starting a process
+# at a higher privilege level and dropping permissions.
+</code></pre>
+
+<h3>Michael McKean</h3>
+
+<p><img src="http://f.cl.ly/items/0x23191Z3K1J0M0Z1e3D/coneheads03.jpg" alt="Michael McKean" /></p>
+
+<p>A total hateable 90s &#8220;that guy&#8221;.</p>
+
+<h3>Ruby Fiber-local variables</h3>
+
+<p><code>Thread#[]</code> is <a href="http://www.ruby-doc.org/core-2.1.1/Thread.html#method-i-5B-5D">a thing</a></p>
+
+<p>It&#8217;s an accessor for fiber-local variables. What does that mean? It
+means even though you&#8217;re saying <code>Thread.current[:a]</code>, which looks as if
+you&#8217;re grabbing <code>a</code> as tied to the current thread, it&#8217;ll actually be
+grabbing <code>a</code> from the currently active Fiber within that Thread, which
+is a little misleading (and obviously wasn&#8217;t a problem before Fibers
+were a thing in 1.9.2).</p>
+
+<p>Example:</p>
+
+<pre><code>Thread.new {
+  Thread.current[:a] = "lol"
+  Fiber.new {
+    puts "in new fiber: #{Thread.current[:a]}"
+  }.resume
+  puts "in original fiber: #{Thread.current[:a]}"
+}.join
+</code></pre>
+
+<p>This prints</p>
+
+<pre><code>in new fiber:
+in original fiber: lol
+</code></pre>
+
+<h3>Thread#join</h3>
+
+<p>I knew this but I&#8217;m forgetful.</p>
+
+<p>The following program prints &#8220;DONE&#8221; and exits:</p>
+
+<pre><code>Thread.new {
+  sleep 1
+  puts "OMG"
+}
+puts "DONE"
+</code></pre>
+
+<p>The following program waits a second, prints &#8220;OMG&#8221;, prints &#8220;DONE&#8221; and quits:</p>
+
+<pre><code>Thread.new {
+  sleep 1
+  puts "OMG"
+}.join
+puts "DONE"
+</code></pre>
+
+<p><code>Thread#join</code> pauses the current thread until the <code>.join</code>d thread
+completes. Dur.</p>
+
+<h3>Rack Request Store</h3>
+
+<p><a href="https://github.com/steveklabnik/request_store">GitHub</a></p>
+
+<p>Apparently <code>Thread.current</code> is already well known as common storage
+place for global state for whichever thread you&#8217;re on (which is safer
+than sharing/clobbering some truly global var shared b/w threads). The
+problem is that servers don&#8217;t agree on Thread re-use:</p>
+
+<pre><code>def index
+  Thread.current[:counter] ||= 0
+  Thread.current[:counter] += 1
+  render :text =&gt; Thread.current[:counter]
+end
+</code></pre>
+
+<blockquote><p>If we ran this on MRI with Webrick, you&#8217;d get 1 as output, every time. But if you run it with Thin, you get 1, then 2, then 3&#8230;</p></blockquote>
+
+<p>Presumably that&#8217;s because WEBrick spawns a new thread for every request
+while Thin reuses threads. (TODO: confirm this?)</p>
+
+<p>So anyway, Rack RequestStore is a thread-local storage mechanism that
+gets cleared at the beginning of every web request. The functioning code
+is literally no more than:</p>
+
+<pre><code>module RequestStore
+  def self.store
+    Thread.current[:request_store] ||= {}
+  end
+
+  def self.clear!
+    Thread.current[:request_store] = {}
+  end
+end
+</code></pre>
+
+<p>and</p>
+
+<pre><code>module RequestStore
+  class Middleware
+    def initialize(app)
+      @app = app
+    end
+
+    def call(env)
+      RequestStore.clear!
+      @app.call(env)
+    end
+  end
+end
+</code></pre>
+
+<p>and then you&#8217;d write in your app code:</p>
+
+<pre><code>def index
+  RequestStore.store[:foo] ||= 0
+  RequestStore.store[:foo] += 1
+  render :text =&gt; RequestStore.store[:foo]
+end
+</code></pre>
+
+<p>so you still have to use <code>||=</code> to initialize values but you have the
+guarantee that a previous value doesn&#8217;t stick around.</p>
+
+<h3>Deadlock detected</h3>
+
+<pre><code>1.9.3p484 :004 &gt; Thread.current.join
+fatal: deadlock detected
+</code></pre>
+
+<p>Dur.</p>
+
+<h3>POSIX: Portable Operating System Interface</h3>
+
+<p>I had no idea what this was. It always &#8220;the thing that has something to
+do with linux/unix and has opinions about utilities that you might find
+both on linux and Mac OS&#8221;.</p>
+
+<p>It&#8217;s a family of standards specified by the IEEE, specifically IEEE
+1003. Linux, UNIX, and Mac OS X are POSIX-compliant, I believe, but what
+does that mean?</p>
+
+<p><a href="http://stackoverflow.com/questions/1780599/i-never-really-understood-what-is-posix">good SO question</a></p>
+
+<p><a href="http://pubs.opengroup.org/onlinepubs/9699919799/">Readable POSIX Standard</a></p>
+
+<p>The C programming language was standardized by POSIX, also BSD variant
+exists.</p>
+
+<h3>Difference b/w linux and unix</h3>
+
+<p><a href="http://www.cyberciti.biz/faq/what-is-the-difference-between-linux-and-unix/">Source</a></p>
+
+<p>UNIX is a copyrighted name; most UNIX system sare commercial in nature.
+Open Group holds UNIX trademark.</p>
+
+<p>Linux is a UNIX clone created by Linus Torvalds and aims for POSIX
+compliance.</p>
+
+<p>Linux is just a kernel; everything else that goes into a Linux distro is
+GUI systems and GNU utilities, filled in by third parties, whereas with
+a UNIX OS, everything comes from a single source/vendor so it&#8217;s
+considered a &#8220;complete operating system&#8221;.</p>
+
+<p>Linux is free, redistributable under GNU licenses. Most UNIX-like
+systems not free, w OpenSolaris as exception. But some Linux systems
+are accompanied by Linux support, consultancy, bug fixing, and training
+for additional fees, e.g. Redhat.</p>
+
+<p>Some UNIX OS&#8217;s</p>
+
+<ul>
+<li>HP-UX</li>
+<li>IBM AIX</li>
+<li>Sun Solaris</li>
+<li>Mac OS X (the X emphasizes relation w UNIX)</li>
+<li>IRIX</li>
+</ul>
+
+
+<p>Some Linux Distributions</p>
+
+<ul>
+<li>Redhat Enterprise Linux</li>
+<li>Fedora Linux</li>
+<li>Debian Linux</li>
+<li>Suse Enterprise Linux</li>
+<li>Ubuntu Linux</li>
+</ul>
+
+
+<p>Commonalities b/w Unix and Linux</p>
+
+<ul>
+<li>GUI, file, windows manager</li>
+<li>Shells (ksh, csh, bash)</li>
+<li>Various office apps (open office)</li>
+<li>Development tools (perl, php, python, GNU C/C++ compilers)</li>
+<li>POSIX interface (wat? i guess this means both are POSIX compliant)</li>
+</ul>
+
+
+<p><a href="http://en.wikipedia.org/wiki/File:Unix_history.svg">Unix History graphic</a></p>
+
+<h3>IEEE: Institute of Electrical and Electronics Engineers</h3>
+
+<p>A professional association with corp office in NYC, dedicated to
+technical advancement and excellence. Known for their conferences,
+educational activities, and in particular their standards development.</p>
+
+<p>How do they make money? Let&#8217;s look at their
+<a href="http://sites.ieee.org/annualreport/files/2013/10/IEEE-2012-Annual-Report-Full.pdf">annual report</a>.</p>
+
+<p>Members pay dues. Full year membership is $187. They have 429,000
+members. Membership bolsters your tech career, I guess. Hear about
+conferences n shit.</p>
+
+<p>$406M in revenue, mostly in periodicals and conferences, then
+membership, then standards, then other things.</p>
+
+<p>So how do they make money off of standards? Someone approaches them and
+says &#8220;hey you usually do a good job on this stuff; we&#8217;ll pay you to help
+out on these standards?&#8221;</p>
+
+<p><a href="http://standards.ieee.org/develop/process.html">what a nice resource</a></p>
+
+<blockquote><p>The development of a new standard is typically triggered by a formal request, submitted to an SDO (Standards Development Organization) by a Sponsoring Body (individual or entity, such as an industry society) for review and evaluation. The SDO mandates, oversees, and helps facilitate the process for standards development. The Sponsor for the standards project assumes responsibility for the respective area of standards development, including the organization of the standards development team and its activities.</p></blockquote>
+
+<p><a href="http://standards.ieee.org/develop/projstart.html">then there&#8217;s this</a></p>
+
+<ul>
+<li>An idea or concept needs to be standardized</li>
+<li>Sponsorship organization comes along to coalesce the ideas of
+individuals and to financially back the standardization process.</li>
+</ul>
+
+
+<p>What are some of their most &#8220;popular&#8221; standards? These are based on the
+Wikipedia search autocomplete of &#8220;IEEE &#8220;:</p>
+
+<ul>
+<li>IEEE 802.11: MAC (media access control) and physical layer (PHY) specs
+for implementing wireless LAN (WLAN) in certain frequency bands. IEEE
+802 is the</li>
+<li>IEEE 802.11g-2003 et al: enhancements to the original spec, expanding
+to other frequencies.</li>
+<li>IEEE 1394: FireWire</li>
+<li>IEEE 1003: POSIX</li>
+</ul>
+
+
+<p>&#8220;IEEE 802&#8221; refers to the family of standards dealing with LAN. Different
+suffixes refer to different standards (rather than versions of
+standards).</p>
+
+<p>Also, when an amendment comes out, e.g. 802.11g-2003, it is
+revoked when fully incorporated into the main standard, but
+manufacturers will still refer to the amendment code as a means to
+concisely advertise a product&#8217;s capability:</p>
+
+<blockquote><p>While each amendment is officially revoked when it is incorporated in the latest version of the standard, the corporate world tends to market to the revisions because they concisely denote capabilities of their products. As a result, in the market place, each revision tends to become its own standard.</p></blockquote>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T15:42:00-04:00" pubdate data-updated="true">May 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/26/daily-journal/">
 		
 			Daily Journal</a>
@@ -1602,85 +1984,6 @@ https://github.com/json-api/json-api/pull/123/files#r12265234</li>
 	<a class='category' href='/blog/categories/das/'>DAS</a>
 
 </div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/01/daily-journal-2/">
-		
-			Daily Journal 2</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Cryptoballs</h2>
-
-<pre><code>openssl speed rsa
-openssl speed aes
-</code></pre>
-
-<h3>RSA</h3>
-
-<p>Encryption key is public. Decryption key is secret.
-Used for generating symmetric key in TLS.</p>
-
-<p>AES is way faster (TODO: wat?).</p>
-
-<h2>Active-model serializers</h2>
-
-<p>How do tell an attribute to use a serializer?</p>
-
-<p>Trick question: you don&#8217;t; rather, if it has a serializer, it&#8217;s probably
-an association, not an attribute, so you probably want something like</p>
-
-<pre><code>has_many :action_items, serializer: ActionItemSerializer
-has_one :originator, serializer: OriginatorSerializer
-</code></pre>
-
-<p>and in both cases you can probably remove <code>serializer</code> once you de-stub
-<code>action_items</code> and <code>originator</code>.</p>
-
-<h2>QUnit filter</h2>
-
-<p>In Mocha JS test suites if you click a suite header, it&#8217;ll run tests
-only from that module or children by way of a <code>grep=blahlbahbl</code> query
-param. I&#8217;m using <a href="https://github.com/square/qunit-bdd">qunit-bdd</a>, which
-is a layer over QUnit, which generates a bunch of concatenated module
-names based on the nested <code>describe</code>s and <code>context</code>s, which doesn&#8217;t let
-you easily run all the nested child modules of a top-level describe if
-you&#8217;re used to using the Module dropdown on the upper right.</p>
-
-<p>If you want to run a family of describe modules, you can manually
-provide a <code>filter</code> query param, e.g.:</p>
-
-<pre><code>http://localhost:4200/tests?filter=LiveQuery
-</code></pre>
-
-<p>This runs all modules w &#8220;LiveQuery&#8221; is part of their name.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-01T22:46:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
-	
 
 
 	

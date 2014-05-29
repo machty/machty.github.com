@@ -112,6 +112,56 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/">
+		
+			Stubbing Date::valueOf for Benefit of Make Great Good Determinism</a>
+	</h2>
+	<div class="entry-content">
+		<p>Quick thing: if you ever find yourself in the situation of writing
+JavaScript test cases that involve <code>setTimeout</code> or some other timer
+logic where the order of timers firing is the subject of testing, you
+might find this trick handy to get rid of brittle, non-deterministic
+test cases.</p>
+
+<p>In short, you can stub out the <code>Date</code> class&#8217;s <code>valueOf</code> method to return
+a value you expect for the duration of the test case.</p>
+
+
+		
+		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-24T13:20:00-04:00" pubdate data-updated="true">Mar 24<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/javascript/'>JavaScript</a>, <a class='category' href='/blog/categories/determinism/'>determinism</a>, <a class='category' href='/blog/categories/testing/'>testing</a>, <a class='category' href='/blog/categories/valueof/'>valueOf</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/">
 		
 			NYC Ember.js Meetup Run Loop Slides</a>
@@ -571,59 +621,6 @@ framework.</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/spree/'>spree</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">
-		
-			Scraping OpenGraph for Video Cover Images</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a site for a record company, and the folk in charge of
-the content usually just host their videos on YouTube, Vimeo, or some
-hosting service, so I needed to come up with a simple way for them to
-enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
-could be added to a gallery.</p>
-
-<p>This site also does a lot of magical things with images that
-require us to know ahead of time the dimensions of the images we&#8217;re working with,
-so it was also important for us to be able to store the thumbnail for the video internally
-(and also allow this automatically selected thumbnail to be overridden
-with an image of their choice).</p>
-
-
-		
-		<a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-23T21:35:00-04:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/opengraph/'>OpenGraph</a>, <a class='category' href='/blog/categories/video/'>video</a>, <a class='category' href='/blog/categories/vimeo/'>vimeo</a>, <a class='category' href='/blog/categories/youtube/'>youtube</a>
 
 </div>
 

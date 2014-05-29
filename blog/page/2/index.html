@@ -112,6 +112,85 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/01/daily-journal-2/">
+		
+			Daily Journal 2</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Cryptoballs</h2>
+
+<pre><code>openssl speed rsa
+openssl speed aes
+</code></pre>
+
+<h3>RSA</h3>
+
+<p>Encryption key is public. Decryption key is secret.
+Used for generating symmetric key in TLS.</p>
+
+<p>AES is way faster (TODO: wat?).</p>
+
+<h2>Active-model serializers</h2>
+
+<p>How do tell an attribute to use a serializer?</p>
+
+<p>Trick question: you don&#8217;t; rather, if it has a serializer, it&#8217;s probably
+an association, not an attribute, so you probably want something like</p>
+
+<pre><code>has_many :action_items, serializer: ActionItemSerializer
+has_one :originator, serializer: OriginatorSerializer
+</code></pre>
+
+<p>and in both cases you can probably remove <code>serializer</code> once you de-stub
+<code>action_items</code> and <code>originator</code>.</p>
+
+<h2>QUnit filter</h2>
+
+<p>In Mocha JS test suites if you click a suite header, it&#8217;ll run tests
+only from that module or children by way of a <code>grep=blahlbahbl</code> query
+param. I&#8217;m using <a href="https://github.com/square/qunit-bdd">qunit-bdd</a>, which
+is a layer over QUnit, which generates a bunch of concatenated module
+names based on the nested <code>describe</code>s and <code>context</code>s, which doesn&#8217;t let
+you easily run all the nested child modules of a top-level describe if
+you&#8217;re used to using the Module dropdown on the upper right.</p>
+
+<p>If you want to run a family of describe modules, you can manually
+provide a <code>filter</code> query param, e.g.:</p>
+
+<pre><code>http://localhost:4200/tests?filter=LiveQuery
+</code></pre>
+
+<p>This runs all modules w &#8220;LiveQuery&#8221; is part of their name.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-01T22:46:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/01/daily-journal/">
 		
 			Daily Journal</a>
@@ -843,56 +922,6 @@ definitely appreciate a pull request.</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/ember-js/'>Ember.js</a>, <a class='category' href='/blog/categories/jeopardy/'>Jeopardy</a>, <a class='category' href='/blog/categories/meetup/'>Meetup</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/">
-		
-			Stubbing Date::valueOf for Benefit of Make Great Good Determinism</a>
-	</h2>
-	<div class="entry-content">
-		<p>Quick thing: if you ever find yourself in the situation of writing
-JavaScript test cases that involve <code>setTimeout</code> or some other timer
-logic where the order of timers firing is the subject of testing, you
-might find this trick handy to get rid of brittle, non-deterministic
-test cases.</p>
-
-<p>In short, you can stub out the <code>Date</code> class&#8217;s <code>valueOf</code> method to return
-a value you expect for the duration of the test case.</p>
-
-
-		
-		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-24T13:20:00-04:00" pubdate data-updated="true">Mar 24<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/javascript/'>JavaScript</a>, <a class='category' href='/blog/categories/determinism/'>determinism</a>, <a class='category' href='/blog/categories/testing/'>testing</a>, <a class='category' href='/blog/categories/valueof/'>valueOf</a>
 
 </div>
 
