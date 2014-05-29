@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-05-29T10:55:27-04:00</updated>
+  <updated>2014-05-29T12:00:44-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -365,6 +365,25 @@ manufacturers will still refer to the amendment code as a means to
 concisely advertise a product&#8217;s capability:</p>
 
 <blockquote><p>While each amendment is officially revoked when it is incorporated in the latest version of the standard, the corporate world tends to market to the revisions because they concisely denote capabilities of their products. As a result, in the market place, each revision tends to become its own standard.</p></blockquote>
+
+<h3>Pass a return value to &#8220;break&#8221; in Ruby</h3>
+
+<p><img src="http://f.cl.ly/items/0Q311t0Y1R2v1O29081u/Image%202014-05-29%20at%2011.51.58%20AM.png" alt="twitter convo" /></p>
+
+<pre><code>[1,2,3].map { |i| break "shit" } # =&gt; "shit"
+</code></pre>
+
+<p>More generally:</p>
+
+<pre><code>def foo
+  yield
+  "shit"
+end
+
+foo { break "naw" } # =&gt; "naw"
+</code></pre>
+
+<p><code>break x</code> means &#8220;force the method that yielded me to return x&#8221;.</p>
 ]]></content>
   </entry>
   
