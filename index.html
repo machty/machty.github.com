@@ -112,6 +112,565 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/06/29/social-media-triggers/">
+		
+			Social Media Triggers</a>
+	</h2>
+	<div class="entry-content">
+		<p>I&#8217;ve enjoyed about a week away from Twitter, and hope to prolong this
+hiatus. Twitter isn&#8217;t consistent with a lot of the lifestyle
+changes I&#8217;ve been nagging myself to make. Twitter is snack drawer
+positioned arms-reach away from the bed of someone trying to maintain a
+diet. It&#8217;s a total trigger for me to retrogress into class clown attention
+whore behavior I&#8217;ve been exhibiting since I was 5. So I&#8217;m on a break.</p>
+
+<p>Twitter encourages me to project a public facade of empty-headed
+buffoonery fueled by zany sarcasm and Photoshop. The last few months,
+I&#8217;ve had various opportunities to meet in person people who only know me
+by this facade, and it&#8217;s draining and depressing to keep it up in
+person.</p>
+
+<p>So I&#8217;m on a break. I&#8217;ve rediscovered distraction-free boredom. And it&#8217;s
+been glorious. I play music again. I sing. When I get frustrated in my
+endeavors to improve at my hobbies or my crafts, I have one less
+mindless outlet distracting me away from pushing through the difficult
+moments. Maybe I&#8217;ll return to Twitter when I have an album to promote.
+Or something worth talking about.</p>
+
+<p>This is where I&#8217;m supposed to apologize for a serious post.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-29T19:00:00-04:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/social-media/'>social media</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/06/20/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Push Notifications</h2>
+
+<p>Apple uses APNS (Apple Push Notification Service) and Android uses
+GCM (Google Cloud Message). Compare/contrast:</p>
+
+<p>Apple:
+- Max payload size: 256 bytes
+- When the app is inactive:
+  - Read <code>aps</code> hash:</p>
+
+<pre><code>- Display `alert`
+- Play `sound`
+- Update app's `badge` number
+</code></pre>
+
+<p>Android
+- Max payload size: 4096 bytes
+- Has no <code>badge</code> option
+- Supports <code>collapse_key</code> to collapse identical messages, like &#8220;New
+  Mail&#8221; messages, which only need to be responded to once, and require
+  only one server fetch.</p>
+
+<p>About payload size: this includes all the JSON padding. The smallest
+message is an empty message, represented by the following payload:</p>
+
+<pre><code>{"aps":{"alert":""}}
+</code></pre>
+
+<p>This is 20 chars/bytes, meaning you have 236 bytes left for a message.
+But push notification payloads often include a badge number, and an
+alert to play.</p>
+
+<p>Source: <a href="http://stackoverflow.com/a/6308462/914123">this lovely SO</a></p>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html">From the docs</a>:</p>
+
+<blockquote><p>If the target application isn’t running when the notification
+arrives, the alert message, sound, or badge value is played or
+shown. If the application is running, the system delivers the
+notification to the application delegate as an NSDictionary
+object. The dictionary contains the corresponding Cocoa
+property-list objects (plus NSNull).</p></blockquote>
+
+<h2>DAS: Boundaries</h2>
+
+<p>https://www.destroyallsoftware.com/talks/boundaries</p>
+
+<p>Integration tests a scam because:
+- if 50 conditionals in your app, 2<sup>50</sup> paths, and no way to
+- as code grows, time of each test grows (due to more setup, DB stuff,
+  etc)</p>
+
+<h2><code>after_commit</code></h2>
+
+<p>This is a hook available within <code>ActiveRecord::Base</code> subclasses
+that let you run some code post-transaction. I was confused by this
+because a lot of the examples made it seem like you could just
+run a method called <code>after_commit</code> in controller code or something,
+but nay.</p>
+
+<p>Controller code isn&#8217;t run in a transaction; transactions are only
+automatic within <code>.save</code>.</p>
+
+<h2>Sidekiq serializers params via JSON.dump</h2>
+
+<p>This answers my question as to whether symbolized keys are preserved
+when passing hash args to a Sidekiq worker: JSON.dump turns string
+keys into symbols.</p>
+
+<h2>Difference between <code>Fiber#resume</code> and <code>transfer</code></h2>
+
+<p>Both will transfer control to the fiber you call it on; the difference
+is that if that new fiber calls yield, it</p>
+
+<pre><code>f0 
+  f1.resume
+    Fiber.yield
+</code></pre>
+
+<p>FUCK! i don&#8217;t know. TODO come back to this.</p>
+
+<p>Followup: transfer transfers control to another Fiber. The transfer-er
+doesn&#8217;t necessarily expect to get returned to, so if the transfer-ee
+yields, it&#8217;ll yield the value back to whoever spawned the transfer-er,
+rather than return control back to the transfer-er. It&#8217;s mega fucking
+confusing.</p>
+
+<p>Also, you have to <code>require 'fiber'</code> to even use this shit.</p>
+
+<h2>~~2.5 in js</h2>
+
+<pre><code>~~2.5  // 2
+~~2    //-3
+~~-4.2 // 4
+</code></pre>
+
+<p>Removes everything to the right of the decimal point, so it&#8217;s like
+Math.floor except Math.floor doesn&#8217;t remove stuff to the right of the
+decimal point for negative numbers.</p>
+
+<h2><code>void</code> operator</h2>
+
+<p><code>void 0</code> or <code>void(0)</code> evaluates the expression and then returns
+undefined. So I could do <code>void (anyNumberOfBullshits())</code> and it&#8217;d be
+undefined. Compared to just writing undefined, it:</p>
+
+<ul>
+<li>works even if <code>undefined</code> (a variable) has been redefined</li>
+<li>is shorter than writing <code>undefined</code></li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-20T10:44:00-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/06/03/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3><code>&lt;base&gt;</code> tag</h3>
+
+<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base">MDN</a>:</p>
+
+<blockquote><p>The HTML Base Element (<code>&lt;base&gt;</code>) specifies the base URL to use for
+all relative URLs contained within a document. There is maximum
+one <code>&lt;base&gt;</code> element in a document.</p></blockquote>
+
+<p>You can also specify the target for all links in the base tag. Crazy?</p>
+
+<p>http://jsbin.com/tedik/1/edit</p>
+
+<p>Note that it also supports values like &#8220;../&#8221;, which is how I got my
+ember-cli tests.html to work when I got rid of the base url config.</p>
+
+<h3>bootleg</h3>
+
+<blockquote><p>(esp. of liquor, computer software, or recordings) made,
+distributed, or sold illegally: bootleg cassettes | bootleg whiskey.</p></blockquote>
+
+<h3>Ember proto CPs</h3>
+
+<p>You can get the proto of an Ember class via <code>Klass.proto()</code> and
+you can even invoke its CPs, but where are they cached? Answer: on the
+meta of the prototype, and invoking the CP on an instance of that class
+will not reuse that cache but rather use its own instance cache.</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5351/edit</p>
+
+<p>Later realization: <em>obviously</em> it had to work this way. What, would all
+instances just magically share the proto cached CP value? That&#8217;s
+idiotic.</p>
+
+<h3>CrossWalk</h3>
+
+<p>Like Cordova but you get your own browser runtime, so no platform
+browser discrepancies.</p>
+
+<p>https://crosswalk-project.org/#documentation/about</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T11:57:00-04:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/31/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Git relative revisions</h3>
+
+<pre><code>git checkout 08h398se~1 
+</code></pre>
+
+<h3>Lazy CPs stripped down examples</h3>
+
+<p>Observing a CP requires consuming it with a get
+before its observers will fire upon change:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5200/edit</p>
+
+<p>But, for some reason, future changes to that property
+don&#8217;t fire that observer:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5203/edit</p>
+
+<p>This is because firing the observer tears down the chain
+nodes unless they&#8217;re activated again by future gets:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5204/edit</p>
+
+<p>But firing the observer tears down the chain
+nodes, so future fires also need to be preceded by
+a get to make the observer alive again:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5201/edit</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5198/edit</p>
+
+<pre><code>// CRUCIAL REALIZATION!!!! THIS IS HOW OBSERVERS
+// STAY LIVE IN VIEWS; RE-RENDERED METAMORPH TEMPLATES
+// CALL .get() to get the LATEST VALUE OF THE FUCK.
+// BUT GENERALLY SPEAKING YOU JUST NEED TO CALL .GET()
+// ON THE THING TO MAKE IT ALIVE AGAIN!
+http://emberjs.jsbin.com/ucanam/5208/edit
+
+
+
+/*
+Ember.addObserver(pojo, 'foo', function() {
+  console.log('foo observer fired');
+});
+*/
+
+
+
+// These additional changes
+// don't fire the fooAlias
+// observer, unless we continue
+// consuming (uncomment the stuff)
+//Ember.get(pojo, 'fooAlias');
+Ember.set(pojo, 'foo', 7);
+//Ember.get(pojo, 'fooAlias');
+Ember.set(pojo, 'foo', 8);
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-31T13:03:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/31/ember-meta/">
+		
+			Ember Meta</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Ember Meta</h3>
+
+<p><em>This will start off in my typical meandering daily journal form and
+hopefully evolve into something good enough for an ARCHITECTURE.md</em></p>
+
+<p>Ember&#8217;s internals make heavy use of meta objects, which are generated
+and attached to objects in order to keep track of bindings, computed
+properties, observers, and all sorts of other things evolving Ember magic.</p>
+
+<h4><code>EMPTY_META</code></h4>
+
+<p><code>EMPTY_META</code> is a default, empty meta object that represents an object
+with no observers, bindings, or computed properties.</p>
+
+<p><code>Ember.meta</code> is the function that takes an object and returns its meta
+object; asking Ember.meta for a read-only meta object for a POJO
+will return <code>Ember.EMPTY_META</code></p>
+
+<pre><code>Ember.meta({}, false) === Ember.EMPTY_META // true
+
+http://emberjs.jsbin.com/ucanam/5173/edit
+</code></pre>
+
+<p>This is an optimization that lets us pretend as if every object in
+Emberland had a meta object, simplifying our binding/observer algorithms
+while not wastefully generating meta objects for objects that don&#8217;t need
+their own separate copies. It&#8217;s a form of copy-on-write.</p>
+
+<pre><code>var pojo = {
+  foo: 'wat'
+};
+
+console.assert(Ember.meta(pojo, false) === Ember.EMPTY_META);
+
+// Add a computed property, which requires writing to meta.
+Ember.defineProperty(pojo, 'fooAlias', Ember.computed.alias('foo'));
+
+console.assert(Ember.get(pojo, 'foo') === 'wat');
+
+var newMeta = Ember.meta(pojo, false)
+
+console.assert(newMeta !== Ember.EMPTY_META);
+
+// http://emberjs.jsbin.com/ucanam/5176/edit
+</code></pre>
+
+<h4><code>META_DESC</code></h4>
+
+<p>This is the ES5 descriptor for the property stashed on an object that
+points to its meta object:</p>
+
+<pre><code>{
+  writable: true,
+  configurable: false,
+  enumerable: false,
+  value: null
+};
+</code></pre>
+
+<p>This makes the property non-enumerable, which is why the meta object
+won&#8217;t show up when iterating over an object with <code>for..in</code>.</p>
+
+<h4>Meta obj structure</h4>
+
+<p><code>EMPTY_META</code> is just <code>new Meta(null)</code>, and here&#8217;s the meta structure:</p>
+
+<pre><code>Meta.prototype = {
+  // Set to {} by constructor
+
+    // dictionary of all Ember.Descriptor properties
+    // defined on for the obj, e.g computed properties
+    descs: null,    
+
+    // dictionary of properties on the object that are
+    // being observed, where the key is the observed
+    // property name and the value is the number of
+    // active observers of this property.
+    // e.g. meta.watching.foo === 2 means that two
+    // observers are watching obj.foo for changes.
+    watching: null,
+
+    // TODO
+    cache: null,
+
+    // TODO
+    cacheMeta: null,
+
+    // The owner of this meta object; important to keep track
+    // of because when prototypal inheritance is involved, a
+    // child object will initially point to the same meta obj
+    // as its prototype, even though they should have separate
+    // meta obj. `Ember.meta()` detects this by checking to see
+    // if meta.source equals the passed in object, and if not,
+    // it generates a new meta object
+    source: null,
+
+  // Left as null by constructor
+  deps: null,
+  listeners: null,
+  mixins: null,
+  bindings: null,
+  chains: null,
+  chainWatchers: null,
+  values: null,
+
+  // The prototype of source
+  //   meta.proto.isPrototypeOf(meta.source) // true
+
+
+  proto: null
+};
+
+//    ret = o_create(ret);
+//    ret.descs     = o_create(ret.descs);
+
+// why is this o_create? 
+// if proto.foo is being watched, and obj.foo is overwritten
+// to some other value, then it's definitely disconnected at
+// that point, right? Even if it's not overwritten, if you have
+// 
+// proto = {
+// }
+// 
+//    ret.watching  = o_create(ret.watching);
+//    ret.cache     = {};
+//    ret.cacheMeta = {};
+//    ret.source    = obj;
+
+// TODO: categorize this realization
+// removeDependentKeys calls iterDeps, which loops
+// over deps[propName] &gt; 0,
+// and then the cp.didChange method decrements
+// the deps in the meta in removeDependentKeys();
+// this method is called in two places:
+// - didChange()
+// - teardown()
+// 
+// note that it doesn't do this for non-cacheables CPs.
+</code></pre>
+
+<p>If CP#didChange removes dependent keys, who adds it back in template situations?
+The view that was installed will call get() on that CP, and .get() on a cacheable property will call addDependentKeys</p>
+
+<p>So the rule is that if you want an observer be/stay alive, you need to
+call get on that changed prop. AH HA.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-31T07:27:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-metal/'>ember-metal</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/28/daily-journal/">
 		
 			Daily Journal</a>
@@ -1509,624 +2068,6 @@ reduced CP, but why not use the Array Computed API for that?</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/19/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Active Model: GlobalID</h2>
-
-<p>https://github.com/rails/activemodel-globalid/</p>
-
-<p>GlobalID is a way of serializing a model into a string so that
-it can be looked up later; rather than serializing all of the
-object&#8217;s data into a string, you merely serialize just enough
-information so that you can look up the rest.</p>
-
-<p>I&#8217;m already doing something similar with model dep state in Ember,
-only extending it such that part of the &#8220;GlobalID&#8221;, which we&#8217;ll
-use internally for binding into a cache bucket, might be a prefixing
-controller name to uniquely identify a cache bucket to a specific
-controller, but in cases where you want to share information about
-a model with other controllers, you&#8217;d leave this prefix off.</p>
-
-<p>Anyway, nice to see other folk arriving at a similar thing, though
-I personally wouldn&#8217;t call this sort of thing &#8220;serializing&#8221; but rather
-&#8220;paramaterizing&#8221;, since you&#8217;re not actually storing all the data in
-string form but just enough to uniquely identify it so that some
-other operation can restore the object.</p>
-
-<h2>Strings have read-only props in &#8220;use strict&#8221; Safari</h2>
-
-<p>The following throws an exception only in Safari (not Chrome or FF):</p>
-
-<pre><code>(function(){"use strict"; ("a").b = 'writing to a string'; })();
-TypeError: Attempted to assign to readonly property.
-</code></pre>
-
-<p>But not if you leave off the &#8220;use strict&#8221;.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-19T07:38:00-04:00" pubdate data-updated="true">May 19<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/global-id/'>global id</a>, <a class='category' href='/blog/categories/use-strict/'>use strict</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/15/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Uniform Type Identifiers</h2>
-
-<p>Turns out I never understood why Java and other languages/frameworks
-embraces this style of &#8220;com.domain.somepackage&#8221;. First off, this is
-called <a href="http://en.wikipedia.org/wiki/Reverse_domain_name_notation">Reverse domain name notation</a>.</p>
-
-<p>The purpose of this naming convention is two-fold:</p>
-
-<h4>Avoids naming collisions from two different vendors</h4>
-
-<p>By prefixing the package name with any sort of
-unique identifier, &#8220;SOME-PREFIX-A.packageName&#8221; won&#8217;t conflict with
-&#8220;SOME-PREFIX-B.packageName&#8221;.</p>
-
-<h4>Sensible sort order / grouping</h4>
-
-<p>You want packages from the same
-vendor to be grouped together in sensible way; if you use the <code>apple</code>
-and <code>carrots</code> packages from <code>food.somevendor.com</code> and the <code>bikes</code> package
-from <code>things.somevendor.com</code>, if you didn&#8217;t reverse the domain order, you might
-end up with the following folder structure</p>
-
-<pre><code>food/
-  somevendor/
-    com/
-      apple
-      carrots
-things/
-  somevendor/
-    com/
-      bikes
-</code></pre>
-
-<p>This is undesirable since you can&#8217;t tell from this structure that apple,
-bikes, and carrots all come from somevendor. Also, you there&#8217;s a
-needless repetition of the <code>somevendor/com</code> path in both directory
-trees. If the domain name were inverted, you&#8217;d end up with:</p>
-
-<pre><code>com/
-  somevendor/
-    food/
-      apple
-      carrots
-    things/
-      bikes
-</code></pre>
-
-<p>Less folders, less repetition, and more information is being conveyed.</p>
-
-<p>Another way to think about it is that domain names are somewhat
-backwards; we know that <code>.com</code>, <code>.net</code>, and
-<a href="http://sandwich.technology"><code>.technology</code></a> are top-level domains (TLD),
-but how/why is something top level appended at the end of a name? It
-definitely makes domain names with subdomains harder to sort in a
-meaningful way. I guess there&#8217;s probably a good reason for this, worth
-investigating in another journal entry.</p>
-
-<p>Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123</p>
-
-<h2>LevelDB</h2>
-
-<ul>
-<li>require(&#8216;leveldbdatabase&#8217;)</li>
-<li>key value pair</li>
-<li>scales, web scale</li>
-<li>PolicyMic is sponsoring folk to work on it</li>
-<li>IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol</li>
-</ul>
-
-
-<h2>Vim: Visual Line</h2>
-
-<p>Shift-V in vim goes into visual line mode, which means you select entire
-lines for yanking/cutting, rather than having to precisely position your
-cursor at the beginning or end of a line so as to not accidentally yank/cut
-only part of a line.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-15T11:38:00-04:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/uniform-type-identifiers/'>Uniform Type Identifiers</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/13/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Sharing ignored blank password fields in ActiveAdmin</h2>
-
-<p>I use ActiveAdmin for some stuff, and often you want to update
-some resource while leaving its password the same, but if you have
-a password field on the form, the form will POST with empty password
-and empty confirmation you&#8217;ll get a validation error from an empty
-password. You can override this with a <code>controller</code> block in your
-ActiveAdmin resource config via:</p>
-
-<pre><code>controller do
-  def update
-    param_obj = params['admin_user']
-    if param_obj[:password].blank?
-      param_obj.delete("password")
-      param_obj.delete("password_confirmation")
-    end
-    super
-  end
-end
-</code></pre>
-
-<p>But if you have multiple Devise-esque resources with passwords, it&#8217;d be
-nice to share this with multiple resources. It&#8217;s a bit tricky to solve
-this with idiomatic Ruby since you&#8217;re already in ActiveAdmin&#8217;s DSL land,
-but the following works:</p>
-
-<p><code>/lib/admin/ignore_blank_password.rb</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Admin</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">IgnoreBlankPassword</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ignore</span><span class="p">(</span><span class="n">dsl</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">dsl</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">controller</span> <span class="k">do</span>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">update</span>
-</span><span class='line'>            <span class="n">param_key</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">model_name</span><span class="o">.</span><span class="n">param_key</span><span class="o">.</span><span class="n">to_sym</span>
-</span><span class='line'>            <span class="n">param_obj</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="n">param_key</span><span class="o">]</span>
-</span><span class='line'>            <span class="k">if</span> <span class="n">param_obj</span><span class="o">[</span><span class="ss">:password</span><span class="o">].</span><span class="n">blank?</span>
-</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password_confirmation&quot;</span><span class="p">)</span>
-</span><span class='line'>            <span class="k">end</span>
-</span><span class='line'>            <span class="k">super</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>/app/admin/admin_user.rb</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;admin/ignore_blank_password&#39;</span>
-</span><span class='line'><span class="no">ActiveAdmin</span><span class="o">.</span><span class="n">register</span> <span class="no">AdminUser</span> <span class="k">do</span>
-</span><span class='line'>  <span class="no">Admin</span><span class="o">::</span><span class="no">IgnoreBlankPassword</span><span class="o">.</span><span class="n">ignore</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-13T13:15:00-04:00" pubdate data-updated="true">May 13<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/active-admin/'>Active Admin</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/12/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Ruby <code>Module#===</code></h2>
-
-<p>Ran into <a href="https://github.com/hassox/warden/blob/master/lib/warden.rb#L33-L34">this piece of
-code</a>
-from the Warden repo:</p>
-
-<pre><code>def self.test_mode!
-  unless Warden::Test::WardenHelpers === Warden
-    Warden.extend Warden::Test::WardenHelpers
-    Warden::Manager.on_request do |proxy|
-      unless proxy.asset_request?
-        while blk = Warden._on_next_request.shift
-          blk.call(proxy)
-        end
-      end
-    end
-  end
-  true
-end
-</code></pre>
-
-<p>I hadn&#8217;t seen this usage of <code>===</code> before; I&#8217;m mostly familiar with it as
-an unidiomatic alias of <code>is_a?</code>, e.g.:</p>
-
-<pre><code>Array === []    #=&gt; true
-[].is_a?(Array) #=&gt; true
-</code></pre>
-
-<p><code>#===</code> is the Case Equality operator or
-<a href="http://stackoverflow.com/questions/4527220/3-equals-or-case-equality-operator"><em>subsumption</em> operator</a>;
-it is overridden by subclasses to provide context-specific / semantic
-meaning, for example:</p>
-
-<ul>
-<li><code>Regexp === /asd/</code> #=> true</li>
-<li><code>Fixnum === 5</code> #=> true</li>
-<li><code>Object === {}</code> #=> true</li>
-</ul>
-
-
-<p>Important things to keep in mind about <code>===</code>:</p>
-
-<ol>
-<li>It is not commutative (A===B does not imply B===A)</li>
-<li>It is a method of the object on the left side of an expression,
-e.g. <code>A===B</code> is shorthand for <code>A.===B</code> or <code>A.send(:===, //)</code></li>
-<li>It has nothing to do with equality; beware, JavaScripters.</li>
-</ol>
-
-
-<p>ANYWAY: back to the Warden example: in this case, the <code>Module</code> class has
-an instance method <code>===</code> that returns if the object on the right side
-has extended the methods on the Module that <code>===</code> is called on, so:</p>
-
-<pre><code>module M; end
-class Foo; end
-
-f = Foo.new
-M === f #=&gt; false
-
-# reopen
-class Foo
-  include M
-end
-
-M === f #=&gt; true
-</code></pre>
-
-<p>So we turned <code>===</code> from false to true by including <code>M</code> on class <code>Foo</code>.
-The Warden example is similar, except that the way the module&#8217;s methods
-were mixed in was via <code>extend</code> vs <code>include</code>. <code>extend</code> is a somewhat more
-direct form of <code>include</code> in that it can be called on instances to put
-methods directly on that instance, rather than having to open an
-instance&#8217;s class and add an <code>include</code> statement, which adds all of those
-methods to subclasses.</p>
-
-<p>So when we check</p>
-
-<pre><code>  Warden::Test::WardenHelpers === Warden
-</code></pre>
-
-<p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
-&#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T13:14:00-04:00" pubdate data-updated="true">May 12<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ruby/'>Ruby</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/04/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Vim surround</h2>
-
-<p>https://github.com/tpope/vim-surround</p>
-
-<ul>
-<li>ysiw] : surround a word in ]</li>
-<li>ysiW] : surround a chunk word in ]</li>
-<li>cs&#8221;&#8217; : change surrounding &#8221; to &#8217;</li>
-<li>ds&#8221; : delete surrounding &#8221;</li>
-<li>yss( : wrap line in parens</li>
-</ul>
-
-
-<h2>DAS: Conflicting Principles</h2>
-
-<ul>
-<li>User/profile/account
-
-<ul>
-<li>All this other stuff that relates to that single giant model</li>
-</ul>
-</li>
-<li>User
-
-<ul>
-<li><code>disable!</code></li>
-<li><code>send_disable_notication</code></li>
-</ul>
-</li>
-<li>Law of demeter
-
-<ul>
-<li>Motivation for decomposition</li>
-<li>move controller logic to model <code>enforce_good_standing!</code></li>
-</ul>
-</li>
-<li>User model will get huge; lots of complexity there.</li>
-<li>Pull out service classes, e.g. GoodStandingPolicy, or
-AccountStandingPolicy
-
-<ul>
-<li><code>#initialize(user)</code></li>
-<li><code>enforce!</code>
-
-<ul>
-<li>still breaks law of demeter.</li>
-<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
-<li>but this breaks Tell Don&#8217;t Ask
-
-<ul>
-<li>TDA means asking an object about properties and deciding what to
-do instead of telling it to do things and giving it enough info
-to do so.</li>
-</ul>
-</li>
-<li>TDA vs Single Responsibility Principle (SRP)?
-
-<ul>
-<li>If you follow TDA, you end up putting responsibility back into
-User class, but now User class has much responsibility</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Pick one: SRP often makes sense</li>
-</ul>
-
-
-<h2>DAS: Wrapping Third Party APIs</h2>
-
-<ul>
-<li>e.g. accepting Braintree payment from secure redirect back to your
-site with data in QPs</li>
-<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
-<li>Goal: move traversal of these objs to a different class.</li>
-<li>Spec
-
-<ul>
-<li>Had to stub deeply nested crap</li>
-</ul>
-</li>
-<li>TDD
-
-<ul>
-<li>it &#8220;konws the newest credit card&#8221;</li>
-<li>qp is a stub</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Pend-out an Rspec test</h2>
-
-<pre><code>it "does something" {}
-</code></pre>
-
-<p>can be made pending via <code>xit</code></p>
-
-<pre><code>xit "does something" {}
-</code></pre>
-
-<h2>Cisgender</h2>
-
-<p>http://en.wikipedia.org/wiki/Cisgender</p>
-
-<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
-related types of gender identity where an individual&#8217;s experience of
-their own gender matches the sex they were assigned at birth.</p></blockquote>
-
-<h2>Hypermedia API</h2>
-
-<p>Hyper = above</p>
-
-<p>Media = well, media, but not just hypertext because more things than
-just text can be conveyed</p>
-
-<p>Examples:</p>
-
-<ul>
-<li>http://jsonapi.org/</li>
-<li>HAL - Hypermedia Application Language</li>
-</ul>
-
-
-<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
-
-<ul>
-<li>HAL embeds child docs recursively; JSON API flattens the entire graph
-at the top level.</li>
-<li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
-<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
-https://github.com/json-api/json-api/pull/123/files#r12265234</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-04T10:11:00-04:00" pubdate data-updated="true">May 4<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/das/'>DAS</a>
 
 </div>
 

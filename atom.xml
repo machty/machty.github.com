@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-05-29T13:08:54-04:00</updated>
+  <updated>2014-06-29T19:22:15-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,418 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Social Media Triggers]]></title>
+    <link href="http://machty.github.com/blog/2014/06/29/social-media-triggers/"/>
+    <updated>2014-06-29T19:00:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/06/29/social-media-triggers</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve enjoyed about a week away from Twitter, and hope to prolong this
+hiatus. Twitter isn&#8217;t consistent with a lot of the lifestyle
+changes I&#8217;ve been nagging myself to make. Twitter is snack drawer
+positioned arms-reach away from the bed of someone trying to maintain a
+diet. It&#8217;s a total trigger for me to retrogress into class clown attention
+whore behavior I&#8217;ve been exhibiting since I was 5. So I&#8217;m on a break.</p>
+
+<p>Twitter encourages me to project a public facade of empty-headed
+buffoonery fueled by zany sarcasm and Photoshop. The last few months,
+I&#8217;ve had various opportunities to meet in person people who only know me
+by this facade, and it&#8217;s draining and depressing to keep it up in
+person.</p>
+
+<p>So I&#8217;m on a break. I&#8217;ve rediscovered distraction-free boredom. And it&#8217;s
+been glorious. I play music again. I sing. When I get frustrated in my
+endeavors to improve at my hobbies or my crafts, I have one less
+mindless outlet distracting me away from pushing through the difficult
+moments. Maybe I&#8217;ll return to Twitter when I have an album to promote.
+Or something worth talking about.</p>
+
+<p>This is where I&#8217;m supposed to apologize for a serious post.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/06/20/daily-journal/"/>
+    <updated>2014-06-20T10:44:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/06/20/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Push Notifications</h2>
+
+<p>Apple uses APNS (Apple Push Notification Service) and Android uses
+GCM (Google Cloud Message). Compare/contrast:</p>
+
+<p>Apple:
+- Max payload size: 256 bytes
+- When the app is inactive:
+  - Read <code>aps</code> hash:</p>
+
+<pre><code>- Display `alert`
+- Play `sound`
+- Update app's `badge` number
+</code></pre>
+
+<p>Android
+- Max payload size: 4096 bytes
+- Has no <code>badge</code> option
+- Supports <code>collapse_key</code> to collapse identical messages, like &#8220;New
+  Mail&#8221; messages, which only need to be responded to once, and require
+  only one server fetch.</p>
+
+<p>About payload size: this includes all the JSON padding. The smallest
+message is an empty message, represented by the following payload:</p>
+
+<pre><code>{"aps":{"alert":""}}
+</code></pre>
+
+<p>This is 20 chars/bytes, meaning you have 236 bytes left for a message.
+But push notification payloads often include a badge number, and an
+alert to play.</p>
+
+<p>Source: <a href="http://stackoverflow.com/a/6308462/914123">this lovely SO</a></p>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html">From the docs</a>:</p>
+
+<blockquote><p>If the target application isn’t running when the notification
+arrives, the alert message, sound, or badge value is played or
+shown. If the application is running, the system delivers the
+notification to the application delegate as an NSDictionary
+object. The dictionary contains the corresponding Cocoa
+property-list objects (plus NSNull).</p></blockquote>
+
+<h2>DAS: Boundaries</h2>
+
+<p>https://www.destroyallsoftware.com/talks/boundaries</p>
+
+<p>Integration tests a scam because:
+- if 50 conditionals in your app, 2<sup>50</sup> paths, and no way to
+- as code grows, time of each test grows (due to more setup, DB stuff,
+  etc)</p>
+
+<h2><code>after_commit</code></h2>
+
+<p>This is a hook available within <code>ActiveRecord::Base</code> subclasses
+that let you run some code post-transaction. I was confused by this
+because a lot of the examples made it seem like you could just
+run a method called <code>after_commit</code> in controller code or something,
+but nay.</p>
+
+<p>Controller code isn&#8217;t run in a transaction; transactions are only
+automatic within <code>.save</code>.</p>
+
+<h2>Sidekiq serializers params via JSON.dump</h2>
+
+<p>This answers my question as to whether symbolized keys are preserved
+when passing hash args to a Sidekiq worker: JSON.dump turns string
+keys into symbols.</p>
+
+<h2>Difference between <code>Fiber#resume</code> and <code>transfer</code></h2>
+
+<p>Both will transfer control to the fiber you call it on; the difference
+is that if that new fiber calls yield, it</p>
+
+<pre><code>f0 
+  f1.resume
+    Fiber.yield
+</code></pre>
+
+<p>FUCK! i don&#8217;t know. TODO come back to this.</p>
+
+<p>Followup: transfer transfers control to another Fiber. The transfer-er
+doesn&#8217;t necessarily expect to get returned to, so if the transfer-ee
+yields, it&#8217;ll yield the value back to whoever spawned the transfer-er,
+rather than return control back to the transfer-er. It&#8217;s mega fucking
+confusing.</p>
+
+<p>Also, you have to <code>require 'fiber'</code> to even use this shit.</p>
+
+<h2>~~2.5 in js</h2>
+
+<pre><code>~~2.5  // 2
+~~2    //-3
+~~-4.2 // 4
+</code></pre>
+
+<p>Removes everything to the right of the decimal point, so it&#8217;s like
+Math.floor except Math.floor doesn&#8217;t remove stuff to the right of the
+decimal point for negative numbers.</p>
+
+<h2><code>void</code> operator</h2>
+
+<p><code>void 0</code> or <code>void(0)</code> evaluates the expression and then returns
+undefined. So I could do <code>void (anyNumberOfBullshits())</code> and it&#8217;d be
+undefined. Compared to just writing undefined, it:</p>
+
+<ul>
+<li>works even if <code>undefined</code> (a variable) has been redefined</li>
+<li>is shorter than writing <code>undefined</code></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/06/03/daily-journal/"/>
+    <updated>2014-06-03T11:57:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/06/03/daily-journal</id>
+    <content type="html"><![CDATA[<h3><code>&lt;base&gt;</code> tag</h3>
+
+<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base">MDN</a>:</p>
+
+<blockquote><p>The HTML Base Element (<code>&lt;base&gt;</code>) specifies the base URL to use for
+all relative URLs contained within a document. There is maximum
+one <code>&lt;base&gt;</code> element in a document.</p></blockquote>
+
+<p>You can also specify the target for all links in the base tag. Crazy?</p>
+
+<p>http://jsbin.com/tedik/1/edit</p>
+
+<p>Note that it also supports values like &#8220;../&#8221;, which is how I got my
+ember-cli tests.html to work when I got rid of the base url config.</p>
+
+<h3>bootleg</h3>
+
+<blockquote><p>(esp. of liquor, computer software, or recordings) made,
+distributed, or sold illegally: bootleg cassettes | bootleg whiskey.</p></blockquote>
+
+<h3>Ember proto CPs</h3>
+
+<p>You can get the proto of an Ember class via <code>Klass.proto()</code> and
+you can even invoke its CPs, but where are they cached? Answer: on the
+meta of the prototype, and invoking the CP on an instance of that class
+will not reuse that cache but rather use its own instance cache.</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5351/edit</p>
+
+<p>Later realization: <em>obviously</em> it had to work this way. What, would all
+instances just magically share the proto cached CP value? That&#8217;s
+idiotic.</p>
+
+<h3>CrossWalk</h3>
+
+<p>Like Cordova but you get your own browser runtime, so no platform
+browser discrepancies.</p>
+
+<p>https://crosswalk-project.org/#documentation/about</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/05/31/daily-journal/"/>
+    <updated>2014-05-31T13:03:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/31/daily-journal</id>
+    <content type="html"><![CDATA[<h3>Git relative revisions</h3>
+
+<pre><code>git checkout 08h398se~1 
+</code></pre>
+
+<h3>Lazy CPs stripped down examples</h3>
+
+<p>Observing a CP requires consuming it with a get
+before its observers will fire upon change:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5200/edit</p>
+
+<p>But, for some reason, future changes to that property
+don&#8217;t fire that observer:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5203/edit</p>
+
+<p>This is because firing the observer tears down the chain
+nodes unless they&#8217;re activated again by future gets:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5204/edit</p>
+
+<p>But firing the observer tears down the chain
+nodes, so future fires also need to be preceded by
+a get to make the observer alive again:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5201/edit</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5198/edit</p>
+
+<pre><code>// CRUCIAL REALIZATION!!!! THIS IS HOW OBSERVERS
+// STAY LIVE IN VIEWS; RE-RENDERED METAMORPH TEMPLATES
+// CALL .get() to get the LATEST VALUE OF THE FUCK.
+// BUT GENERALLY SPEAKING YOU JUST NEED TO CALL .GET()
+// ON THE THING TO MAKE IT ALIVE AGAIN!
+http://emberjs.jsbin.com/ucanam/5208/edit
+
+
+
+/*
+Ember.addObserver(pojo, 'foo', function() {
+  console.log('foo observer fired');
+});
+*/
+
+
+
+// These additional changes
+// don't fire the fooAlias
+// observer, unless we continue
+// consuming (uncomment the stuff)
+//Ember.get(pojo, 'fooAlias');
+Ember.set(pojo, 'foo', 7);
+//Ember.get(pojo, 'fooAlias');
+Ember.set(pojo, 'foo', 8);
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Meta]]></title>
+    <link href="http://machty.github.com/blog/2014/05/31/ember-meta/"/>
+    <updated>2014-05-31T07:27:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/05/31/ember-meta</id>
+    <content type="html"><![CDATA[<h3>Ember Meta</h3>
+
+<p><em>This will start off in my typical meandering daily journal form and
+hopefully evolve into something good enough for an ARCHITECTURE.md</em></p>
+
+<p>Ember&#8217;s internals make heavy use of meta objects, which are generated
+and attached to objects in order to keep track of bindings, computed
+properties, observers, and all sorts of other things evolving Ember magic.</p>
+
+<h4><code>EMPTY_META</code></h4>
+
+<p><code>EMPTY_META</code> is a default, empty meta object that represents an object
+with no observers, bindings, or computed properties.</p>
+
+<p><code>Ember.meta</code> is the function that takes an object and returns its meta
+object; asking Ember.meta for a read-only meta object for a POJO
+will return <code>Ember.EMPTY_META</code></p>
+
+<pre><code>Ember.meta({}, false) === Ember.EMPTY_META // true
+
+http://emberjs.jsbin.com/ucanam/5173/edit
+</code></pre>
+
+<p>This is an optimization that lets us pretend as if every object in
+Emberland had a meta object, simplifying our binding/observer algorithms
+while not wastefully generating meta objects for objects that don&#8217;t need
+their own separate copies. It&#8217;s a form of copy-on-write.</p>
+
+<pre><code>var pojo = {
+  foo: 'wat'
+};
+
+console.assert(Ember.meta(pojo, false) === Ember.EMPTY_META);
+
+// Add a computed property, which requires writing to meta.
+Ember.defineProperty(pojo, 'fooAlias', Ember.computed.alias('foo'));
+
+console.assert(Ember.get(pojo, 'foo') === 'wat');
+
+var newMeta = Ember.meta(pojo, false)
+
+console.assert(newMeta !== Ember.EMPTY_META);
+
+// http://emberjs.jsbin.com/ucanam/5176/edit
+</code></pre>
+
+<h4><code>META_DESC</code></h4>
+
+<p>This is the ES5 descriptor for the property stashed on an object that
+points to its meta object:</p>
+
+<pre><code>{
+  writable: true,
+  configurable: false,
+  enumerable: false,
+  value: null
+};
+</code></pre>
+
+<p>This makes the property non-enumerable, which is why the meta object
+won&#8217;t show up when iterating over an object with <code>for..in</code>.</p>
+
+<h4>Meta obj structure</h4>
+
+<p><code>EMPTY_META</code> is just <code>new Meta(null)</code>, and here&#8217;s the meta structure:</p>
+
+<pre><code>Meta.prototype = {
+  // Set to {} by constructor
+
+    // dictionary of all Ember.Descriptor properties
+    // defined on for the obj, e.g computed properties
+    descs: null,    
+
+    // dictionary of properties on the object that are
+    // being observed, where the key is the observed
+    // property name and the value is the number of
+    // active observers of this property.
+    // e.g. meta.watching.foo === 2 means that two
+    // observers are watching obj.foo for changes.
+    watching: null,
+
+    // TODO
+    cache: null,
+
+    // TODO
+    cacheMeta: null,
+
+    // The owner of this meta object; important to keep track
+    // of because when prototypal inheritance is involved, a
+    // child object will initially point to the same meta obj
+    // as its prototype, even though they should have separate
+    // meta obj. `Ember.meta()` detects this by checking to see
+    // if meta.source equals the passed in object, and if not,
+    // it generates a new meta object
+    source: null,
+
+  // Left as null by constructor
+  deps: null,
+  listeners: null,
+  mixins: null,
+  bindings: null,
+  chains: null,
+  chainWatchers: null,
+  values: null,
+
+  // The prototype of source
+  //   meta.proto.isPrototypeOf(meta.source) // true
+
+
+  proto: null
+};
+
+//    ret = o_create(ret);
+//    ret.descs     = o_create(ret.descs);
+
+// why is this o_create? 
+// if proto.foo is being watched, and obj.foo is overwritten
+// to some other value, then it's definitely disconnected at
+// that point, right? Even if it's not overwritten, if you have
+// 
+// proto = {
+// }
+// 
+//    ret.watching  = o_create(ret.watching);
+//    ret.cache     = {};
+//    ret.cacheMeta = {};
+//    ret.source    = obj;
+
+// TODO: categorize this realization
+// removeDependentKeys calls iterDeps, which loops
+// over deps[propName] &gt; 0,
+// and then the cp.didChange method decrements
+// the deps in the meta in removeDependentKeys();
+// this method is called in two places:
+// - didChange()
+// - teardown()
+// 
+// note that it doesn't do this for non-cacheables CPs.
+</code></pre>
+
+<p>If CP#didChange removes dependent keys, who adds it back in template situations?
+The view that was installed will call get() on that CP, and .get() on a cacheable property will call addDependentKeys</p>
+
+<p>So the rule is that if you want an observer be/stay alive, you need to
+call get on that changed prop. AH HA.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -2090,226 +2502,6 @@ you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
   - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
   - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
   - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/04/16/daily-journal/"/>
-    <updated>2014-04-16T13:31:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/16/daily-journal</id>
-    <content type="html"><![CDATA[<h3>Heroku + Unicorn + Rails Logging</h3>
-
-<p>We&#8217;re using Unicorn on Heroku and would like to log just about
-everything, particularly incoming JSON request payloads, but it seemed
-like the Heroku logs (which we forward to Papertrail) weren&#8217;t properly
-logging everything the way they do with <code>rails server</code>.
-<a href="http://dave.is/unicorn.html">This article</a> points out the problem and
-offers the solution; specifically, <code>rails s</code> adds
-<code>Rails::Rack::LogTailer</code> middleware which tails the log files and prints
-their contents to <code>stdout</code>, but if you run your server via <code>unicorn</code>,
-that middleware doesn&#8217;t get added, so if you want a Unicorn-driven Rails
-server to have the same logging behavior as <code>rails s</code>, you&#8217;ll have to
-configure the Rails logger to print to STDOUT in
-<code>config/application.rb</code>:</p>
-
-<pre><code>config.logger = Logger.new(STDOUT)
-config.logger.level = Logger.const_get(
-  ENV['LOG_LEVEL'] ? ENV['LOG_LEVEL'].upcase : 'DEBUG'
-)
-</code></pre>
-
-<h5>Update 4/17/14: Use TaggedLogging</h5>
-
-<p>Actually, if you want to use <code>config</code> options like <code>log_tags</code>, you&#8217;ll
-want to use an instance of <code>TaggedLogging</code> instead of <code>Logger</code>:</p>
-
-<pre><code>config.logger = ActiveSupport::TaggedLogging.new(Logger.new($stdout))
-
-# Prepend all log lines with the following tags.
-config.log_tags = [
-  :uuid,
-  -&gt; request {
-    request.env["HTTP_USER_AGENT"]
-  }
-]
-</code></pre>
-
-<p>Vanilla <code>Logger</code> doesn&#8217;t make use of the <code>log_tags</code> config, among other
-config vars.</p>
-
-<h3>Prevent expensive debug logs</h3>
-
-<p>This is coming from an old ass Railscast, but thought it was cool: if
-you do <code>logger.debug "some #{expensive_calc}"</code>, it&#8217;ll only print this
-out if your log level is <code>:debug</code>, but the <code>expensive_calc</code> is still
-performed; to actually prevent the calculation unless you&#8217;re on
-<code>:debug</code>, you can write this as:</p>
-
-<pre><code>logger.debug { "some #{expensive_calc}" }
-</code></pre>
-
-<h3><code>Hash#values_at</code></h3>
-
-<p>In Ruby, use <code>Hash#values_at</code> to query a Hash for multiple and return an
-array of those values, e.g.</p>
-
-<pre><code>hash = { some: "value", other: "lame value" }
-hash.values_at(:some, :other) # =&gt; ["value", "lame value"]
-</code></pre>
-
-<p>This plays nicely with multiple assignment:</p>
-
-<pre><code>some,other = hash.values_at(:some, :other)
-# now some and other have been assigned values from the hash
-</code></pre>
-
-<p>This is the Ruby equivalent of <code>Ember.getProperties(obj, vals)</code>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Blog Flashcards]]></title>
-    <link href="http://machty.github.com/blog/2014/04/12/blog-flashcards/"/>
-    <updated>2014-04-12T20:38:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/12/blog-flashcards</id>
-    <content type="html"><![CDATA[<p>I&#8217;m a very forgetful person and have been looking for a way to integrate
-flashcards into my daily routine as a means of keeping track of the
-random dev-related things I learn throughout the day, and I think I&#8217;ve
-finally cracked the nut:</p>
-
-<p>I&#8217;ve built flashcards into this blog: specifically, for each entry in
-this Jekyll/Octopress-based static site, I can optionally specify a list
-of flashcards in the YAML configuration, and these flashcards get
-compiled at site generation/deployment time and uploaded to
-<a href="http://Cram.com">Cram</a>, a free site for hosting flashcards (they also
-have nice iOS/Android apps).</p>
-
-<p>The point of all of this is that part of the blog-writing process will
-be to jot down some quick flashcards for myself and everyone else who
-might be interested in having a quizzable TL;DR for each entry. Of
-course, it all comes down to how committed I remain to writing regular
-blog entries, but I think it&#8217;s a pretty cool idea and I&#8217;d love it if
-other bloggers I followed did something similar (or accepted pull
-requests from community flashcard-writers).</p>
-
-<p>You can check out all the flashcards associated with this blog
-<a href="http://www.cram.com/flashcards/alexmatchneercom-4692833">here</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ember CLI and NPM fights]]></title>
-    <link href="http://machty.github.com/blog/2014/04/12/ember-cli-and-npm-fights/"/>
-    <updated>2014-04-12T18:30:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/12/ember-cli-and-npm-fights</id>
-    <content type="html"><![CDATA[<p>Daily Journal: 4/12/14</p>
-
-<p>I&#8217;ve been giving <a href="https://github.com/stefanpenner/ember-cli">ember-cli</a>
-a whirl the last few days; it&#8217;s still extremely alpha but it&#8217;s extremely
-cool. It leverages <a href="https://github.com/joliss/broccoli">Broccoli</a> as a
-highly performant build tool, which minimifies the amount of rebuilding
-that must occur when a file changes in your project; in this way it&#8217;s a
-major improvement over previous iterations of Ember tooling, such as
-<a href="https://github.com/stefanpenner/ember-app-kit">Ember App Kit</a>, which
-falls prey to all of the gotchas involved with teaching Grunt, a
-JavaScript task runner, to act like a build tool, but because Grunt
-doesn&#8217;t have any built-in primitives for describing/tracking
-dependencies between files, or any other primitives convenient for use
-as a build tool without a plethora of plugins/addons, it&#8217;s very
-difficult to arrive at a Grunt setup that:</p>
-
-<ol>
-<li>Minimizes rebuilding in response to file changes</li>
-<li>Has configuration that is easy to reason about</li>
-<li>Locks your server during rebuilds (so that you&#8217;re not serving
-files from a half-compiled project folder)</li>
-</ol>
-
-
-<p>Anyway, onward to stuff I actually learned.</p>
-
-<!-- more -->
-
-
-<h3><code>npm link</code> to locally develop <code>ember-cli</code></h3>
-
-<p><code>npm install -g ember-cli</code> installs <code>ember-cli</code> globally so that its
-binaries are installed and accessible to the whole system. But what
-about if you&#8217;re contributing to <code>ember-cli</code> and want to test the binary
-you&#8217;re actively developing?</p>
-
-<pre><code>git clone https://github.com/stefanpenner/ember-cli
-cd ember-cli
-
-# Point ember-cli binaries to this project folder
-npm link
-</code></pre>
-
-<p>Now when you run the <code>ember</code> command it&#8217;ll run the code in your local
-development <code>ember-cli</code>. I verified this by doing
-<code>git checkout SOME_OLD_TAG</code> and running <code>npm link</code> again, and then
-when I ran <code>ember --version</code>, it spat out the version I&#8217;d just checked
-out. Baby stuff, right? Maybe, but I find the node world mysterious and
-frightening and this was a nice sanity check.</p>
-
-<p>Now, if you create a new Ember project via <code>ember new some-proj</code>, it may
-come as a surprise that <code>ember-cli</code> libraries installed in
-<code>some-proj/node_modules</code> is not the local <code>ember-cli</code> that you
-<code>npm link</code>&#8216;ed; this seems ok to me as a default, but if you also want
-your <code>ember new</code>-generated project to internally use your local
-<code>ember-cli</code> code, <code>cd</code> into <code>some-proj</code> and then run
-<code>npm link ember-cli</code>, which will install symlinks in <code>node_modules</code>
-pointing <code>ember-cli</code> to the same place that your development <code>ember-cli</code>
-was linked into:</p>
-
-<pre><code>some-proj:: ls -l node_modules/ember-cli
-lrwxr-xr-x  1 machty  staff  37 Apr 12 17:05 node_modules/ember-cli -&gt; /usr/local/lib/node_modules/ember-cli
-</code></pre>
-
-<p>I find the overloading of <code>npm link</code> here extremely confusing; the
-present/absence of the last param to <code>npm link</code> causes the command to
-do drastically different things, but maybe that&#8217;s just me.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily thoughts]]></title>
-    <link href="http://machty.github.com/blog/2014/04/12/daily-thoughts/"/>
-    <updated>2014-04-12T18:16:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/12/daily-thoughts</id>
-    <content type="html"><![CDATA[<p>Long time no blog, been busy with Ember stuff. Much has transpired since
-the last post, including getting added to Ember Core, making the Ember
-router reasonable, and other things. About time I get back into the
-blog-groove. Don&#8217;t expect quality; I&#8217;m probably gonna use this to jot
-down daily learnings because I am immensely forgetful, which rears its
-ugly head when I spend hours / days on a hard problem, only to forget
-the various realizations that would prevent me from having to solve the
-same shit over and over again. It&#8217;s gotten pretty bad; hopefully this
-will help.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ember Jeopardy]]></title>
-    <link href="http://machty.github.com/blog/2013/03/29/ember-jeopardy/"/>
-    <updated>2013-03-29T15:36:00-04:00</updated>
-    <id>http://machty.github.com/blog/2013/03/29/ember-jeopardy</id>
-    <content type="html"><![CDATA[<p>At last night&#8217;s <a href="http://www.meetup.com/EmberJS-NYC/events/106490682/">NYC Ember Meetup</a>,
-I led the gang through a somewhat enduring session of Jeopardy,
-featuring a ton of different Ember.js trivia questions. The app itself
-was written in Ember.js and the source code is mostly good, and
-certainly well-commented. Have a look see:</p>
-
-<p><a href="http://ember-jeopardy.herokuapp.com/">Ember Jeopardy</a></p>
-
-<p><a href="https://github.com/machty/ember-jeopardy">Source code</a></p>
-
-<p>It&#8217;s (somewhat needlessly) hosted within a Rails app, but you can find the
-Ember-specific code in <code>app/assets/javascripts/</code>. It presently only
-works on non-retina Safari/Chrome, given all the 3D stuff going on, but
-if you can figure out how to slay the remaining CSS3 demons, I&#8217;d
-definitely appreciate a pull request.</p>
 ]]></content>
   </entry>
   
