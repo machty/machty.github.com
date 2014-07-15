@@ -1,0 +1,377 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>Website Push != Push Notifications</h2>
+
+<p>So when you&#8217;re rummaging through the Apple Dev Portal, don&#8217;t confuse the
+two and generate the wrong certs. K?</p>
+
+<h2>WWDC 2011 video on UIViewController Containment</h2>
+
+<pre><code>https://developer.apple.com/videos/wwdc/2011/
+</code></pre>
+
+<p>First off, WWDC stands for the Apple World-Wide Developer Conference.</p>
+
+<h2>Why view controllers</h2>
+
+<ul>
+<li>Make it easy to make high quality apps</li>
+<li>Reusable</li>
+</ul>
+
+
+<p>A View Controller just a Controller. Mediates model data with many
+views. View controllers maintain entire hierarchies of views. They&#8217;re
+heavyweight, meant to manage a &#8220;screenful of content&#8221;. Often packaged
+with a model, e.g.</p>
+
+<ul>
+<li>TweetViewController</li>
+<li>ImagePickerController</li>
+</ul>
+
+
+<p>View Controllers are social, meant to connect to each other. They push
+and pop each other, etc. They talk to each other a lot.</p>
+
+<p>The &#8220;manage a screenful of content&#8221;:</p>
+
+<p>View Controllers anticipate being presented in different ways. More
+accurately: they should maintain a unit of content. Only
+<code>rootViewController</code> manages a &#8220;screenful of content&#8221;, specifically the
+<code>rootViewController</code> property of the window object. Knows how to forward
+rotation events, decides overall layout.</p>
+
+<p>How to use View Controllers</p>
+
+<ul>
+<li>subclass UIViewController</li>
+<li>associate VC w view hierarchy</li>
+<li>override callbacks</li>
+</ul>
+
+
+<p>Apperance callbacks: viewWillAppear, viewDidAppear, etc
+Rotation callbacks: viewWillRotate, etc</p>
+
+<p>ViewControllers manage an entire view hierarchy. Not just one to one
+with a view.</p>
+
+<p>View Controller Containers, a tale of Two Hierarchies: view hierarchies
+and view controller hierarchies.</p>
+
+<p>Container controllers</p>
+
+<ul>
+<li>responsible for parent child relationships
+
+<ul>
+<li>API like <code>initWithRootViewController</code> implies parent-child in nav
+controller</li>
+<li>split view controllers lets you set view controller children.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Controller container api</p>
+
+<ul>
+<li>addChildViewController
+
+<ul>
+<li>not meant to be called by anyone but its own implementation; don&#8217;t
+call it on other controllers, basically</li>
+</ul>
+</li>
+<li>remoteFromParentViewController
+
+<ul>
+<li>^^ ditto</li>
+</ul>
+</li>
+<li>childViewControllers array</li>
+<li>callbacks
+
+<ul>
+<li>willMoveToParentViewController</li>
+<li>didMoveToParentViewController</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Shouldn&#8217;t be able to walk up view hierarchy and totally skip over a
+parent view controller: UIViewControllerHierarchyInconsistencyException,
+prevents you from manually adding views into the wrong view controller
+hierarchy.</p>
+
+<p>When are appearance callbacks called?</p>
+
+<p>viewWillAppear etc has nothing to do w addChildViewController, which has
+nothing to do w view appearance.</p>
+
+<p>viewWillAppear just means it&#8217;s in the window view hiearchy, but doesn&#8217;t
+mean it&#8217;s actually visible (same w viewDidAppear).</p>
+
+<p>TODO: what is view layoutSubviews?</p>
+
+<p>viewDidAppear after the view added to viewHierarchy. Called after
+layoutSubviews.</p>
+
+<p>When implementing transitions, you have to implement
+didTransitionToBlahBlah, one of the options is <code>animations</code> lambda.</p>
+
+<p>VS Layout callbacks:</p>
+
+<ul>
+<li>viewWillLayoutSubviews&#8230;</li>
+</ul>
+
+
+<p>Presentation and Dismissal of VCs</p>
+
+<p>set presentation style and then do presentViewController</p>
+
+<p>Can also present VCs by direct subview manipulation.</p>
+
+<pre><code>[root.someView addSubview: vc.view]
+</code></pre>
+
+<p>But this is bad form; better to make the VC a child of the root VC. VC
+knows where subviews should go rather than the ass backwards way.</p>
+
+<p>When to create a custom view controller container?</p>
+
+<ul>
+<li>Hopefully you don&#8217;t need to, so think twice first</li>
+<li>Aesthetics</li>
+<li>Custom app flows</li>
+<li>Your app manipulates view hiearchy directly</li>
+</ul>
+
+
+<p>Use case: make split view show up in both landscape and portrait: no
+need to make custom VC because now there&#8217;s API to just better configure
+split view.</p>
+
+<p>View controllers know themselves if they&#8217;re moving to or from parent
+view controllers within viewWillAppear and viewDidAppear by checking:</p>
+
+<pre><code>// used in viewDid/WillAppear
+- (BOOL)isMovingToParentViewController;
+
+// used in viewDid/WillDisappear
+- (BOOL)isMovingFromParentViewController;
+
+- isBeingPresented;
+- isBeingDismissed;
+</code></pre>
+
+<p>Lol:</p>
+
+<pre><code>- (BOOL) automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
+</code></pre>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T09:33:00-04:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/07/14/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/07/14/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-06-29T19:28:30-04:00</updated>
+  <updated>2014-07-15T10:22:25-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,1483 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/14/daily-journal/"/>
+    <updated>2014-07-14T09:33:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/14/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Website Push != Push Notifications</h2>
+
+<p>So when you&#8217;re rummaging through the Apple Dev Portal, don&#8217;t confuse the
+two and generate the wrong certs. K?</p>
+
+<h2>WWDC 2011 video on UIViewController Containment</h2>
+
+<pre><code>https://developer.apple.com/videos/wwdc/2011/
+</code></pre>
+
+<p>First off, WWDC stands for the Apple World-Wide Developer Conference.</p>
+
+<h2>Why view controllers</h2>
+
+<ul>
+<li>Make it easy to make high quality apps</li>
+<li>Reusable</li>
+</ul>
+
+
+<p>A View Controller just a Controller. Mediates model data with many
+views. View controllers maintain entire hierarchies of views. They&#8217;re
+heavyweight, meant to manage a &#8220;screenful of content&#8221;. Often packaged
+with a model, e.g.</p>
+
+<ul>
+<li>TweetViewController</li>
+<li>ImagePickerController</li>
+</ul>
+
+
+<p>View Controllers are social, meant to connect to each other. They push
+and pop each other, etc. They talk to each other a lot.</p>
+
+<p>The &#8220;manage a screenful of content&#8221;:</p>
+
+<p>View Controllers anticipate being presented in different ways. More
+accurately: they should maintain a unit of content. Only
+<code>rootViewController</code> manages a &#8220;screenful of content&#8221;, specifically the
+<code>rootViewController</code> property of the window object. Knows how to forward
+rotation events, decides overall layout.</p>
+
+<p>How to use View Controllers</p>
+
+<ul>
+<li>subclass UIViewController</li>
+<li>associate VC w view hierarchy</li>
+<li>override callbacks</li>
+</ul>
+
+
+<p>Apperance callbacks: viewWillAppear, viewDidAppear, etc
+Rotation callbacks: viewWillRotate, etc</p>
+
+<p>ViewControllers manage an entire view hierarchy. Not just one to one
+with a view.</p>
+
+<p>View Controller Containers, a tale of Two Hierarchies: view hierarchies
+and view controller hierarchies.</p>
+
+<p>Container controllers</p>
+
+<ul>
+<li>responsible for parent child relationships
+
+<ul>
+<li>API like <code>initWithRootViewController</code> implies parent-child in nav
+controller</li>
+<li>split view controllers lets you set view controller children.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Controller container api</p>
+
+<ul>
+<li>addChildViewController
+
+<ul>
+<li>not meant to be called by anyone but its own implementation; don&#8217;t
+call it on other controllers, basically</li>
+</ul>
+</li>
+<li>remoteFromParentViewController
+
+<ul>
+<li>^^ ditto</li>
+</ul>
+</li>
+<li>childViewControllers array</li>
+<li>callbacks
+
+<ul>
+<li>willMoveToParentViewController</li>
+<li>didMoveToParentViewController</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Shouldn&#8217;t be able to walk up view hierarchy and totally skip over a
+parent view controller: UIViewControllerHierarchyInconsistencyException,
+prevents you from manually adding views into the wrong view controller
+hierarchy.</p>
+
+<p>When are appearance callbacks called?</p>
+
+<p>viewWillAppear etc has nothing to do w addChildViewController, which has
+nothing to do w view appearance.</p>
+
+<p>viewWillAppear just means it&#8217;s in the window view hiearchy, but doesn&#8217;t
+mean it&#8217;s actually visible (same w viewDidAppear).</p>
+
+<p>TODO: what is view layoutSubviews?</p>
+
+<p>viewDidAppear after the view added to viewHierarchy. Called after
+layoutSubviews.</p>
+
+<p>When implementing transitions, you have to implement
+didTransitionToBlahBlah, one of the options is <code>animations</code> lambda.</p>
+
+<p>VS Layout callbacks:</p>
+
+<ul>
+<li>viewWillLayoutSubviews&#8230;</li>
+</ul>
+
+
+<p>Presentation and Dismissal of VCs</p>
+
+<p>set presentation style and then do presentViewController</p>
+
+<p>Can also present VCs by direct subview manipulation.</p>
+
+<pre><code>[root.someView addSubview: vc.view]
+</code></pre>
+
+<p>But this is bad form; better to make the VC a child of the root VC. VC
+knows where subviews should go rather than the ass backwards way.</p>
+
+<p>When to create a custom view controller container?</p>
+
+<ul>
+<li>Hopefully you don&#8217;t need to, so think twice first</li>
+<li>Aesthetics</li>
+<li>Custom app flows</li>
+<li>Your app manipulates view hiearchy directly</li>
+</ul>
+
+
+<p>Use case: make split view show up in both landscape and portrait: no
+need to make custom VC because now there&#8217;s API to just better configure
+split view.</p>
+
+<p>View controllers know themselves if they&#8217;re moving to or from parent
+view controllers within viewWillAppear and viewDidAppear by checking:</p>
+
+<pre><code>// used in viewDid/WillAppear
+- (BOOL)isMovingToParentViewController;
+
+// used in viewDid/WillDisappear
+- (BOOL)isMovingFromParentViewController;
+
+- isBeingPresented;
+- isBeingDismissed;
+</code></pre>
+
+<p>Lol:</p>
+
+<pre><code>- (BOOL) automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/13/daily-journal/"/>
+    <updated>2014-07-13T15:18:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/13/daily-journal</id>
+    <content type="html"><![CDATA[<h2>HTML is an API, getAttribute</h2>
+
+<p>HTML is just a string of characters that get converted into DOM. You can
+also create DOM via the JavaScript DOM API. Seems like an obvious thing
+I guess but it just clicked for me.</p>
+
+<p>What&#8217;s an attribute? It&#8217;s any key-value pair (or occasional boolean)
+within an open tag.</p>
+
+<pre><code>&lt;div id="lol" snaggletooth="blorg"&gt;&lt;/div&gt;
+</code></pre>
+
+<p><code>id</code> and <code>snaggletooth</code> are attributes. During HTML parsing, the browser
+will convert this isn&#8217;t an HTML element (which is a node). HTML elements
+have a fixed set of <em>properties</em>. All the <em>attributes</em> you provide in
+your HTML that map to known properties will set the values of those
+properties, hence <code>.id</code> gets set to &#8220;lol&#8221;, but <code>.snaggletooth</code> would
+yield <code>undefined</code>, because that&#8217;s obviously not a real property name.</p>
+
+<p>http://jsbin.com/bejog/1/edit</p>
+
+<p>This also explains why you can set an <code>&lt;input&gt;</code>&#8217;s value to &#8220;wat&#8221;, then
+type in a new value in the input field, and <code>getAttribute("value")</code> will
+still yield <code>"wat"</code> even though <code>inputElement.value</code> will equal whatever
+you typed in.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/08/daily-journal/"/>
+    <updated>2014-07-08T14:31:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/08/daily-journal</id>
+    <content type="html"><![CDATA[<p>This blog left intentionally blank. There are flashcards about browser
+networking attached to it.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/05/daily-journal/"/>
+    <updated>2014-07-05T16:44:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/05/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Bandwidth</h2>
+
+<p>Grigorik&#8217;s book confused me when he switched from the bits/second
+definition of bandwidth to the more signal processing definition.</p>
+
+<pre><code>http://en.wikipedia.org/wiki/Bandwidth_(computing)
+vs
+http://en.wikipedia.org/wiki/Bandwidth_(signal_processing)
+</code></pre>
+
+<p>Computing bandwidth refers to bits/s. Signal bandwidth is the difference
+in the max and min Hz that you transmit on.</p>
+
+<p>This is interesting:</p>
+
+<blockquote><p>A key characteristic of bandwidth is that any band of a given width can
+carry the same amount of information, regardless of where that band is
+located in the frequency spectrum. For example, a 3 kHz band
+can carry a telephone conversation whether that band is at baseband
+(as in a POTS telephone line) or modulated to some higher frequency.</p></blockquote>
+
+<p>My understanding of this is that regardless of the modulation alphabet
+you use, modulation will always cause a signal to vary between a
+minimumm and maximum frequency, which determines the bandwidth of a
+signal. For example, transmitting a &#8220;01&#8221; might mean squeezing the waves
+together tightly until the next &#8220;letter&#8221; to transmit, and the tightest
+those waves are squeezed determines the maximum frequency, while &#8220;10&#8221;
+might might loosening the waves, and other letters could be some
+combination of the two, but the key thing here is that bandwidth
+determines the min and max frequencies that those waves can compress
+or expand to; any more and you might be interfering with someone else&#8217;s
+band.</p>
+
+<!-- more -->
+
+
+<p>And as to the ability to transmit the same amount of information, I
+don&#8217;t understand that; I&#8217;ll have to read up on that a bit more.</p>
+
+<h2>allocWithZone</h2>
+
+<p>Cocoa&#8217;s <code>alloc</code> method calls <code>allocWithZone</code> zone with some sensible
+default. The whole point of <code>allocWithZone</code> is to allow you to
+explicitly specify which memory zone an object lives in, allowing you to
+put related objects into the same zone so as to avoid thrashing.</p>
+
+<p>NOTE: <code>allocWithZone</code> is old school, and as memory becomes cheap and
+approaches to memory management improve, the zone passed in becomes
+ignored, particularly with ARC.</p>
+
+<p>Also, if any instance vars need to be <code>alloc</code>d, they should be done
+within the same zone, or else you&#8217;re defeating the whole purpose of zone
+allocation (then again, ARC ignores this, so&#8230;). Anyway, you can do
+things like <code>self.label = [[NSString allocFromZone:[self zone]] initWithString:@"balls"]</code></p>
+
+<h2>Designated Initializer</h2>
+
+<p>In Cocoa, the designated initializer is the one initializer in a class
+that all others defer to perform the full initialization of an object.
+As such, it&#8217;s usually the one with the most arguments, and other
+initializers will usually choose sensible defaults to pass to the
+designated initializer.</p>
+
+<p>Designated Initializers in subclasses must call the Designated
+Initializers in its superclass.</p>
+
+<p>NOTE: sometimes a class might have multiple Designated Initializers,
+e.g. NSCell.</p>
+
+<p>Drawback: having to know what the Designated Initializer is for a given
+class&#8230; yeah, that sucks.</p>
+
+<h2>Two-Stage Creation</h2>
+
+<p>e.g. <code>[[Thing alloc] init]</code></p>
+
+<ol>
+<li>Assign implicit <code>self</code> local var to <code>[super init]</code>, which might
+return something other than <code>self</code> where alloc fails or singleton
+pattern returns another instance.</li>
+<li>If <code>self</code> not nil, continue to perform initialization.</li>
+</ol>
+
+
+<p>Step 2 is extremely defensive and possibly overkill, but nil is a valid
+return value for initializers so you have to watch out for it. Aren&#8217;t
+nils awesome?</p>
+
+<h2><code>self</code> and <code>cmd</code></h2>
+
+<p>These are the two implicit variables provided within a method
+invocation.</p>
+
+<ol>
+<li><code>self</code> is the instance, durr</li>
+<li><code>_cmd</code> is the message received that caused the method to be run</li>
+</ol>
+
+
+<p>Question: what happens if you don&#8217;t assign <code>self</code>? Does it actually make
+a difference outside of the method? Is it a reference or just a value
+used within the method?</p>
+
+<h2>ARC</h2>
+
+<p>Automatic Reference Counting: been around since Mac OS X 10.5, but if
+you&#8217;re writing a class with ARC, all consumers must also be using ARC
+(but it&#8217;s possible for ARC to consume non-ARC). Hence, it&#8217;s important to
+understand old school memory management.</p>
+
+<h2><code>dealloc</code> and <code>finalize</code></h2>
+
+<p>No-ARC:</p>
+
+<p><code>dealloc</code> called automatically (don&#8217;t call it yourself) when reference count down
+to 0.</p>
+
+<p>ARC:</p>
+
+<p><code>finalize</code> called instead of <code>dealloc</code>, but often doesn&#8217;t need to be
+implemented unless any non-ARC objects were alloc&#8217;d that need to be
+manually released, or some file handles need to be closed, etc.</p>
+
+<h2><code>stringWithString</code> vs <code>[alloc] initWithString</code></h2>
+
+<p><code>autorelease</code> is called within these convenience methods like
+<code>stringWithString</code>, but not called with the <code>alloc</code> + <code>init</code> pattern.
+<code>autorelease</code> is often idiomatically meant for temporary vars.
+You must call <code>retain</code> on something that&#8217;s autoreleased if you want to
+hold on to it.</p>
+
+<p>One drawback to the convenience methods is that their allocation is
+hard-wired to their initialization; you can&#8217;t swap the approach to
+allocation, or pick zones or anything like that.</p>
+
+<h2><code>drawRect</code> and <code>setNeedsDisplay</code></h2>
+
+<p><code>drawRect</code> is a template method which you&#8217;re never supposed to call
+yourself; if you&#8217;re tempted to use it, chances are you want
+<code>setNeedsDisplay</code> instead.</p>
+
+<h2>Template Methods vs Delagate</h2>
+
+<p>Template Methods as an approach to customizing/overriding a super
+class&#8217;s default behavior in a subclass result in tight coupling to the
+super class. Also, if you need to override lots of different unrelated
+behaviors in a superclass, likely the super class should have been
+designed to use Delegates instead.</p>
+
+<h2><code>NSClassFromString</code> =~ <code>const_get</code></h2>
+
+<p>Objective-C&#8217;s runtime supports class lookup from strings via
+<code>NSClassFromString</code>. I had no idea. And like in Ruby, Objective C
+classes are objects as well.</p>
+
+<h2>NSBundle</h2>
+
+<p>Makes use of NSClassFromString (or some variety of it?) to look up
+classes in a bundle. Can either use <code>+classNamed</code> if you know the class,
+or <code>+principalClass</code>, which uses the class defined in the Bundle&#8217;s
+plist.</p>
+
+<h2>Obj-C Categories =~ <code>reopen</code></h2>
+
+<pre><code>@interface Horseshit (SomeCategory)
+- (void)newMethod;
+@end
+
+@implementation Horseshit (SomeCategory)
+- (void)newMethod
+{
+  // stuff
+}
+@end
+</code></pre>
+
+<p>This can be used to reopen classes, which, like <code>Module#reopen</code> in Ruby,
+is inherited by subclasses as well.</p>
+
+<p>This is familiar:</p>
+
+<blockquote><p>but there is no good way to force exist- ing compiled code to
+return instances of your subclass instead of instances of NSMutableArray.</p></blockquote>
+
+<p>The same gotcha is true for Ruby, where you can&#8217;t trivially subclass
+<code>Array</code> without running into the often undesirable behavior of methodsl
+like <code>#map</code> returning an instance of <code>Array</code>, rather than your subclass.</p>
+
+<p>The Ruby approach to this (credit to Avdi Grimm), is something like</p>
+
+<pre><code>require 'forwardable'
+class MyArray
+  include Enumerable
+  extend Forwardable
+
+  def initialize
+    @a = []
+  end
+
+  def_delegators :@a, :each, :&lt;&lt;
+end
+
+a = MyArray.new
+a &lt;&lt; 123
+a.map { |i| i*2 } # =&gt; [246] # works because Enumerable#map uses #each
+</code></pre>
+
+<p>But in the case of <code>NSMutableArray</code>, since you&#8217;d have to override a
+great many methods in a subclass of <code>NSMutableArray</code> to return instances
+of your subclass, it might just make more sense to reopen
+<code>NSMutableArray</code> by declaring a new category, and just throw methods
+onto that; that way, these methods will still return their hard-wired
+<code>NSMutableArray</code> instances, but they&#8217;ll have the new methods that you
+were tempted to put on an <code>NSMutableArray</code> subclass. A little sucky but
+hey that&#8217;s framework code.</p>
+
+<h3>Categories for Framework Division</h3>
+
+<p>Kinda like how Ember progressively reopens ControllerMixin and other
+classes in the various <code>ember-xxx</code> libraries that get combined into the
+final complete Ember package, Cocoa uses categories to &#8220;reopen&#8221; certain
+classes as libraries/frameworks are added. For instance,
+<code>NSAttributedString</code> exists in Cocoa Foundation and can be used in
+non-graphical contexts, but once Application Kit is added, categories
+that included string-drawing logic are added to <code>NSAttributedString</code>.</p>
+
+<p>Reserving judgement as to whether it makes sense to keep dumping code
+into <code>NSAttributedString</code> vs adding utility classes that know how to
+draw <code>NSAttributedString</code>s.</p>
+
+<h2>(Informal) Protocols</h2>
+
+<p>A formal protocol, or just protocol, is a language construct in Obj-C
+that is used to declare methods than an object must implement in order
+to work in certain scenarios. The compiler can guarantee that a protocol
+is adhered to and will throw errors (warnings?) if not.</p>
+
+<p>An <em>informal protocol</em> is a protocol where no compiler time checks are
+made to make sure an object/class actually implements the methods in the
+informal protocol. Informal protocols are implemented as categories of
+<code>NSObject</code> (which means virtually all classes inherit those informal
+protocol methods), but Cocoa will often only provide an interface to
+these categories, but no implementation; the compiler doesn&#8217;t check
+this, so lots of Cocoa classes use runtime checks to see if these
+methods have been implemented on an object before sending such a
+message.</p>
+
+<p>One of the crappiest parts about informal protocols is that you have to
+know, when subclassing, whether a super class provides an implementation
+of an informal protocol method. If you just do <code>[super method]</code> and
+<code>method</code> doesn&#8217;t exist, then boom. The safest way around this if you
+don&#8217;t have the original source code is a run-time check, a la</p>
+
+<pre><code>if ([Superclass instancesRespondToSelector:@selector(method)]) {
+  [super method];
+}
+// more crap
+</code></pre>
+
+<p>Additionally, you could just stub out all the methods that Apple
+&#8220;forgot&#8221; to implement via a new NSObject category, but this</p>
+
+<ol>
+<li>Overrides the method definitions for classes that <em>do</em> provide an
+implementation</li>
+<li>Might interfere with runtime logic that checks if a method is
+implemented and performs some additional logic if it is.</li>
+</ol>
+
+
+<p>But mean that just seems to scream with mega design flaws.
+Tell-don&#8217;t-ask, much?</p>
+
+<blockquote><p>it’s a best practice to provide a default implementation for each
+method you declare in your informal protocol.</p></blockquote>
+
+<p>If that&#8217;s the case, then why not just do a normal ol category? Answer:
+because the key difference w informal protocols is that they&#8217;re declared
+on <code>NSObject</code>, so any object/class has the option of providing it.</p>
+
+<p>Note that Obj-C 2.0 (Mac OS X 10.5) provides <code>@required</code> and <code>@optional</code>
+keywords in plain ol protocols to allow informal protocol semantics on
+formal protocols.</p>
+
+<h2>Category (and reopen) gotchas</h2>
+
+<ol>
+<li>Collisions are more likely when reopening is the norm</li>
+<li>Apple (or whatever vendor) might add methods in future versions that
+clash with the ones you&#8217;ve added</li>
+<li>Replacing methods means you have to be very careful to duplicate all
+of the effects of a method (but why do methods have so much logic in
+them in the first place?). Replacing should kinda be a last resort.</li>
+</ol>
+
+
+<p>If you&#8217;re going to extend Cocoa classes, it&#8217;s wise to use a prefix.</p>
+
+<p>One nice convention is when you&#8217;re extending NSArray with your custom
+Wat category, you could throw it in a file named <code>NSArray+Wat.h</code>.</p>
+
+<h2>Anonymous type: <code>id</code></h2>
+
+<p>Unlike C++ and Java (et al), knowing the receiver type of a message is
+not a requirement and can be deferred until runtime. This supports duck
+typing. Bark bark.</p>
+
+<p>Selectors can be dynamically constructed from strings as run-time. (But
+beware of standard security issues surrounding code injection.)</p>
+
+<p><code>id</code> as a type says nothing more than &#8220;this object can receive
+messages&#8221;. An <code>id</code> var can point to <code>nil</code> (as opposed to <code>NULL</code>), which
+evaluates to zero. Also, sending messages to <code>nil</code> is NOT an error, and
+returns <code>nil</code>.</p>
+
+<p><code>id</code> can be an alternative to forward class declaration, but obviously
+the tradeoff is that you&#8217;re giving the compiler less information to use
+for catching errors/typos.</p>
+
+<p>Unrecognized messages/methods are warnings rather than errors because
+sometimes the compiler cannot guarantee that the object definitely
+cannot respond to a message.</p>
+
+<p>Two ways to do a runtime check to see if an object/class responds to a
+selector:</p>
+
+<pre><code>[SomeClass instancesRespondToSelector:@selector(method)]
+[instance respondsToSelector:(SEL)aSelector]
+</code></pre>
+
+<p>Check if an <code>id</code> is an instance of some class via</p>
+
+<pre><code>[someIdVar isKindOfClass:[NSArray class]]
+</code></pre>
+
+<p>What about <code>nil</code>? I guess it&#8217;ll always return falsy (<code>nil</code>) for all
+selectors, so <code>isKindOfClass</code> would correctly return falsy.</p>
+
+<p>There is also a <code>conformsToProtocol</code> selector. In addition to a
+<code>NSObject</code> class, there is an <code>NSObject</code> protocol&#8230; why? How is it
+useful? Dunno.</p>
+
+<p>You can use anonymous types scoped to protocols so that you can get all
+those lovely compiler warnings you expect, e.g.:</p>
+
+<pre><code>id &lt;MyDumbProtocol&gt; wat = something;
+[wat someMessage]
+</code></pre>
+
+<p>If you catch yourself doing this a bunch:</p>
+
+<pre><code>id &lt;MyDumbProtocol, NSObject&gt; woot;
+</code></pre>
+
+<p>then maybe consider having MyDumbProtocol inherit from NSObject.</p>
+
+<p>Of note: the presence of an anonymous type prevents the need for generic
+programming features, like C++ templates. Then again you could just
+store everything as a void pointer, right? But then in C++ you have to
+do address translation in some cases. I think. I forget.</p>
+
+<h2>NSEnumerator</h2>
+
+<p>Simple interface:</p>
+
+<ul>
+<li>nextObject: call until nil</li>
+<li>allObjects: returns an array of all remaining untraversed items;
+nextObject guaranteed to be nil after calling this</li>
+</ul>
+
+
+<p>NSEnumerators retain the underlying container until traversal is
+complete so that it&#8217;s not dealloc&#8217;d mid-traversal.</p>
+
+<p>Unsafe to modify collection mid-traversal.</p>
+
+<p>Common example:</p>
+
+<pre><code>id instance;
+NSEnumerator *enumerator = [myCollection objectEnumerator]; while (instance = [enumerator nextObject])
+{
+  // do something with instance 
+}
+</code></pre>
+
+<p>Fast enumeration:</p>
+
+<pre><code>id instance;
+for (instance in myCollection) {
+  // do something with instance 
+}
+// or, alternatively:
+for (id instance2 in myCollection) {
+  // do something with instance2 
+}
+</code></pre>
+
+<p>An object needs to support Fast Enumeration to be used in a for-in loop.
+Enumerators themselves support fast enumeration, so you can do:</p>
+
+<pre><code>id instance;
+for (instance in [myArrayInstance reverseObjectEnumerator]) {
+  // do something with instance 
+}
+</code></pre>
+
+<p>Internal Enumeration is like <code>each</code> in Ruby, where the iteration is
+internal to the collection or enumerator. Cocoa offers:</p>
+
+<pre><code>- (void)makeObjectsPerformSelector:(SEL)aSelector
+- (void)makeObjectsPerformSelector:(SEL)aSelector withObject:(id)anObject
+</code></pre>
+
+<h2>Objective-C runtime files</h2>
+
+<p>Explore <code>/usr/include/objc/*.h</code> for fun and profit.</p>
+
+<h2>Selectors</h2>
+
+<pre><code>SEL aSelector = @selector(myDumbMethod);
+</code></pre>
+
+<p>NSObject has the following method for running <code>aSelector</code> later:</p>
+
+<pre><code>-(id)performSelector:(SEL)aSelector
+</code></pre>
+
+<p>Interchangeable:</p>
+
+<pre><code>id result1 = [someObject update];
+id result2 = [someObject performSelector:@selector(update)];
+id result3 = [someObject performSelector:aSelector];
+</code></pre>
+
+<p>Get a SEL from a String:</p>
+
+<pre><code>SEL NSSelectorFromString(NSString *)
+</code></pre>
+
+<p>Passing an arg to performSelector</p>
+
+<pre><code>- (id)performSelector:(SEL)aSelector withObject:(id)anObject
+</code></pre>
+
+<p>Need to use NSInvocation if</p>
+
+<ul>
+<li>more than one arg</li>
+<li>non object arg</li>
+<li>returns non-object value</li>
+</ul>
+
+
+<p>Perform a method async&#8230;?</p>
+
+<pre><code>- (void)performSelector:(SEL)aSelector withObject:(id)anArgument afterDelay:(NSTimeInterval)delay
+</code></pre>
+
+<p>This schedules the event to fire via NSRunLoop, which only guarantees
+that it won&#8217;t fire before <code>delay</code>, but you might catch it mid slow
+operation and it won&#8217;t fire til after that&#8217;s done. Obvious parallels to
+Ember&#8217;s Backburner.js.</p>
+
+<p>Async performs are cancelable via <code>cancelPreviousPerformRequestsWithTarget</code>.</p>
+
+<p><code>NSRunLoop</code> runs in different modes which govern which sources of input
+are read by the loop; async schedules are put in to <code>NSDefaultRunLoopMode</code>, and
+the run loop might not be in that mode, which would cause that to be
+ignored. Interesting, will need to follow up on that. Maybe that&#8217;s
+because there are different threads? And you can set up the different
+threads to listen for different events? And a performSelector afterDelay
+is just like any other events, like user tapped something, etc.</p>
+
+<h2>Implementation of Obj-C message sending</h2>
+
+<p>First off, a <code>runtime</code> is any collection of functions/functionality that
+comes with the compiled language and is depended upon to perform certain
+tasks at runtime. That was a shitty definition. A runtime is any
+collection of functionality you need at runtime that comes with the
+language you&#8217;re using. Handlebars has a runtime; even though your
+templates are precompiled, they all depend on shared functionality that
+lives within the Handlebars runtime that must be present to actually
+render a template. I knew that, kinda, but it just clicked as a generic
+concept. JVM is a runtime. C++ has a runtime.</p>
+
+<p>Two most important C functions:</p>
+
+<pre><code>id objc_msgSend(id self, SEL op, ...);
+id objc_msgSendSuper(struct objc_super *super, SEL op, ...);
+</code></pre>
+
+<p>These fns search for a handling method on the receiver.</p>
+
+<p>Here&#8217;s the typedef for a C function pointer of a method that responds to
+a selector:</p>
+
+<pre><code>typedef id (*IMP)(id self, SEL _cmd, ...);
+// e.g.:
+IMP fn = &amp;someFn;
+// i think this is valid C, I forget.
+</code></pre>
+
+<p>The search for the method on the receiver is slow, but the result is
+cached on the receiver class so future lookups are fast.</p>
+
+<p>You can convert a message send into a C fn pointer via:</p>
+
+<pre><code>- (IMP)methodForSelector:(SEL)aSelector;
++ (IMP)instanceMethodForSelector:(SEL)aSelector;
+</code></pre>
+
+<p>The late binding provided by all of the above makes it possible for
+other threads to schedule operations on the main thread via super
+convenient methods like</p>
+
+<pre><code>- (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait
+- (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait modes:(NSArray * )array
+</code></pre>
+
+<h2>Accessors</h2>
+
+<p>Some obvious general benefits mixed w Cocoa-specific:</p>
+
+<ul>
+<li>Uniform access principle: flexibility to switch from simple instance
+variable storage to some other complex logic. In Ember this like how
+you can effortlessly switch between a raw value property and a
+computed property and any consuming code won&#8217;t need to change if it
+has been using <code>.get()</code> from the start.</li>
+<li>Facilitate Cocoa&#8217;s non-ARC memory maintenance</li>
+<li>Facilitate Cocoa Key-value coding and observation</li>
+<li>Facilitate special logic when (re)-connecting Interface Builder outlets.</li>
+</ul>
+
+
+<p>Naming conventions: if you&#8217;re returning a value, just name the getter
+the name of the property (i.e. not prefixed with &#8220;get&#8221;):</p>
+
+<pre><code>- (float) interestRate 
+{
+  return interestRate;
+}
+</code></pre>
+
+<p>If you&#8217;re returning by reference (via pointers), prefix with get:</p>
+
+<pre><code>- (void)getInterestRate:(float * )aFloatPtr {
+  if(NULL != aFloatPtr) {
+    *aFloatPtr = interestRate; 
+  }
+}
+</code></pre>
+
+<p>Apparently this is seldom-used, hence there&#8217;s not many <code>get</code> methods in
+Cocoa, but common in some cases where size of array returned is not
+known ahead of time, or there are more than one &#8220;return&#8221; values, e.g.:</p>
+
+<pre><code>-(void)getRed:(CGFloat *)red green:(CGFloat *)green blue:(CGFloat *)blue alpha:(CGFloat *)alpha
+</code></pre>
+
+<p>Setters are obviously prefixed by set</p>
+
+<pre><code>- (void)setInterestRate:(float)aRate 
+{
+  interestRate = aRate; 
+}
+</code></pre>
+
+<p>They make a good point about debugging utility:</p>
+
+<blockquote><p>During debugging, if a property has an incorrect or suspicious value,
+a debugger break-point set within the implementation of an accessor
+halts execution whenever the property is changed and helps track
+down how and why the value is being changed incorrectly.</p></blockquote>
+
+<p>This isn&#8217;t super easy to do in Ember as a general capability unless it&#8217;s
+one of the rare cases where you&#8217;re writing a getter-setter computed
+property&#8230; maybe we can do something in ember-inspector that hooks into
+ember-metal?</p>
+
+<h2>Thread safety + Memory Management</h2>
+
+<p>Thread safety w memory management: consider the following:</p>
+
+<pre><code>- (NSString * ) aString {
+  return _myString ;
+}
+</code></pre>
+
+<p>An obvious getter that returns an NSString instance var. But lets say
+there are two threads, where Thread A is retrieving <code>aString</code> and
+intends to <code>retain</code> it, and Thread B releases the object that <code>aString</code>
+lives on, thus causing it to be deallocated. In this case, there&#8217;s a
+race condition in multi-threaded environments:</p>
+
+<pre><code>A: NSString * str = [alexObject aString];
+B: [alexObject release]; 
+B: // ref count is now 0, dealloc occurs
+B: // _myString gets `release`d and dealloc'd because ref count is 0
+A: [str retain];
+A: // BOOM. can't `retain` a dealloc'd obj
+</code></pre>
+
+<p>Realization: the &#8220;intending to <em>retain</em>&#8221; distinction isn&#8217;t so important;
+more important is &#8220;intending to use in any way&#8221;; sending a message to a
+suddenly dealloc&#8217;d obj is going to break, it&#8217;s just that the obvious way
+to prevent dealloc is to immediately <code>retain</code> the return value of a
+getter, but then you&#8217;re still exposed to the race condition above. So
+the retain needs to happen in the getter, a la:</p>
+
+<pre><code>- (NSString * )title {
+  id result;
+
+  // Lock
+  result = [[_myTitle retain] autorelease];
+  // Unlock
+
+  return result; 
+}
+</code></pre>
+
+<p>Makes sense, but I need to learn about when autorelease actually fires
+its release&#8230; this would cause issues if the autorelease just happened
+at the end of a thread&#8217;s run loop, since another thread might not have
+had time to use/retain an obj before the other thread released it at the
+end of its run loop. AH CRUCIAL MISTAKE: I was some reason thinking that
+the getting would happen in one thread and that retaining of that return
+value would happen in another thread; no, all of that happens on one
+thread, and autorelease, assuming my assumptions about the run loop are
+correct, will always correctly fire after the code that called the
+getter had a chance to use/retain its return value.</p>
+
+<p>So actually, it sounds like consumers of getters don&#8217;t need to call
+<code>retain</code> unless they really intend to hold on to that value beyond the
+end of the run loop.</p>
+
+<pre><code>- (void)setTitle:(NSString * ) aTitle {
+ ￼[aTitle retain];
+</code></pre>
+
+<p>  ￼￼￼￼[ _myTitle release];</p>
+
+<pre><code>  _myTitle = aTitle; 
+}
+</code></pre>
+
+<p>So if you had no locks on the above getters and setters, there&#8217;d be a
+race condition where <code>[_myTitle release]</code> and <code>[_myTitle retain]</code> are
+called at the same time, release happens first, and then <code>retain</code> gets
+called on a dealloc&#8217;d my obj. So really you&#8217;d need</p>
+
+<pre><code>- (void)setTitle:(NSString * ) aTitle {
+ ￼[aTitle retain];
+
+  // Lock
+</code></pre>
+
+<p>  ￼￼￼￼[ _myTitle release];</p>
+
+<pre><code>  _myTitle = aTitle; 
+  // Unlock
+}
+</code></pre>
+
+<p>The above handles all the following cases:</p>
+
+<ul>
+<li>changing a value from nil to aTitle</li>
+<li>changing a value from somethingElse to aTitle</li>
+<li>changing a value from aTitle to aTitle</li>
+<li>changing a value from somethingElse to nil</li>
+<li>changing a value from nil to nil</li>
+</ul>
+
+
+<p>This is due to the precise ordering of retains/release and assignment,
+as well as the fact that sending messages to <code>nil</code> is harmless so long
+as you don&#8217;t count on the return value.</p>
+
+<p>Hmm, I&#8217;m told that the following is actually the correct answer, but I&#8217;m
+not sure why:</p>
+
+<pre><code>- (void)setTitle:(NSString * )aTitle {
+  id oldValue; 
+  [aTitle retain];
+
+  // Lock
+  oldValue = _myTitle; 
+  _myTitle = aTitle; 
+  // Unlock
+
+  [oldValue release]; 
+}
+</code></pre>
+
+<h2>NSKeyValueCoding</h2>
+
+<p>An informal protocol. Allows properties to be read/written by string
+name.</p>
+
+<h2>Archiving / Unarchiving</h2>
+
+<p>Objects can be (de)serialized into a binary format (or XML) and back,
+and Cocoa handles all the issues of cross-platform byte ordering and 32
+vs 64 bit, etc, issues that normally crop up when you try to store in
+binary (apparently though it doesn&#8217;t have to handle big/little-endian
+issues?).</p>
+
+<p>When Archiving, an object can conditionally or unconditionally
+reference another obj; if unconditional, force the object to be stored;
+if conditional, only store the object if something else has declared it
+as unconditional, and if not, when unarchived, that object will be
+<code>nil</code>.</p>
+
+<p>So in Cocoa, a View knows about its subviews, but little to nothing about
+its parent view, so it conditionally references its parentView, and
+unconditionally references child views.</p>
+
+<p>To archive an object:</p>
+
+<pre><code>[NSKeyedArchiver archivedDataWithRootObject:someObject];
++(NSData *)archivedDataWithRootObject:(id)rootObject
+</code></pre>
+
+<p><code>rootObject</code> conforms to <code>NSCoding</code> protocol, and is sent a message to
+unconditionally archive itself, causing the chain reaction that
+ultimately archives the whole thing and returns <code>NSData</code> that can be
+written to a file.</p>
+
+<p><code>NSUserDefaults</code> is the standard way of storing user preferences, but
+it only supports storing <code>NSData</code>, <code>NSString</code>, and a few others&#8230; how
+to encode something like an <code>NSColor</code>? Answer: &#8220;reopen&#8221; <code>NSUserDefaults</code>
+by adding a custom category to it that defines <code>setColor</code> and
+<code>colorForKey</code> to use <code>NSKeyedArchiver</code> to archive and unarchive to the
+color to and from an <code>NSData</code>, which <em>can</em> be stored in UserDefaults.</p>
+
+<p>To implement <code>NSCoder</code> protocol, implement:</p>
+
+<pre><code>- (void)encodeWithCoder:(NSCoder * )coder
+- (id)initWithCoder:(NSCoder * )
+</code></pre>
+
+<p>To encode/decode arbitrary C structs/unions:</p>
+
+<blockquote><p>Either wrap the unsupported data types in objects that conform to the
+NSCoding protocol and then encode those objects, or break the data
+types down to supported components like int and float and encode
+the individual components.</p></blockquote>
+
+<p>Cocoa supports object substitution when encoding. I don&#8217;t know what it&#8217;s
+used for, need to research more.</p>
+
+<p><code>-awakeFromNib</code> is almost like a <code>didInsertElement</code>, or rather an
+<code>afterRender</code> callback called on an object after all the objects in the
+archive have been unpacked, so you have the guarantee when the hook is
+called that all <code>IBOutlet</code>s are connected.</p>
+
+<p>&#8220;Simulation&#8221; mode in Interface Builder encodes and decodes all objects
+to simulate the real thang.</p>
+
+<p>A <code>.nib</code> specificies a File Owner that will &#8220;own&#8221; the objects decoded
+from the <code>.nib</code>. The owner object also receives an <code>awakeFromNib</code>
+anytime a <code>.nib</code> is unarchived with that file as the owner. Obviously
+this means you can associate a <code>.nib</code> with whichever owner you want (not
+sure if you can do this dynamically?), and a single owner can own (be
+associated with) multiple <code>.nib</code>s. That&#8217;s kinda rad.</p>
+
+<h2>Copying</h2>
+
+<p>Some things don&#8217;t make sense to be copied, like singletons e.g.
+<code>NSApplication</code>, which is meant to contain a single connection to OS X&#8217;s
+Quartz window server.</p>
+
+<p><code>NSCopying</code> in Cocoa is meant to produce shallow copies. One approach
+for deep copies, if everything adheres to <code>NSCoding</code> protocol, is to
+archive and then unarchive.</p>
+
+<p>On mutability: Cocoa provides lots of immutable classes, like <code>NSString</code>
+and <code>NSArray</code>. Why? Issues surrounding concurrency come to mind, e.g. if
+you can only create new modifies versions of a string rather than
+modify the string, then threads will each have their own copies of
+strings to fart around with rather than have to manage complex locking
+procedures when making changes to the thing.</p>
+
+<p>But the other thing to realize is that immutable objects can be shared,
+and passed by reference without fear of someone mucking with them.
+Multiple objects can &#8220;own&#8221; the same immutable object. Maybe this will
+help me remember:</p>
+
+<blockquote><p>Everyone owns immutable objects</p></blockquote>
+
+<p>or</p>
+
+<blockquote><p>There is no tragedy of the commons with immutable objects</p></blockquote>
+
+<p><code>NSCopying</code> returns immutable copies, but there&#8217;s also
+<code>NSMutableCopying</code>.</p>
+
+<p>If you&#8217;re implementing copy on an immutable object, it&#8217;s as easy as:</p>
+
+<pre><code>- (id)copyWithZone:(NSZone * )aZone 
+{
+  return [self retain]; 
+}
+</code></pre>
+
+<p>Optimal as fuck.</p>
+
+<p>There is no formal <code>NSDeepCopying</code> protocol, but you can make your own
+<code>deepCopy</code> method using Archiving and Unarchiving.</p>
+
+<p><code>NSDictionary</code> copies objects used as keys, so those need to conform to
+<code>NSCopying</code>.</p>
+
+<p>In Obj-C 2.0, it&#8217;s common to have a public interface with <code>readonly</code>
+properties, only to have an anonymous category class extension redefine
+them as <code>readwrite</code> so that they are mutable within the implementation
+but immutable to the public.</p>
+
+<blockquote><p>The compiler allows redeclarations to replace readonly with readwrite,
+but no other attributes of the property can be changed in a redeclaration.</p></blockquote>
+
+<p>So you could change something from</p>
+
+<pre><code>@property (readonly, retain) NSString *word;
+</code></pre>
+
+<p>to</p>
+
+<pre><code>@property (readwrite, retain) NSString *word;
+</code></pre>
+
+<p><code>retain</code> means setters retain their args rather than copy them.</p>
+
+<p>Note that <code>assign</code> is the default among <code>assign</code>, <code>copy</code>, or <code>retain</code>,
+so the following are equivalent:</p>
+
+<pre><code>@property (readonly, assign)
+@property (readonly)
+</code></pre>
+
+<p>But the Obj-C 2.0 compiler will warn you if you use the default <code>assign</code> for a
+property that adheres to <code>NSCopying</code>.</p>
+
+<h2>Strong and Weak pointers</h2>
+
+<p>Obj-C 2.0 supports <code>__strong</code> and <code>__weak</code> pointers. Presumably that
+means <code>__strong</code> pointers can &#8220;own&#8221; the referenced object and increase
+its retain count, while <code>__weak</code> pointer can only refer to an object but
+have no ownership. It probably circumvents cycles. And it probably
+implies that there&#8217;s no mark and sweep phase? Is that true? There&#8217;s no
+weak reference in JavaScript, but maybe there&#8217;s some other use case.
+Mark and Sweep gets rid of the need for strong and weak pointers in the
+case of handling circular dependencies, but are there use cases beyond
+that? I guess there are, if you want to say &#8220;let this weak pointer
+reference this thing that might disappear at any point.&#8221; That could
+exist even if mark and sweep were used&#8230; right? Yeah, it could. It just
+means that the sweeper wouldn&#8217;t traverse weak pointers.</p>
+
+<p>So weak pointers can make sense in mark and sweep or reference counting.</p>
+
+<p>But mark and sweep is better at cycles and don&#8217;t require manual cycle
+breaking before garbage can be collected.</p>
+
+<h2>Singletons</h2>
+
+<p>Given Obj-C classes are objects, why use instances over class objects?</p>
+
+<p>Answer: rewriting all the references to the superclass when you
+subclass. Class object or no, you&#8217;re treating it as an instance, and
+tightly coupling to that instance. Also, I don&#8217;t really know enough
+about how class objects work, but can you also inherit/override methods
+with class objects the same way? Well, you can&#8217;t store a pointer to a
+class object without it looking really weird, right? Like:</p>
+
+<pre><code>id foo = [NSObject class];
+[foo classMethod];
+</code></pre>
+
+<p>Is there a more specific type than <code>id</code> that lets you store classes?
+Dunno. Point is: you could get in the habit of storing pointers to class
+objects but using the factory pattern to avoid initializing them, and so
+long as the interface the same you would have maintained loose coupling.
+But this is no different than just saying Obj-C supports duck-typing so
+your factory could return anything that conforms to whatever
+informal informal protocol you&#8217;re conforming to.</p>
+
+<p>So to sum it up: the main reason not to do this is it becomes really
+really confusing what you&#8217;re trying to accomplish and subclassing
+becomes extremely convoluted.</p>
+
+<p>The Cocoa pattern is to have a class object encapsulate access to the
+singleton instance and have the singleton encapsulate all the stuff
+unique to what that object is doing. Derp.</p>
+
+<p><code>+sharedInstance</code> is usually the name of the singleton accessor.</p>
+
+<pre><code>+ (MySingleton * )sharedInstance {
+  static MySingleton *myInstance = nil; 
+  if (!myInstance) {
+    myInstance = [[[self class] alloc] init];
+  }
+ ￼return myInstance; 
+}
+</code></pre>
+
+<p>Note the <code>[[self class] alloc]</code>, rather than <code>[MySingleton alloc]</code>. This
+lets you subclass and defer the alloc to which subclass you&#8217;re using it.
+You can choose the subclass that locks in in an app ready hook by doing</p>
+
+<pre><code>[MySingletonSubclass sharedInstance];
+</code></pre>
+
+<p>But you&#8217;d have to be careful that this ran before anyone else called
+<code>[MySingleton sharedInstance]</code>, which is the API anywhere else in your
+code. This parallels to Ember requiring that you&#8217;ve registered/injected
+everything before your first lookup. Both feel kinda jank.</p>
+
+<p>Also, obviously this won&#8217;t work for <code>NSApplication</code> singleton because
+it&#8217;s created before your code even runs; to handle that, you have to set
+the Principal Class in the XCode info panel when the application target
+is selected, whatever that means. This actually writes through to the
+Info.plist file. You could rewrite the above code to similarly look up
+<code>infoDictionary</code> in <code>mainBundle</code> and choose which class to init.</p>
+
+<p>Prediction: this code isn&#8217;t thread-safe, right?</p>
+
+<pre><code>Thread A: [MySingleton sharedInstance]
+          if (!myInstance) {
+Thread B: [MySingleton sharedInstance]
+          if (!myInstance) {
+            myInstance = ALLOC INIT STUFF;
+Thread A:   myInstance = ALLOC INIT STUFF;
+</code></pre>
+
+<p>Boom. Needs moar mutex.</p>
+
+<p>There&#8217;s also <code>alloc</code> and <code>allocWithZone</code> and a bunch of others and use a
+<code>hiddenAlloc</code> not defined in the public interface. It&#8217;s really messy and
+error-prone. Kinda like a lot of Cocoa?</p>
+
+<p>But if you&#8217;re using a singleton in Interface Builder (I guess this just
+means referencing it as a File Owner?) you have to preserve normal alloc
+and init semantics, so you end up having <code>alloc</code> return sharedInstance
+and adding code to <code>init</code> to make sure it only inits once.</p>
+
+<p>Singleton examples:</p>
+
+<ul>
+<li><code>NSApplication</code>: maintains Quartz window server connection. Apparently
+it receives and distributes events via First Responder pattern. That&#8217;s
+rad. Event delegation, or something else? What does it mean?</li>
+<li><code>NSWorkStation</code>: encapsulates connection to Finder and underlying file
+system</li>
+<li><code>NSFontManager</code>: maintains per-font singleton flyweights</li>
+<li>and friends</li>
+</ul>
+
+
+<p><code>+new</code> is old school Obj-C, deprecated as eff, and not to be used in
+Cocoa.</p>
+
+<p>Some classic Cocoa singletons became instances over time as their
+assumptions changed, like <code>NSPrintPanel</code> and <code>NSPageLayout</code>. Be careful
+about your assumptions, then?</p>
+
+<h2>Random: parallel b/w calculus and OO?</h2>
+
+<p>The relationship between an instance and a class object could be
+described as an integral relative to its derivative.</p>
+
+<pre><code>derivative(class) = instance
+integral(instance) = class + C
+</code></pre>
+
+<p>where <code>C</code> is all the methods declared on an object&#8217;s singleton class.</p>
+
+<p>What&#8217;s the derivative of an instance? Often it&#8217;s 0.</p>
+
+<h2>Notifications / Observers / Run loop scheduling</h2>
+
+<p>This is like Evented in Ember, except that the observer state lives in a
+global <code>NSNotificationManager</code> in Cocoa whereas it lives on instance
+meta in Ember. The Ember benefit is that testing becomes easier when you
+don&#8217;t have to remember to flush a global instance. It also means
+you don&#8217;t have to remember to teardown observers when you destroy an
+object, observer or observee (I think; need to verify this).</p>
+
+<p>Notifications are synchronous, so be mindful of performance implications
+when complex interactions are involved. You can asyncify by doing a</p>
+
+<pre><code>[self performSelector:@selector(doSlowAssShit:) 
+      withObject:[aNotification object]
+      afterDelay:0.0f];
+</code></pre>
+
+<p>I wonder if the 0.0f performs in the same run loop or not? In Ember, I
+remember making the change so that Ember.run.later would guarantee
+running on a separate run loop.</p>
+
+<p>For more complex async messaging, you can use <code>NSNotificationQueue</code>,
+which handles the async-ness, and then posts notifications later, after
+which point it&#8217;s back in sync-land.</p>
+
+<p>Oo oo oo:</p>
+
+<blockquote><p>The NSPostASAP style directs the queue to post the notification
+at the beginning of the next run loop iteration and is effectively
+identical to the -performSelector:withObject:afterDelay:</p></blockquote>
+
+<p>So afterDelay 0.0f forces onto the next run loop iteration.</p>
+
+<p>Three styles of async flags for a notification queue&#8217;s
+<code>-enqueueNotification</code>:</p>
+
+<ul>
+<li>NSPostASAP: same as afterDelay:0.0f approach above</li>
+<li>NSPostWhenIdle: runs when run loop is ideal, e.g. no user input events
+or other things.</li>
+<li>NSPostNow: post the notification immediately and synchronously. Will
+still perform <code>NSNotificationQueue</code>-specific coalescing if there are
+other events with NSPostASAP or NSPostWhenIdle whose args match. This
+is like Ember.run.once except that it works cross run loop, whereas
+Ember.run.once only guarantees once-ness within a run loop.</li>
+</ul>
+
+
+<p>So far I don&#8217;t think I&#8217;ve seen an example of enqueuing and action to the
+same run loop&#8230; or maybe there was something earlier.</p>
+
+<p>Cocoa lets you describe how once-ness coalesces via the following
+<code>coalesceFlags</code> masks:</p>
+
+<ul>
+<li>NSNotificationNoCoalescing: same as Ember.run.schedule. No coalescing occurs</li>
+<li>NSNotificationCoalescingOnName: coalesce if notification names match</li>
+<li>NSNotificationCoalescingOnSender: <code>postNotification</code> includes a string
+<code>sender</code>, which Ember doesn&#8217;t have, but this flag will cause events to
+coalesce on sender.</li>
+</ul>
+
+
+<p>Ember doesn&#8217;t let you specify coalesce options for <code>run.once</code>. It will
+coalesce on action names, and replace any args present on a previously
+scheduled action with the same name.</p>
+
+<p>Since NSRunLoop supports multiple modes of operations (which I still
+don&#8217;t understand), you can also specify run loop modes in <code>forModes</code>.</p>
+
+<p><code>NSDistributedNotificationCenter</code> lets you post inter-process
+notifications. Other apps must <code>addObserver</code> to register to receive them
+of course. You can control suspended app behaviors, etc etc etc.</p>
+
+<p>One downside about framework notifications is that you end up posting
+notifications that no one may ever use, or you might not post a crucial
+one that people would love to have, and there&#8217;s a performance cost to
+un-judicious use.</p>
+
+<p>Notifications are similar to delegates, except that delegates are meant
+to be the sole receiver/manager of these events.</p>
+
+<h2>Delegation</h2>
+
+<p>Delegation is a benefit over subclassing and overriding hooks (Template
+Pattern) because subclass-superclass coupling is bad, and it&#8217;s also
+hardwired at compile time whereas you can switch delegates dynamically
+at runtime.</p>
+
+<p>Another way to think about it is that sometimes model/controller state
+dictate constraints on the view layer, e.g. <code>NSWindow</code> sizing and what
+not, but subclassing <code>NSWindow</code> to pollute it with model/controller
+concerns would break the separation of concerns. Delegates obviously do
+this to some degree, but this breakage, if it can be considered that,
+is way more encapsulated.</p>
+
+<p><code>setDelegate</code> should only assign an instance variable but not retain it;
+an object doesn&#8217;t own its delegate, but a delegate knows about the
+object. This avoids cycles and makes conceptual sense. Delegate objects
+are responsible sending <code>setDelegate:nil</code> to all the objects it stands
+in for upon <code>dealloc</code>.</p>
+
+<p>Data Sources are like delegates, but provides data rather than
+responding to a change.</p>
+
+<p><code>NSOutlineView</code> and <code>NSTableView</code> use a data source.</p>
+
+<h2>UIKit is iOS-only!</h2>
+
+<p>UIKit is iOS only (Cocoa Touch), dweebleton. Apparently UIKit is based on
+<code>Application Kit</code>.</p>
+
+<pre><code>Cocoa:ApplicationKit::CocoaTouch:UIKit
+</code></pre>
+
+<h2>Prefix.pch for globally used framework headers</h2>
+
+<p>Save on typing by adding an <code>import</code> to <code>YourApp-Prefix.pch</code>, which
+literally prepends it to every Objective-C source file in your proj.</p>
+
+<p>Also, <code>.pch</code> means Pre-Compile Header.</p>
+
+<h2>View Hierarchy</h2>
+
+<p>Non-opaque views let clicks through. Like <code>pointer-events</code> in CSS land.</p>
+
+<p>Each view tracks two rectangles:</p>
+
+<ul>
+<li>bounds: always <code>0,0</code> origin unless reset at some point (there&#8217;s a
+method to use this, apparently scrollview uses it).</li>
+<li>frame: the box within the parent view&#8217;s coord system.</li>
+</ul>
+
+
+<p>Scaling is supported, resetting the origin (which affects bounds) is
+supported. There are methods for translating between coord systems.</p>
+
+<p>TODO: finish this bitchass book.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/01/daily-journal/"/>
+    <updated>2014-07-01T10:03:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/01/daily-journal</id>
+    <content type="html"><![CDATA[<h2>window vs document events</h2>
+
+<p><code>window</code> and <code>document</code> have different events. Duh.</p>
+
+<p><code>window</code>:</p>
+
+<ul>
+<li>resize</li>
+</ul>
+
+
+<p><code>document</code>:</p>
+
+<ul>
+<li>DOMContentLoaded</li>
+</ul>
+
+
+<p>Breakdown of events and their originators:</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/Events</p>
+
+<p>Fun fact: DOMContentLoaded is considered a DOM mutation event.</p>
+
+<h2>Treat stubbed cordova as its own platform</h2>
+
+<p>I&#8217;m doing a Phonegap/Cordova app and it&#8217;s been tricky settling on a
+pattern for stubbing out the cordova library when I&#8217;m just running in
+Chrome or anywhere not in the actual native cordova wrapper, and I think
+I found the final solution: clone https://github.com/apache/cordova-js,
+define a new platform with a fake exec, have the fake exec look up some
+stubbed handlers that you can define in your app, (e.g.
+<code>window._stubbedCordovaHandlers[blahblah]</code>) and basically leave it up to
+your app to stub out all the native plugin services/actions. The effect
+of all of this is that your index.html always loads a cordova.js (which
+has some other conveniences like stick event handlers, pub sub channels,
+etc) but you don&#8217;t have to have a bunch of conditionals asking whether
+this is a stubbed version of the app or not.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/06/29/daily-journal/"/>
+    <updated>2014-06-29T19:29:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/06/29/daily-journal</id>
+    <content type="html"><![CDATA[<h2>DAS thangs</h2>
+
+<p>Ctrl-Z suspends a task, but you can resume a task via <code>%1</code> or <code>%2</code>, etc,
+referencing the number next to the job as displayed in <code>jobs</code>:</p>
+
+<pre><code>[1]- suspended bleh
+[2]+ suspended lol
+[3]  suspended lol
+</code></pre>
+
+<p>You can also do <code>%-</code> and <code>%+</code>.</p>
+
+<h3>Inline loops</h3>
+
+<pre><code>while true; do echo "wat"; sleep 1; done
+</code></pre>
+
+<p>ctrl-z to suspend, <code>bg</code> to convert a suspended job to a background job.</p>
+
+<p>Open the output of a command in <code>vim</code>: <code>echo woot | view -</code></p>
+
+<ul>
+<li><code>view</code> is a <code>vim -R</code> alias that opens in read-only mode</li>
+<li><code>-</code> option reads the file from stdin</li>
+</ul>
+
+
+<p>The man page for <code>vim</code> / <code>view</code> mentions that commands are read from
+stderror. So how would we run a command that reads input from stdin and
+commands from stderr? TODO: this.</p>
+
+<pre><code>machty.github.com :: &lt;(echo "wat")
+-bash: /dev/fd/63: Permission denied
+machty.github.com :: echo &lt;(echo "wat")
+/dev/fd/63
+</code></pre>
+
+<p><code>&lt;()</code> will run a command and put its output in a file descriptor which
+is file-like enough to work as an input to most commands. Gary&#8217;s example
+is the &#8220;diff of diffs&#8221;, which is mostly useful to see if two branches
+(e.g. one rebased and the other not) have the same content.</p>
+
+<pre><code>diff -u &lt;(git diff master~5..master~1) &lt;(git diff master~4..master)
+</code></pre>
+
+<p>Can diff google com and fr, e.g.</p>
+
+<pre><code>diff &lt;(curl www.google.com | tidy) &lt;(curl www.google.fr | tidy) | view -
+</code></pre>
+
+<p>This is stupidly cool. Another use case is diffing localhost w deployed
+site.</p>
+
+<h2>subterfuge</h2>
+
+<p>I thought this word was a synonym for &#8220;plasma&#8221;, as in the liquid-y
+filler part of blood that&#8217;s revealed when you spin blood in a
+centrifuge. I think the centrifuge&#8217;s involvement in that tripped me up.</p>
+
+<p>http://www.merriam-webster.com/dictionary/subterfuge</p>
+
+<p>It actually just means</p>
+
+<ul>
+<li>deceit used in order to achieve one&#8217;s goal</li>
+</ul>
+
+
+<h2>Cordova My Mac 64-bit</h2>
+
+<p>This was the only thing showing up after I changed the project name in
+config.xml away from what I&#8217;d had it as when I first generated the iOS
+platform. Remember this crap; I&#8217;m sure I&#8217;ll have to fight it again.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Social Media Triggers]]></title>
@@ -1992,516 +3469,6 @@ methods to subclasses.</p>
 
 <p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
 &#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/04/daily-journal/"/>
-    <updated>2014-05-04T10:11:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/04/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Vim surround</h2>
-
-<p>https://github.com/tpope/vim-surround</p>
-
-<ul>
-<li>ysiw] : surround a word in ]</li>
-<li>ysiW] : surround a chunk word in ]</li>
-<li>cs&#8221;&#8217; : change surrounding &#8221; to &#8217;</li>
-<li>ds&#8221; : delete surrounding &#8221;</li>
-<li>yss( : wrap line in parens</li>
-</ul>
-
-
-<h2>DAS: Conflicting Principles</h2>
-
-<ul>
-<li>User/profile/account
-
-<ul>
-<li>All this other stuff that relates to that single giant model</li>
-</ul>
-</li>
-<li>User
-
-<ul>
-<li><code>disable!</code></li>
-<li><code>send_disable_notication</code></li>
-</ul>
-</li>
-<li>Law of demeter
-
-<ul>
-<li>Motivation for decomposition</li>
-<li>move controller logic to model <code>enforce_good_standing!</code></li>
-</ul>
-</li>
-<li>User model will get huge; lots of complexity there.</li>
-<li>Pull out service classes, e.g. GoodStandingPolicy, or
-AccountStandingPolicy
-
-<ul>
-<li><code>#initialize(user)</code></li>
-<li><code>enforce!</code>
-
-<ul>
-<li>still breaks law of demeter.</li>
-<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
-<li>but this breaks Tell Don&#8217;t Ask
-
-<ul>
-<li>TDA means asking an object about properties and deciding what to
-do instead of telling it to do things and giving it enough info
-to do so.</li>
-</ul>
-</li>
-<li>TDA vs Single Responsibility Principle (SRP)?
-
-<ul>
-<li>If you follow TDA, you end up putting responsibility back into
-User class, but now User class has much responsibility</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Pick one: SRP often makes sense</li>
-</ul>
-
-
-<h2>DAS: Wrapping Third Party APIs</h2>
-
-<ul>
-<li>e.g. accepting Braintree payment from secure redirect back to your
-site with data in QPs</li>
-<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
-<li>Goal: move traversal of these objs to a different class.</li>
-<li>Spec
-
-<ul>
-<li>Had to stub deeply nested crap</li>
-</ul>
-</li>
-<li>TDD
-
-<ul>
-<li>it &#8220;konws the newest credit card&#8221;</li>
-<li>qp is a stub</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Pend-out an Rspec test</h2>
-
-<pre><code>it "does something" {}
-</code></pre>
-
-<p>can be made pending via <code>xit</code></p>
-
-<pre><code>xit "does something" {}
-</code></pre>
-
-<h2>Cisgender</h2>
-
-<p>http://en.wikipedia.org/wiki/Cisgender</p>
-
-<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
-related types of gender identity where an individual&#8217;s experience of
-their own gender matches the sex they were assigned at birth.</p></blockquote>
-
-<h2>Hypermedia API</h2>
-
-<p>Hyper = above</p>
-
-<p>Media = well, media, but not just hypertext because more things than
-just text can be conveyed</p>
-
-<p>Examples:</p>
-
-<ul>
-<li>http://jsonapi.org/</li>
-<li>HAL - Hypermedia Application Language</li>
-</ul>
-
-
-<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
-
-<ul>
-<li>HAL embeds child docs recursively; JSON API flattens the entire graph
-at the top level.</li>
-<li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
-<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
-https://github.com/json-api/json-api/pull/123/files#r12265234</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal 2]]></title>
-    <link href="http://machty.github.com/blog/2014/05/01/daily-journal-2/"/>
-    <updated>2014-05-01T22:46:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/01/daily-journal-2</id>
-    <content type="html"><![CDATA[<h2>Cryptoballs</h2>
-
-<pre><code>openssl speed rsa
-openssl speed aes
-</code></pre>
-
-<h3>RSA</h3>
-
-<p>Encryption key is public. Decryption key is secret.
-Used for generating symmetric key in TLS.</p>
-
-<p>AES is way faster (TODO: wat?).</p>
-
-<h2>Active-model serializers</h2>
-
-<p>How do tell an attribute to use a serializer?</p>
-
-<p>Trick question: you don&#8217;t; rather, if it has a serializer, it&#8217;s probably
-an association, not an attribute, so you probably want something like</p>
-
-<pre><code>has_many :action_items, serializer: ActionItemSerializer
-has_one :originator, serializer: OriginatorSerializer
-</code></pre>
-
-<p>and in both cases you can probably remove <code>serializer</code> once you de-stub
-<code>action_items</code> and <code>originator</code>.</p>
-
-<h2>QUnit filter</h2>
-
-<p>In Mocha JS test suites if you click a suite header, it&#8217;ll run tests
-only from that module or children by way of a <code>grep=blahlbahbl</code> query
-param. I&#8217;m using <a href="https://github.com/square/qunit-bdd">qunit-bdd</a>, which
-is a layer over QUnit, which generates a bunch of concatenated module
-names based on the nested <code>describe</code>s and <code>context</code>s, which doesn&#8217;t let
-you easily run all the nested child modules of a top-level describe if
-you&#8217;re used to using the Module dropdown on the upper right.</p>
-
-<p>If you want to run a family of describe modules, you can manually
-provide a <code>filter</code> query param, e.g.:</p>
-
-<pre><code>http://localhost:4200/tests?filter=LiveQuery
-</code></pre>
-
-<p>This runs all modules w &#8220;LiveQuery&#8221; is part of their name.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/01/daily-journal/"/>
-    <updated>2014-05-01T08:59:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/01/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Normalize / Denormalize</h2>
-
-<p>From <a href="http://en.wikipedia.org/wiki/Database_normalization">Wikipedia</a>:</p>
-
-<p>Database normalization is the process of organizing the fields and
-tables of a relational database to minimize redundancy.</p>
-
-<p>Source: Gary Bernhardt saying &#8220;we denormalize by passing in
-<code>person_name</code> in addition to the person object&#8221;. Normalizing means
-keeping all the data in one place, reducing redundancy. Denormalizing
-means redundancy, which normally affords</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Denormalization">Denormalization</a>:</p>
-
-<blockquote><p>In computing, denormalization is the process of attempting to
-optimize the read performance of a database by adding redundant
-data or by grouping data. In some cases, denormalization
-is a means of addressing performance or scalability in relational
-database software.</p></blockquote>
-
-<p>Generally speaking, denormalizing means you&#8217;ve duplicated some piece of
-data for some reason, probably optimization.</p>
-
-<h2>Stub a method in ruby</h2>
-
-<p>As simple as</p>
-
-<pre><code>def stubbed_method(*args)
-  # accept any number of args, do nothing with them.
-end
-</code></pre>
-
-<h2>Use <code>fetch</code>, not <code>[]</code> for <code>Hash</code> / <code>Array</code></h2>
-
-<p>I already know this, just keep on forgetting to use it;</p>
-
-<pre><code>{}[123] # =&gt; nil
-{}.fetch(123) # =&gt; KeyError: key not found: 123
-</code></pre>
-
-<h2>Directory stack: <code>pushd</code> / <code>popd</code></h2>
-
-<p>Forgot about this from my Bloomberg days; use <code>pushd</code> and <code>popd</code> for
-saving which directory you&#8217;re in (<code>pushd</code>) so that you can screw around,
-change directories, and then ultimately <code>popd</code> back to whichever directory
-you were in before you ran <code>pushd</code>.</p>
-
-<pre><code>cd /foo/bar/baz
-pushd /some/other/dir
-pwd # =&gt; /some/other/dir
-cd /go/to/some/strange/land
-popd
-pwd # =&gt; /foo/bar/baz
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/04/28/daily-journal/"/>
-    <updated>2014-04-28T14:11:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/28/daily-journal</id>
-    <content type="html"><![CDATA[<h2><code>npm install</code> git repos</h2>
-
-<p>NOTE: this section is not complete; placeholding for later.</p>
-
-<p>After many abortive attempts to find the right syntax for running
-<code>npm install</code>, I figured I&#8217;d delve into what URL syntax it actually
-expected, and why.</p>
-
-<p>Here&#8217;s a bunch of stuff that didn&#8217;t work:</p>
-
-<pre><code>npm install git+ssh@github.com:stefanpenner/ember-cli.git
-npm install https://github.com/stefanpenner/ember-cli.git
-</code></pre>
-
-<p>Why couldn&#8217;t <code>npm install</code> just figure out what I meant? Well, I don&#8217;t
-know, but here&#8217;s a breakdown of the above.</p>
-
-<p><em>This is a helpful resoure: https://help.github.com/articles/which-remote-url-should-i-use</em></p>
-
-<p>Basically, you can clone GitHub repos either with HTTPS or SSH urls. SSH
-urls require an SSH keypair to generated on your computer and registered
-to your GitHub accounts.</p>
-
-<p>So here&#8217;s the first thing I tried:</p>
-
-<pre><code>https://help.github.com/articles/using-ssh-agent-forwarding
-</code></pre>
-
-<p>This is an HTTPS url.</p>
-
-<p>Q: Why does/did GitHub even require a password for cloning a repo?
-What&#8217;s insecure about that read info? Possible answer: even if you don&#8217;t
-have read access to a repo, a man in the middle might tell you you do,
-and then you&#8217;re sending priv data, blah blah blah.</p>
-
-<h2><code>Gdiff</code>, diffing in vim</h2>
-
-<p>This was a very helpful resource:</p>
-
-<p>http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/</p>
-
-<pre><code>:Gdiff
-:ls # list all the open buffers in their names
-:diffget BUFSPEC # when inside a conflict region,
-                 # say which buffer to get content from
-:diffput BUFSPEC # when inside a conflict region,
-                 # say which buffer to get content from
-:only # close all buffer except this one
-</code></pre>
-
-<p>I ended up adding the following to my <code>.vimrc.after</code>:</p>
-
-<pre><code>:nnoremap &lt;Leader&gt;dg :diffget &lt;CR&gt;
-:nnoremap &lt;Leader&gt;dp :diffput &lt;CR&gt;
-</code></pre>
-
-<p>Note that this arg-less form is useful when diffing between local
-changes and your last checkin; I use it a bunch for <code>ember-cli</code> when I
-call <code>ember init</code> to reset my app structure to the latest <code>ember-cli</code>
-blueprint (note that this process is still pretty miserable).</p>
-
-<h2>Broccoli <code>ignoredModules</code> and <code>legacyFilesToAppend</code></h2>
-
-<p>These options come from the <code>broccoli-es6-concatenator</code>.</p>
-
-<ul>
-<li><code>ignoredModules</code>: don&#8217;t transpile this module or add it to the list of
-importable modules. This is useful when you have a file that&#8217;s already
-in AMD format (not ES6), and you want to be able to es6 <code>import</code> that
-module, so you put it in <code>ignoredModules</code> so it&#8217;s not treated as an
-es6 file that needs to be imported.</li>
-<li><code>legacyFilesToAppend</code>: non-es6 files (global libraries) that should be
-appended to the end of the final output JS file.</li>
-</ul>
-
-
-<p>Note: <code>loaderFile</code> is automatically added as a legacy files, why, duh,
-because the loader file obviously needs to be a global, non-module file.</p>
-
-<p>So, wtf does this mean (the latest iteration of the blueprint
-Brocfile.js from ember-cli):</p>
-
-<pre><code>if (app.env !== 'production') {
-  push.apply(app.ignoredModules, [
-    'qunit',
-    'ember-qunit'
-  ]);
-
-  push.apply(app.legacyFilesToAppend, [
-    'test-shims.js',
-    'ember-qunit/dist/named-amd/main.js'
-  ]);
-}
-</code></pre>
-
-<p>Well, thanks to the geniuses in freenode IRC <code>#ember-cli</code>, I&#8217;ve learned
-that:</p>
-
-<ul>
-<li>This shouldn&#8217;t be in the blueprint Brocfile.js, but rather should be
-in the ember-cli lib <code>EmberApp</code> abstraction over the Brocfile.js, but
-anyway:</li>
-<li>The intent is that by specifying an <code>ignoredModules</code> item, you&#8217;re
-basically saying &#8220;I intent to import a module with this name, and
-because I&#8217;m opting out of generating it now via an ES6 file, I&#8217;ll be
-adding an AMD module for this file later&#8221;</li>
-</ul>
-
-
-<p>And if you try to <code>import something from 'nonexistent-module'</code>, you&#8217;ll
-get a loader error.</p>
-
-<p>This all seems really obvious, right? Naw, it&#8217;s really freaking hard for
-me to keep in my dumb brain. :(</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/04/26/daily-journal/"/>
-    <updated>2014-04-26T14:49:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/26/daily-journal</id>
-    <content type="html"><![CDATA[<h2>JavaScript: <code>Object#constructor</code></h2>
-
-<pre><code>function A() {}
-function B() {}
-B.prototype = Object.create(A.prototype);
-console.log(new B().constructor); // "[Function: A]"
-</code></pre>
-
-<p>That&#8217;s not what we want. If we use <code>Object.create</code> on a parent class&#8217;s
-prototype, you need to also do</p>
-
-<pre><code>B.prototype.constructor = B;
-console.log(new B().constructor); // "[Function: B]"
-</code></pre>
-
-<p>TL;DR, you must manually set <code>constructor</code> on a subclass&#8217;s prototype to
-point to that subclass&#8217;s constructor function, or else <code>.constructor</code>
-will refer to a parent class&#8217;s constructor.</p>
-
-<h2>Duck duck go</h2>
-
-<p>Search engine that I should be using.</p>
-
-<h2><code>tree</code></h2>
-
-<p><code>tree</code> is a command you can install with <code>brew install tree</code> that
-gives you a visual, recursive display of a folder. Output looks like
-this:</p>
-
-<pre><code>app/routes
-├── ad.js
-├── application.js
-├── builds
-│   ├── form.js
-│   ├── index.js
-│   ├── select
-│   │   └── index.js
-│   └── select.js
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/04/21/daily-journal/"/>
-    <updated>2014-04-21T09:41:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/04/21/daily-journal</id>
-    <content type="html"><![CDATA[<p>This is a half-finished journal. Most of the value lies in the fact that
-there&#8217;s a crap-ton of flashcards associated with what I learned.</p>
-
-<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
-
-<p>In a Unicorn setting, shared resources like database connections
-need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
-in <code>after_hook</code>. This is so that you don&#8217;t wind up in a situation where
-two forked instances of your server try to write to a DB socket at the
-same time, which can result in a Protocol Error. This makes sense; if
-two protocol-adhering processes write to the socket at the same time,
-the message delivered to the other side obviously won&#8217;t adhere to the
-protocol. TODO: at what point does this actually break? How bout writing
-a quick Ruby script to prove this :) :) :)</p>
-
-<p>Resources:</p>
-
-<ul>
-<li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
-</ul>
-
-
-<h2>The difference between a process and a thread</h2>
-
-<p>A Process has:</p>
-
-<ul>
-<li>A group of resources</li>
-<li>A Thread of Execution</li>
-</ul>
-
-
-<p>The group of resources includes:</p>
-
-<ul>
-<li>Address space where program text and data lives in memory</li>
-<li>Global variables</li>
-<li>Open files</li>
-<li>Child processes</li>
-<li>Pending alarms</li>
-<li>Signals and signal handlers</li>
-<li>Accounting information</li>
-</ul>
-
-
-<p>A Thread (of Execution) has:</p>
-
-<ul>
-<li>Program counter</li>
-<li>Registers (of course these aren&#8217;t shared b/w threads; that&#8217;s crazy)</li>
-<li>Stack</li>
-<li>State</li>
-</ul>
-
-
-<p>A Thread must execute in a Process, but they are separate entities.</p>
-
-<p>There are multiple types of threads:</p>
-
-<ul>
-<li>User-space threads: super-fast thread switching because no kernel trap
-is required. Fine-grain control over thread scheduling. Unable to do
-blocking I/O though, since this blocks the entire process and all
-user threads.</li>
-<li>Kernel-threads: can using blocking IO, defers scheduling to the OS,
-but each thread switch means a slow kernel trap, but then again if
-you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
-<li>Combined: multiple kernel threads have multiple userspace threads.</li>
-</ul>
-
-
-<p>Resources:
-  - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
-  - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
-  - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
 ]]></content>
   </entry>
   
