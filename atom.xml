@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-07-15T10:22:25-04:00</updated>
+  <updated>2014-07-18T04:37:50-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,227 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/18/daily-journal/"/>
+    <updated>2014-07-18T03:50:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/18/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Cookies</h2>
+
+<p>What ends up in <code>document.cookie</code>?</p>
+
+<p>Test: kill a previous localhost:5000 server, start a server for a
+separate project. Reload the page. Request headers sent include
+a transient cookie from the previous server. I bet it was due to
+Turbolinks. I was right!</p>
+
+<p>From http://tools.ietf.org/html/rfc6265#section-4.1.1</p>
+
+<blockquote><p> Origin servers MAY send a Set-Cookie response header with any
+ response.  User agents MAY ignore Set-Cookie headers contained in
+ responses with 100-level status codes but MUST process Set-Cookie
+ headers contained in other responses (including responses with 400-
+ and 500-level status codes).  An origin server can include multiple
+ Set-Cookie header fields in a single response.  The presence of a
+ Cookie or a Set-Cookie header field does not preclude HTTP caches
+ from storing and reusing a response.</p></blockquote>
+
+<p>So you can send multiple headers with the same key. Makes sense, since
+comma separation will conflict with the UTC date (e.g. <code>Aug 12, 2014</code>).</p>
+
+<p>So how do you set multiple cookies in Rack?</p>
+
+<p>Interesting: https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L266</p>
+
+<p>Anyway, split cookies with newlines and Rack will cause this to send two
+<code>Set-Cookie</code> headers, which is totally fine.</p>
+
+<p>You can also use <code>set_cookie</code> on <code>Rack::Response</code> if you&#8217;re into that
+sort of thing..</p>
+
+<p>I psyched myself out thinking cookies were overwriting each other by doing:</p>
+
+<pre><code>"Set-Cookie" =&gt; "foo\nbar\nbaz"
+</code></pre>
+
+<p><code>document.cookie</code> was only revealing <code>baz</code>. But, I&#8217;m a dumb: cookies
+need to be key-value pairs, which fixed it.</p>
+
+<p>You can use <code>HttpOnly</code> to prevent JS (and other APIs?) access to the
+cookie sent by the server. Makes sense; less likely that&#8217;ll break
+something.</p>
+
+<p>Getting <code>document.cookie</code> returns all the cookies available to JS.
+Setting it will only set the cookie you provide.</p>
+
+<blockquote><p>Notice that servers can delete cookies by sending the user agent a
+new cookie with an Expires attribute with a value in the past.</p></blockquote>
+
+<h2>JavaScript set focus</h2>
+
+<p><code>focus()</code> is a method on input elements. So is <code>blur()</code>.</p>
+
+<p><code>document.activeElement</code> in modern browsers points to the focused
+element, which might also include scroll windows.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/document.activeElement</p>
+
+<p>In older browsers, to <code>blur</code> the active element, you&#8217;d have to know what
+that element was; there was no way to query. Might be wrong about this.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/16/daily-journal/"/>
+    <updated>2014-07-16T00:40:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/16/daily-journal</id>
+    <content type="html"><![CDATA[<h2>WeakMap</h2>
+
+<p>Use objects as keys. If you lose access to a key, it and its value will
+eventually be removed by GC because references to keys are weak. This
+also means WeakMaps are non enumerable since GC is non-deterministic and
+a key that might exist pre GC might not exist after.</p>
+
+<h2>ES6 Symbols</h2>
+
+<p>They&#8217;re nothing like Ruby symbols.</p>
+
+<p>They&#8217;re used to create unique, non-enumerable, keys that can&#8217;t be
+determined publicly unless the symbol is exported. So you could prevent
+tampering with a player&#8217;s score by storing the score on the player using
+an unshared symbol as the key:</p>
+
+<p>http://tc39wiki.calculist.org/es6/symbols/</p>
+
+<h2>ES6 === Harmony === ES.next</h2>
+
+<p>They&#8217;re all the same thing.</p>
+
+<h2>JS 1.7 vs ES6, etc</h2>
+
+<p><a href="http://ejohn.org/blog/versions-of-javascript/">jeresig clears this up a bit</a></p>
+
+<p>All modern browsers support ECMAScript; JavaScript is a variant of it
+that Mozilla&#8217;s largely been adding features to. ES3 === JS 1.5.</p>
+
+<p>So I see <code>let</code> was added to JavaScript 1.7, so why is it now being
+described as a new upcoming feature of ES6? Ah, because all browsers
+track ECMAScript standards, even if they call their enhanced language in
+the browser something else. Mozilla has been blazing ahead and trying
+new shit, but other browsers won&#8217;t pick it up until it&#8217;s actually
+standardized into ECMAScript.</p>
+
+<p>Why would Microsoft follow ECMAScript? Well, for starters, it delivered
+JScript to Ecma back in the day for standardization.</p>
+
+<blockquote><p>The name &#8220;ECMAScript&#8221; was a compromise between the organizations involved in standardizing the language, especially Netscape and Microsoft, whose disputes dominated the early standards sessions.</p></blockquote>
+
+<p>Interesting, and:</p>
+
+<blockquote><p>While both JavaScript and JScript aim to be compatible with ECMAScript, they also provide additional features not described in the ECMA specifications</p></blockquote>
+
+<p>Also, some reason I thought TC39 was part of Mozilla. I see that I am
+obviously incorrect: http://www.ecma-international.org/memento/TC39.htm</p>
+
+<p>It&#8217;s Ecma-TC39. The things I don&#8217;t know.</p>
+
+<p>W3C Tag, Ecma-TC39. W3C Tag, Ecma-TC39.</p>
+
+<h2><code>let</code></h2>
+
+<p><code>let</code> behaves like C++ declarations; the obj is only available in the
+curlies, or in for loops, or whatever, and there&#8217;s no hoisting. Outside
+of the block, the variable is undefined.</p>
+
+<h2>Cloudfront TTL</h2>
+
+<p>TTL lets you specify a min time before CF checks the origin to see if it
+has a new version of the file/response. You still need your origin
+server&#8217;s Cache-Control headers setup correctly.</p>
+
+<p><a href="http://stackoverflow.com/questions/10621099/what-is-a-ttl-0-in-cloudfront-useful-for">TTL can be 0</a>.
+Why? TTL 0 means that it delegates Cache-Control entirely to the origin.
+This means CF will always make a GET request w <code>If-Modified-Since</code>
+header to let the server return <code>304 Not Modified</code>.</p>
+
+<h2>Drag and Drop</h2>
+
+<p>Draggable elements need to be marked as <code>draggable="true"</code>.</p>
+
+<p>Then listen to the <code>ondragstart</code> event, e.g.
+<code>ondragstart="drag(event)"</code>.</p>
+
+<p>And then say what data is associated with the dragged el&#8230;</p>
+
+<pre><code>ev.dataTransfer.setData("Text", ev.target.id);
+</code></pre>
+
+<p>This seems strange.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer</p>
+
+<p>It really is a class associated only w drag and drop.</p>
+
+<p>Should probably be reading this rather than fucking w3schools. Why do I
+still do that?
+https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop</p>
+
+<p>Ah I get it, you use dataTransfer as part of the mechanism for
+dynamically determining drop targets. You have to prevent bubbling
+(return false or preventDefault) on droppable targets, and in that fn
+they have the option of looking up the data transfer to see if they want
+to accept the data from that drag drop.</p>
+
+<p>You can also configure drag drag visual details to indicate copying,
+moving, etc. LOL such drag and drop.</p>
+
+<p>Oof apparently it&#8217;s a fucking disaster: http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html</p>
+
+<p>Criticisms:</p>
+
+<ul>
+<li>7 fucking events, such API surface</li>
+<li>&#8220;For the drop event to fire at all, you have to cancel the defaults of both the dragover and the dragenter event.&#8221;</li>
+</ul>
+
+
+<h2>Cordova events: sticky != buffered</h2>
+
+<p>Sticky events (e.g. deviceready) just mean that once fired, they stay in
+a fired state. This means you can&#8217;t have multiple events fire if it&#8217;s a
+sticky event. I was originally thinking sticky meant all the events were
+cached until the first handler was registered.</p>
+
+<p>Ended up making this: https://gist.github.com/machty/e1cc485060f2951aeb6c</p>
+
+<h2>Why <code>-print0</code> in <code>find</code>?</h2>
+
+<p>Often you pipe the results of <code>find</code> into <code>xargs</code> to pass the results of
+a <code>find</code> so that some utility can operate on each file found. GOOD
+ENGRISH, MATCHNEER.</p>
+
+<p>But since <code>xargs</code> splits based on whitespace by default, this will break
+for files with newlines or or spaces in them, so <code>-print0</code> separates
+files w null bytes, and <code>-0</code> tells xargs to split via null bytes as
+well. Win win win. No difference if you have no files with spaces in
+them.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Forgotten things]]></title>
+    <link href="http://machty.github.com/blog/2014/07/15/forgotten-things/"/>
+    <updated>2014-07-15T12:18:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/15/forgotten-things</id>
+    <content type="html"><![CDATA[<p>Here&#8217;s a progressively-updated list of things I forget throughout the
+day. This is different from the list of things I&#8217;ve learned; that
+approach is useful for packing the things into my brain, hopefully; the
+purpose of this list is to pack things back in when I forget. And for
+now it&#8217;ll just be one giant progressively-updated blog.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -190,6 +411,327 @@ view controllers within viewWillAppear and viewDidAppear by checking:</p>
 
 <pre><code>- (BOOL) automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
 </code></pre>
+
+<h2>RFC</h2>
+
+<p>RFC&#8217;s (Request for Comments):</p>
+
+<blockquote><p>Memos in the Requests for Comments (RFC) document series contain technical and organizational notes about the Internet</p></blockquote>
+
+<p>http://www.ietf.org/about/</p>
+
+<p>So many standards organizations. How am I supposed to keep this separate
+from IEEE?</p>
+
+<p>Anyway, RFCs are docs produced by IETF. I don&#8217;t think anyone else
+(notable) produces docs called RFCs.</p>
+
+<h2>Push Notifications</h2>
+
+<p>Two levels of trust involved in publishing a push notifications:</p>
+
+<h3>Connection Trust</h3>
+
+<ul>
+<li>Provider-side: provider proves it is an authorized provider that
+Apple&#8217;s agreed to publish notifications for</li>
+<li>Device-side: APNs must validate the connection is a with a legit
+device</li>
+</ul>
+
+
+<h3>Token Trust</h3>
+
+<p>Establishes certainty that messages are routed correctly; a provider
+shouldn&#8217;t be able to send messages to random iPhones.</p>
+
+<ul>
+<li>APNs gives device a token</li>
+<li>Devices gives it to provider</li>
+<li>Provider uses it when publishing to APNs</li>
+<li>APNs uses it to route back to device</li>
+</ul>
+
+
+<p>A <code>device token</code> is not a device <code>UDID</code>; aside from being a totally
+different string, it is conceptually different in that it identifies not
+only the unique device, but the application the Push Notification is
+delivered to.</p>
+
+<p>Maybe that&#8217;s what&#8217;s confusing: don&#8217;t call it a <code>device token</code>, call
+it&#8230; an app-token? I get confused by the easiest things.</p>
+
+<h3>Providers must maintain persistent connection</h3>
+
+<p>If you want to send a notification through APNS (and GCM),
+you must maintain a persistent connection to the server. In other words,
+you can&#8217;t just connect-sendmessage-disconnect a la HTTP, which makes
+push notifications inconvenient for Rails-y architectures without
+using Sidekiq/Resque to reuse a persistent connection.</p>
+
+<p>I both:</p>
+
+<ol>
+<li>failed to realize that this was a requirement for a while and</li>
+<li>failed to understand why</li>
+</ol>
+
+
+<p>The best justification for this architecture that I can determine from
+the docs and people I&#8217;ve talked to is that constantly
+connecting/disconnecting to what is a high-performance, low-latency,
+distributed system would be a colossal waste of resources and a latency
+hit. An app capable of notifications is essentially a stream that APNS
+consumes, and might be sending thousands of messages, so either way
+they&#8217;d at least need to support a persistent connection for performance
+reasons, and if they&#8217;re going to support that, why bother supporting
+an obviously deficient connect/disconnect-based server interaction.</p>
+
+<p>How many other services can be considered consumers of your stream?</p>
+
+<h3>Service-to-Device Connection Trust</h3>
+
+<p>Device identity is established via TLS peer-to-peer auth (internally;
+iOS devs don&#8217;t need to implement this).</p>
+
+<ul>
+<li>Device TLS auths w APNs</li>
+<li>APNs returns certificate, which it validates</li>
+<li>Device sends device certificate to APNs</li>
+<li>APNs valiates device certificate</li>
+</ul>
+
+
+<p>So I guess this prevents:</p>
+
+<ul>
+<li>an iPhone mimicker pretending to be something it&#8217;s not</li>
+<li>an APNs ripoff pretending to be something it&#8217;s not</li>
+</ul>
+
+
+<h3>Provider-to-APNS connection trust</h3>
+
+<p>Same process as above, just w provider (your server) and APNS.</p>
+
+<p>A connection to APNs can only serve a single application, identified by
+the topic (bundle ID) specified in the certificate, presumably the
+one you generate in the online dev console. Also, APNs has a certificate
+revocation list; if a provider is on that list, it&#8217;s connection will be
+refused/closed. I think this would happen if you didn&#8217;t implement a
+persistent connection to APNs but rather treated it like HTTP and kept
+closing/opening the connection.</p>
+
+<h3>Token Generation and Dispersal / token trust</h3>
+
+<p>Jesus christ why don&#8217;t I just RTFM? It solves all the problems. Ah yes,
+arm-chair ADD.</p>
+
+<ul>
+<li>Application asks system to register</li>
+<li>System (iOS) forwards this to APNs</li>
+<li>APNs generates device token using info in the certficate (presumably
+the one established as described above) and encrypts it, and sends
+back the encrypted token</li>
+<li>App gets the encrypted key as an <code>NSData</code>, and must send it to the
+provider in hexidecimal format</li>
+</ul>
+
+
+<p>This guarantees that only APNs generated the token used for routing
+(since it&#8217;s encrypted by some private key within APNs). This token can
+only be used for the device that originally connected to receive
+notifications.</p>
+
+<h3>Trust components</h3>
+
+<p>e.g. keys/certificates you need to create/provide to APNs for all of
+this shit to work:</p>
+
+<ul>
+<li><p>Provider</p>
+
+<ul>
+<li>unique provider certificate and private key for validating
+connection to APNs</li>
+<li>certificate identifies a topic that the provide can publish to (the
+app&#8217;s bundle id).</li>
+<li>Provider provides device token.</li>
+<li>Provider can additionally validate that it&#8217;s talking to APNs using
+the public server certificate provide&#8230; at connection time?</li>
+</ul>
+</li>
+<li><p>Device</p>
+
+<ul>
+<li>obvious stuff already covered</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note: &#8220;topic&#8221; today is literally the bundle ID of the app. A certificate
+identifies which apps it&#8217;s allowed to broadcast notifications to via
+this topic. Maybe in the future, topics can refer to multiple apps?
+Right now it&#8217;s coupled to bundle ID, in the future, this could be a
+configurable thing&#8230; multiple apps could subscribe to the same topic?
+This is all bullshit atm but what I think based on their terminology.
+It&#8217;s really just a really constrained pub-sub, where apps can&#8217;t
+subscribe to message channels other than the one that uniquely
+identifies their app+device tuple.</p>
+
+<h3>Coalescing</h3>
+
+<p>APNs is last-write wins in that that in the case of multiple
+notifications, only the last one will be stored-forwarded to the app.
+This isn&#8217;t to say they coalesce within your device (validated by the
+fact that you&#8217;ll see multiple messages from IRCCloud rather than a
+single one saying &#8220;new messages available&#8221;), but specifically refers to
+the storage of messages undeliverable because the client app&#8217;s turned
+off. GCM gives you more fine-grained control over this.</p>
+
+<h3>Summary</h3>
+
+<p>So, given that I&#8217;ve been fighting this bullshit, realizations:</p>
+
+<p>I need to stop revoking/re-creating the APNs app certificate generated
+in the Apple Dev console. It&#8217;s not like it&#8217;s tied to some private/public
+key or anything.</p>
+
+<h2>Difference b/w .pem and .cer, etc</h2>
+
+<p>I had to run this to convert .cer to .pem</p>
+
+<pre><code>openssl x509 -in aps_development.cer -inform DER -out aps_development.pem
+</code></pre>
+
+<h3>X.509</h3>
+
+<pre><code>http://en.wikipedia.org/wiki/X.509
+</code></pre>
+
+<p>X.509 is an ITU-T (Telecommunication Standardization Sector)
+standard that describes certificate generation, revocation, and other
+utilities. <code>openssl</code> just happens to support x509 certificate
+generation.</p>
+
+<p>Remember: x509 means one thing: certificates. If you see x509 in the
+wild, it&#8217;s probably talking about certificates. x509 certificates.
+Certificates.</p>
+
+<p>x509 is unlike PGP in that it maintains a hierarchical chain of
+certificate signers, each validated by the previous, with a root CA
+(Certificate Authority) starting the chain. PGP relies (or at least
+originally relied on) a Web of Trust.</p>
+
+<h3>PEM</h3>
+
+<p><code>---BEGIN CERTIFICATE---</code> and <code>---END CERTIFICATE---</code>.</p>
+
+<p>Can contain multiple certificate and even the prviate key. &#8220;The private
+key&#8221;? Which private key? Answer: the one that&#8217;s automatically generated
+by Keychain Access and similar utilities when you create a Certificate
+Signing Request (CSR).</p>
+
+<p><a href="http://stackoverflow.com/a/7947362/914123">See here</a></p>
+
+<p>TODO: can you even use an existing public/private key? Probably, but
+possibly less secure:</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Certificate_signing_request">Read the wiki, you dingus</a></p>
+
+<h2>PKCS</h2>
+
+<p>(public key cryptography standards) created by RSA Security in the 90s.
+It&#8217;s a family of standards relating to cryptography.</p>
+
+<p>PCKS 1 is a standard, PCKS 9 is a standard, PCKS 12 is a standard.</p>
+
+<p>Exporting multiple cryptography shits in a single file falls under the
+PKCS 12 standard. PKCS 12 also handles bundling all the members of a
+CHAIN OF TRUST.</p>
+
+<blockquote><p>It is commonly used to bundle a private key with its X.509 certificate or to bundle all the members of a chain of trust.</p></blockquote>
+
+<p>Makes sense, must be a common thing. Apple obviously does that. AWS SNS
+expects you to upload a <code>.p12</code> that it splits into a cert and priv key.</p>
+
+<p>File name extension is <code>.p12</code> (which I&#8217;ve seen) or <code>.pfx</code> which I&#8217;ve
+not.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/PKCS_12">Wiki</a></p>
+
+<p>So if I understand correctly, the purpose of certificate is so that you
+can encrypt data, and anyone who wants to validate that you are who you
+say you are can look up the certificate chain.</p>
+
+<p>You create a pub/priv key pair, create a CSR with it, and then the
+approving authority gives you a certificate that you can hand to other
+people. The certificate can be used to validate that whatever you
+encrypted with your (still unshared and totally) private key, can be
+guaranteed to have originated from you. Without certification, you&#8217;re
+just some entity with a pub/priv key pair&#8230; and&#8230; I don&#8217;t know, need
+to read up more on the implications of this. Amazing how hard this stuff
+is.</p>
+
+<p>Anyway, <code>pkcs12</code> is the <code>openssl</code> file utility for creating/parsing
+pkcs12 file.</p>
+
+<h2><code>man</code> page sections</h2>
+
+<p>Valid:</p>
+
+<pre><code>man crontab
+man 1 crontab # equiv to above
+man -s 1 crontab # equiv to above
+man 5 crontab 
+man -s 5 crontab # equiv to above
+</code></pre>
+
+<p>Invalid:</p>
+
+<pre><code>man 2 crontab # No entry for crontab in section 2 of the manual
+man 3 crontab # ditto
+man 4 crontab # ditto
+</code></pre>
+
+<p>Why would it have pages 1 and 5 but not 2-4?</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Man_page">Ahhhh!</a></p>
+
+<p>Turns out there are sections (that vary by platform):</p>
+
+<pre><code>1   General commands
+2   System calls
+3   Library functions, covering in particular the C standard library
+4   Special files (usually devices, those found in /dev) and drivers
+5   File formats and conventions
+6   Games and screensavers
+7   Miscellanea
+8   System administration commands and daemons
+</code></pre>
+
+<p><code>crontab</code> has no system calls, lib fns, special files, but it does have
+general commands and file formats.</p>
+
+<p><code>man</code> isn&#8217;t just unix commands, but also lib, system calls, C functions,
+etc.</p>
+
+<p>These sections also handle cases when unrelated concepts have the same
+name&#8230; there might be an <code>exit</code> C fn (there is) and an <code>exit</code> terminal
+command.</p>
+
+<p>This explains the wording here:</p>
+
+<pre><code>No entry for printf in section 4 of the manual
+</code></pre>
+
+<p>You don&#8217;t look up the <code>printf</code> page, and then its section 4
+subsection&#8230; rather, you look up entries in a section of <code>man</code>.</p>
+
+<p>That&#8217;s the same reason it&#8217;s <code>man 3 printf</code> rather than <code>man printf 3</code></p>
+
+<p>God, such an obvious thing I never understood/remembered.</p>
 ]]></content>
   </entry>
   
@@ -3199,276 +3741,6 @@ TypeError: Attempted to assign to readonly property.
 </code></pre>
 
 <p>But not if you leave off the &#8220;use strict&#8221;.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/15/daily-journal/"/>
-    <updated>2014-05-15T11:38:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/15/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Uniform Type Identifiers</h2>
-
-<p>Turns out I never understood why Java and other languages/frameworks
-embraces this style of &#8220;com.domain.somepackage&#8221;. First off, this is
-called <a href="http://en.wikipedia.org/wiki/Reverse_domain_name_notation">Reverse domain name notation</a>.</p>
-
-<p>The purpose of this naming convention is two-fold:</p>
-
-<h4>Avoids naming collisions from two different vendors</h4>
-
-<p>By prefixing the package name with any sort of
-unique identifier, &#8220;SOME-PREFIX-A.packageName&#8221; won&#8217;t conflict with
-&#8220;SOME-PREFIX-B.packageName&#8221;.</p>
-
-<h4>Sensible sort order / grouping</h4>
-
-<p>You want packages from the same
-vendor to be grouped together in sensible way; if you use the <code>apple</code>
-and <code>carrots</code> packages from <code>food.somevendor.com</code> and the <code>bikes</code> package
-from <code>things.somevendor.com</code>, if you didn&#8217;t reverse the domain order, you might
-end up with the following folder structure</p>
-
-<pre><code>food/
-  somevendor/
-    com/
-      apple
-      carrots
-things/
-  somevendor/
-    com/
-      bikes
-</code></pre>
-
-<p>This is undesirable since you can&#8217;t tell from this structure that apple,
-bikes, and carrots all come from somevendor. Also, you there&#8217;s a
-needless repetition of the <code>somevendor/com</code> path in both directory
-trees. If the domain name were inverted, you&#8217;d end up with:</p>
-
-<pre><code>com/
-  somevendor/
-    food/
-      apple
-      carrots
-    things/
-      bikes
-</code></pre>
-
-<p>Less folders, less repetition, and more information is being conveyed.</p>
-
-<p>Another way to think about it is that domain names are somewhat
-backwards; we know that <code>.com</code>, <code>.net</code>, and
-<a href="http://sandwich.technology"><code>.technology</code></a> are top-level domains (TLD),
-but how/why is something top level appended at the end of a name? It
-definitely makes domain names with subdomains harder to sort in a
-meaningful way. I guess there&#8217;s probably a good reason for this, worth
-investigating in another journal entry.</p>
-
-<p>Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123</p>
-
-<h2>LevelDB</h2>
-
-<ul>
-<li>require(&#8216;leveldbdatabase&#8217;)</li>
-<li>key value pair</li>
-<li>scales, web scale</li>
-<li>PolicyMic is sponsoring folk to work on it</li>
-<li>IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol</li>
-</ul>
-
-
-<h2>Vim: Visual Line</h2>
-
-<p>Shift-V in vim goes into visual line mode, which means you select entire
-lines for yanking/cutting, rather than having to precisely position your
-cursor at the beginning or end of a line so as to not accidentally yank/cut
-only part of a line.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/13/daily-journal/"/>
-    <updated>2014-05-13T13:15:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/13/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Sharing ignored blank password fields in ActiveAdmin</h2>
-
-<p>I use ActiveAdmin for some stuff, and often you want to update
-some resource while leaving its password the same, but if you have
-a password field on the form, the form will POST with empty password
-and empty confirmation you&#8217;ll get a validation error from an empty
-password. You can override this with a <code>controller</code> block in your
-ActiveAdmin resource config via:</p>
-
-<pre><code>controller do
-  def update
-    param_obj = params['admin_user']
-    if param_obj[:password].blank?
-      param_obj.delete("password")
-      param_obj.delete("password_confirmation")
-    end
-    super
-  end
-end
-</code></pre>
-
-<p>But if you have multiple Devise-esque resources with passwords, it&#8217;d be
-nice to share this with multiple resources. It&#8217;s a bit tricky to solve
-this with idiomatic Ruby since you&#8217;re already in ActiveAdmin&#8217;s DSL land,
-but the following works:</p>
-
-<p><code>/lib/admin/ignore_blank_password.rb</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Admin</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">IgnoreBlankPassword</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ignore</span><span class="p">(</span><span class="n">dsl</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">dsl</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">controller</span> <span class="k">do</span>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">update</span>
-</span><span class='line'>            <span class="n">param_key</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">model_name</span><span class="o">.</span><span class="n">param_key</span><span class="o">.</span><span class="n">to_sym</span>
-</span><span class='line'>            <span class="n">param_obj</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="n">param_key</span><span class="o">]</span>
-</span><span class='line'>            <span class="k">if</span> <span class="n">param_obj</span><span class="o">[</span><span class="ss">:password</span><span class="o">].</span><span class="n">blank?</span>
-</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password_confirmation&quot;</span><span class="p">)</span>
-</span><span class='line'>            <span class="k">end</span>
-</span><span class='line'>            <span class="k">super</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>/app/admin/admin_user.rb</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;admin/ignore_blank_password&#39;</span>
-</span><span class='line'><span class="no">ActiveAdmin</span><span class="o">.</span><span class="n">register</span> <span class="no">AdminUser</span> <span class="k">do</span>
-</span><span class='line'>  <span class="no">Admin</span><span class="o">::</span><span class="no">IgnoreBlankPassword</span><span class="o">.</span><span class="n">ignore</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/12/daily-journal/"/>
-    <updated>2014-05-12T13:14:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/12/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Ruby <code>Module#===</code></h2>
-
-<p>Ran into <a href="https://github.com/hassox/warden/blob/master/lib/warden.rb#L33-L34">this piece of
-code</a>
-from the Warden repo:</p>
-
-<pre><code>def self.test_mode!
-  unless Warden::Test::WardenHelpers === Warden
-    Warden.extend Warden::Test::WardenHelpers
-    Warden::Manager.on_request do |proxy|
-      unless proxy.asset_request?
-        while blk = Warden._on_next_request.shift
-          blk.call(proxy)
-        end
-      end
-    end
-  end
-  true
-end
-</code></pre>
-
-<p>I hadn&#8217;t seen this usage of <code>===</code> before; I&#8217;m mostly familiar with it as
-an unidiomatic alias of <code>is_a?</code>, e.g.:</p>
-
-<pre><code>Array === []    #=&gt; true
-[].is_a?(Array) #=&gt; true
-</code></pre>
-
-<p><code>#===</code> is the Case Equality operator or
-<a href="http://stackoverflow.com/questions/4527220/3-equals-or-case-equality-operator"><em>subsumption</em> operator</a>;
-it is overridden by subclasses to provide context-specific / semantic
-meaning, for example:</p>
-
-<ul>
-<li><code>Regexp === /asd/</code> #=> true</li>
-<li><code>Fixnum === 5</code> #=> true</li>
-<li><code>Object === {}</code> #=> true</li>
-</ul>
-
-
-<p>Important things to keep in mind about <code>===</code>:</p>
-
-<ol>
-<li>It is not commutative (A===B does not imply B===A)</li>
-<li>It is a method of the object on the left side of an expression,
-e.g. <code>A===B</code> is shorthand for <code>A.===B</code> or <code>A.send(:===, //)</code></li>
-<li>It has nothing to do with equality; beware, JavaScripters.</li>
-</ol>
-
-
-<p>ANYWAY: back to the Warden example: in this case, the <code>Module</code> class has
-an instance method <code>===</code> that returns if the object on the right side
-has extended the methods on the Module that <code>===</code> is called on, so:</p>
-
-<pre><code>module M; end
-class Foo; end
-
-f = Foo.new
-M === f #=&gt; false
-
-# reopen
-class Foo
-  include M
-end
-
-M === f #=&gt; true
-</code></pre>
-
-<p>So we turned <code>===</code> from false to true by including <code>M</code> on class <code>Foo</code>.
-The Warden example is similar, except that the way the module&#8217;s methods
-were mixed in was via <code>extend</code> vs <code>include</code>. <code>extend</code> is a somewhat more
-direct form of <code>include</code> in that it can be called on instances to put
-methods directly on that instance, rather than having to open an
-instance&#8217;s class and add an <code>include</code> statement, which adds all of those
-methods to subclasses.</p>
-
-<p>So when we check</p>
-
-<pre><code>  Warden::Test::WardenHelpers === Warden
-</code></pre>
-
-<p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
-&#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
 ]]></content>
   </entry>
   

@@ -280,6 +280,327 @@ view controllers within viewWillAppear and viewDidAppear by checking:</p>
 
 <pre><code>- (BOOL) automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
 </code></pre>
+
+<h2>RFC</h2>
+
+<p>RFC&#8217;s (Request for Comments):</p>
+
+<blockquote><p>Memos in the Requests for Comments (RFC) document series contain technical and organizational notes about the Internet</p></blockquote>
+
+<p>http://www.ietf.org/about/</p>
+
+<p>So many standards organizations. How am I supposed to keep this separate
+from IEEE?</p>
+
+<p>Anyway, RFCs are docs produced by IETF. I don&#8217;t think anyone else
+(notable) produces docs called RFCs.</p>
+
+<h2>Push Notifications</h2>
+
+<p>Two levels of trust involved in publishing a push notifications:</p>
+
+<h3>Connection Trust</h3>
+
+<ul>
+<li>Provider-side: provider proves it is an authorized provider that
+Apple&#8217;s agreed to publish notifications for</li>
+<li>Device-side: APNs must validate the connection is a with a legit
+device</li>
+</ul>
+
+
+<h3>Token Trust</h3>
+
+<p>Establishes certainty that messages are routed correctly; a provider
+shouldn&#8217;t be able to send messages to random iPhones.</p>
+
+<ul>
+<li>APNs gives device a token</li>
+<li>Devices gives it to provider</li>
+<li>Provider uses it when publishing to APNs</li>
+<li>APNs uses it to route back to device</li>
+</ul>
+
+
+<p>A <code>device token</code> is not a device <code>UDID</code>; aside from being a totally
+different string, it is conceptually different in that it identifies not
+only the unique device, but the application the Push Notification is
+delivered to.</p>
+
+<p>Maybe that&#8217;s what&#8217;s confusing: don&#8217;t call it a <code>device token</code>, call
+it&#8230; an app-token? I get confused by the easiest things.</p>
+
+<h3>Providers must maintain persistent connection</h3>
+
+<p>If you want to send a notification through APNS (and GCM),
+you must maintain a persistent connection to the server. In other words,
+you can&#8217;t just connect-sendmessage-disconnect a la HTTP, which makes
+push notifications inconvenient for Rails-y architectures without
+using Sidekiq/Resque to reuse a persistent connection.</p>
+
+<p>I both:</p>
+
+<ol>
+<li>failed to realize that this was a requirement for a while and</li>
+<li>failed to understand why</li>
+</ol>
+
+
+<p>The best justification for this architecture that I can determine from
+the docs and people I&#8217;ve talked to is that constantly
+connecting/disconnecting to what is a high-performance, low-latency,
+distributed system would be a colossal waste of resources and a latency
+hit. An app capable of notifications is essentially a stream that APNS
+consumes, and might be sending thousands of messages, so either way
+they&#8217;d at least need to support a persistent connection for performance
+reasons, and if they&#8217;re going to support that, why bother supporting
+an obviously deficient connect/disconnect-based server interaction.</p>
+
+<p>How many other services can be considered consumers of your stream?</p>
+
+<h3>Service-to-Device Connection Trust</h3>
+
+<p>Device identity is established via TLS peer-to-peer auth (internally;
+iOS devs don&#8217;t need to implement this).</p>
+
+<ul>
+<li>Device TLS auths w APNs</li>
+<li>APNs returns certificate, which it validates</li>
+<li>Device sends device certificate to APNs</li>
+<li>APNs valiates device certificate</li>
+</ul>
+
+
+<p>So I guess this prevents:</p>
+
+<ul>
+<li>an iPhone mimicker pretending to be something it&#8217;s not</li>
+<li>an APNs ripoff pretending to be something it&#8217;s not</li>
+</ul>
+
+
+<h3>Provider-to-APNS connection trust</h3>
+
+<p>Same process as above, just w provider (your server) and APNS.</p>
+
+<p>A connection to APNs can only serve a single application, identified by
+the topic (bundle ID) specified in the certificate, presumably the
+one you generate in the online dev console. Also, APNs has a certificate
+revocation list; if a provider is on that list, it&#8217;s connection will be
+refused/closed. I think this would happen if you didn&#8217;t implement a
+persistent connection to APNs but rather treated it like HTTP and kept
+closing/opening the connection.</p>
+
+<h3>Token Generation and Dispersal / token trust</h3>
+
+<p>Jesus christ why don&#8217;t I just RTFM? It solves all the problems. Ah yes,
+arm-chair ADD.</p>
+
+<ul>
+<li>Application asks system to register</li>
+<li>System (iOS) forwards this to APNs</li>
+<li>APNs generates device token using info in the certficate (presumably
+the one established as described above) and encrypts it, and sends
+back the encrypted token</li>
+<li>App gets the encrypted key as an <code>NSData</code>, and must send it to the
+provider in hexidecimal format</li>
+</ul>
+
+
+<p>This guarantees that only APNs generated the token used for routing
+(since it&#8217;s encrypted by some private key within APNs). This token can
+only be used for the device that originally connected to receive
+notifications.</p>
+
+<h3>Trust components</h3>
+
+<p>e.g. keys/certificates you need to create/provide to APNs for all of
+this shit to work:</p>
+
+<ul>
+<li><p>Provider</p>
+
+<ul>
+<li>unique provider certificate and private key for validating
+connection to APNs</li>
+<li>certificate identifies a topic that the provide can publish to (the
+app&#8217;s bundle id).</li>
+<li>Provider provides device token.</li>
+<li>Provider can additionally validate that it&#8217;s talking to APNs using
+the public server certificate provide&#8230; at connection time?</li>
+</ul>
+</li>
+<li><p>Device</p>
+
+<ul>
+<li>obvious stuff already covered</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note: &#8220;topic&#8221; today is literally the bundle ID of the app. A certificate
+identifies which apps it&#8217;s allowed to broadcast notifications to via
+this topic. Maybe in the future, topics can refer to multiple apps?
+Right now it&#8217;s coupled to bundle ID, in the future, this could be a
+configurable thing&#8230; multiple apps could subscribe to the same topic?
+This is all bullshit atm but what I think based on their terminology.
+It&#8217;s really just a really constrained pub-sub, where apps can&#8217;t
+subscribe to message channels other than the one that uniquely
+identifies their app+device tuple.</p>
+
+<h3>Coalescing</h3>
+
+<p>APNs is last-write wins in that that in the case of multiple
+notifications, only the last one will be stored-forwarded to the app.
+This isn&#8217;t to say they coalesce within your device (validated by the
+fact that you&#8217;ll see multiple messages from IRCCloud rather than a
+single one saying &#8220;new messages available&#8221;), but specifically refers to
+the storage of messages undeliverable because the client app&#8217;s turned
+off. GCM gives you more fine-grained control over this.</p>
+
+<h3>Summary</h3>
+
+<p>So, given that I&#8217;ve been fighting this bullshit, realizations:</p>
+
+<p>I need to stop revoking/re-creating the APNs app certificate generated
+in the Apple Dev console. It&#8217;s not like it&#8217;s tied to some private/public
+key or anything.</p>
+
+<h2>Difference b/w .pem and .cer, etc</h2>
+
+<p>I had to run this to convert .cer to .pem</p>
+
+<pre><code>openssl x509 -in aps_development.cer -inform DER -out aps_development.pem
+</code></pre>
+
+<h3>X.509</h3>
+
+<pre><code>http://en.wikipedia.org/wiki/X.509
+</code></pre>
+
+<p>X.509 is an ITU-T (Telecommunication Standardization Sector)
+standard that describes certificate generation, revocation, and other
+utilities. <code>openssl</code> just happens to support x509 certificate
+generation.</p>
+
+<p>Remember: x509 means one thing: certificates. If you see x509 in the
+wild, it&#8217;s probably talking about certificates. x509 certificates.
+Certificates.</p>
+
+<p>x509 is unlike PGP in that it maintains a hierarchical chain of
+certificate signers, each validated by the previous, with a root CA
+(Certificate Authority) starting the chain. PGP relies (or at least
+originally relied on) a Web of Trust.</p>
+
+<h3>PEM</h3>
+
+<p><code>---BEGIN CERTIFICATE---</code> and <code>---END CERTIFICATE---</code>.</p>
+
+<p>Can contain multiple certificate and even the prviate key. &#8220;The private
+key&#8221;? Which private key? Answer: the one that&#8217;s automatically generated
+by Keychain Access and similar utilities when you create a Certificate
+Signing Request (CSR).</p>
+
+<p><a href="http://stackoverflow.com/a/7947362/914123">See here</a></p>
+
+<p>TODO: can you even use an existing public/private key? Probably, but
+possibly less secure:</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Certificate_signing_request">Read the wiki, you dingus</a></p>
+
+<h2>PKCS</h2>
+
+<p>(public key cryptography standards) created by RSA Security in the 90s.
+It&#8217;s a family of standards relating to cryptography.</p>
+
+<p>PCKS 1 is a standard, PCKS 9 is a standard, PCKS 12 is a standard.</p>
+
+<p>Exporting multiple cryptography shits in a single file falls under the
+PKCS 12 standard. PKCS 12 also handles bundling all the members of a
+CHAIN OF TRUST.</p>
+
+<blockquote><p>It is commonly used to bundle a private key with its X.509 certificate or to bundle all the members of a chain of trust.</p></blockquote>
+
+<p>Makes sense, must be a common thing. Apple obviously does that. AWS SNS
+expects you to upload a <code>.p12</code> that it splits into a cert and priv key.</p>
+
+<p>File name extension is <code>.p12</code> (which I&#8217;ve seen) or <code>.pfx</code> which I&#8217;ve
+not.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/PKCS_12">Wiki</a></p>
+
+<p>So if I understand correctly, the purpose of certificate is so that you
+can encrypt data, and anyone who wants to validate that you are who you
+say you are can look up the certificate chain.</p>
+
+<p>You create a pub/priv key pair, create a CSR with it, and then the
+approving authority gives you a certificate that you can hand to other
+people. The certificate can be used to validate that whatever you
+encrypted with your (still unshared and totally) private key, can be
+guaranteed to have originated from you. Without certification, you&#8217;re
+just some entity with a pub/priv key pair&#8230; and&#8230; I don&#8217;t know, need
+to read up more on the implications of this. Amazing how hard this stuff
+is.</p>
+
+<p>Anyway, <code>pkcs12</code> is the <code>openssl</code> file utility for creating/parsing
+pkcs12 file.</p>
+
+<h2><code>man</code> page sections</h2>
+
+<p>Valid:</p>
+
+<pre><code>man crontab
+man 1 crontab # equiv to above
+man -s 1 crontab # equiv to above
+man 5 crontab 
+man -s 5 crontab # equiv to above
+</code></pre>
+
+<p>Invalid:</p>
+
+<pre><code>man 2 crontab # No entry for crontab in section 2 of the manual
+man 3 crontab # ditto
+man 4 crontab # ditto
+</code></pre>
+
+<p>Why would it have pages 1 and 5 but not 2-4?</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Man_page">Ahhhh!</a></p>
+
+<p>Turns out there are sections (that vary by platform):</p>
+
+<pre><code>1   General commands
+2   System calls
+3   Library functions, covering in particular the C standard library
+4   Special files (usually devices, those found in /dev) and drivers
+5   File formats and conventions
+6   Games and screensavers
+7   Miscellanea
+8   System administration commands and daemons
+</code></pre>
+
+<p><code>crontab</code> has no system calls, lib fns, special files, but it does have
+general commands and file formats.</p>
+
+<p><code>man</code> isn&#8217;t just unix commands, but also lib, system calls, C functions,
+etc.</p>
+
+<p>These sections also handle cases when unrelated concepts have the same
+name&#8230; there might be an <code>exit</code> C fn (there is) and an <code>exit</code> terminal
+command.</p>
+
+<p>This explains the wording here:</p>
+
+<pre><code>No entry for printf in section 4 of the manual
+</code></pre>
+
+<p>You don&#8217;t look up the <code>printf</code> page, and then its section 4
+subsection&#8230; rather, you look up entries in a section of <code>man</code>.</p>
+
+<p>That&#8217;s the same reason it&#8217;s <code>man 3 printf</code> rather than <code>man printf 3</code></p>
+
+<p>God, such an obvious thing I never understood/remembered.</p>
 </div>
 
 

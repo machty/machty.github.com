@@ -1,0 +1,335 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>WeakMap</h2>
+
+<p>Use objects as keys. If you lose access to a key, it and its value will
+eventually be removed by GC because references to keys are weak. This
+also means WeakMaps are non enumerable since GC is non-deterministic and
+a key that might exist pre GC might not exist after.</p>
+
+<h2>ES6 Symbols</h2>
+
+<p>They&#8217;re nothing like Ruby symbols.</p>
+
+<p>They&#8217;re used to create unique, non-enumerable, keys that can&#8217;t be
+determined publicly unless the symbol is exported. So you could prevent
+tampering with a player&#8217;s score by storing the score on the player using
+an unshared symbol as the key:</p>
+
+<p>http://tc39wiki.calculist.org/es6/symbols/</p>
+
+<h2>ES6 === Harmony === ES.next</h2>
+
+<p>They&#8217;re all the same thing.</p>
+
+<h2>JS 1.7 vs ES6, etc</h2>
+
+<p><a href="http://ejohn.org/blog/versions-of-javascript/">jeresig clears this up a bit</a></p>
+
+<p>All modern browsers support ECMAScript; JavaScript is a variant of it
+that Mozilla&#8217;s largely been adding features to. ES3 === JS 1.5.</p>
+
+<p>So I see <code>let</code> was added to JavaScript 1.7, so why is it now being
+described as a new upcoming feature of ES6? Ah, because all browsers
+track ECMAScript standards, even if they call their enhanced language in
+the browser something else. Mozilla has been blazing ahead and trying
+new shit, but other browsers won&#8217;t pick it up until it&#8217;s actually
+standardized into ECMAScript.</p>
+
+<p>Why would Microsoft follow ECMAScript? Well, for starters, it delivered
+JScript to Ecma back in the day for standardization.</p>
+
+<blockquote><p>The name &#8220;ECMAScript&#8221; was a compromise between the organizations involved in standardizing the language, especially Netscape and Microsoft, whose disputes dominated the early standards sessions.</p></blockquote>
+
+<p>Interesting, and:</p>
+
+<blockquote><p>While both JavaScript and JScript aim to be compatible with ECMAScript, they also provide additional features not described in the ECMA specifications</p></blockquote>
+
+<p>Also, some reason I thought TC39 was part of Mozilla. I see that I am
+obviously incorrect: http://www.ecma-international.org/memento/TC39.htm</p>
+
+<p>It&#8217;s Ecma-TC39. The things I don&#8217;t know.</p>
+
+<p>W3C Tag, Ecma-TC39. W3C Tag, Ecma-TC39.</p>
+
+<h2><code>let</code></h2>
+
+<p><code>let</code> behaves like C++ declarations; the obj is only available in the
+curlies, or in for loops, or whatever, and there&#8217;s no hoisting. Outside
+of the block, the variable is undefined.</p>
+
+<h2>Cloudfront TTL</h2>
+
+<p>TTL lets you specify a min time before CF checks the origin to see if it
+has a new version of the file/response. You still need your origin
+server&#8217;s Cache-Control headers setup correctly.</p>
+
+<p><a href="http://stackoverflow.com/questions/10621099/what-is-a-ttl-0-in-cloudfront-useful-for">TTL can be 0</a>.
+Why? TTL 0 means that it delegates Cache-Control entirely to the origin.
+This means CF will always make a GET request w <code>If-Modified-Since</code>
+header to let the server return <code>304 Not Modified</code>.</p>
+
+<h2>Drag and Drop</h2>
+
+<p>Draggable elements need to be marked as <code>draggable="true"</code>.</p>
+
+<p>Then listen to the <code>ondragstart</code> event, e.g.
+<code>ondragstart="drag(event)"</code>.</p>
+
+<p>And then say what data is associated with the dragged el&#8230;</p>
+
+<pre><code>ev.dataTransfer.setData("Text", ev.target.id);
+</code></pre>
+
+<p>This seems strange.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer</p>
+
+<p>It really is a class associated only w drag and drop.</p>
+
+<p>Should probably be reading this rather than fucking w3schools. Why do I
+still do that?
+https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop</p>
+
+<p>Ah I get it, you use dataTransfer as part of the mechanism for
+dynamically determining drop targets. You have to prevent bubbling
+(return false or preventDefault) on droppable targets, and in that fn
+they have the option of looking up the data transfer to see if they want
+to accept the data from that drag drop.</p>
+
+<p>You can also configure drag drag visual details to indicate copying,
+moving, etc. LOL such drag and drop.</p>
+
+<p>Oof apparently it&#8217;s a fucking disaster: http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html</p>
+
+<p>Criticisms:</p>
+
+<ul>
+<li>7 fucking events, such API surface</li>
+<li>&#8220;For the drop event to fire at all, you have to cancel the defaults of both the dragover and the dragenter event.&#8221;</li>
+</ul>
+
+
+<h2>Cordova events: sticky != buffered</h2>
+
+<p>Sticky events (e.g. deviceready) just mean that once fired, they stay in
+a fired state. This means you can&#8217;t have multiple events fire if it&#8217;s a
+sticky event. I was originally thinking sticky meant all the events were
+cached until the first handler was registered.</p>
+
+<p>Ended up making this: https://gist.github.com/machty/e1cc485060f2951aeb6c</p>
+
+<h2>Why <code>-print0</code> in <code>find</code>?</h2>
+
+<p>Often you pipe the results of <code>find</code> into <code>xargs</code> to pass the results of
+a <code>find</code> so that some utility can operate on each file found. GOOD
+ENGRISH, MATCHNEER.</p>
+
+<p>But since <code>xargs</code> splits based on whitespace by default, this will break
+for files with newlines or or spaces in them, so <code>-print0</code> separates
+files w null bytes, and <code>-0</code> tells xargs to split via null bytes as
+well. Win win win. No difference if you have no files with spaces in
+them.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-16T00:40:00-04:00" pubdate data-updated="true">Jul 16<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/07/16/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/07/16/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
