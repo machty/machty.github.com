@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-07-18T04:37:50-04:00</updated>
+  <updated>2014-07-19T11:25:12-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -80,6 +80,200 @@ element, which might also include scroll windows.</p>
 
 <p>In older browsers, to <code>blur</code> the active element, you&#8217;d have to know what
 that element was; there was no way to query. Might be wrong about this.</p>
+
+<h2>React Nested Router</h2>
+
+<p>http://www.youtube.com/watch?v=P6xTa3RRzfA</p>
+
+<ul>
+<li>State is just data</li>
+<li>Your route is data, e.g. you could render a top-level App component
+and tell it what its route is, and render everything a la React,
+pretend like you&#8217;re redrawing the whole page.</li>
+<li>Rather than switch-statement-based routing, the <code>activeRoute</code> just
+gets passed in via <code>props</code> like any other property
+
+<ul>
+<li><code>router.match</code> handlers will create all the routes, and pass in a
+single <code>activeRoute</code>; every route segment along the way just knows
+about with its activeRoute child is, if one exists.</li>
+<li>e.g. <code>contact/profile</code>, app.activeRoute = contact,
+contact.activeRoute = profile</li>
+</ul>
+</li>
+<li>API
+
+<ul>
+<li>Route component
+
+<ul>
+<li>handler = a React Class</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Differences w Ember
+
+<ul>
+<li>No auto-gen &#8216;index&#8217; routes</li>
+<li>paths don&#8217;t inherit parent paths
+
+<ul>
+<li>this means if you&#8217;re &#8220;overwriting&#8221; a parent dynamic segment, the
+dynamic segment must appear <em>somewhere</em> in the child route so you
+can actually load that data.
+
+<ul>
+<li>AH, the router will detect when children omit ids that their
+parents have declared. That&#8217;s nice.</li>
+<li>also yells at you if you use the same path in two places.</li>
+</ul>
+</li>
+<li>nice that it lets you have <code>/profile</code> vs <code>/user</code></li>
+</ul>
+</li>
+<li>Ember is less typing, but
+
+<ul>
+<li>React makes it easier to share handlers</li>
+<li>Overwriting URL is nice when you need it, error checking is nice</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>So each non leaf handler gets <code>activeRoute</code>, all handlers get all
+<code>params</code>.</li>
+<li>Refactorability/decoupling:
+
+<ul>
+<li>Because route names and paths are fully specified and all params are provided to
+each handler, changing the nesting of a route means you don&#8217;t have
+to rewrite all your link-tos from &#8220;wat.foo&#8221; to &#8220;foo&#8221;. Then again
+if you&#8217;re using resources you don&#8217;t have to do that either.</li>
+</ul>
+</li>
+<li>Question: what about other <code>props</code> you&#8217;d want to pass into a
+component?
+
+<ul>
+<li>Answer: Route components aren&#8217;t concerned with props other than how
+to be a route handler.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://jsbin.com/vukacule/6/edit</p>
+
+<p>It is really cool that you can switch between rendering a route with App
+as a handler vs just rendering App. The difference is that, when
+route-driven, it gets passed props.</p>
+
+<p>The <code>Route</code> components you use are obviously stateless; all state lives
+on the Handlers.</p>
+
+<p>Ah, in React <code>` syntax just means</code>{blah: &#8220;wat&#8221;}` inside
+the normal single-curly.</p>
+
+<p>How do Links work? They call transitionTo and there&#8217;s a single URLStore
+singleton.</p>
+
+<h2>TLS Replay?</h2>
+
+<p>I had it in my head that man-in-the-middle wasn&#8217;t a problem for TLS but
+maybe they could replay the messages? Turns out I am wrong; TLS includes
+a sequence mechanism.</p>
+
+<p>That being said, your app might send repeat messages, which demands its
+own double checking / application-level sequencing or some other
+prevention mechanism.</p>
+
+<h2>chroot</h2>
+
+<p>http://en.wikipedia.org/wiki/Chroot</p>
+
+<p>Learned about this when speculating w Ember Core about how the front
+page Rust evaluator works at http://www.rust-lang.org/</p>
+
+<p>It runs a program with the assumption that <code>/</code> is somewhere else, and it
+can&#8217;t access it.</p>
+
+<p>Change</p>
+
+<h2>process.nextTick</h2>
+
+<p><code>process</code> doesn&#8217;t exist on the browser, so therefore neither does
+<code>nextTick</code>, but you can hack it if you&#8217;re on a browser that has a native
+<code>Promise</code> object, since the <a href="http://promisesaplus.com/">spec</a> mentions
+that resolution callbacks must happen when the execution context
+consists only of platform code.</p>
+
+<blockquote><p>onFulfilled or onRejected must not be called until the execution
+context stack contains only platform code. [3.1].</p></blockquote>
+
+<p>So here&#8217;s how you could write nextTick, note that there&#8217;s no need to</p>
+
+<pre><code>var p = Promise.resolve();
+function nextTick(cb) {
+  p.then(cb);
+}
+</code></pre>
+
+<h2>Visibility API</h2>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API">mdn</a></p>
+
+<p>e.g.</p>
+
+<ul>
+<li>pause video when you tab-away</li>
+<li>stop requestAnimationFrame</li>
+</ul>
+
+
+<h2>Closing over <code>let i</code></h2>
+
+<pre><code>var fns = [];
+for (var i = 0; i &lt; 10; ++i) {
+  fns.push(function() {
+    console.log(i);
+  });
+}
+</code></pre>
+
+<p>The above code has the gotcha that by the time the <code>fns</code> functions run,
+they&#8217;ll all print out <code>10</code>, rather than the value of <code>i</code> when the
+closing-over function was created. This is part of the reason why jshint
+will yell at you for creating functions in a loop, e.g.</p>
+
+<pre><code>var fns = [];
+for (var i = 0; i &lt; 10; ++i) {
+  fns.push(makeCallback(i));
+}
+
+function makeCallback(num) {
+  return function() {
+    console.log(num);
+  }
+}
+</code></pre>
+
+<p>Then <code>i</code> will be uniquely preserved for each callback.</p>
+
+<p>The es6 <code>let</code> keyword gives you block scope, which includes everything
+declared within the for loop. If you just use <code>let</code> in the original
+code, you can do</p>
+
+<pre><code>var fns = [];
+for (let i = 0; i &lt; 10; ++i) {
+  fns.push(function() {
+    console.log(i);
+  });
+}
+</code></pre>
+
+<p><code>i</code> doesn&#8217;t get hoisted; rather, each iteration gets its own <code>i</code> value
+that gets closed over.</p>
 ]]></content>
   </entry>
   
