@@ -112,6 +112,68 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/06/29/social-media-triggers/">
+		
+			Social Media Triggers</a>
+	</h2>
+	<div class="entry-content">
+		<p>I&#8217;ve enjoyed about a week away from Twitter, and hope to prolong this
+hiatus. Twitter isn&#8217;t consistent with a lot of the lifestyle
+changes I&#8217;ve been nagging myself to make. Twitter is snack drawer
+positioned arms-reach away from the bed of someone trying to maintain a
+diet. It&#8217;s a total trigger for me to retrogress into class clown attention
+whore behavior I&#8217;ve been exhibiting since I was 5. So I&#8217;m on a break.</p>
+
+<p>Twitter encourages me to project a public facade of empty-headed
+buffoonery fueled by zany sarcasm and Photoshop. The last few months,
+I&#8217;ve had various opportunities to meet in person people who only know me
+by this facade, and it&#8217;s draining and depressing to keep it up in
+person.</p>
+
+<p>So I&#8217;m on a break. I&#8217;ve rediscovered distraction-free boredom. And it&#8217;s
+been glorious. I play music again. I sing. When I get frustrated in my
+endeavors to improve at my hobbies or my crafts, I have one less
+mindless outlet distracting me away from pushing through the difficult
+moments. Maybe I&#8217;ll return to Twitter when I have an album to promote.
+Or something worth talking about.</p>
+
+<p>This is where I&#8217;m supposed to apologize for a serious post.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-29T19:00:00-04:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/social-media/'>social media</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/06/20/daily-journal/">
 		
 			Daily Journal</a>
@@ -2006,78 +2068,6 @@ reduced CP, but why not use the Array Computed API for that?</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/19/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Active Model: GlobalID</h2>
-
-<p>https://github.com/rails/activemodel-globalid/</p>
-
-<p>GlobalID is a way of serializing a model into a string so that
-it can be looked up later; rather than serializing all of the
-object&#8217;s data into a string, you merely serialize just enough
-information so that you can look up the rest.</p>
-
-<p>I&#8217;m already doing something similar with model dep state in Ember,
-only extending it such that part of the &#8220;GlobalID&#8221;, which we&#8217;ll
-use internally for binding into a cache bucket, might be a prefixing
-controller name to uniquely identify a cache bucket to a specific
-controller, but in cases where you want to share information about
-a model with other controllers, you&#8217;d leave this prefix off.</p>
-
-<p>Anyway, nice to see other folk arriving at a similar thing, though
-I personally wouldn&#8217;t call this sort of thing &#8220;serializing&#8221; but rather
-&#8220;paramaterizing&#8221;, since you&#8217;re not actually storing all the data in
-string form but just enough to uniquely identify it so that some
-other operation can restore the object.</p>
-
-<h2>Strings have read-only props in &#8220;use strict&#8221; Safari</h2>
-
-<p>The following throws an exception only in Safari (not Chrome or FF):</p>
-
-<pre><code>(function(){"use strict"; ("a").b = 'writing to a string'; })();
-TypeError: Attempted to assign to readonly property.
-</code></pre>
-
-<p>But not if you leave off the &#8220;use strict&#8221;.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-19T07:38:00-04:00" pubdate data-updated="true">May 19<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/global-id/'>global id</a>, <a class='category' href='/blog/categories/use-strict/'>use strict</a>
 
 </div>
 

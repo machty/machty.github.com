@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-07-19T11:25:12-04:00</updated>
+  <updated>2014-07-24T19:30:22-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,262 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/19/daily-journal/"/>
+    <updated>2014-07-19T11:30:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/19/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Crank</h2>
+
+<p>Meth.</p>
+
+<p>An eccentric person, esp. one who is obsessed by a particular subject or
+theory: when he first started to air his views, they labeled him a
+crank | [ as modifier ] : I am used to getting crank calls from
+conspiracy theorists.</p>
+
+<h2>Roko&#8217;s modern basilisk</h2>
+
+<p>It&#8217;s happening.</p>
+
+<h2>Transactional UIs</h2>
+
+<p>People build forms. Ember gives you sweet syntax sugar for 2wb.
+Not for transactional UI, anything that needs a buffer.</p>
+
+<p>Old mindset: if you need 1wb, just&#8230; don&#8217;t set on the other side of a
+2wb.</p>
+
+<p>TODO: ask kris more about the async/sync cocoa observer binding
+limitations.</p>
+
+<ul>
+<li>Most observers just do something and stop.</li>
+<li>And they mostly want to know the last thing they cared about.</li>
+</ul>
+
+
+<p>Bubbling doesn&#8217;t describe actions; actions go wherever. Bubbling only in
+route hierarchy.</p>
+
+<p>Services:</p>
+
+<ul>
+<li>session/user</li>
+<li>timer</li>
+<li>websocket</li>
+<li>analytics</li>
+</ul>
+
+
+<p>Idea: components provide services to the components the render. They
+have a ServiceCertificate</p>
+
+<p>Goal:</p>
+
+<ul>
+<li>Try and associate actions with objects.</li>
+<li><code>actions</code> themselves can just be passed into the <code>actions</code></li>
+</ul>
+
+
+<h2>Non-dynamic routes</h2>
+
+<pre><code>resolveEntry: function(params, model, transition) {
+  return model || this.store.find(params.id);
+}
+
+resolveEntry: function(params, model, transition) {
+  return model || this.store.find(params.id);
+}
+</code></pre>
+
+<p>Initializers vs <code>applicationRoute#beforeModel</code>.</p>
+
+<p>retcon for how to use controllers</p>
+
+<p>asop to data binding</p>
+
+<p>HTMLbars knows what parts of the template are dynamic vs static.</p>
+
+<p>In React, if you have a conditional</p>
+
+<h2>Skunkworks project</h2>
+
+<blockquote><p>A skunkworks project is a project developed by a small and loosely
+structured group of people who research and develop a project
+primarily for the sake of radical innovation.[1] The terms
+originated with Lockheed&#8217;s World War II Skunk Works project.</p></blockquote>
+
+<p>http://en.wikipedia.org/wiki/Skunk_Works</p>
+
+<blockquote><p>The designation &#8220;skunk works&#8221;, or &#8220;skunkworks&#8221;, is widely used
+in business, engineering, and technical fields to describe a
+group within an organization given a high degree of autonomy
+and unhampered by bureaucracy, tasked with working on advanced
+or secret projects.</p></blockquote>
+
+<p>Lockheed Martin&#8217;s Skunk Works project made SR-71.</p>
+
+<h2>Project Svelte</h2>
+
+<p>http://www.trustedreviews.com/opinions/android-4-4-kitkat-s-project-svelte-what-it-is-and-why-you-should-care</p>
+
+<blockquote><p>‘dogfooding’ – that is making its employees use and live with their own projects</p></blockquote>
+
+<p>They dogfooded their employees by forcing them to dev on handicapped
+phones. Android 4.4 was the result, apparently it was way more
+performant.</p>
+
+<h2>RACK_ENV vs RAILS_ENV</h2>
+
+<p><code>Rails.env</code> is decided by <code>RAILS_ENV || RACK_ENV || "development"</code>. It&#8217;s
+common to set <code>RACK_ENV</code> which will also set <code>RAILS_ENV</code>, but if you
+have any rack middleware that behaves differently in different
+environments, you might screw yourself if you&#8217;re using <code>RAILS_ENV</code>.</p>
+
+<h2>wythoughts on blocks</h2>
+
+<p>The reason <code>|i|</code> is ok is for the same reason you can&#8217;t do the following
+in Ruby:</p>
+
+<pre><code>a = { |it| wat }
+</code></pre>
+
+<p>You have to do</p>
+
+<pre><code>a = proc { |it| wat }
+</code></pre>
+
+<p>Case in point you need an fn to save a block.</p>
+
+<h2>mythoughts on mutability</h2>
+
+<p>Can/should we swap POJOs when an observed property changes? Is there any
+value to</p>
+
+<pre><code>var pojo = {
+  a: {
+    b: 123
+  }
+};
+
+var a = pojo.a;
+Ember.set(pojo, 'a.b'
+</code></pre>
+
+<h2>ASI: automatic semicolon insertion</h2>
+
+<p>Nuff said.</p>
+
+<h2>old browser disagreements on ws</h2>
+
+<pre><code>[ text ws text]
+</code></pre>
+
+<p>cloneNode produces:</p>
+
+<ul>
+<li>ie8: 1 node</li>
+<li>ie9: 2 nodes</li>
+<li>else: 3 nodes</li>
+</ul>
+
+
+<h2>NoScope</h2>
+
+<p>http://www.thecssninja.com/javascript/noscope</p>
+
+<p>tldr NoScope is an old IE categorization of nodes, and NoScope dictates
+that innerHTML and cloneNode will strip these els.</p>
+
+<h2>Ropes: DAG of string implementation for FF/Chrome</h2>
+
+<p>http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=181EEF66EB411F4277C009A1D492CF75?doi=10.1.1.14.9450&amp;rep=rep1&amp;type=pdf</p>
+
+<p>Look into this more. Too lazy to read / comment.</p>
+
+<p>How to force Chrome to not use a rope:</p>
+
+<ul>
+<li>Less than 12 chars</li>
+</ul>
+
+
+<p>What does it mean to intern strings?</p>
+
+<h2>CSP: Content Security Policy</h2>
+
+<p>http://www.html5rocks.com/en/tutorials/security/content-security-policy/</p>
+
+<h2>String interning</h2>
+
+<pre><code>String.prototype.intern = (function() {
+   "use strict";
+   var o = {"- ": 0};
+   delete o["- "];
+   return function() {
+       var str = this;
+       o[str] = true;
+       var ret = Object.keys(o)[0];
+       delete o[str];
+       return ret;
+       try {} finally {}
+   };
+})();
+</code></pre>
+
+<h2>Component pinning</h2>
+
+<p>Associating the re-render with the pre-existing fragment.</p>
+
+<h2>localStorage on iOS Cordova webviews</h2>
+
+<ol>
+<li>Run dev, set <code>localStorage.wat = "lol"</code></li>
+<li>Stop and re-run the app, and <code>localStorage.wat</code> still is &#8220;lol&#8221;</li>
+<li>Delete the app, re-install, still dev, <code>localStorage.wat</code> is undefined</li>
+</ol>
+
+
+<p>I don&#8217;t even have to check&#8230; your app can&#8217;t run in both dev and prod.
+You can&#8217;t share userSessions across dev and prod apps. Then again, our
+servers could maintain keys for both APNS and APNS_SANDBOX.</p>
+
+<h2>GCM project number vs project ID</h2>
+
+<p>https://developers.google.com/compute/docs/faq#whatisthedifference</p>
+
+<p>You pick project ID, they pick project number. Project number is the
+Sender ID you use for GCM.</p>
+
+<h2>Pointer comparisons for such perf</h2>
+
+<pre><code>if (wat === false) {
+}
+</code></pre>
+
+<p><code>false</code> can be implemented to just refer to a unique memory location,
+such that all browsers need to comparison in the above code is <code>wat</code>&#8217;s
+memory address against <code>false</code>&#8217;s.</p>
+
+<p>Same goes with</p>
+
+<pre><code>if (wat === undefined) {
+}
+</code></pre>
+
+<p>just that the presence of <code>foo</code> in <code>cache.foo</code> is ambiguous without
+testing <code>foo in cache</code>; might be easier to do <code>cache.foo = UNDEFINED</code>
+where</p>
+
+<pre><code>function UNDEFINED() {}
+</code></pre>
+
+<p>Sentinel as fuck.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -3896,45 +4152,6 @@ Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
 <p>So you can&#8217;t write a &#8220;sum&#8221; Array Computed; you&#8217;d just use reduce
 computed for that. And you <em>could</em> write your own hand-crafted &#8220;filter&#8221;
 reduced CP, but why not use the Array Computed API for that?</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/19/daily-journal/"/>
-    <updated>2014-05-19T07:38:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/19/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Active Model: GlobalID</h2>
-
-<p>https://github.com/rails/activemodel-globalid/</p>
-
-<p>GlobalID is a way of serializing a model into a string so that
-it can be looked up later; rather than serializing all of the
-object&#8217;s data into a string, you merely serialize just enough
-information so that you can look up the rest.</p>
-
-<p>I&#8217;m already doing something similar with model dep state in Ember,
-only extending it such that part of the &#8220;GlobalID&#8221;, which we&#8217;ll
-use internally for binding into a cache bucket, might be a prefixing
-controller name to uniquely identify a cache bucket to a specific
-controller, but in cases where you want to share information about
-a model with other controllers, you&#8217;d leave this prefix off.</p>
-
-<p>Anyway, nice to see other folk arriving at a similar thing, though
-I personally wouldn&#8217;t call this sort of thing &#8220;serializing&#8221; but rather
-&#8220;paramaterizing&#8221;, since you&#8217;re not actually storing all the data in
-string form but just enough to uniquely identify it so that some
-other operation can restore the object.</p>
-
-<h2>Strings have read-only props in &#8220;use strict&#8221; Safari</h2>
-
-<p>The following throws an exception only in Safari (not Chrome or FF):</p>
-
-<pre><code>(function(){"use strict"; ("a").b = 'writing to a string'; })();
-TypeError: Attempted to assign to readonly property.
-</code></pre>
-
-<p>But not if you leave off the &#8220;use strict&#8221;.</p>
 ]]></content>
   </entry>
   
