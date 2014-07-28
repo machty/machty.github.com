@@ -112,6 +112,57 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/22/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Array Computed / Reduce Computed</h2>
+
+<p>The difference between reduce computed properties and array computed
+properties in Ember is that reduce computed properties will boil down
+the contents of an array to <em>some value</em> using one-at-a-time semantics;
+Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
+
+<p>So you can&#8217;t write a &#8220;sum&#8221; Array Computed; you&#8217;d just use reduce
+computed for that. And you <em>could</em> write your own hand-crafted &#8220;filter&#8221;
+reduced CP, but why not use the Array Computed API for that?</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T14:08:00-04:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/19/daily-journal/">
 		
 			Daily Journal</a>
@@ -1111,116 +1162,6 @@ this:</p>
 
 
 <time datetime="2014-04-26T14:49:00-04:00" pubdate data-updated="true">Apr 26<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/21/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<p>This is a half-finished journal. Most of the value lies in the fact that
-there&#8217;s a crap-ton of flashcards associated with what I learned.</p>
-
-<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
-
-<p>In a Unicorn setting, shared resources like database connections
-need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
-in <code>after_hook</code>. This is so that you don&#8217;t wind up in a situation where
-two forked instances of your server try to write to a DB socket at the
-same time, which can result in a Protocol Error. This makes sense; if
-two protocol-adhering processes write to the socket at the same time,
-the message delivered to the other side obviously won&#8217;t adhere to the
-protocol. TODO: at what point does this actually break? How bout writing
-a quick Ruby script to prove this :) :) :)</p>
-
-<p>Resources:</p>
-
-<ul>
-<li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
-</ul>
-
-
-<h2>The difference between a process and a thread</h2>
-
-<p>A Process has:</p>
-
-<ul>
-<li>A group of resources</li>
-<li>A Thread of Execution</li>
-</ul>
-
-
-<p>The group of resources includes:</p>
-
-<ul>
-<li>Address space where program text and data lives in memory</li>
-<li>Global variables</li>
-<li>Open files</li>
-<li>Child processes</li>
-<li>Pending alarms</li>
-<li>Signals and signal handlers</li>
-<li>Accounting information</li>
-</ul>
-
-
-<p>A Thread (of Execution) has:</p>
-
-<ul>
-<li>Program counter</li>
-<li>Registers (of course these aren&#8217;t shared b/w threads; that&#8217;s crazy)</li>
-<li>Stack</li>
-<li>State</li>
-</ul>
-
-
-<p>A Thread must execute in a Process, but they are separate entities.</p>
-
-<p>There are multiple types of threads:</p>
-
-<ul>
-<li>User-space threads: super-fast thread switching because no kernel trap
-is required. Fine-grain control over thread scheduling. Unable to do
-blocking I/O though, since this blocks the entire process and all
-user threads.</li>
-<li>Kernel-threads: can using blocking IO, defers scheduling to the OS,
-but each thread switch means a slow kernel trap, but then again if
-you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
-<li>Combined: multiple kernel threads have multiple userspace threads.</li>
-</ul>
-
-
-<p>Resources:
-  - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
-  - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
-  - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-21T09:41:00-04:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time></div>
 	
 
 
