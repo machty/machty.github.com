@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-07-28T08:09:14-04:00</updated>
+  <updated>2014-07-29T07:48:38-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,736 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal 2]]></title>
+    <link href="http://machty.github.com/blog/2014/07/28/daily-journal-2/"/>
+    <updated>2014-07-28T20:43:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/28/daily-journal-2</id>
+    <content type="html"><![CDATA[<h2>User and Kernel</h2>
+
+<p>http://blog.codinghorror.com/understanding-user-and-kernel-mode/</p>
+
+<p>Non-idle tasks.</p>
+
+<p>The CPU graph is tasty. Red means kernel.</p>
+
+<p>CPU hardware knows all about kernels n shit. It isn&#8217;t just a software
+divide. CPU instructions and certain memory locations can only be
+accessed by the kernel, enforced by hardware. User mode makes it so that
+only the app crashes, not the entire system.</p>
+
+<p>http://en.wikipedia.org/wiki/Ring_(computer_security)</p>
+
+<p>Interesrserseting.</p>
+
+<p>x86 CPU hardware:</p>
+
+<ul>
+<li>0 is kernel</li>
+<li>3 is user</li>
+</ul>
+
+
+<p>1 and 2 are device drivers but they&#8217;re not often used. On Windows,
+device drivers can be user or kernel mode, mostly to the user, but video
+cards are often kernel level since they so perfy. In Vista+, the Windows
+Driver Display Model is such that only kernel mode is used for executing
+the GPU commands, but the translation from API to GPU now takes place in
+userland.</p>
+
+<p>Exceptions fire in kernel land I guess? Sometimes?</p>
+
+<h2>Old Foreman Orphans Sidekiq</h2>
+
+<p>After lots of starts/stops of foreman, I noticed lots of sidekiq
+instances with ppid 1. They was orphans. I killed em.</p>
+
+<h2>fspawn</h2>
+
+<p>Refers to the fork+exec approach to spawning a process.</p>
+
+<h2>Daemons</h2>
+
+<p>https://github.com/ghazel/daemons</p>
+
+<p>Library of fun little trinkets.</p>
+
+<ul>
+<li>given some-server.rb, let&#8217;s you write a some-server-control.rb</li>
+<li>inline the server inside such a daemon (you can still run it
+without forking via <code>run</code> command)</li>
+<li>manage multiple daemons</li>
+<li>Ability to take existing server and daemonize it; you do lose control
+over the daemon unless you&#8217;re a <code>ps</code>/<code>kill</code> JOURNEYMAN.
+
+<ul>
+<li>this takes advantage of the <code>fork</code> <code>getsid</code></li>
+</ul>
+</li>
+</ul>
+
+
+<h2>.pid file</h2>
+
+<p>It&#8217;s a file in a well known location that contains only the pid of
+some running process, usually a daemon. Useful because daemons are often
+hard to detect, kinda look like forgotten orphan processes, and there
+might be multiple similar ones. But pid files let you look up the pid of
+the running process so that you can send it signals.</p>
+
+<h2><code>$0</code> or <code>$PROGRAM_NAME</code></h2>
+
+<p>If you run this script</p>
+
+<pre><code>fork {
+  $PROGRAM_NAME = "WAT"
+  sleep
+}
+</code></pre>
+
+<p>then <code>ps | grep WOOT</code> yields</p>
+
+<pre><code>62724 ttys022    0:00.00 WOOT
+</code></pre>
+
+<p>Woot wat wat wotasoasdas lol.</p>
+
+<h2><code>pidof</code></h2>
+
+<pre><code>brew install pidof
+
+$ pidof bash
+754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/07/28/daily-journal/"/>
+    <updated>2014-07-28T08:16:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/07/28/daily-journal</id>
+    <content type="html"><![CDATA[<h2>Them processes</h2>
+
+<p>Kernel</p>
+
+<!--more-->
+
+
+<ul>
+<li>sits on top of hardware, doing things like
+
+<ul>
+<li>read/write from filesystem</li>
+<li>sending/receiving network data</li>
+<li>playing audio</li>
+</ul>
+</li>
+<li>programs don&#8217;t have access to this stuff, only the kernel</li>
+</ul>
+
+
+<p>System call is the barrier b/w userland and kernel.</p>
+
+<p>What about memory? I think userland can read memory.</p>
+
+<p>Common man pages for FreeBSD or Linux</p>
+
+<p><code>wat(2)</code> means section 2 of manual, wat: <code>man 2 wat</code></p>
+
+<p>Can&#8217;t execute code without a process.</p>
+
+<p><code>Process.pid == $$</code> global var in Ruby, from Perl/bash, but
+<code>Process.pid</code> is way more obvious, duh.</p>
+
+<p>Processes have parents, identified via <code>ppid</code>, <code>Process.ppid</code>, but not
+super often used.</p>
+
+<p>In Unixland, everything is a file.</p>
+
+<p>When opening resources, you&#8217;re given a file descriptor number, unique to
+your process, unshareable with unrelated processes. These resources are
+closed when you exit process, cept forking.</p>
+
+<p>All Ruby <code>IO</code> objects have a <code>fileno</code>, e.g.</p>
+
+<pre><code>2.0.0-p353 :007 &gt; $stdin.fileno
+ =&gt; 0
+2.0.0-p353 :007 &gt; $stdout.fileno
+ =&gt; 1
+2.0.0-p353 :008 &gt; $stderr.fileno
+ =&gt; 2
+</code></pre>
+
+<p>File descriptors are assigned lowest unused value, and are reusable when
+old file handlers are closed.</p>
+
+<p>Streams are lovely, before them, each program had to explicitly handle
+different keyboard types, etc, but the stream abstraction unified all of
+that.</p>
+
+<p><code>fsync</code> flushes file descriptor state to disk, but disk might reorder
+writes. The <code>F_FULLFSYNC</code> will ask the drive to write it immediately and
+preserve order, useful for things like databases, see <code>fsync</code></p>
+
+<pre><code> For applications that require tighter guarantees about the integrity of their
+ data, Mac OS X provides the F_FULLFSYNC fcntl.  The F_FULLFSYNC fcntl asks the
+ drive to flush all buffered data to permanent storage.  Applications, such as
+ databases, that require a strict ordering of writes should use F_FULLFSYNC to
+ ensure that their data is written in the order they expect.  Please see fcntl(2)
+ for more detail.
+</code></pre>
+
+<p><code>F_FULLFSYNC</code> probably isn&#8217;t available on everything, possibly mac only.</p>
+
+<p>To find the limit of file descriptors you can do <code>Process.getrlimit(:NOFILE)</code></p>
+
+<p>This translates to <code>getrlimit(2)</code>, control max system resource
+consumption. <code>r</code> is resource, <code>NOFILE</code> means &#8220;The maximum number of open
+files for this process&#8221;.</p>
+
+<pre><code>2.0.0-p353 :001 &gt; Process.getrlimit(:NOFILE)
+ =&gt; [2048, 2048]
+    #soft, hard
+</code></pre>
+
+<p>Soft means an exception will raise but you can reconfigure. Hard limit
+might be reconfigurable by superuser, or if the process has permissions.</p>
+
+<p><code>sysctl</code> lets you get or set kernel state, useful for configuring
+system-wide kernel details.</p>
+
+<p><code>EMFILE</code> is too many files open. Testable via</p>
+
+<pre><code>machty.github.com :: ruby -e "Process.setrlimit(:NOFILE, 3); File.open('/dev/null')"
+-e:1:in `initialize': Too many open files - /dev/null (Errno::EMFILE)
+</code></pre>
+
+<p><code>ulimit</code> is a built in command to control resource usage for this shelll
+and any of its children. It&#8217;s different from system wide <code>sysctl</code> stuff.
+I can change the result above</p>
+
+<p>So I remember <code>ulimit</code> resets the soft limit. If I set to 2046, then</p>
+
+<pre><code>machty.github.com :: ruby -e "puts Process.getrlimit(:NOFILE)"
+2046
+2046
+</code></pre>
+
+<blockquote><p>(Built-in command) In computing, a shell builtin is a command or a function, called from a shell, that is executed directly in the shell itself, instead of an external executable program which the shell would load and execute. ..</p></blockquote>
+
+<p>Use cases for overriding limits</p>
+
+<ul>
+<li>stress-testing utilities (e.g. 5000 simultaneous connections)</li>
+<li>limiting resources for 3rd party stuff, removing permissions to change</li>
+</ul>
+
+
+<p>Environment is nothing more than Env vars, key values pairs.
+Set by parent, inherited by children.</p>
+
+<pre><code>machty.github.com :: A=lol ruby -e "puts ENV['A']"
+lol
+</code></pre>
+
+<p>Note that env var assignment on its own shell line sets them for the
+rest of the process, but followed by a command only sets them for that
+command.</p>
+
+<p>Process names are changeable, e.g. <code>$PROCESS_NAME = "fuckles"</code></p>
+
+<pre><code>  PID TTY           TIME CMD
+45874 ttys011    0:00.68 fuckles
+</code></pre>
+
+<p>Note that TIME is CPU time.</p>
+
+<p>Ah, <code>time</code> makes sense to me now:</p>
+
+<pre><code>machty.github.com :: time sleep 1
+
+real    0m1.012s
+user    0m0.001s
+sys     0m0.003s
+</code></pre>
+
+<p><code>sleep</code> suspends execution thread, consuming no CPU. I think <code>sys</code> means
+system call time, such as telling the pthread to sleep. IT IS ALL MAKING
+SENSE.</p>
+
+<p>Processes have exit codes, 0 is successful.</p>
+
+<p>All the ways to exit</p>
+
+<ul>
+<li>exit, <code>Kernel#exit</code>, exits w 0 by default but you can pass a code,
+runs <code>Kernel#at_exit</code> blocks. <code>exit!</code> does a code 1 and doesn&#8217;t run
+exit blocks.</li>
+<li>abort accepts a string in ruby, runs exit handlers, returns 1</li>
+<li>raised exceptions yield exit code 1 and still raise things.</li>
+</ul>
+
+
+<p>Processes can fork, unless you&#8217;re JRuby. That means Unicorn won&#8217;t work
+for JRuby.</p>
+
+<p>Forking copies all memory (or copy on write). File descriptors are also
+provided to forked thinger.</p>
+
+<pre><code>2.0.0-p353 :016 &gt; fork { puts Process.pid; puts Process.ppid}
+ =&gt; 46054
+2.0.0-p353 :017 &gt; 46054
+45874
+2.0.0-p353 :018 &gt;   Process.pid
+ =&gt; 45874
+</code></pre>
+
+<p>Parent and child can share file descriptors, open files, sockets, etc.
+Because forking is faster than booting up fresh copies of servers&#8230; it
+is good&#8230;?</p>
+
+<p>Awesome example:</p>
+
+<pre><code>if fork
+  puts "YES"
+else
+  puts "NO"
+end
+</code></pre>
+
+<p>Hahaha, don&#8217;t run this in irb though, because you&#8217;ll have two processes
+reading from the same $stdin, e.g. your keyboard.</p>
+
+<p>Blockless <code>fork</code> returns twice</p>
+
+<ul>
+<li>parent gets child pid</li>
+<li>child gets nil</li>
+</ul>
+
+
+<p>Explains this output</p>
+
+<pre><code>ruby -e "cid=fork; puts cid || 'none'"
+46650
+none
+</code></pre>
+
+<p>What about threads? Do thread ids change after forking?</p>
+
+<pre><code>machty.github.com :: ruby -e "puts Thread.current; fork; puts Thread.current"
+#&lt;Thread:0x007fa7710677a8&gt;
+#&lt;Thread:0x007fa7710677a8&gt;
+#&lt;Thread:0x007fa7710677a8&gt;
+</code></pre>
+
+<p>No it seems they don&#8217;t&#8230; forking really makes everything seem totally
+the same. I wonder how that works at the pthread level.</p>
+
+<p>http://pubs.opengroup.org/onlinepubs/009695399/functions/fork.html</p>
+
+<blockquote><p>A process shall be created with a single thread. If a multi-threaded process calls fork(), the new process shall contain a replica of the calling thread and its entire address space, possibly including the states of mutexes and other resources. Consequently, to avoid errors, the child process may only execute async-signal-safe operations until such time as one of the exec functions is called. [THR] [Option Start]  Fork handlers may be established by means of the pthread_atfork() function in order to maintain application invariants across fork() calls.</p></blockquote>
+
+<p>So only a single thread is created, and the kernel knows it&#8217;s a separate
+thread, but the forked instance still thinks the address of that thread
+is the same as before, even though it&#8217;s obviously a different thread.</p>
+
+<p>Forking allows (but doesn&#8217;t guarantee) a process to run on multiple
+cores. If the system is busy the forked processes might all run on the
+same CPU.</p>
+
+<p>Forking duplicates memory (assuming no copy-on-write; TODO: learn the
+terminology for total memory vs not-yet-copied-on-write memory).
+Running out of memory due to over-forking is called a fork bomb.</p>
+
+<p>Forking means orphaning if the parent process finishes before children.</p>
+
+<p>Daemon processes are intentionally orphaned so that they can stay
+running forever. Orphaned children can be communicated with via signals.</p>
+
+<p>Fork-and-forget vs remembering child process. <code>Process.wait</code> will wait
+for ONE child process to terminate before quitting, and returns the pid
+of the child process that terminates. Spawn 3 processes, must wait three
+times. <code>wait2</code> returns <code>[pid, status]</code>, so you can get codes n shit.
+<code>waitpid</code> and <code>waitpid2</code> wait on specific pids. But they are aliased to
+the same thing: `wait</p>
+
+<p>The kernel queues child process return info so that waiting on a process
+that has already did will return its shit. That said, waiting on
+non-existent children raises <code>ECHILD</code>.</p>
+
+<p>Unicorn forks N times, makes sure the processes are still alive,
+restarts if necessary, etc.</p>
+
+<p>If you don&#8217;t do <code>Process.wait</code> though, the kernel will keep on storing
+information about exit codes, etc. You either need to <code>wait</code> or <code>detach</code>,
+or else you get a zombie process.</p>
+
+<p>http://en.wikipedia.org/wiki/Zombie_process</p>
+
+<p>A Zombie process is a process that has called exit but whose parent
+hasn&#8217;t called <code>wait</code> or <code>detach</code>.</p>
+
+<ul>
+<li>Zombie: un-reaped, terminated child process</li>
+<li>Orphan: still active child process whose parent has died.</li>
+</ul>
+
+
+<p>Orphans get attached to <code>init</code> (or <code>launchd</code> in OS X land), which has a
+pid of 1.</p>
+
+<p>Oh man, fork bombs are hilarious: http://en.wikipedia.org/wiki/Fork_bomb</p>
+
+<p>So ppid actually automatically updates:</p>
+
+<pre><code>fork do
+  loop do
+    puts "(#{Process.pid}, #{Process.ppid})"
+    sleep 1
+  end
+end
+
+sleep 1
+
+abort "k i'm done #{Process.pid}"
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>(47598, 47597)
+(47598, 47597)
+k i'm done 47597
+(47598, 1)
+(47598, 1)
+</code></pre>
+
+<p>Pretty cool.</p>
+
+<p>Also if you <code>brew install pstree</code> and take a look at that, pid 1 is
+<code>launchd</code>.</p>
+
+<p>You can check the status of process and how it changes into a zombie and
+then when it gets removed from the process table when we call
+<code>Process.wait</code>:</p>
+
+<pre><code>cpid = fork {}
+puts `ps -p #{cpid} -o state`
+sleep 1
+puts `ps -p #{cpid} -o state`
+Process.wait
+puts `ps -p #{cpid} -o state`
+</code></pre>
+
+<p>Yields:</p>
+
+<pre><code>STAT
+R+
+STAT
+Z+
+STAT
+</code></pre>
+
+<p>Note the last STAT is empty because no such pid; shit is dead.
+The <code>+</code> means process is in the foreground process group of its control
+terminal.</p>
+
+<p>Note that no memory is allocated to the zombie process itself; just the
+slot in the process table is used; zombie processes prevent other
+processes from taking their place and reusing their PID. Which is
+another thing: a parent process might not want a child pid to be reused
+when creating a child pid, so it&#8217;ll create the new child, and THEN
+<code>wait</code>/<code>detach</code> on original.</p>
+
+<p><code>Process.detach</code> spins up a thread to <code>wait</code> on a process. Here&#8217;s a
+really roundabout way to detach and then wait and get the return value:</p>
+
+<pre><code>t = Process.detach(cpid)
+puts `ps -p #{cpid} -o state`
+puts t.value
+</code></pre>
+
+<p><code>t.join</code> before a <code>t.value</code> is a noop; <code>value</code> must always <code>join</code> in
+order to get the value.</p>
+
+<p>Fork-and-forget is rare. <code>Process.detach</code> has no system call equiv; it&#8217;s
+just a ruby convenience.</p>
+
+<p>SIGCHLD fires when a child process exits. You can trap it and <code>wait</code> for
+that process to finish. Problem is, signal delivery is unreliable; if
+you&#8217;re handling a signal and another one comes in, you might not receive
+that signal. Solution is to pass a second param to <code>wait</code> to describe
+how the kernel should wait for this thing, e.g. <code>Process::WNOHANG</code></p>
+
+<p>Shit is so messy</p>
+
+<pre><code>Process.trap(:CHLD) do
+  nil while Process.wait(-1, Process::WNOHANG) rescue Errno::ECHILD
+end
+</code></pre>
+
+<p>Yes you could unravel but come on.</p>
+
+<p>Signals are async, ignorable, actionable, defaultable. Processes use the
+kernel to as an intermediary to send messages.</p>
+
+<pre><code>echo "puts 'lol'" | ruby
+</code></pre>
+
+<p>Who knew? It accepts input from stdin. So you can pipe Ruby code to it.
+Ctrl-C sends an interrupt. You can trap it and ignore. You can also say
+<code>trap(:INT, "IGNORE")</code></p>
+
+<p>It&#8217;s good form in lib code to define a trap, though it&#8217;s possibly to
+preserve other people&#8217;s callbacks and call them in yours. But you can&#8217;t
+restore default behavior. This is fine if your&#8217;e writing a server
+though.</p>
+
+<blockquote><p>USR2 - reexecute the running binary. A separate QUIT should be sent to the original process once the child is verified to be up and running.</p></blockquote>
+
+<p>https://github.com/ice799/memprof does some cool stuff with trapping
+signals, printing out useful shits.</p>
+
+<p>This guy is boundlessly smart.</p>
+
+<p>Make a pipe, give someone one end to yell into and the other person the
+put their ear up to it. Methinks you see where this is going.</p>
+
+<p>Source and Sink, Writer and Reader. Pipe persists until all associated
+descriptors are closed. Half-closed pipes are &#8220;widowed&#8221;. Writing to a
+widowed pipe yields <code>SIGPIPE</code>, but widowing it is how the reader gets an
+EOF signal. <code>SIGPIPE</code> can be disabled via F_SETNOSIGPIPE in fcntl, which
+we saw above in this journal for telling a hard drive to actually
+preserve write order.</p>
+
+<p>In Ruby you can pass an encoding which tags the read input with that
+encoding.</p>
+
+<p>http://ruby-doc.org/core-2.0/IO.html#method-c-pipe</p>
+
+<pre><code>rd, wr = IO.pipe
+
+if fork
+  wr.close # REQUIRED
+  puts "Parent got: &lt;#{rd.read}&gt;"
+  rd.close
+  Process.wait
+else
+  rd.close # REQUIRED
+  puts "Sending message to parent"
+  wr.write "Hi Dad"
+  wr.close
+end
+</code></pre>
+
+<p>The <code># REQUIRED</code> closes are there because otherwise the data won&#8217;t
+flush, EOF&#8217;s won&#8217;t be called.</p>
+
+<p>So that&#8217;s a neat little primitive, but how is it different than just
+using a StringIO? Well, aside from the fact that I don&#8217;t think you can
+just progressively write into StringIO as you read from it (maybe you
+can), Pipe goes through the kernel; there&#8217;s system calls and overhead.
+Check this bitchin benchmark:</p>
+
+<pre><code>require 'benchmark'
+require 'stringio'
+
+n = 100000
+Benchmark.bm do |x|
+  x.report("pipes:") {
+    n.times do
+      rd, wr = IO.pipe
+      wr.write "HELLO"
+      wr.close
+      raise "wat" unless rd.read == "HELLO"
+      rd.close
+    end
+  }
+
+  x.report("StringIO") {
+    n.times do
+      s = StringIO.new("HELLO")
+      raise "wat" unless s.read == "HELLO"
+      s.close
+    end
+  }
+end
+</code></pre>
+
+<p>yields</p>
+
+<pre><code>              user     system      total        real
+  pipes:  0.630000   0.730000   1.360000 (  1.363994)
+StringIO  0.080000   0.000000   0.080000 (  0.077973)
+</code></pre>
+
+<p>This is skewed by the fact that you&#8217;re not going to be creating and
+dumping pipes all the time, but it just highlights the inner workings of
+Pipe: because it involves syscalls, much of the time is spent in
+<code>system</code>.</p>
+
+<p>With streams (pipes/TCP sockets), you write to a stream followed by a
+delimiter. Newline is the delimiter. Unix sockets are intra machine, and
+fast.</p>
+
+<p>Use sockets to communicate in datagrams vs delimited stream chunks. You
+still have pairs, but rather than read/write pairs, you just have
+bidirectional shits, one of which needs to get closed per process.
+Sockets are bidirectional!</p>
+
+<p>http://stackoverflow.com/questions/731233/activemq-or-rabbitmq-or-zeromq-or
+http://wiki.secondlife.com/wiki/Message_Queue_Evaluation_Notes</p>
+
+<p>From http://www.ruby-doc.org/core-2.1.0/IO.html</p>
+
+<blockquote><p>In the example below, the two processes close the ends of the pipe that they are not using. This is not just a cosmetic nicety. The read end of a pipe will not generate an end of file condition if there are any writers with the pipe still open. In the case of the parent process, the rd.read will never return if it does not first issue a wr.close.</p></blockquote>
+
+<p>Fuckles and shittles.</p>
+
+<pre><code>man socketpair
+</code></pre>
+
+<p>Thom Ass Tover says:</p>
+
+<p>http://www.thomasstover.com/uds.html</p>
+
+<p>So these sockets are Unix Domain Sockets, or local sockets.</p>
+
+<p>Pipes</p>
+
+<ul>
+<li>can be given a name</li>
+<li>writing to a full one yields <code>SIGSTOP</code></li>
+<li>are faster than Unix domain sockets</li>
+<li>require context switches w kernel to use read/write</li>
+</ul>
+
+
+<p>Solaris pipes are special in that they are full duplex, where as on
+Linux and BSD you&#8217;d need two pipes for full duplex. fifos are named
+pipes. I guess they&#8217;re like files.</p>
+
+<p>http://en.wikipedia.org/wiki/Named_pipe</p>
+
+<p>wow:</p>
+
+<pre><code>mkfifo my_pipe
+gzip -9 -c &lt; my_pipe &gt; out.gz &amp;
+</code></pre>
+
+<p>So, Matt Daemon.</p>
+
+<p><code>init</code> or <code>launchd</code> has ppid 0 and pid 1.</p>
+
+<p><code>exit if fork</code> will fork and close the parent process.</p>
+
+<p><code>Process.setsid</code> creates a new session. It talks about a process groups
+and what not. If you call it, your process becomes</p>
+
+<ul>
+<li>session leader of new session</li>
+<li>process group leader of new process group</li>
+<li>and has no controlling terminal</li>
+<li>and becomes the only new thing in the thing</li>
+</ul>
+
+
+<p>returns the new process group ID.</p>
+
+<p>Job control is the way processes are managed by terminal. Process group
+id is generally same as process ID. Fork and the process group id will
+be the same. If they fork and so on then yeah yeah yeah this is how you
+know they all came from the same shit. When you do <code>irb</code> in a terminal
+it&#8217;ll set the process group to the pid of the command you run.</p>
+
+<p>This is why interrupting a Ruby script that&#8217;s shelled out to thing will
+kill all the things if it gets an interrupt; if it&#8217;s still alive, it&#8217;ll
+kill children. It&#8217;s only upon normal exiting that you lose
+thisetoisjdoiasj.</p>
+
+<p>Session groups are higher up, a collection of process groups. One
+session group: <code>echo "lol" | echo "lol"</code>. EPERM fires if you are already
+leader (can only call w children).</p>
+
+<p>Look at http://rubygems.org/gems/daemons</p>
+
+<p><code>exec</code> totally transforms your shit, better fork first.</p>
+
+<pre><code>Thread.new {
+  sleep 2
+  puts "THIS WILL NEVER PRINT"
+}
+Thread.new {
+  sleep 1
+  exec 'ls'
+}
+</code></pre>
+
+<p>It entirely nukes your process context, including any outstanding
+threads. You must escape via a fork.</p>
+
+<p>Ruby&#8217;s <code>exec</code> will close file handles, database connections, etc, before
+passing control to the new shit, though native <code>exec</code> calls would leave
+them open. Sensible default given <code>echo</code> doesn&#8217;t care about your
+database. You might accidentally exec another process that doesn&#8217;t do
+anything with a db connection, and it never totally closes. But you can
+override this default if you want to pass the fileno to the new process
+and keep open that handle when it opens it for reading.</p>
+
+<p>Unlike fork, no memory is shared with the resulting process of an exec.</p>
+
+<p>I am so tired.</p>
+
+<p><code>system</code> returns a true or false. Output barfs to stdout.</p>
+
+<p><code>popen</code> opens a bi-directional pipe; you can write to and read from the
+process spawned</p>
+
+<p><code>popen3</code> gives you access to all 3.</p>
+
+<p>Forking means a copy of all the parent process&#8217;s context before
+<code>exec</code>-ing something super small like <code>ls</code>, but you can use gems that
+wrap <code>posix_spawn(2)</code></p>
+
+<p>https://github.com/rtomayko/posix-spawn</p>
+
+<p>Also check out <code>man vfork</code> for virtual memory friendly forking.</p>
+
+<p>Resque forks for memory management; bloating Ruby tasks tend not to
+shrink, so fork makes it possible for forked workers to bloat and
+disappear.</p>
+
+<p>http://rubydoc.info/github/defunkt/resque/Resque/Worker</p>
+
+<blockquote><p>A Resque Worker processes jobs. On platforms that support fork(2), the worker will fork off a child to process each job. This ensures a clean slate when beginning the next job and cuts down on gradual memory growth as well as low level failures.</p>
+
+<p>It also ensures workers are always listening to signals from you, their master, and can react accordingly.</p></blockquote>
+
+<p>Preforking, is it cool. haidjasoidjasiodj</p>
+
+<p>What&#8217;s the rules on writing to stdout between multiple processes.
+You can do it; there&#8217;s not going to be thread-unsafety, i don&#8217;t think.</p>
+
+<p>http://stackoverflow.com/questions/1326067/how-to-lock-io-shared-by-fork-in-ruby</p>
+
+<p>Preforking has load balancing wins similar to message queuing with
+multiple consumers; when a consumer is ready, it just listens for the
+same thing. A socket is shared b/w forked processes, and kernel makes
+sure only one gets it</p>
+
+<p>I need to understand more about $stdout and buffering and what not. It&#8217;s
+not thread safe, but process-safe? syscall-safe?</p>
+
+<ul>
+<li>fork-safe if the action in question fits within a single syscall</li>
+</ul>
+
+
+<p>I have no fucking IDEA MY BRAIN IS DEAD.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -4894,214 +5624,6 @@ features for ECMAScript.</p>
 <a href="http://jsbin.com/davew/1/edit">JSBin</a> for farting around w
 XSLT transformations. Kinda reminds me of <code>&lt;content select="asd"&gt;</code> in
 Web Components land, though probably way more complicated.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/25/daily-journal/"/>
-    <updated>2014-05-25T13:26:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/25/daily-journal</id>
-    <content type="html"><![CDATA[<h3>Web Notifications</h3>
-
-<p><a href="https://github.com/stefanpenner/ember-cli/pull/804">Web notifications were added to ember-cli</a>
-not long ago, and I forgot they were a thing. IRRCloud uses them too.
-Like so many other new HTML5-y things, there&#8217;s a
-<a href="http://www.w3.org/TR/notifications/">spec</a> for web notifications.
-Basically, you ask for permissions and then you can broadcast.</p>
-
-<h3>Not invented here (NIH)</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Not_invented_here">Wikipedia</a></p>
-
-<p>Antonym: Proudly Found Elsewhere (PFE)</p>
-
-<p>Often a criticism of OSS communities reinventing the wheels in
-already-solved problem spaces.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/05/24/daily-journal/"/>
-    <updated>2014-05-24T07:56:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/05/24/daily-journal</id>
-    <content type="html"><![CDATA[<h3>Enterprise Integration Patterns</h3>
-
-<p>Reading this here Fowler book.</p>
-
-<p>Operating systems have begun to ship with messaging middleware and
-related tools:</p>
-
-<ul>
-<li>Windows: MS Message Queueing (MSMQ), accessible via APIS like COM
-components and System.Messaging (part of .NET).</li>
-</ul>
-
-
-<p>Application Servers</p>
-
-<ul>
-<li>Java Messaging Service (JMS)</li>
-</ul>
-
-
-<p>EAI (Enterprise Application Integration) suites:</p>
-
-<ul>
-<li>IBM WebSphere MQ</li>
-<li>Microsoft BizTalk</li>
-<li>TIBCO</li>
-<li>WebMethods</li>
-<li>SeeBeyond</li>
-<li>Vitria</li>
-<li>CrossWorlds</li>
-</ul>
-
-
-<p>Many of the above include JMS as a supported client API, while
-others focus on implementing merely JMS-compliant infrastructures.</p>
-
-<h3>Pro Git</h3>
-
-<h4>VCS: Version Control System</h4>
-
-<p>Keeps patch sets between versions of files, reconstruct a version be
-applying/unapplying patches. Example: <code>rcs</code>.</p>
-
-<p>Git&#8217;s predecessor was BitKeeper, whose free-of-charge status was
-revoked in 2005.</p>
-
-<h4>git config</h4>
-
-<p><code>git config lol.wat "imadork"</code></p>
-
-<p>will put the following into <code>./.git/config</code>:</p>
-
-<pre><code>[lol]
-  wat = imadork
-</code></pre>
-
-<p>what if you did <code>git config a.b.c lol</code> ?</p>
-
-<pre><code>[a "b"]
-  c = lol
-</code></pre>
-
-<p>followed by <code>git config a.b.z lol</code>:</p>
-
-<pre><code>[a "b"]
-  c = lol
-  z = lol
-</code></pre>
-
-<p>So basically <code>git config</code> just prettily formats things into groups using
-everything about the key you provide except the trailing segment. Makes
-sense.</p>
-
-<h4>Staging</h4>
-
-<p>Staging means you&#8217;re building up snapshots for a commit. By the time you
-commit, you&#8217;re just creating a commit object with meta data that points
-to that same snapshot.</p>
-
-<h4>Simple git repo hosting via HTTP</h4>
-
-<p>You can host a git repo via HTTP file hosting, which implies:</p>
-
-<ul>
-<li>anonymity (no authentication, no way to know who&#8217;s cloning your repo)</li>
-<li>read-only access (can&#8217;t push, unless doing crazy WebDAV things)</li>
-</ul>
-
-
-<p>So just for fun, here&#8217;s the simplest number of steps to push to a
-localhost http git server.</p>
-
-<ol>
-<li>Create bare repo: <code>git init --bare fun.git</code>. This creates a folder
-called <code>/fun.git</code>. The <code>.git</code> extension is optional, but
-conventional.</li>
-<li>Start a server hosting <code>ruby -run -e httpd . -p 5000</code></li>
-<li>Try and clone via http: <code>git clone http://localhost:5000/fun.git</code></li>
-</ol>
-
-
-<p>This will give you an error:</p>
-
-<pre><code>fatal: repository 'http://localhost:5000/fun.git/' not found
-</code></pre>
-
-<p>and your Ruby server will show the log</p>
-
-<pre><code>[2014-05-25 12:03:13] ERROR `/fun.git/info/refs' not found.
-localhost - - [25/May/2014:12:03:13 EDT] "GET /fun.git/info/refs?service=git-upload-pack HTTP/1.1" 404 287
-- -&gt; /fun.git/info/refs?service=git-upload-pack
-</code></pre>
-
-<p>So it&#8217;s looking for files that aren&#8217;t there. If you look at various
-git manuals, it&#8217;ll tell you something about how you should
-<code>mv hooks/post-update.example hooks/post-update</code> and give it executable
-chmod permissions, but even if you do that and try and clone again,
-it&#8217;ll fail.</p>
-
-<p>The reason for the failure is that there are static files that need to
-be generated in order for a plain ol static http git hosting solution to
-work, and these files haven&#8217;t been generated yet. If you enabled the
-<code>post-update</code> hook and then pushed to the repo via some other means,
-those files would be generated, but just to get this example working,
-you can <code>cd</code> into <code>fun.git</code> and run</p>
-
-<pre><code>sh fun.git/hooks/post-update.example
-</code></pre>
-
-<p>or you can just run the single command that the above script runs:</p>
-
-<pre><code>git update-server-info
-</code></pre>
-
-<p>Then when you <code>git clone http://localhost:5000/fun.git</code>, the clone will
-succeed (though the repo&#8217;s still totally empty).</p>
-
-<h3><code>ruby -run</code></h3>
-
-<p>Also, here&#8217;s the breakdown of the <code>ruby -run -e httpd . -p 5001</code></p>
-
-<ul>
-<li>There&#8217;s a very intentionally-named Ruby library called <code>un</code>, which
-<a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/un/rdoc/index.html">contains some useful tools</a></li>
-<li>The <code>-r</code> option requires the following lib; <code>-run</code> requires <code>un.rb</code>,
-which is part of the Ruby standard library.</li>
-<li><code>un.rb</code> contains top-level method definitions, like <code>httpd</code></li>
-<li><code>-e httpd</code> executes the top-level <code>httpd</code> method in <code>un.rb</code>, which
-makes use of the rest of the command line args provided: <code>. -p 5001</code>,
-and starts up a WEBBrick server.</li>
-</ul>
-
-
-<p>Here&#8217;s another dumb example of a <code>ruby -r</code>:</p>
-
-<p>Put a file named <code>aunchy.rb</code> with the following contents into new
-subdirectory <code>ma</code>:</p>
-
-<pre><code>def lephant
-  puts "i am so raunchy"
-end
-</code></pre>
-
-<p>Then run <code>ruby -Ima -raunchy -elephant</code>:</p>
-
-<pre><code>i am so raunchy
-</code></pre>
-
-<p>This works because</p>
-
-<ul>
-<li><code>-Ima</code> adds <code>ma</code> to the load path (which <code>require</code> uses)</li>
-<li><code>-raunchy</code> requires <code>aunchy.rb</code></li>
-<li><code>-e</code> executes the method <code>lephant</code></li>
-</ul>
-
 ]]></content>
   </entry>
   
