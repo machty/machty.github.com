@@ -5,7 +5,7 @@
 	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
 	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<meta charset="utf-8">
-	<title>Daily Journal 2  | machty's thoughtz</title>
+	<title>Daily Journal  | machty's thoughtz</title>
 
 <meta name="author" content="Alex Matchneer"> 
 
@@ -107,141 +107,101 @@ $(document).ready(
 </header>
 
 	<div id="content" class="inner"><article class="post">
-	<h2 class="title">Daily Journal 2</h2>
-	<div class="entry-content"><h2>User and Kernel</h2>
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>NPM is killing me</h2>
 
-<p>http://blog.codinghorror.com/understanding-user-and-kernel-mode/</p>
+<p>Apparently this fixed everything.</p>
 
-<p>Non-idle tasks.</p>
+<pre><code>npm cache clear &amp;&amp; npm install
+</code></pre>
 
-<p>The CPU graph is tasty. Red means kernel.</p>
+<p>https://www.npmjs.org/doc/cli/npm-cache.html</p>
 
-<p>CPU hardware knows all about kernels n shit. It isn&#8217;t just a software
-divide. CPU instructions and certain memory locations can only be
-accessed by the kernel, enforced by hardware. User mode makes it so that
-only the app crashes, not the entire system.</p>
+<p>npm caches everything in <code>npm config get cache</code>, which for me is:</p>
 
-<p>http://en.wikipedia.org/wiki/Ring_(computer_security)</p>
+<pre><code>~/.npm
+</code></pre>
 
-<p>Interesrserseting.</p>
+<p>Folder structure is something like</p>
 
-<p>x86 CPU hardware:</p>
+<pre><code>~/.npm/PACKAGE_NAME/VERSION/
+</code></pre>
+
+<p>which contains:</p>
 
 <ul>
-<li>0 is kernel</li>
-<li>3 is user</li>
+<li>.cache.json
+
+<ul>
+<li>lots of overlap w the project&#8217;s package.json, with additional
+cache-specific things like</li>
+<li>etag, shasum</li>
+<li>deployment-specific data about the package</li>
 </ul>
-
-
-<p>1 and 2 are device drivers but they&#8217;re not often used. On Windows,
-device drivers can be user or kernel mode, mostly to the user, but video
-cards are often kernel level since they so perfy. In Vista+, the Windows
-Driver Display Model is such that only kernel mode is used for executing
-the GPU commands, but the translation from API to GPU now takes place in
-userland.</p>
-
-<p>Exceptions fire in kernel land I guess? Sometimes?</p>
-
-<h2>Old Foreman Orphans Sidekiq</h2>
-
-<p>After lots of starts/stops of foreman, I noticed lots of sidekiq
-instances with ppid 1. They was orphans. I killed em.</p>
-
-<h2>fspawn</h2>
-
-<p>Refers to the fork+exec approach to spawning a process.</p>
-
-<h2>Daemons</h2>
-
-<p>https://github.com/ghazel/daemons</p>
-
-<p>Library of fun little trinkets.</p>
+</li>
+<li>package.tgz
 
 <ul>
-<li>given some-server.rb, let&#8217;s you write a some-server-control.rb</li>
-<li>inline the server inside such a daemon (you can still run it
-without forking via <code>run</code> command)</li>
-<li>manage multiple daemons</li>
-<li>Ability to take existing server and daemonize it; you do lose control
-over the daemon unless you&#8217;re a <code>ps</code>/<code>kill</code> JOURNEYMAN.
+<li>the original tarball downloaded for this packaage</li>
+</ul>
+</li>
+<li>package/
 
 <ul>
-<li>this takes advantage of the <code>fork</code> <code>getsid</code></li>
+<li>the unzipped tarball</li>
 </ul>
 </li>
 </ul>
 
 
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons.rb#L45-L53</p>
+<p>In other words</p>
 
-<pre><code># 1.  Forks a child (and exits the parent process, if needed)
-# 2.  Becomes a session leader (which detaches the program from
-#     the controlling terminal).
-# 3.  Forks another child process and exits first child. This prevents
-#     the potential of acquiring a controlling terminal.
-# 4.  Changes the current working directory to "/".
-# 5.  Clears the file creation mask (sets +umask+ to 0000).
-# 6.  Closes file descriptors (reopens +STDOUT+ and +STDERR+ to point to a logfile if
-#     possible).
+<blockquote><p>Additionally, whenever a registry request is made, a .cache.json file is placed at the corresponding URI, to store the ETag and the requested data. This is stored in {cache}/{hostname}/{path}/.cache.json.</p></blockquote>
+
+<h2>Food Shit</h2>
+
+<p>Pok Pok is a legit ass Thai place I need to check out.</p>
+
+<pre><code>http://pokpokny.com/
 </code></pre>
 
-<p>Controlling terminal:</p>
+<h2><code>sed</code> to select lines</h2>
 
-<p>http://www.gnu.org/software/libc/manual/html_node/Controlling-Terminal.html</p>
-
-<blockquote><p>An individual process disconnects from its controlling terminal when it calls setsid to become the leader of a new session.</p></blockquote>
-
-<p>Ah I get it:</p>
-
-<ul>
-<li>first fork is to orphan the child, but it&#8217;s still connected to a
-controlling terminal/session.</li>
-</ul>
-
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L201</p>
-
-<p>They actually loop through all known IO files to close file
-descriptors using ObjectSpace:</p>
-
-<p>http://www.ruby-doc.org/core-2.1.2/ObjectSpace.html</p>
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L221</p>
-
-<p>That&#8217;s pretty rad. I guess the GC uses it too.</p>
-
-<h2>.pid file</h2>
-
-<p>It&#8217;s a file in a well known location that contains only the pid of
-some running process, usually a daemon. Useful because daemons are often
-hard to detect, kinda look like forgotten orphan processes, and there
-might be multiple similar ones. But pid files let you look up the pid of
-the running process so that you can send it signals.</p>
-
-<h2><code>$0</code> or <code>$PROGRAM_NAME</code></h2>
-
-<p>If you run this script</p>
-
-<pre><code>fork {
-  $PROGRAM_NAME = "WAT"
-  sleep
-}
+<pre><code>$ git branch
+  cp-qp
+* master
+  new-doctitle
+  setup-controller-qp
 </code></pre>
 
-<p>then <code>ps | grep WOOT</code> yields</p>
+<p>I wanted to switch to the fourth one without typing
+<code>setup-controller-qp</code>. Here&#8217;s how you could do it by using the line
+number</p>
 
-<pre><code>62724 ttys022    0:00.00 WOOT
+<pre><code>$ git branch | sed -n '4p' | xargs git checkout
+Switched to branch 'setup-controller-qp'
 </code></pre>
 
-<p>Woot wat wat wotasoasdas lol.</p>
+<p>Obviously this is just a dumb exercise since it&#8217;s waaay more typing.
+This is me practicing.</p>
 
-<h2><code>pidof</code></h2>
+<p>You can also display multiple lines using a syntax similiar to cut&#8217;s
+<code>-f1,2</code> syntax:</p>
 
-<pre><code>brew install pidof
-
-$ pidof bash
-754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
+<pre><code>$ git branch | sed -n '3,4p' 
+  new-doctitle
+  setup-controller-qp
 </code></pre>
+
+<h2>commissary</h2>
+
+<p>From Orange is the New Black</p>
+
+<blockquote><p>commissary: a restaurant in a movie studio, military base, prison, or other institution.</p></blockquote>
+
+<h2>HRT</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Hormone_replacement_therapy">Hormone replacement therapy</a></p>
 </div>
 
 
@@ -258,7 +218,7 @@ $ pidof bash
   
 
 
-<time datetime="2014-07-28T20:43:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
+<time datetime="2014-08-02T21:24:00-04:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time></div>
 	
 
 
@@ -307,8 +267,8 @@ Powered by Octopress.
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://machty.github.com/blog/2014/07/28/daily-journal-2/';
-        var disqus_url = 'http://machty.github.com/blog/2014/07/28/daily-journal-2/';
+        var disqus_identifier = 'http://machty.github.com/blog/2014/08/02/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/08/02/daily-journal/';
         var disqus_script = 'embed.js';
       
     (function () {

@@ -1,0 +1,500 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>ES6 fat arrow</h2>
+
+<pre><code>var a = this;
+var fn = () =&gt; {
+  console.log(this === a); // true
+}
+</code></pre>
+
+<p>http://tc39wiki.calculist.org/es6/arrow-functions/</p>
+
+<p>yuno CoffeeScript single arrow syntax?</p>
+
+<blockquote><p>However, we don&#8217;t want CoffeeScript&#8217;s ->, it&#8217;s confusing to have two arrows and dynamic this binding is an oft-fired footgun.</p></blockquote>
+
+<h2>SaltStack</h2>
+
+<p>http://docs.saltstack.com/en/latest/</p>
+
+<h2>Open Core</h2>
+
+<p>http://en.wikipedia.org/wiki/Open_core</p>
+
+<p>Open Source core functionality with paid/proprietary add-ons, e.g.
+Sidekiq, or MySQL</p>
+
+<p>Related:</p>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Crippleware">Crippleware</a>: free versions
+cripple the ability to save/export/whatever</li>
+<li><a href="http://en.wikipedia.org/wiki/Freemium">Freemium</a>: free core features,
+pay for higher usage/capacity, e.g. most heroku add-ons</li>
+</ul>
+
+
+<h2>Ember First Class Actions</h2>
+
+<p>http://emberjs.jsbin.com/ucanam/5919/edit</p>
+
+<p>Questions:</p>
+
+<ul>
+<li>singleton vs multiples?</li>
+<li>actions that depend on others?</li>
+<li>link-to?
+
+<ul>
+<li>idea: a LinkView asks the router or url service for an Action
+using the route params, query params, etc.</li>
+<li>LinkView&#8217;s active CP is <code>action.pending</code> || present day isActive</li>
+<li><p>action will internally delegate to a shared transitionTo action
+that everyone in the world can see; everyone can know where it&#8217;s
+going, etc etc etc.</p>
+
+<p><code>{{link-to action=myAction}}</code>
+any reason for this? what do you gain? nothing?</p></li>
+</ul>
+</li>
+</ul>
+
+
+<p>We need to separate fake link font decoration style from the underlying
+action.</p>
+
+<p>Link&#8217;s display components:</p>
+
+<pre><code>routeDescriptor: function() {
+  // when resolvedParams change, we need to recalculate
+  // our route object... this should refire only when
+  // params change, not when the URL changes
+  this.urlService.getRouteObject('articles', 1)
+
+
+  this.urlService.createRouteDescriptor({
+    routeName: alias('_linkView.params.firstObject'),
+    contexts: alias('_linkView.contexts'),
+    queryParams: alias('_linkView.queryParams'),
+    _linkView: this
+  });
+}//.property('resolvedParams')
+
+createRouteDescriptor: function(_attrs) {
+  var attrs = {
+    router: this.router, // or maybe just `this`?
+  };
+  Ember.merge(attrs, _attrs);
+  return RouteDescriptor.createWithMixins(attrs);
+}
+
+RouteDescriptor = Ember.Object.extend({
+  // required
+  router: null,
+  routeName: null,
+  contexts: null,
+  queryParams: null,
+
+  allParams: computed('routeName', 'contexts', 'queryParams', function() {
+    // this is just a perfy thing; since all calculations depend
+    // on all these params, we'll avoid the overhead of multiple
+    // CPs depending on each of these params
+    return this.getProperties(['routeName', 'contexts', 'queryParams']);
+  }),
+
+  path: computed('router.url', 'allParams', function() {
+    var allParams = this.get('allParams');
+    var router = this.get('router');
+
+    // presently we only use router.url as a cue that the router
+    // is at a new route
+    var url = this.get('router.url');
+
+    // pass crap to routerJS
+  }),
+
+  perform: function() {
+    // invoke, blah blah blah, same logic as in link to.
+    this.get('allParams');
+  }
+});
+
+service.getRouteDescriptor('articles', 1)
+
+{
+  action:   FCA,
+  isActive: true,
+  path: "/some/dynamic/thing"
+}
+</code></pre>
+
+<p>RouteDescriptors are objects</p>
+
+<ul>
+<li>inactive: !routeObject.active</li>
+<li>active:   routeObject.active</li>
+<li>visited</li>
+</ul>
+
+
+<p>Weird thing: ember link-to&#8217;s concept of &#8220;active&#8221; doesn&#8217;t match with
+<code>&lt;a&gt;</code> tag&#8217;s concept of active; link-to &#8216;active&#8217; means you&#8217;re currently
+in the route specified by that link; <code>&lt;a&gt;</code> tag&#8217;s active means you&#8217;re
+currently clicking this link.</p>
+
+<p>I think I know how to refactor link-to and LinkView and all that</p>
+
+<p>Goals</p>
+
+<ul>
+<li>make linking/routing/active calc logic shareable</li>
+<li>make it possible to click a link to make it active before a slow
+transition has completed.</li>
+<li><p>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
+anything else in general too.</p>
+
+<p>  {{#link-wrapper tagName=&#8221;li&#8221; |w|}}</p>
+
+<pre><code>{{w.link-to "wat" 1 2 3 (query-params)}}
+</code></pre>
+
+<p>  {{/link-wrapper}}</p>
+
+<p>  {{#link-to &#8216;articles&#8217; article.id |l|}}</p>
+
+<pre><code>{{! providing block params kicks it into
+    wrapper mode }}
+
+&lt;li class="{{l.active}}"&gt;
+  {{#l.tag}}
+    {{article.title}}
+  {{/l.tag}}
+&lt;/li&gt;
+</code></pre>
+
+<p>  {{/link-to}}</p></li>
+</ul>
+
+
+<h2>RFCs</h2>
+
+<p>Rust tempered it&#8217;s freewheeling feature additions by requiring RFCs.</p>
+
+<p>https://github.com/rust-lang/rfcs/blob/master/active/0001-rfc-process.md
+https://github.com/rust-lang/rfcs/blob/master/active/0039-lifetime-elision.md</p>
+
+<p>Sounds like we&#8217;ll be doing this for Ember.</p>
+
+<h2>Elide</h2>
+
+<blockquote><p>omit (a sound or syllable) when speaking: (as adj. elided) : the indication of elided consonants or vowels.</p></blockquote>
+
+<h2>Variadic</h2>
+
+<p>http://en.wikipedia.org/wiki/Variadic_function</p>
+
+<p>A function that is variadic has an indefinite number of arguments.
+<code>.bind</code></p>
+
+<blockquote><p>8:50 PM <spion> bind is variadic and I think it also has to do some stuff with constructors
+8:51 PM <spion> (additional arguments can be used for partial application)
+8:52 PM <spion> the constructor stuff: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Bound_functions_used_as_constructors
+8:53 PM <spion> (creates significant additional overhead)
+8:53 PM <spion> so a simple non-variadic closure implementation of bind has a lot less work to do :P</p></blockquote>
+
+<h2>React forms</h2>
+
+<p>https://github.com/wingspan/wingspan-forms</p>
+
+<p>Powerded by KendoUI</p>
+
+<h2>Reflux</h2>
+
+<p>https://github.com/spoike/refluxjs</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>╔═════════╗       ╔════════╗       ╔═════════════════╗
+</span><span class='line'>║ Actions ║──────&gt;║ Stores ║──────&gt;║ View Components ║
+</span><span class='line'>╚═════════╝       ╚════════╝       ╚═════════════════╝
+</span><span class='line'>     ^                                      │
+</span><span class='line'>     └──────────────────────────────────────┘</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rationale: http://spoike.ghost.io/deconstructing-reactjss-flux/</p>
+
+<h2>Promixo dedicated</h2>
+
+<p>https://addons.heroku.com/proximo#dedicated</p>
+
+<h2>CIDR: Classless Inter-Domain Routing</h2>
+
+<p>http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing</p>
+
+<p>Classful allocation of IP addresses (pre 1993) defined class A, B, C
+network groups split along the 8 bit chunks. Problem is the smallest
+allocation (256 addresses, assuming you were allocated something like
+123.456.789.XXX) was often too small for companies, whereas the next
+step up from that (123.456.XXX.XXX) was generally too huge (65536) for
+companies/entities to efficiently take advantage of. SOLUTION: CIDR
+blocks and subnet masks.</p>
+
+<blockquote><p>This led to inefficiencies in address use as well as routing because the large number of allocated small (class-C) networks with individual route announcements, being geographically dispersed with little opportunity for route aggregation, created heavy demand on routing equipment.</p></blockquote>
+
+<p>In other words, class C allocations are 123.456.789.XXX allocations,
+each containing 256 addresses, with no requirement that they be
+geographically grouped, such that routers had to maintain large tables
+for very similar looking addresses rather than being able to rely on
+some grouping rules to minimize the routing information they had to know
+about. But now subnet masking is a thing and blah blah blah I&#8217;m done
+learning this shit.</p>
+
+<p>192.168.2.0/24 means that the network is identified by the first 24 bits</p>
+
+<blockquote><p>192.168.100.0/24 represents the given IPv4 address and its associated routing prefix 192.168.100.0, or equivalently, its subnet mask 255.255.255.0 (i.e. 24 &#8220;1&#8221; bits).</p>
+
+<p>the IPv4 block 192.168.100.0/22 represents the 1024 IPv4 addresses from 192.168.100.0 to 192.168.103.255.</p></blockquote>
+
+<h2>TokenEx client-side encryption</h2>
+
+<p>Original misconception:</p>
+
+<ul>
+<li>You post directly to TokenEx via AJAX, and they give you an encrypted
+value that you can pass to your server and exchange for a token</li>
+</ul>
+
+
+<p>Correction:</p>
+
+<ul>
+<li>You only use JSEncrypt to encrypt the PAN via a public key.</li>
+</ul>
+
+
+<p>Wait, I don&#8217;t understand, with tokenizing, if you have a token saved in
+the database, then your server, if compromised, could still send data
+through to TokenEx, which would proxy it through to whomever.</p>
+
+<h2>Form Factor</h2>
+
+<p>https://www.pcisecuritystandards.org/documents/Mobile_Payment_Security_Guidelines_Merchants_v1.pdf</p>
+
+<blockquote><p>The PCI Security Standards Council charter provides a forum for collaboration across the payment space
+to develop security standards and guidance for the protection of payment card data wherever it may be
+stored, processed, or transmitted—regardless of the <em>form factor</em> or channel used for payment.</p></blockquote>
+
+<p>the physical size and shape of a piece of computer hardware.</p>
+
+<p>http://en.wikipedia.org/wiki/Mobile_phone_form_factor</p>
+
+<p>or phone.</p>
+
+<p>what a stupid fucking phrase/word/definition.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T08:47:00-04:00" pubdate data-updated="true">Aug 5<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/08/05/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/08/05/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

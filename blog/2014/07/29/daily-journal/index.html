@@ -5,7 +5,7 @@
 	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
 	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<meta charset="utf-8">
-	<title>Daily Journal 2  | machty's thoughtz</title>
+	<title>Daily Journal  | machty's thoughtz</title>
 
 <meta name="author" content="Alex Matchneer"> 
 
@@ -107,141 +107,155 @@ $(document).ready(
 </header>
 
 	<div id="content" class="inner"><article class="post">
-	<h2 class="title">Daily Journal 2</h2>
-	<div class="entry-content"><h2>User and Kernel</h2>
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>tar</h2>
 
-<p>http://blog.codinghorror.com/understanding-user-and-kernel-mode/</p>
+<p>Short for Tape Archives.</p>
 
-<p>Non-idle tasks.</p>
+<p>Had a tar.xz file, just needed to</p>
 
-<p>The CPU graph is tasty. Red means kernel.</p>
+<pre><code>tar xf thefile.tar.xz
+</code></pre>
 
-<p>CPU hardware knows all about kernels n shit. It isn&#8217;t just a software
-divide. CPU instructions and certain memory locations can only be
-accessed by the kernel, enforced by hardware. User mode makes it so that
-only the app crashes, not the entire system.</p>
+<h2>Dexing</h2>
 
-<p>http://en.wikipedia.org/wiki/Ring_(computer_security)</p>
+<p>Convert string names to numbers to be referenced within compiled Java
+whilst packaging android apps.</p>
 
-<p>Interesrserseting.</p>
+<h2>Good Food</h2>
 
-<p>x86 CPU hardware:</p>
+<p>Prince St Cafe on Prince and Mott.</p>
 
 <ul>
-<li>0 is kernel</li>
-<li>3 is user</li>
+<li>Awesome burger</li>
+<li>Awesome lamb thing</li>
 </ul>
 
 
-<p>1 and 2 are device drivers but they&#8217;re not often used. On Windows,
-device drivers can be user or kernel mode, mostly to the user, but video
-cards are often kernel level since they so perfy. In Vista+, the Windows
-Driver Display Model is such that only kernel mode is used for executing
-the GPU commands, but the translation from API to GPU now takes place in
-userland.</p>
+<h2>ls -l</h2>
 
-<p>Exceptions fire in kernel land I guess? Sometimes?</p>
+<p>Was curious about an <code>@</code> sign I saw next to a .txt file, from <code>ls(1)</code>:</p>
 
-<h2>Old Foreman Orphans Sidekiq</h2>
+<blockquote><p>The Long Format</p>
 
-<p>After lots of starts/stops of foreman, I noticed lots of sidekiq
-instances with ppid 1. They was orphans. I killed em.</p>
-
-<h2>fspawn</h2>
-
-<p>Refers to the fork+exec approach to spawning a process.</p>
-
-<h2>Daemons</h2>
-
-<p>https://github.com/ghazel/daemons</p>
-
-<p>Library of fun little trinkets.</p>
+<pre><code>If the -l option is given, the following information is displayed for
+each file: file mode, number of links, owner name, group name, number
+of bytes in the file, abbreviated month, day-of-month file was last
+modified, hour file last modified, minute file last modified, and the
+pathname.  In addition, for each directory whose contents are dis-
+played, the total number of 512-byte blocks used by the files in the
+directory is displayed on a line by itself, immediately before the
+information for the files in the directory.  If the file or directory
+has extended attributes, the permissions field printed by the -l
+option is followed by a '@' character.  Otherwise, if the file or
+directory has extended security information (such as an access control
+list), the permissions field printed by the -l option is followed by a
+'+' character.
+</code></pre></blockquote>
 
 <ul>
-<li>given some-server.rb, let&#8217;s you write a some-server-control.rb</li>
-<li>inline the server inside such a daemon (you can still run it
-without forking via <code>run</code> command)</li>
-<li>manage multiple daemons</li>
-<li>Ability to take existing server and daemonize it; you do lose control
-over the daemon unless you&#8217;re a <code>ps</code>/<code>kill</code> JOURNEYMAN.
-
-<ul>
-<li>this takes advantage of the <code>fork</code> <code>getsid</code></li>
-</ul>
-</li>
+<li><code>@</code> extended attributes</li>
+<li><code>+</code> extended security info</li>
 </ul>
 
 
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons.rb#L45-L53</p>
+<h2>Interrupted System Call</h2>
 
-<pre><code># 1.  Forks a child (and exits the parent process, if needed)
-# 2.  Becomes a session leader (which detaches the program from
-#     the controlling terminal).
-# 3.  Forks another child process and exits first child. This prevents
-#     the potential of acquiring a controlling terminal.
-# 4.  Changes the current working directory to "/".
-# 5.  Clears the file creation mask (sets +umask+ to 0000).
-# 6.  Closes file descriptors (reopens +STDOUT+ and +STDERR+ to point to a logfile if
-#     possible).
-</code></pre>
+<p>http://infohost.nmt.edu/~eweiss/222_book/222_book/0201433079/ch10lev1sec5.html</p>
 
-<p>Controlling terminal:</p>
+<p>I&#8217;m getting some shit about foreman and interrupted system calls. So
+what is it.</p>
 
-<p>http://www.gnu.org/software/libc/manual/html_node/Controlling-Terminal.html</p>
+<h2>&#8220;data at the edge&#8221;</h2>
 
-<blockquote><p>An individual process disconnects from its controlling terminal when it calls setsid to become the leader of a new session.</p></blockquote>
+<p>Keeping secure data at the edge of your infrastructure, e.g. using
+tokens instead of storing CC&#8217;s in your db.</p>
 
-<p>Ah I get it:</p>
+<h2>PAN (primary account number)</h2>
+
+<p>Bank card number.</p>
+
+<p>http://en.wikipedia.org/wiki/Primary_account_number</p>
+
+<h2>CP (card present)</h2>
+
+<p>e.g AuthorizeNetCP</p>
+
+<p>Cheaper rates if you can prove card present (via CVV).</p>
+
+<h2>TokenEx</h2>
+
+<p>ProcessTransaction</p>
+
+<p>ProcessTransactionWithPAN</p>
 
 <ul>
-<li>first fork is to orphan the child, but it&#8217;s still connected to a
-controlling terminal/session.</li>
+<li>pass in all the CC data; no</li>
 </ul>
 
 
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L201</p>
+<h2>Levenshtein Distance</h2>
 
-<p>They actually loop through all known IO files to close file
-descriptors using ObjectSpace:</p>
+<p>The minimum number of single-element operations (add, remove,
+substitute) between two sequences. Often used for spell-checking
+suggestions.</p>
 
-<p>http://www.ruby-doc.org/core-2.1.2/ObjectSpace.html</p>
+<p>I was thinking of using it to do an array diffing for React-ish stuff.</p>
 
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L221</p>
-
-<p>That&#8217;s pretty rad. I guess the GC uses it too.</p>
-
-<h2>.pid file</h2>
-
-<p>It&#8217;s a file in a well known location that contains only the pid of
-some running process, usually a daemon. Useful because daemons are often
-hard to detect, kinda look like forgotten orphan processes, and there
-might be multiple similar ones. But pid files let you look up the pid of
-the running process so that you can send it signals.</p>
-
-<h2><code>$0</code> or <code>$PROGRAM_NAME</code></h2>
-
-<p>If you run this script</p>
-
-<pre><code>fork {
-  $PROGRAM_NAME = "WAT"
-  sleep
-}
+<pre><code>Array 1: B C D E F
+Array 2: A B C D E
 </code></pre>
 
-<p>then <code>ps | grep WOOT</code> yields</p>
+<p>Clearly the answer to how to get from 1 to 2 is</p>
 
-<pre><code>62724 ttys022    0:00.00 WOOT
+<pre><code>shift A
+delete E
 </code></pre>
 
-<p>Woot wat wat wotasoasdas lol.</p>
+<p>But how to programmatically detect that?</p>
 
-<h2><code>pidof</code></h2>
+<h2>Ruby String Substring Shorthand</h2>
 
-<pre><code>brew install pidof
+<p>https://speakerdeck.com/headius/jruby-the-hard-parts</p>
 
-$ pidof bash
-754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
+<p>I can&#8217;t believe I didn&#8217;t know this&#8230;</p>
+
+<pre><code>s = "alex is quite maudlin"
+s['quite'] = 'very'
+s =&gt; "alex is very maudlin"
 </code></pre>
+
+<p>and if the substring isn&#8217;t in there, then</p>
+
+<pre><code>IndexError: string not matched
+</code></pre>
+
+<p>http://www.ruby-doc.org/core-2.1.2/String.html#method-i-5B-5D-3D</p>
+
+<h2>JRuby the Hard Parts</h2>
+
+<p>Goal: understand this talk https://speakerdeck.com/headius/jruby-the-hard-parts</p>
+
+<h2>Learn about encodings</h2>
+
+<p>I had to resort to this shit:</p>
+
+<pre><code>line = line.force_encoding("iso-8859-1")
+</code></pre>
+
+<p>for a bigass file because I was running into</p>
+
+<pre><code>http://stackoverflow.com/questions/15399530/ruby-match-invalid-byte-sequence-in-utf-8
+</code></pre>
+
+<p>Apparently you can open files as a certain encoding. Seems good.</p>
+
+<h2>Auto-inline CSS with Roadie</h2>
+
+<p>https://github.com/Mange/roadie</p>
+
+<p>Useful for supporting a vast array of shitty email clients that require
+inline CSS. This wouldn&#8217;t be a problem if web components.</p>
 </div>
 
 
@@ -258,7 +272,7 @@ $ pidof bash
   
 
 
-<time datetime="2014-07-28T20:43:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
+<time datetime="2014-07-29T07:50:00-04:00" pubdate data-updated="true">Jul 29<span>th</span>, 2014</time></div>
 	
 
 
@@ -307,8 +321,8 @@ Powered by Octopress.
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://machty.github.com/blog/2014/07/28/daily-journal-2/';
-        var disqus_url = 'http://machty.github.com/blog/2014/07/28/daily-journal-2/';
+        var disqus_identifier = 'http://machty.github.com/blog/2014/07/29/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/07/29/daily-journal/';
         var disqus_script = 'embed.js';
       
     (function () {
