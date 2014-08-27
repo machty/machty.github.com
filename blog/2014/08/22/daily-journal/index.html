@@ -1,0 +1,362 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>Difference b/w XSD and DTD</h2>
+
+<p>They both define the structure of an XML document, but what&#8217;s the
+difference?</p>
+
+<p>Awesome SO:
+http://stackoverflow.com/questions/1544200/what-is-difference-between-xml-schema-and-dtd</p>
+
+<p>DTD&#8217;s are arguably easier to grok, but the XSD has more features, but at
+the expense of understanding the abstractions of data types and what
+not. Seems easier to describe recursive structures in XSD than the other
+bullsharticles.</p>
+
+<p>XSD is XML, DTD stems from SGML.</p>
+
+<p>I guess XML And HTML also stem from SGML. WHAT DO I KNOW? NOTHING!</p>
+
+<h2>Wolf3d in React</h2>
+
+<p>Apparently I missed this https://github.com/petehunt/wolfenstein3D-react.git</p>
+
+<h2>Breaking the chain in React</h2>
+
+<p>For when you want to tell React &#8220;don&#8217;t mess with my DOM, I&#8217;m doing funky
+jQuery shit&#8221;.</p>
+
+<p>Render a div that won&#8217;t invalidate:</p>
+
+<p>https://gist.github.com/rpflorence/4c5044b217e0a67c2c4d#file-react-opt-out-js-L47</p>
+
+<p>Re-render your own children:</p>
+
+<p>https://gist.github.com/rpflorence/4c5044b217e0a67c2c4d#file-react-opt-out-js-L15-L18</p>
+
+<h2>Retcon: retroactive continuity</h2>
+
+<p>http://en.wikipedia.org/wiki/Retroactive_continuity</p>
+
+<p>&#8220;alteration of previously established facts in the continuity of a
+fictional work&#8221;</p>
+
+<h2>CVV can mean lower rates</h2>
+
+<p>http://security.stackexchange.com/questions/21168/how-does-amazon-bill-me-without-the-cvc-cvv-cvv2</p>
+
+<p>There are fraud-prevention benefits to using CVV, and as such, payment
+handlers will often give you a discount if the CVV is present.</p>
+
+<h2>X-Forwarded-For</h2>
+
+<p>Some servers fall prey to IP spoofing via setting the <code>X-Forwarded-For</code>
+header. If your server isn&#8217;t careful, then given a
+<code>curl -H "X-Forwarded-For: 1.2.3.4" http://www.machty.com</code>, your
+server&#8217;s logs and maybe even IP-dependent application logic (e.g.
+language detection) might use 1.2.3.4.</p>
+
+<p>In Rails you can add your known proxy/load-balancing IPs to
+<code>TRUSTED_PROXIES</code>. Then the <code>RemoteIp</code> rack middleware will filter out
+all of those and pick the most recently set IP, which handles the case
+where you might have multiple <code>X-Fowarded-By</code> headers. So the rule is:
+use the rightmost, untrusted IP and treat that as the remote ip. Why?
+Because when your first proxy is hit, it&#8217;ll see IP X.X.X.X and move that
+to the list of <code>X-Forwarded-By</code> headers. Note that the previous
+<code>X-Forwarded-By</code> headers, present or no, are untrustable and totally
+spoofable.</p>
+
+<p>http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection</p>
+
+<p>So that&#8217;s IP spoofing via HTTP header. How else can you IP spoof?</p>
+
+<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
+
+<p>You just rewrite the source IP in the TCP/UDP packet header, which also
+means when the application responds, it&#8217;ll send it back to the forged
+IP.</p>
+
+<p>There are valid use cases for this as well, such as testing load
+balancing software/hardware.</p>
+
+<h2>Types of NAT</h2>
+
+<p>http://think-like-a-computer.com/2011/09/16/types-of-nat/</p>
+
+<h3>Full cone NAT (Static NAT) (port forwarding)</h3>
+
+<p>Manual mapping of public IP and port to LAN IP and port.</p>
+
+<p>e.g. all incoming traffic to port 12345, forward to 192.168.0.10:9999.</p>
+
+<p>Blocks (drops connection):</p>
+
+<ul>
+<li>Ports that haven&#8217;t been forwarded</li>
+</ul>
+
+
+<h3>Restricted cone NAT (dynamic)</h3>
+
+<p>Don&#8217;t allow incoming data from an IP unless I&#8217;ve sent packets to it
+already. Note that depending on the strictness, if I initiate a
+connection to WAN IP 1.2.3.4:1234, I could potentially get data from
+1.2.3.4:5678, but in stricter schemes, the port must also match.</p>
+
+<p>But regardless of this strictness, the one requirement is that they send
+data to exactly my public IP and port that I sent data out of.</p>
+
+<h3>Symmetric NAT</h3>
+
+<p>http://think-like-a-computer.com/2011/09/19/symmetric-nat/</p>
+
+<p>Sym NAT is like port-restricted cone NAT, but randomly generates
+different public source ports when sending to different destinations.</p>
+
+<p>Sym NATs are the only ones that cause problems with other devices behind
+NATs.</p>
+
+<h2>Vim registers</h2>
+
+<p>So if I have</p>
+
+<pre><code>&lt;a href="WAT"&gt;&lt;/a&gt;
+</code></pre>
+
+<p>and I want to replace the href with a yanked &#8220;LOL&#8221;, then I can <code>di"</code> in
+WAT to delete it, then <code>"0P</code> to use the last-yank register 0. Registers
+1,2,3,4,5&#8230; get populated with cuts. Unnamed register gets replaced by
+any yanking/cutting command. Weird terminology.</p>
+
+<h2>Ember-cli + divshot</h2>
+
+<p>Holy shit this was awesome.</p>
+
+<p>Divshot.com is a static deployment heroku, basically, and ember-cli has
+an addon for letting you deploy there.</p>
+
+<pre><code>npm install --save-dev ember-cli-divshot &amp;&amp; ember generate divshot
+</code></pre>
+
+<h2>brew install fuck</h2>
+
+<p>naw, but this is a cool script for killing them all:</p>
+
+<pre><code>#!/usr/bin/env ruby
+# coding: utf-8
+
+abort "Usage: fuck you &lt;name&gt;" unless ARGV[0] == "you" &amp;&amp; ARGV.size == 2
+
+a = "abcdefghijklmnopqrstuvqxyz".each_char.to_a
+b = "ɐqɔpǝɟƃɥıɾʞʃɯuodbɹsʇnʌʍxʎz".each_char.to_a
+ws = Hash[a.zip(b)]
+ws.default = -&gt;(f){f}
+
+puts "\n  (╯°□°）╯︵ #{ARGV[1].reverse.each_char.map{|f|ws[f]}.join}\n\n"
+
+system("killall -9 #{ARGV[1]}")
+exit $?.exitstatus
+</code></pre>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-22T16:32:00-04:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/08/22/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/08/22/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

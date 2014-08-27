@@ -112,6 +112,311 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/08/22/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Difference b/w XSD and DTD</h2>
+
+<p>They both define the structure of an XML document, but what&#8217;s the
+difference?</p>
+
+<p>Awesome SO:
+http://stackoverflow.com/questions/1544200/what-is-difference-between-xml-schema-and-dtd</p>
+
+<p>DTD&#8217;s are arguably easier to grok, but the XSD has more features, but at
+the expense of understanding the abstractions of data types and what
+not. Seems easier to describe recursive structures in XSD than the other
+bullsharticles.</p>
+
+<p>XSD is XML, DTD stems from SGML.</p>
+
+<p>I guess XML And HTML also stem from SGML. WHAT DO I KNOW? NOTHING!</p>
+
+<h2>Wolf3d in React</h2>
+
+<p>Apparently I missed this https://github.com/petehunt/wolfenstein3D-react.git</p>
+
+<h2>Breaking the chain in React</h2>
+
+<p>For when you want to tell React &#8220;don&#8217;t mess with my DOM, I&#8217;m doing funky
+jQuery shit&#8221;.</p>
+
+<p>Render a div that won&#8217;t invalidate:</p>
+
+<p>https://gist.github.com/rpflorence/4c5044b217e0a67c2c4d#file-react-opt-out-js-L47</p>
+
+<p>Re-render your own children:</p>
+
+<p>https://gist.github.com/rpflorence/4c5044b217e0a67c2c4d#file-react-opt-out-js-L15-L18</p>
+
+<h2>Retcon: retroactive continuity</h2>
+
+<p>http://en.wikipedia.org/wiki/Retroactive_continuity</p>
+
+<p>&#8220;alteration of previously established facts in the continuity of a
+fictional work&#8221;</p>
+
+<h2>CVV can mean lower rates</h2>
+
+<p>http://security.stackexchange.com/questions/21168/how-does-amazon-bill-me-without-the-cvc-cvv-cvv2</p>
+
+<p>There are fraud-prevention benefits to using CVV, and as such, payment
+handlers will often give you a discount if the CVV is present.</p>
+
+<h2>X-Forwarded-For</h2>
+
+<p>Some servers fall prey to IP spoofing via setting the <code>X-Forwarded-For</code>
+header. If your server isn&#8217;t careful, then given a
+<code>curl -H "X-Forwarded-For: 1.2.3.4" http://www.machty.com</code>, your
+server&#8217;s logs and maybe even IP-dependent application logic (e.g.
+language detection) might use 1.2.3.4.</p>
+
+<p>In Rails you can add your known proxy/load-balancing IPs to
+<code>TRUSTED_PROXIES</code>. Then the <code>RemoteIp</code> rack middleware will filter out
+all of those and pick the most recently set IP, which handles the case
+where you might have multiple <code>X-Fowarded-By</code> headers. So the rule is:
+use the rightmost, untrusted IP and treat that as the remote ip. Why?
+Because when your first proxy is hit, it&#8217;ll see IP X.X.X.X and move that
+to the list of <code>X-Forwarded-By</code> headers. Note that the previous
+<code>X-Forwarded-By</code> headers, present or no, are untrustable and totally
+spoofable.</p>
+
+<p>http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection</p>
+
+<p>So that&#8217;s IP spoofing via HTTP header. How else can you IP spoof?</p>
+
+<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
+
+<p>You just rewrite the source IP in the TCP/UDP packet header, which also
+means when the application responds, it&#8217;ll send it back to the forged
+IP.</p>
+
+<p>There are valid use cases for this as well, such as testing load
+balancing software/hardware.</p>
+
+<h2>Types of NAT</h2>
+
+<p>http://think-like-a-computer.com/2011/09/16/types-of-nat/</p>
+
+<h3>Full cone NAT (Static NAT) (port forwarding)</h3>
+
+<p>Manual mapping of public IP and port to LAN IP and port.</p>
+
+<p>e.g. all incoming traffic to port 12345, forward to 192.168.0.10:9999.</p>
+
+<p>Blocks (drops connection):</p>
+
+<ul>
+<li>Ports that haven&#8217;t been forwarded</li>
+</ul>
+
+
+<h3>Restricted cone NAT (dynamic)</h3>
+
+<p>Don&#8217;t allow incoming data from an IP unless I&#8217;ve sent packets to it
+already. Note that depending on the strictness, if I initiate a
+connection to WAN IP 1.2.3.4:1234, I could potentially get data from
+1.2.3.4:5678, but in stricter schemes, the port must also match.</p>
+
+<p>But regardless of this strictness, the one requirement is that they send
+data to exactly my public IP and port that I sent data out of.</p>
+
+<h3>Symmetric NAT</h3>
+
+<p>http://think-like-a-computer.com/2011/09/19/symmetric-nat/</p>
+
+<p>Sym NAT is like port-restricted cone NAT, but randomly generates
+different public source ports when sending to different destinations.</p>
+
+<p>Sym NATs are the only ones that cause problems with other devices behind
+NATs.</p>
+
+<h2>Vim registers</h2>
+
+<p>So if I have</p>
+
+<pre><code>&lt;a href="WAT"&gt;&lt;/a&gt;
+</code></pre>
+
+<p>and I want to replace the href with a yanked &#8220;LOL&#8221;, then I can <code>di"</code> in
+WAT to delete it, then <code>"0P</code> to use the last-yank register 0. Registers
+1,2,3,4,5&#8230; get populated with cuts. Unnamed register gets replaced by
+any yanking/cutting command. Weird terminology.</p>
+
+<h2>Ember-cli + divshot</h2>
+
+<p>Holy shit this was awesome.</p>
+
+<p>Divshot.com is a static deployment heroku, basically, and ember-cli has
+an addon for letting you deploy there.</p>
+
+<pre><code>npm install --save-dev ember-cli-divshot &amp;&amp; ember generate divshot
+</code></pre>
+
+<h2>brew install fuck</h2>
+
+<p>naw, but this is a cool script for killing them all:</p>
+
+<pre><code>#!/usr/bin/env ruby
+# coding: utf-8
+
+abort "Usage: fuck you &lt;name&gt;" unless ARGV[0] == "you" &amp;&amp; ARGV.size == 2
+
+a = "abcdefghijklmnopqrstuvqxyz".each_char.to_a
+b = "ɐqɔpǝɟƃɥıɾʞʃɯuodbɹsʇnʌʍxʎz".each_char.to_a
+ws = Hash[a.zip(b)]
+ws.default = -&gt;(f){f}
+
+puts "\n  (╯°□°）╯︵ #{ARGV[1].reverse.each_char.map{|f|ws[f]}.join}\n\n"
+
+system("killall -9 #{ARGV[1]}")
+exit $?.exitstatus
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-22T16:32:00-04:00" pubdate data-updated="true">Aug 22<span>nd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/08/15/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Incremental GC</h2>
+
+<p>Tenderlove tweeted this: https://bugs.ruby-lang.org/issues/10137</p>
+
+<ul>
+<li>Generational GC already is implemented: distinguish/bucket old and new
+generation objects; sweeping new generation objects is fast (minor GC), and the
+ones that don&#8217;t get swept up get promoted to old generation, which is
+less frequently swept (in a major GC)</li>
+<li>Generation GC is always incremental in that it doesn&#8217;t collect ALL
+unreachables, &#8230; todo http://stackoverflow.com/questions/5092134/whats-the-difference-between-generational-and-incremental-garbage-collection</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T12:17:00-04:00" pubdate data-updated="true">Aug 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/08/09/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>iOS State Preservation</h2>
+
+<p>https://developer.apple.com/library/ios/documentation/iphone/conceptual/iphoneosprogrammingguide/StatePreservation/StatePreservation.html</p>
+
+<h2>Session token storage in localStorage</h2>
+
+<p>Do not store session identifiers in local storage as the data is always accessible by JavaScript. Cookies can mitigate this risk using the httpOnly flag.</p>
+
+<p>It&#8217;s risky? SAY MORE THINGS.</p>
+
+<h2>Loading Ember CLI addons in jsbin</h2>
+
+<h2>Forking in xargs</h2>
+
+<p>Holy shitters, this is how I simultaneously uploaded three tracks to s3
+(using my <code>to_s3</code>) script.</p>
+
+<pre><code>find ~/Desktop -name "Audio*" -print0 | xargs -0 -n 1 -P 5 to_s3
+</code></pre>
+
+<p><code>-n 1</code> means each invocation takes a max of one arg, and <code>-P 5</code> means a
+max of 5 simultaneous processes. So cool.</p>
+
+<h2>Web audio api</h2>
+
+<p>Finish this: http://emberjs.jsbin.com/ucanam/5964/edit</p>
+
+<h2>Liquid Fire Global</h2>
+
+<p>http://jsbin.com/mifuq/1/edit</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-09T16:15:00-04:00" pubdate data-updated="true">Aug 9<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/08/05/daily-journal/">
 		
 			Daily Journal</a>
@@ -2230,502 +2535,6 @@ killed Zalgo.</p>
 
 
 <time datetime="2014-07-19T11:30:00-04:00" pubdate data-updated="true">Jul 19<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/18/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Cookies</h2>
-
-<p>What ends up in <code>document.cookie</code>?</p>
-
-<p>Test: kill a previous localhost:5000 server, start a server for a
-separate project. Reload the page. Request headers sent include
-a transient cookie from the previous server. I bet it was due to
-Turbolinks. I was right!</p>
-
-<p>From http://tools.ietf.org/html/rfc6265#section-4.1.1</p>
-
-<blockquote><p> Origin servers MAY send a Set-Cookie response header with any
- response.  User agents MAY ignore Set-Cookie headers contained in
- responses with 100-level status codes but MUST process Set-Cookie
- headers contained in other responses (including responses with 400-
- and 500-level status codes).  An origin server can include multiple
- Set-Cookie header fields in a single response.  The presence of a
- Cookie or a Set-Cookie header field does not preclude HTTP caches
- from storing and reusing a response.</p></blockquote>
-
-<p>So you can send multiple headers with the same key. Makes sense, since
-comma separation will conflict with the UTC date (e.g. <code>Aug 12, 2014</code>).</p>
-
-<p>So how do you set multiple cookies in Rack?</p>
-
-<p>Interesting: https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L266</p>
-
-<p>Anyway, split cookies with newlines and Rack will cause this to send two
-<code>Set-Cookie</code> headers, which is totally fine.</p>
-
-<p>You can also use <code>set_cookie</code> on <code>Rack::Response</code> if you&#8217;re into that
-sort of thing..</p>
-
-<p>I psyched myself out thinking cookies were overwriting each other by doing:</p>
-
-<pre><code>"Set-Cookie" =&gt; "foo\nbar\nbaz"
-</code></pre>
-
-<p><code>document.cookie</code> was only revealing <code>baz</code>. But, I&#8217;m a dumb: cookies
-need to be key-value pairs, which fixed it.</p>
-
-<p>You can use <code>HttpOnly</code> to prevent JS (and other APIs?) access to the
-cookie sent by the server. Makes sense; less likely that&#8217;ll break
-something.</p>
-
-<p>Getting <code>document.cookie</code> returns all the cookies available to JS.
-Setting it will only set the cookie you provide.</p>
-
-<blockquote><p>Notice that servers can delete cookies by sending the user agent a
-new cookie with an Expires attribute with a value in the past.</p></blockquote>
-
-<h2>JavaScript set focus</h2>
-
-<p><code>focus()</code> is a method on input elements. So is <code>blur()</code>.</p>
-
-<p><code>document.activeElement</code> in modern browsers points to the focused
-element, which might also include scroll windows.</p>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/API/document.activeElement</p>
-
-<p>In older browsers, to <code>blur</code> the active element, you&#8217;d have to know what
-that element was; there was no way to query. Might be wrong about this.</p>
-
-<h2>React Nested Router</h2>
-
-<p>http://www.youtube.com/watch?v=P6xTa3RRzfA</p>
-
-<ul>
-<li>State is just data</li>
-<li>Your route is data, e.g. you could render a top-level App component
-and tell it what its route is, and render everything a la React,
-pretend like you&#8217;re redrawing the whole page.</li>
-<li>Rather than switch-statement-based routing, the <code>activeRoute</code> just
-gets passed in via <code>props</code> like any other property
-
-<ul>
-<li><code>router.match</code> handlers will create all the routes, and pass in a
-single <code>activeRoute</code>; every route segment along the way just knows
-about with its activeRoute child is, if one exists.</li>
-<li>e.g. <code>contact/profile</code>, app.activeRoute = contact,
-contact.activeRoute = profile</li>
-</ul>
-</li>
-<li>API
-
-<ul>
-<li>Route component
-
-<ul>
-<li>handler = a React Class</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Differences w Ember
-
-<ul>
-<li>No auto-gen &#8216;index&#8217; routes</li>
-<li>paths don&#8217;t inherit parent paths
-
-<ul>
-<li>this means if you&#8217;re &#8220;overwriting&#8221; a parent dynamic segment, the
-dynamic segment must appear <em>somewhere</em> in the child route so you
-can actually load that data.
-
-<ul>
-<li>AH, the router will detect when children omit ids that their
-parents have declared. That&#8217;s nice.</li>
-<li>also yells at you if you use the same path in two places.</li>
-</ul>
-</li>
-<li>nice that it lets you have <code>/profile</code> vs <code>/user</code></li>
-</ul>
-</li>
-<li>Ember is less typing, but
-
-<ul>
-<li>React makes it easier to share handlers</li>
-<li>Overwriting URL is nice when you need it, error checking is nice</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>So each non leaf handler gets <code>activeRoute</code>, all handlers get all
-<code>params</code>.</li>
-<li>Refactorability/decoupling:
-
-<ul>
-<li>Because route names and paths are fully specified and all params are provided to
-each handler, changing the nesting of a route means you don&#8217;t have
-to rewrite all your link-tos from &#8220;wat.foo&#8221; to &#8220;foo&#8221;. Then again
-if you&#8217;re using resources you don&#8217;t have to do that either.</li>
-</ul>
-</li>
-<li>Question: what about other <code>props</code> you&#8217;d want to pass into a
-component?
-
-<ul>
-<li>Answer: Route components aren&#8217;t concerned with props other than how
-to be a route handler.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>http://jsbin.com/vukacule/6/edit</p>
-
-<p>It is really cool that you can switch between rendering a route with App
-as a handler vs just rendering App. The difference is that, when
-route-driven, it gets passed props.</p>
-
-<p>The <code>Route</code> components you use are obviously stateless; all state lives
-on the Handlers.</p>
-
-<p>Ah, in React <code>` syntax just means</code>{blah: &#8220;wat&#8221;}` inside
-the normal single-curly.</p>
-
-<p>How do Links work? They call transitionTo and there&#8217;s a single URLStore
-singleton.</p>
-
-<h2>TLS Replay?</h2>
-
-<p>I had it in my head that man-in-the-middle wasn&#8217;t a problem for TLS but
-maybe they could replay the messages? Turns out I am wrong; TLS includes
-a sequence mechanism.</p>
-
-<p>That being said, your app might send repeat messages, which demands its
-own double checking / application-level sequencing or some other
-prevention mechanism.</p>
-
-<h2>chroot</h2>
-
-<p>http://en.wikipedia.org/wiki/Chroot</p>
-
-<p>Learned about this when speculating w Ember Core about how the front
-page Rust evaluator works at http://www.rust-lang.org/</p>
-
-<p>It runs a program with the assumption that <code>/</code> is somewhere else, and it
-can&#8217;t access it.</p>
-
-<p>Change</p>
-
-<h2>process.nextTick</h2>
-
-<p><code>process</code> doesn&#8217;t exist on the browser, so therefore neither does
-<code>nextTick</code>, but you can hack it if you&#8217;re on a browser that has a native
-<code>Promise</code> object, since the <a href="http://promisesaplus.com/">spec</a> mentions
-that resolution callbacks must happen when the execution context
-consists only of platform code.</p>
-
-<blockquote><p>onFulfilled or onRejected must not be called until the execution
-context stack contains only platform code. [3.1].</p></blockquote>
-
-<p>So here&#8217;s how you could write nextTick, note that there&#8217;s no need to</p>
-
-<pre><code>var p = Promise.resolve();
-function nextTick(cb) {
-  p.then(cb);
-}
-</code></pre>
-
-<h2>Visibility API</h2>
-
-<p><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API">mdn</a></p>
-
-<p>e.g.</p>
-
-<ul>
-<li>pause video when you tab-away</li>
-<li>stop requestAnimationFrame</li>
-</ul>
-
-
-<h2>Closing over <code>let i</code></h2>
-
-<pre><code>var fns = [];
-for (var i = 0; i &lt; 10; ++i) {
-  fns.push(function() {
-    console.log(i);
-  });
-}
-</code></pre>
-
-<p>The above code has the gotcha that by the time the <code>fns</code> functions run,
-they&#8217;ll all print out <code>10</code>, rather than the value of <code>i</code> when the
-closing-over function was created. This is part of the reason why jshint
-will yell at you for creating functions in a loop, e.g.</p>
-
-<pre><code>var fns = [];
-for (var i = 0; i &lt; 10; ++i) {
-  fns.push(makeCallback(i));
-}
-
-function makeCallback(num) {
-  return function() {
-    console.log(num);
-  }
-}
-</code></pre>
-
-<p>Then <code>i</code> will be uniquely preserved for each callback.</p>
-
-<p>The es6 <code>let</code> keyword gives you block scope, which includes everything
-declared within the for loop. If you just use <code>let</code> in the original
-code, you can do</p>
-
-<pre><code>var fns = [];
-for (let i = 0; i &lt; 10; ++i) {
-  fns.push(function() {
-    console.log(i);
-  });
-}
-</code></pre>
-
-<p><code>i</code> doesn&#8217;t get hoisted; rather, each iteration gets its own <code>i</code> value
-that gets closed over.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-18T03:50:00-04:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/16/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>WeakMap</h2>
-
-<p>Use objects as keys. If you lose access to a key, it and its value will
-eventually be removed by GC because references to keys are weak. This
-also means WeakMaps are non enumerable since GC is non-deterministic and
-a key that might exist pre GC might not exist after.</p>
-
-<h2>ES6 Symbols</h2>
-
-<p>They&#8217;re nothing like Ruby symbols.</p>
-
-<p>They&#8217;re used to create unique, non-enumerable, keys that can&#8217;t be
-determined publicly unless the symbol is exported. So you could prevent
-tampering with a player&#8217;s score by storing the score on the player using
-an unshared symbol as the key:</p>
-
-<p>http://tc39wiki.calculist.org/es6/symbols/</p>
-
-<h2>ES6 === Harmony === ES.next</h2>
-
-<p>They&#8217;re all the same thing.</p>
-
-<h2>JS 1.7 vs ES6, etc</h2>
-
-<p><a href="http://ejohn.org/blog/versions-of-javascript/">jeresig clears this up a bit</a></p>
-
-<p>All modern browsers support ECMAScript; JavaScript is a variant of it
-that Mozilla&#8217;s largely been adding features to. ES3 === JS 1.5.</p>
-
-<p>So I see <code>let</code> was added to JavaScript 1.7, so why is it now being
-described as a new upcoming feature of ES6? Ah, because all browsers
-track ECMAScript standards, even if they call their enhanced language in
-the browser something else. Mozilla has been blazing ahead and trying
-new shit, but other browsers won&#8217;t pick it up until it&#8217;s actually
-standardized into ECMAScript.</p>
-
-<p>Why would Microsoft follow ECMAScript? Well, for starters, it delivered
-JScript to Ecma back in the day for standardization.</p>
-
-<blockquote><p>The name &#8220;ECMAScript&#8221; was a compromise between the organizations involved in standardizing the language, especially Netscape and Microsoft, whose disputes dominated the early standards sessions.</p></blockquote>
-
-<p>Interesting, and:</p>
-
-<blockquote><p>While both JavaScript and JScript aim to be compatible with ECMAScript, they also provide additional features not described in the ECMA specifications</p></blockquote>
-
-<p>Also, some reason I thought TC39 was part of Mozilla. I see that I am
-obviously incorrect: http://www.ecma-international.org/memento/TC39.htm</p>
-
-<p>It&#8217;s Ecma-TC39. The things I don&#8217;t know.</p>
-
-<p>W3C Tag, Ecma-TC39. W3C Tag, Ecma-TC39.</p>
-
-<h2><code>let</code></h2>
-
-<p><code>let</code> behaves like C++ declarations; the obj is only available in the
-curlies, or in for loops, or whatever, and there&#8217;s no hoisting. Outside
-of the block, the variable is undefined.</p>
-
-<h2>Cloudfront TTL</h2>
-
-<p>TTL lets you specify a min time before CF checks the origin to see if it
-has a new version of the file/response. You still need your origin
-server&#8217;s Cache-Control headers setup correctly.</p>
-
-<p><a href="http://stackoverflow.com/questions/10621099/what-is-a-ttl-0-in-cloudfront-useful-for">TTL can be 0</a>.
-Why? TTL 0 means that it delegates Cache-Control entirely to the origin.
-This means CF will always make a GET request w <code>If-Modified-Since</code>
-header to let the server return <code>304 Not Modified</code>.</p>
-
-<h2>Drag and Drop</h2>
-
-<p>Draggable elements need to be marked as <code>draggable="true"</code>.</p>
-
-<p>Then listen to the <code>ondragstart</code> event, e.g.
-<code>ondragstart="drag(event)"</code>.</p>
-
-<p>And then say what data is associated with the dragged el&#8230;</p>
-
-<pre><code>ev.dataTransfer.setData("Text", ev.target.id);
-</code></pre>
-
-<p>This seems strange.</p>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer</p>
-
-<p>It really is a class associated only w drag and drop.</p>
-
-<p>Should probably be reading this rather than fucking w3schools. Why do I
-still do that?
-https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop</p>
-
-<p>Ah I get it, you use dataTransfer as part of the mechanism for
-dynamically determining drop targets. You have to prevent bubbling
-(return false or preventDefault) on droppable targets, and in that fn
-they have the option of looking up the data transfer to see if they want
-to accept the data from that drag drop.</p>
-
-<p>You can also configure drag drag visual details to indicate copying,
-moving, etc. LOL such drag and drop.</p>
-
-<p>Oof apparently it&#8217;s a fucking disaster: http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html</p>
-
-<p>Criticisms:</p>
-
-<ul>
-<li>7 fucking events, such API surface</li>
-<li>&#8220;For the drop event to fire at all, you have to cancel the defaults of both the dragover and the dragenter event.&#8221;</li>
-</ul>
-
-
-<h2>Cordova events: sticky != buffered</h2>
-
-<p>Sticky events (e.g. deviceready) just mean that once fired, they stay in
-a fired state. This means you can&#8217;t have multiple events fire if it&#8217;s a
-sticky event. I was originally thinking sticky meant all the events were
-cached until the first handler was registered.</p>
-
-<p>Ended up making this: https://gist.github.com/machty/e1cc485060f2951aeb6c</p>
-
-<h2>Why <code>-print0</code> in <code>find</code>?</h2>
-
-<p>Often you pipe the results of <code>find</code> into <code>xargs</code> to pass the results of
-a <code>find</code> so that some utility can operate on each file found. GOOD
-ENGRISH, MATCHNEER.</p>
-
-<p>But since <code>xargs</code> splits based on whitespace by default, this will break
-for files with newlines or or spaces in them, so <code>-print0</code> separates
-files w null bytes, and <code>-0</code> tells xargs to split via null bytes as
-well. Win win win. No difference if you have no files with spaces in
-them.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-16T00:40:00-04:00" pubdate data-updated="true">Jul 16<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/15/forgotten-things/">
-		
-			Forgotten Things</a>
-	</h2>
-	<div class="entry-content">
-		<p>Here&#8217;s a progressively-updated list of things I forget throughout the
-day. This is different from the list of things I&#8217;ve learned; that
-approach is useful for packing the things into my brain, hopefully; the
-purpose of this list is to pack things back in when I forget. And for
-now it&#8217;ll just be one giant progressively-updated blog.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-15T12:18:00-04:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time></div>
 	
 
 
