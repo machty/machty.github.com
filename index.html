@@ -112,6 +112,869 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/09/06/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>netcat (nc)</h2>
+
+<p>Utility to spinning up arbitrary tcp servers for testing, sending
+packets, etc.</p>
+
+<pre><code>Socket.new(Socket::AF_INET, Socket::SOCK_STREAM)
+or symbols:
+Socket.new(:INET6, :STREAM)
+</code></pre>
+
+<p>INET = internet, specifically IPv4, <code>SOCK_STREAM</code> means a TCP stream
+will be set up, as opposed to <code>DGRAM</code>, which would set up UDP.</p>
+
+<p>Set up bullshit listener:</p>
+
+<pre><code>nc -l localhost 4481
+</code></pre>
+
+<h2>Loopback</h2>
+
+<p><code>localhost</code> is a loopback, which is a virtual interface where any data
+sent to the loopback is immediately received. <code>127.0.0.1</code> is the IP.</p>
+
+<p>Check dat <code>/etc/hosts</code> file:</p>
+
+<pre><code>##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+</code></pre>
+
+<p>Funny how I never notice stuff like that until someone officially
+defines it for me.</p>
+
+<h2>&#8220;well-known&#8221; ports</h2>
+
+<p>Hosted by IANA.org, the Internet Assigned Numbers Authority.</p>
+
+<h2>Gerrymandering</h2>
+
+<blockquote><p>manipulate the boundaries of (an electoral constituency) so as to favor one party or class.</p></blockquote>
+
+<p>Knew what this was, forgot the word for it.</p>
+
+<h2>AWS Spot Instances</h2>
+
+<p>Running interruption-tolerant applications on EC2 unused capacity, where
+you can bid on price per hour and maximum bid price.</p>
+
+<h2>Chekhov&#8217;s Gun</h2>
+
+<p>http://en.wikipedia.org/wiki/Chekhov&#8217;s_gun</p>
+
+<blockquote><p>Remove everything that has no relevance to the story. If you say in the first chapter that there is a rifle hanging on the wall, in the second or third chapter it absolutely must go off. If it&#8217;s not going to be fired, it shouldn&#8217;t be hanging there.</p></blockquote>
+
+<p>Anton Chekhov is considered to be among the greatest writers of short
+stories in history. Guess I should start reading.</p>
+
+<h2>Binding to an interface</h2>
+
+<p>You can bind to a single interface, or ALL interfaces, lol!</p>
+
+<p><code>0.0.0.0</code> means all interfaces. I guess that means that requests to
+localhost, and potentially some other external facing interface, will
+route requests to this socket. So what if someone has already bound
+specifically to localhost:12345 and you try to bind to <code>0.0.0.0:12345</code>?</p>
+
+<p>Answer: I don&#8217;t know&#8230; need to learn about what other interfaces are
+available</p>
+
+<p>REVISED ANSWER: I can use the IP provided by my router.</p>
+
+<pre><code>ruby -run -e httpd . --port=4124 --bind-address=192.168.1.3
+</code></pre>
+
+<p>Then if I type <code>localhost:4124</code> in the browser, it don&#8217;t work, but if I
+type <code>192.168.1.3:4124</code> in the browser, IT WORKS. :)</p>
+
+<p>But to the original question, it turns out you can run ALL THREE of
+these:</p>
+
+<pre><code>ruby -run -e httpd . --port=4123 --bind-address=0.0.0.0
+ruby -run -e httpd . --port=4123 --bind-address=192.168.1.3
+ruby -run -e httpd . --port=4123 --bind-address=localhost
+</code></pre>
+
+<p>So the first and 3rd of these should be able to respond to</p>
+
+<pre><code>curl localhost:4123 &gt; /dev/null
+</code></pre>
+
+<p>It seems that the third (localhost) always wins. Makes sense. What about</p>
+
+<pre><code>curl 192.168.1.3:4123 &gt; /dev/null
+</code></pre>
+
+<p>And the more specific second one always wins. So I guess the OS will
+look for a match of interface+port before falling back to 0.0.0.0.
+Makes sense.</p>
+
+<h2>listen queue size</h2>
+
+<pre><code>socket.listen(10)
+</code></pre>
+
+<p>This means your socket will buffer up to 10 connections before
+<code>ECONNREFUSED</code> is return to the shits on the other side.</p>
+
+<p>If you&#8217;re getting a lot of ECONNREFUSED, it probably means users are
+already experiencing some some queue-based lag, and you should rethink
+your architecture, spin up more server instances, etc. But you can also
+just set to the max size via</p>
+
+<pre><code>server.listen(Socket::SOMAXCONN)
+</code></pre>
+
+<h2>A connection is a socket</h2>
+
+<p>When you accept() after binding, you&#8217;ll get a connection object, which
+is just a Socket, but different from your server socket; it&#8217;s just a
+file wrapper for that particular connection that you can write shit to.</p>
+
+<h2>quadruple of remote/ip/port must be unique</h2>
+
+<p>You can&#8217;t have more than one connection where</p>
+
+<pre><code>local addr, local port, remote addr, and remote port
+</code></pre>
+
+<p>are not totally unique. Hmmm, so where is this prevented? TODO</p>
+
+<h2>Close socket file descriptors</h2>
+
+<p>Why, doesn&#8217;t this happen automatically on exit/GC?</p>
+
+<ol>
+<li>GC might not clean up for you fast enough;</li>
+<li>Might hit file descriptor limit</li>
+</ol>
+
+
+<p>Wat wat wat wat in the boot.</p>
+
+<p>You can close the read side, or close the write side, or both. This make
+use of <code>shutdown</code>, and shutdown will close a side of a connection even
+if you&#8217;re dup&#8217;d file descriptors (explicitly or via fork). <code>close</code>
+wouldn&#8217;t actually close unless there were no other file descriptors
+holding on to that socket.</p>
+
+<h2>Keybase</h2>
+
+<p>Uses social media accounts to prove crypto identity.</p>
+
+<h2>Clients don&#8217;t need to bind</h2>
+
+<p>to a port when connecting to a server. For obvious reasons. Namely that
+a server needs to have a known/consistent port in order for clients to
+reach it, but a client can just send from any ol po,]rt.</p>
+
+<h2>Long ass timeouts</h2>
+
+<pre><code>require 'socket'
+socket = Socket.new(:INET, :STREAM)
+remote_addr = Socket.pack_sockaddr_in(666, 'machty.com')
+socket.connect(remote_addr)
+</code></pre>
+
+<p>This won&#8217;t fail any time soon. (Note if i&#8217;d given a BS DNS then it would: SocketError
+exception from getaddrinfo). Only after a long ass time do you get a
+ETIMEDOUT.</p>
+
+<p>getaddrinfo seems cool. I guess it&#8217;s the C function that does a DNS
+lookup? Nevermind, man <code>getaddrinfo</code> makes me cry.</p>
+
+<p>So when does ECONNREFUSED happen vs just a long ass timeout? I guess it
+means you&#8217;ve hit a server but a) no app is bound to the requested port
+or b) the queue is full, and probably c) some other reason. No that&#8217;s
+not valid; google.com:70 hangs for a while rather than ECONNREFUSED.</p>
+
+<p>Maybe localhost knows what&#8217;s connected or not? I have NO IDEA.</p>
+
+<h2><code>TIME_WAIT</code></h2>
+
+<p>If you close a socket with pending outbound data, it won&#8217;t discard that
+data but rather finish sending (and wait for ack) before totally closing
+the socket. This is the <code>TIME_WAIT</code> state. Unless you&#8217;ve enabled
+<code>REUSEADDR</code>, you&#8217;ll get an <code>EADDRINUSE</code> if you try to bind to a socket
+that&#8217;s still in <code>TIME_WAIT</code> state.</p>
+
+<h2><code>EAGAIN</code></h2>
+
+<p>Commonly seen in non-blocking IO operations when there&#8217;s no data
+available to read. Reading nonblockingly from a socket that hasn&#8217;t had EOF set yet but
+doesn&#8217;t have data at the moment would cause that.</p>
+
+<p>Non blocking reads will find any data in Ruby buffers, followed by
+kernel buffers. If there&#8217;s nothing in there, then blocking read is
+necessary.</p>
+
+<h2>Ruby IO.write</h2>
+
+<p><code>IO.write_nonblock</code> behavior maps to sys call <code>write()</code>, in that it can
+fail to write all the data you provided it. Ruby&#8217;s <code>IO.write</code> tries to
+be helpful and might internally call <code>write()</code> many times.</p>
+
+<p>A saturated <code>write()</code> followed immediately by <code>write()</code> will cause an
+<code>EAGAIN</code> because you haven&#8217;t given the kernel/network enough time to
+flush the data you gave it. This is when you&#8217;d use <code>IO.select</code> to let
+you know when a socket is available for writing/reading again.</p>
+
+<p>Wat wat wat. In the BOOT.</p>
+
+<p><code>select</code> returns an array of descriptors that are ready to be written
+to. I guess it blocks?</p>
+
+<p>Writes are blocked by TCP congestion prevention algo requirements
+(cwnd, rwnd, etc).</p>
+
+<p>There&#8217;s also <code>accept_nonblock</code> which <code>EAGAIN</code>s if there are no pending
+connection on dat queue.</p>
+
+<p><code>connect_nonblock</code> is sp</p>
+
+<h2>TPC Resets</h2>
+
+<p>http://en.wikipedia.org/wiki/TCP_reset_attack</p>
+
+<p>There&#8217;s a usually-0 flag in a packet that can be set to 1 that tells the
+receiver to stop using this TCP connection. Useful, for instance, when a
+computer&#8217;s crashed, gets a packet it has no context for, so it tells the
+sender to stop it, so that it might make a new connection and start from
+there.</p>
+
+<h2>Edge Device</h2>
+
+<p>http://en.wikipedia.org/wiki/Edge_device</p>
+
+<p>Basically, all the stuff that separates the public network (internet)
+from your private network.</p>
+
+<ul>
+<li>routers</li>
+<li>routing switches</li>
+</ul>
+
+
+<h2>traceroute</h2>
+
+<p>I&#8217;ve already written about this before, but traceroute is useful for
+tracing all the gateways your packet goes through to get to its
+destination.</p>
+
+<p>A gateway is any node that might forward packets along to some other
+destination. Could be a router, switch, etc. Could also be a protocol
+converter. Gateways could be software too.</p>
+
+<p>Anyway, traceroute makes use of ICMP <code>TIME_EXCEEDED</code> response.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Internet_Control_Message_Protocol">What is ICMP?</a></p>
+
+<p>One of the many protocols that can be communicated via packets. Packets
+have an 8 bit protocol field. The protocol values are decided by the
+IANA (just like common/reserved ports&#8230; MIND BLOWN).</p>
+
+<p>The list is here: http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</p>
+
+<h2><code>host google.com</code></h2>
+
+<p>I noticed that the DNS lookup results via <code>host google.com</code> differed
+almost each time I ran it.</p>
+
+<pre><code>google.com has address 74.125.226.72
+google.com has address 74.125.226.65
+google.com has address 74.125.226.68
+google.com has address 74.125.226.67
+google.com has address 74.125.226.64
+google.com has address 74.125.226.70
+google.com has address 74.125.226.78
+google.com has address 74.125.226.69
+google.com has address 74.125.226.73
+google.com has address 74.125.226.71
+google.com has address 74.125.226.66
+...
+</code></pre>
+
+<p>and then</p>
+
+<pre><code>google.com has address 74.125.226.2
+google.com has address 74.125.226.5
+google.com has address 74.125.226.8
+google.com has address 74.125.226.9
+google.com has address 74.125.226.6
+google.com has address 74.125.226.4
+google.com has address 74.125.226.3
+google.com has address 74.125.226.14
+google.com has address 74.125.226.7
+google.com has address 74.125.226.0
+google.com has address 74.125.226.1
+...
+</code></pre>
+
+<p>I&#8217;m asking the friendly folk at <code>##networking</code>. They turned me on to
+<code>dig</code>. <code>dig</code> is the most raw and flexible DNS lookup tool. <code>host</code> is
+apparently for chumps (i.e. it&#8217;s useful/quick/easy but not as much
+functionality).</p>
+
+<pre><code>dig google.com @ns1.google.com +short | sort | md5
+</code></pre>
+
+<p>This queries a specific name server&#8230;</p>
+
+<p>OK i have a bunch of questions:</p>
+
+<p>Why do DNS records contain
+<a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name">Fully Qualified Domain Names</a>
+as references to name servers? That seems to make no sense&#8230; you have
+to turn something like <code>ns1.google.com</code> into an IP by querying&#8230; the
+DNS system?</p>
+
+<p>Answer: http://en.wikipedia.org/wiki/Domain_Name_System#Circular_dependencies_and_glue_records</p>
+
+<ul>
+<li>GET www.example.com /
+
+<ul>
+<li>Look up record, find its NS records</li>
+<li>NS ns1.example.com</li>
+<li>Need to get IP of ns1.example.com (we need to issue another DNS
+request)</li>
+<li>&#8230; circular dependency: you have to look up a name server&#8217;s IP
+using that name server. Need some way to break dependency</li>
+<li><p>Dependency broken by <code>AUTHORITY SECTION</code>, e.g.</p>
+
+<p>;; AUTHORITY SECTION:
+google.com.             60      IN      SOA     ns1.google.com. dns-admin.google.com. 1566886 7200 1800 1209600 300</p></li>
+</ul>
+</li>
+</ul>
+
+
+<p>This is called the &#8220;glue&#8221;. It&#8217;s either in Authority or Additional
+section? (I should find this out.)</p>
+
+<p>Related: http://support.dnsimple.com/articles/vanity-nameservers/</p>
+
+<p>DNSimple allows &#8220;vanity&#8221; name servers, which lets you pretend like
+you&#8217;re a bigass enough company to own/maintain your own name servers,
+and anyone looking at your DNS records will see your fake name servers,
+like ns1.machty.com, but these servers obviously don&#8217;t actually exist;
+DNSimple provides this service by sending &#8220;glue&#8221; that maps your fake
+name servers to the IP addresses of their actual name servers.</p>
+
+<p>Top-level domains live under root (.).</p>
+
+<p>http://www.tldp.org/HOWTO/DNS-HOWTO-5.html</p>
+
+<p>That&#8217;s why sometimes you&#8217;ll see stuff ending in a period, like
+<code>ns1.dnsimple.com.</code>.</p>
+
+<pre><code>;; ANSWER SECTION:
+dnssimple.com.          597     IN      A       184.168.221.96
+</code></pre>
+
+<p>The dot is important! You know how you can just put <code>www</code> is the record
+value? You could also do a fully qualified shit e.g. <code>www.machty.com.</code>
+(note the period at the end).</p>
+
+<p>So my question is: when does the glue record get sent?</p>
+
+<p>Gimme the NS records for www.machty.com</p>
+
+<pre><code>$ dig machty.com NS
+...
+;; ANSWER SECTION:
+machty.com.             3481    IN      NS      ns1.dnsimple.com.
+machty.com.             3481    IN      NS      ns1a.dnsimple.com.
+machty.com.             3481    IN      NS      ns2.dnsimple.com.
+machty.com.             3481    IN      NS      ns2a.dnsimple.com.
+machty.com.             3481    IN      NS      ns3.dnsimple.com.
+machty.com.             3481    IN      NS      ns3a.dnsimple.com.
+machty.com.             3481    IN      NS      ns4.dnsimple.com.
+machty.com.             3481    IN      NS      ns4a.dnsimple.com.
+</code></pre>
+
+<p>Cool, so internally it&#8217;d need to look up ns1.dnsimple.com, so something
+like:</p>
+
+<pre><code>$ dig @ns1.dnsimple.com. www.machty.com
+</code></pre>
+
+<p>http://www.tldp.org/HOWTO/DNS-HOWTO-5.html</p>
+
+<blockquote><p>+norec means that dig is asking non-recursive questions so that we get to do the recursion ourselves. The other options are to reduce the amount of dig produces so this won&#8217;t go on for too many pages:</p></blockquote>
+
+<pre><code>a.root-servers.net. 518400  IN  A   198.41.0.4
+a.root-servers.net. 518400  IN  AAAA    2001:503:ba3e:0:0:0:2:30
+</code></pre>
+
+<p>AAAA records serve the same purpose as A records, just that they are
+IPv6.</p>
+
+<p>WebPageTest.org: breaks your requests down into blah blah blah why is
+this different than Network tab in devtools? Ah because it does it from
+many different browsers.</p>
+
+<p>162.212.105.24</p>
+
+<h2>Turntable.fm</h2>
+
+<p>Me: &#8220;there should be an app where multiple people have a playlist, but
+there&#8217;s a single player that alternates between different people&#8217;s
+playlists.&#8221;</p>
+
+<p>Person next to me: &#8220;yes, that&#8217;s turntable.fm&#8221;</p>
+
+<p>Should probably check that out.</p>
+
+<h2>non-blocking connect</h2>
+
+<p>http://stackoverflow.com/questions/8277970/what-are-possible-reason-for-socket-error-einprogress-in-solaris</p>
+
+<p>There are two error codes for &#8220;shit is underway&#8221; when doing a
+non-blocking connect/accept:</p>
+
+<pre><code> [EALREADY]         The socket is non-blocking and a previous connection attempt
+                    has not yet been completed.
+
+ [EINPROGRESS]      The socket is non-blocking and the connection cannot be com-
+                    pleted immediately.  It is possible to select(2) for comple-
+                    tion by selecting the socket for writing.
+</code></pre>
+
+<p>Nice docs yo. The difference is that <code>EINPROGRESS</code> is the error that
+gets returned if the operation has started but hasn&#8217;t finished (as
+opposed to not yet being able to start because it can&#8217;t allocate the
+resources it needs, file handlers, sockets, etc.). Most likely, the 3
+way handshake packets have been sent, but SYN-ACK hasn&#8217;t been sent.</p>
+
+<h2>Inversion of Control / DI</h2>
+
+<p>Matthew Beale and I were discussing whether the proposed
+<code>Ember.service()</code> violated the inversion of control that dependency
+injection is meant to provide, e.g.:</p>
+
+<pre><code>export default Controller.extend({
+  foo: Ember.service() // request that 'service:foo' be injected
+});
+</code></pre>
+
+<p>The fact that the consumer is requesting a specific thing to be injected
+into it seems like it might be an IOC violation, but to me, all that&#8217;s
+happening is that you&#8217;re specifying a provider, and it&#8217;s still up to the
+outside world to decide what it&#8217;ll specifically inject into you. Also,
+regardless of whether it&#8217;s explicit or not, if you use whatever is
+injected into you, you are implicitly specifying a duck-typed provider
+interface by the consumer; in other words, if we do things the classic
+way and use <code>app.inject('controller:article', 'articleLookup', 'service:article-lookup')</code>,
+this may seem like we&#8217;re moving all &#8220;control&#8221; to the injector, but
+still, the article controller is going access <code>articleLookup</code>&#8217;s
+properties and methods in a very specific way, which is the most
+powerful / crucial way that you could specify a dependency (by
+describing / using the duck type interface).</p>
+
+<p>So, tl;dr, your consumer is always going to be specifying its
+dependency, whether explicitly (<code>Ember.service()</code>) or implicitly (by
+whatever methods/properties it uses from <code>this.injectedThing</code>), and it&#8217;s
+therefore not a violation for a consumer to specify a Provider of the
+dependency, so long as it&#8217;s still possible for the injector to disregard
+the specifically-requested provider and substitute another one (e.g. a
+stub) in its place.</p>
+
+<p>This is what Angular&#8217;s <a href="https://github.com/angular/di.js">di.js</a> does
+and I think it&#8217;s correct. I want it.</p>
+
+<h2>Password-less SSH</h2>
+
+<p>I&#8217;ve done this a bunch of times before but always forget, now I&#8217;m
+writing about it:</p>
+
+<p>The remote server you&#8217;re SSHing into needs to have your public key if
+you want to be able to skip providing a password every time you ssh in.
+I wanted to use a different public rsa key, so I made a new one:</p>
+
+<pre><code>ssh-keygen
+</code></pre>
+
+<p>The optional passphrase you&#8217;re asked to supply is NOT the same password
+you would have otherwise needed to use to log into SSH (which we&#8217;re
+trying to avoid). Rather, it&#8217;s an additional security measure that&#8217;s
+required every time you want to use your private RSA key to try and
+decrypt data. I guess: if private RSA keys are a kind of password, the
+passphrase is a password for your password. It means that someone who
+steals your private key also needs to know your passphrase in order to
+use it.</p>
+
+<p>Anyway, let&#8217;s say I save the newly generated key pair to
+<code>~/.ssh/shortcut_rsa</code> and <code>~/.ssh/shortcut_rsa.pub</code>, now I want to make
+it possible to just type <code>ssh shortcut</code> and have it never ask me for a
+password again. This means I need a few things:</p>
+
+<ol>
+<li><code>ssh shortcut</code> should translate into the IP I&#8217;m connecting to
+(because I&#8217;d rather not type the IP every time and <code>shortcut</code> is not
+a domain name that&#8217;d do the translating for me)</li>
+<li><code>ssh shortcut</code> should supply the user name that the remote machine
+expects (so that I don&#8217;t have to do <code>ssh remote_user_name@shortcut</code>).</li>
+<li><code>ssh shortcut</code> should use the key pair I just generated w
+<code>ssh-keygen</code>.</li>
+</ol>
+
+
+<p>To do all of these things, I need to append the following to
+<code>~/.ssh/config</code>.</p>
+
+<pre><code>Host shortcut
+  HostName 162.123.123.123
+  User remote_user_name
+  IdentityFile "/Users/machty/.ssh/shortcut_rsa"
+  IdentitiesOnly yes
+</code></pre>
+
+<p>Pretty self explanatory and does the job. Note that you&#8217;ll be prompted
+for the passphrase you provided for your RSA private key, but that&#8217;ll be
+cached for a little while, and if you want, you can just save it to your
+Apple keychain if you feel safe doing that.</p>
+
+<p>The SSH config file also allows for wildcards, so you could literally do</p>
+
+<pre><code>Host *
+  HostName 162.123.123.123
+  User remote_user_name
+  IdentityFile "/Users/machty/.ssh/shortcut_rsa"
+  IdentitiesOnly yes
+</code></pre>
+
+<p>and then this would cause <code>ssh somerandombullshit</code> to connect to the
+same remote machine. Obviously that use case is a little nuts, but it&#8217;s
+useful if you wanna say &#8220;every remote machine I connect to should use
+this same RSA key pair&#8221;.</p>
+
+<h2>say+say+say = choir</h2>
+
+<p>I devised the most badass script.</p>
+
+<pre><code>#!/usr/bin/env sh
+
+# use/uncomment this instead to weed out the annoying singing voices
+#voices=`say -v ? | grep en_US | grep -v Cellos | grep -v Good | grep -v Hysterical | grep -v Bad | grep -v Pipe | grep -v Bells | cut -f1 -d ' '`
+voices=`say -v ? | grep en_US | cut -f1 -d ' '`
+num=`echo $voices | wc -w`
+echo $voices | xargs -n 1 -P $num say $* -v
+</code></pre>
+
+<h2>How many segments are sent per SSH character?</h2>
+
+<p>http://blog.hyfather.com/blog/2013/04/18/ssh-uses-four-tcp-segments-for-each-character/</p>
+
+<p>Answer: 4</p>
+
+<ol>
+<li>You: Hey SSH server, user pressed &#8216;b&#8217;</li>
+<li>SSH: cool, got it (ack)</li>
+<li>SSH: hey btw, this is what <code>bash</code> (or whatever shell) ended up doing
+with that character you type (description of screen update)</li>
+<li>You: cool, got it (ack)</li>
+</ol>
+
+
+<p>What&#8217;s the difference between a segment and a packet?</p>
+
+<ul>
+<li>Segment: TCP header + application data</li>
+<li>Packet: wraps segment w IP header information; a packet is a routable
+piece of data</li>
+</ul>
+
+
+<p>This seems like the best answer: http://superuser.com/a/505134</p>
+
+<p>A TCP segment is not enough information to know where to route data
+within a network; you need IP headers for that, and where do those shits
+live? In packets.</p>
+
+<p>Take a packet and rip off its IP head: voila, a packet. Take a packet
+and rip off its TCP (or UDP) head: voila, application data.</p>
+
+<p>Don&#8217;t forget &#8220;frames&#8221;: frames wrap packets. If you wanna send your shit
+over an ethernet, you need to wrap in a frame, whether wired or
+wireless. Frames have MAC addresses. MAC addresses are generally
+hard-wired into some hardware and are never expected to collide, lest
+undefined behavior.</p>
+
+<p>Now my question is: does TCP ever have access to IP headers? I guess it
+must get forwarded along in some way&#8230; then again I dunno.</p>
+
+<h2>RFC3439: Some Internet Architectural Guidelines and Philosophy</h2>
+
+<p>http://tools.ietf.org/html/rfc3439</p>
+
+<p>Clearly I need to read this.</p>
+
+<h2>Nagle&#8217;s Algo</h2>
+
+<p>When sending data:</p>
+
+<ol>
+<li>If there&#8217;s enough data in local packet buffer to comprise a whole TCP
+packet, send that shit.</li>
+<li>If no pending data in buffers and no pending acks, send immediately.</li>
+<li>If there&#8217;s a pending ack, and not enough data to fill a packet, put
+data in local buffer.</li>
+</ol>
+
+
+<p>This prevents protocols like telnet from saturating with
+one-packet-per-char traffic. For telnet, if you type a bunch of chars in
+a row, you could expect that the first char would send immediately and
+the following ones would buffer and then send once the first char&#8217;s ack
+came back.</p>
+
+<p>All Ruby servers disable this since Ruby does its own internal buffering
+in the socket lib. You disable by sending with NODELAY.</p>
+
+<h2>URG flag</h2>
+
+<p>Apparently you can break the FIFO-ness of TCP with Urgent data.</p>
+
+<p><code>Socket#send</code> is the same as <code>write</code> except that you can pass flags to
+<code>send</code>, e.g.</p>
+
+<pre><code>socket.send 'urgent data', Socket::MSG_OOB
+</code></pre>
+
+<p>OOB stands for out of band. Note that the receiver must use the same
+flag w <code>recv</code> to read the OOB data or else it won&#8217;t notice it.</p>
+
+<p>OOB is rarely used because:</p>
+
+<ul>
+<li>only one byte of urgent data can be sent</li>
+<li>there are issues w <code>select</code> wherein consumed urgent data continues to
+be reported as unread, requires additional state tracking to get
+right, etc.</li>
+</ul>
+
+
+<p>You could also use OOBINLINE flag to stick in an urgent byte amidst
+normal queued data, and <code>read</code> will stop once it hits an urgent thing.</p>
+
+<p>I&#8217;m guessing OOB is only a TCP thing since in UDP there&#8217;s no concept of
+connection and &#8220;in order&#8221;.</p>
+
+<h2>Datagram</h2>
+
+<p>Data + telegram. From RFC 1594:</p>
+
+<blockquote><p>“A self-contained, independent entity of data carrying sufficient information to be routed from the source to the destination computer without reliance on earlier exchanges between this source and destination computer and the transporting network.”</p>
+
+<p>The term datagram is often considered synonymous to packet but there are some nuances. The term datagram is generally reserved for packets of an unreliable service, which cannot notify the sender if delivery fails, while the term packet applies to any packet, reliable or not. Datagrams are the IP packets that provide a quick and unreliable service like UDP, and all IP packets are datagrams;[4] however, at the TCP layer what is termed a TCP segment is the sometimes necessary IP fragmentation of a datagram,[5] but those are referred to as &#8220;packets&#8221;.</p></blockquote>
+
+<p>So, datagrams imply unreliability of delivery, whereas packet could
+refer to reliable or unreliable packets. I guess a TCP segment is a
+packet. But you can&#8217;t call it a datagram, since the protocol makes it
+its business to be a shit.</p>
+
+<h2>Bill Burr</h2>
+
+<p>How&#8217;s your danish?</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T14:30:00-04:00" pubdate data-updated="true">Sep 6<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/08/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Why can&#8217;t React render() return multiple elements?</h2>
+
+<p>you can&#8217;t do</p>
+
+<pre><code>return &lt;div/&gt;&lt;div/&gt;
+</code></pre>
+
+<p>Pete Hunt tells me it&#8217;s because of how <code>ref</code>s work; it&#8217;s a common
+pattern to do <code>this.refs.x.getDOMNode()</code>, but if the component returns
+multiple DOM nodes, which one do you return?</p>
+
+<p>It&#8217;s an admitted shortcoming but not a major major push to fix any time
+soon.</p>
+
+<h2>Ruby Fixnum vs Bignum</h2>
+
+<pre><code>2.0.0-p353 :004 &gt; (100).class
+ =&gt; Fixnum
+2.0.0-p353 :005 &gt; (100234234234234234234).class
+ =&gt; Bignum
+</code></pre>
+
+<h2>Postgres indexing</h2>
+
+<p>I need to optimize. Most of the queries in my app are very specific
+&#8220;SELECT WHERE bleh = wat, lol = yeah, foo = bar&#8221;. By default Rails
+creates a btree index, which handles many common indexing use cases, but
+there&#8217;s also a &#8220;hash&#8221; index, which Postgres only considers for usage for
+<code>bleh = bleh</code> queries (you can&#8217;t use it for ordering, sorting,
+whatever), so it seemed ideal for me:</p>
+
+<blockquote><p>Hash indexes can only handle simple equality comparisons. The query planner will consider using a hash index whenever an indexed column is involved in a comparison using the = operator.</p></blockquote>
+
+<p>But then I&#8217;d like it to match multiple columns, not just a single one,
+so I&#8217;d like to consider a multi-column index, but then:</p>
+
+<blockquote><p>Currently, only the B-tree, GiST and GIN index types support multicolumn indexes. Up to 32 columns can be specified. (This limit can be altered when building PostgreSQL; see the file pg_config_manual.h.)</p></blockquote>
+
+<p>So I guess Hash is out of the question. So the final thing I need to
+figure out is: does it make sense for me to use a multi-column index if
+I have three columns that need to be <code>=</code> matched?</p>
+
+<p>Partial indexes: http://www.postgresql.org/docs/8.2/static/indexes-partial.html</p>
+
+<p>Useful for when you&#8217;d like to exclude common values from consideration
+in an index (because indexes lose value the more duplicates there are in
+a database).</p>
+
+<h2>V8 optimizes based on AST size</h2>
+
+<p>&#8230;and comments are part of the AST:</p>
+
+<p>https://github.com/broccolijs/broccoli-kitchen-sink-helpers/commit/092a680f1ff8fe2d54419dd57fa9ba8a81f6f297</p>
+
+<h2>General Theory of Reactivity</h2>
+
+<p>https://github.com/kriskowal/gtor</p>
+
+<p>Reactivity: reacting to external stimuli and propagating events.</p>
+
+<ul>
+<li>(functional) reactive programming</li>
+<li>bindings</li>
+<li><p>operational transform</p></li>
+<li><p>Spatial Singular is a value, e.g. 5</p></li>
+<li>Spatial Plural is an enumberable/iterable of values</li>
+<li>Temporal Singular is an eventual value, e.g. a Promise</li>
+<li>Temporal Plural is eventual values, e.g. Observable of values</li>
+</ul>
+
+
+<p>But this glazes over many particulars, and things like Rx boil too much
+into a single Observable type that can perform any role.</p>
+
+<h3>Value</h3>
+
+<ul>
+<li>Singular</li>
+<li>Spatial</li>
+<li>Accessible</li>
+<li>Modifiable</li>
+<li>Composed of a getter and a setter</li>
+<li>Data flows from setter to getter</li>
+</ul>
+
+
+<p>Every reactive primitive features getter/setter, producer/consumer, or
+writer/reader. See http://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2014/Keynote-Duality</p>
+
+<p>Arrays are the above, but plural. Generators are the
+producing/writing/setting side, iterators are the read/get/consume.</p>
+
+<p>Promises are singular and temporal. Promises are getters, and
+corresponding setter is a resolver. Together, they&#8217;re a kind of
+deferred.</p>
+
+<p>Streams are a getter/setter pair of temporal plurals. Producer is a
+writer and consumer is a reader. Reader is an async iterator and writer
+is an async generator.</p>
+
+<p>Remember that a value encapsulates a getter and setter&#8230; values are:
+Deferred (promise + resolver, singular, temporal), Stream (reader +
+writer, plural, temporal), Array (iterator + generator, spatial,
+plural), and value (getter + setter, spatial, singular).</p>
+
+<p>Promises (singular + temporal) model dependency. The API/experience of
+multiple resolvers is the same regardless of who wins the race, and same
+w consumers.</p>
+
+<p>Because consumers cannot interfere with another consumer, aborting
+promises is not possible; promise is only the result, not the work
+leading to that result.</p>
+
+<p>A task, similar to promise, but is unicast.</p>
+
+<p>Unicast: http://en.wikipedia.org/wiki/Unicast - sending messages to a
+  single destination</p>
+
+<p>Broadcast: multiple possible destinations (or none)</p>
+
+<p>Because tasks are unicast, consumers can&#8217;t clobber each other (because
+there&#8217;s only one), hence they are cancellable. Can be explicitly forked
+to create a task that depends on the same result</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-28T13:10:00-04:00" pubdate data-updated="true">Aug 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/08/22/daily-journal/">
 		
 			Daily Journal</a>
@@ -1257,1284 +2120,6 @@ $ pidof bash
 
 
 <time datetime="2014-07-28T08:16:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/26/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>top</h2>
-
-<blockquote><p>display and update sorted information about processes</p></blockquote>
-
-<p><code>top</code> will display a sampled, updating list of processes, ordered by pid
-by default. Order by cpu:</p>
-
-<pre><code>top -o cpu
-</code></pre>
-
-<p>Filter by a pid</p>
-
-<pre><code>top -pid 12345
-</code></pre>
-
-<p>Show a single sample of the pid and thread number for a given pid</p>
-
-<pre><code>top -l1 -pid 1234 -stats pid,th
-</code></pre>
-
-<h2>Spawn 50 ruby threads&#8230;</h2>
-
-<p>and you wind up w 52: <code>Thread.main</code> + the 50 you created + Ruby
-housekeeping thread (listening for OS signals and piping them
-synchronously to main thread).</p>
-
-<p>Ruby creates legit OS threads, vs <code>_____</code> threads, whatever the
-terminology is for threads that live entirely in the code.</p>
-
-<h2>Thread#join</h2>
-
-<p>Yes, you have to call it on a spawned thread so that the main thread
-will wait on it before prematurely exiting. But did you know that
-exceptions thrown in a spawned thread get re-raised on the main thread
-if you do <code>.join</code>?</p>
-
-<p><code>Thread#value</code> joins and returns the last value of the thread.</p>
-
-<p><code>Thread#status</code> returns status for live, dead, erroed, dying threads.</p>
-
-<p><code>Thread.stop</code> puts the thread to sleep and it won&#8217;t wake up until
-someone calls <code>wakeup</code> on it</p>
-
-<p><code>Thread.pass</code> hints the OS to schedule another thread, but this may be
-ignored by the scheduler.</p>
-
-<p><code>Thread#raise</code> lets you externally fire exceptions within another thread
-but should not be used because <code>ensure</code> is busted. <code>Thread#kill</code> does
-what you expect but should also be aborted for the same reasons.</p>
-
-<p>Multiple threads mean concurrency; they <em>might</em> mean parallelism. One
-CPU switching b/w threads means concurrency but not parallelism;
-multiple cores means paralleilism if they&#8217;re both executing.</p>
-
-<p>Code can&#8217;t be parallel, only concurrent. The executation of concurrent
-code can be parallel if the scheduler so chooses.</p>
-
-<h2>golang concurrency vs parallelism</h2>
-
-<p>http://concur.rspace.googlecode.com/hg/talk/concur.html#slide-2</p>
-
-<p>Concurrency is defined as:</p>
-
-<blockquote><p>Programming as the composition of independently executing processes</p></blockquote>
-
-<p>not Linux processes, but rather the famously harder to define Process.</p>
-
-<p>Parallelism is</p>
-
-<blockquote><p>Programming as the simultaneous execution of (possibly related) computations.</p>
-
-<p>Concurrency provides a way to structure a solution to solve a problem that may (but not necessarily) be parallelizable</p></blockquote>
-
-<p>Concurrency facilitates but doesn&#8217;t guarantee parallelism.</p>
-
-<p>Goroutines aren&#8217;t threads; they&#8217;re similar but cheaper, won&#8217;t block
-other goroutines, and multiplexed onto OS threads as necessary.</p>
-
-<p>Synchronize via channels. I guess this is like Ruby Queue? Sounds like
-you&#8217;d never do someGoroutine.value but rather use the channel primitive.</p>
-
-<h2>ruby concurrency and you</h2>
-
-<p>https://blog.engineyard.com/2011/ruby-concurrency-and-you</p>
-
-<p>Green threads</p>
-
-<ul>
-<li>scheduled by VM, rather than underlying OS</li>
-<li>pre 1.9 Ruby was this way (MRI)</li>
-<li>managed in user space rather than kernel space</li>
-</ul>
-
-
-<p>Test: if i run Ruby 1.8.7 and do a top of new threads, I would expect
-the thread count to be only whatever I started with.</p>
-
-<p>BEHOLD, on 1.8.7:</p>
-
-<pre><code>PID    #TH
-84752  1
-</code></pre>
-
-<p>So old ruby didn&#8217;t even spawn another thread for housekeeping&#8230; I guess
-maybe it wasn&#8217;t necessary because it didn&#8217;t have to coordinate the
-signals landing at any random currently-active thread? Pretty cool.</p>
-
-<p>I guess green threads are easy to implement in any interpreted language:
-in the main loop of the interpreter you can just check if 100ms has gone
-by and then move to another other known threads.</p>
-
-<p>Early Java had green threads&#8230; I don&#8217;t know enough about Java to
-comment here.</p>
-
-<p>Ruby &lt;1.9 was smart enough to know when one of these threads was blocked
-on external data so that it could &#8220;sleep&#8221; until the data arrived:</p>
-
-<blockquote><p>MRI 1.8.7 is quite smart, and knows that when a Thread is waiting for some external event (such as a browser to send an HTTP request), the Thread can be put to sleep and be woken up when data is detected.</p></blockquote>
-
-<p>1.9 uses native threads, but there&#8217;s still a GIL because the non-Ruby
-parts of MRI 1.9 aren&#8217;t thread-safe.</p>
-
-<p>MRI 1.9 uses the same technique as MRI 1.8 to improve the situation,
-namely the GIL is released if a Thread is waiting on an external
-event (normally IO) which improves responsiveness.</p>
-
-<p>Great read:</p>
-
-<p>http://yehudakatz.com/2010/08/14/threads-in-ruby-enough-already/</p>
-
-<p>Threads are hard, but requests are an extremely clean concurrency
-primitive: controllers and the models loaded and views rendered, etc.,
-are not shared between threads that are processing requests. It&#8217;s only
-if you start using global state that problems arise, but why are you
-doing that?</p>
-
-<p>Why the Ruby/Rails thread FUD?</p>
-
-<ul>
-<li>Early Rails wasn&#8217;t threadsafe; essentially a mutex around each request</li>
-<li>Mongrel explicitly mutexed around its Rails adapter, so even when
-<code>threadsafe!</code> was added, you&#8217;d still have zero concurrency in mongrel.</li>
-</ul>
-
-
-<blockquote><p>For safety, Ruby does not allow a context switch while in C code unless the C code explicitly tells the VM that it’s ok to do so.</p></blockquote>
-
-<p>And mysql was poorly written in this case. So mysql would block.</p>
-
-<blockquote><p>A lot of people talk about the GIL (global interpreter lock) in Ruby 1.9 as a death knell for concurrency. For the uninitiated, the GIL disallows multiple CPU cores from running Ruby code simultaneously. That does mean that you’ll need one Ruby process (or thereabouts) per CPU core, but it also means that if your multithreaded code is running correctly, you should need only one process per CPU core. I’ve heard tales of six or more processes per core. Since it’s possible to fully utilize a CPU with a single process (even in Ruby 1.8), these applications could get a 4-6x improvement in RAM usage (depending on context-switching overhead) by switching to threadsafe mode and using modern drivers for blocking operations.</p></blockquote>
-
-<p>Node vs Ruby Threading:</p>
-
-<p>Yehuda: &#8220;the main difference is that a callback is smaller in size than a stack&#8221;</p>
-
-<p>In other words, the context switch that happens when switching threads
-includes copying over an entire stack of the thread you&#8217;re resuming and
-some other details I don&#8217;t know of off the top of my head. But with
-callbacks, the callbacks have no stack (is this true in Rubyland? maybe
-there&#8217;s stack trace information but probably no stack. The only stack
-starts from where the callback/block was created, and the same is true w
-threads, but the point is that in a thread-per-request model, the stack
-goes all the way up to when the request was first received, which can be
-a pretty tall stack).</p>
-
-<p>So what about Fibers? They&#8217;re cooperative, but why is their context
-switch not a big deal? They have a stack size limit of 4kb. How can I
-test this?</p>
-
-<p>Here&#8217;s a nice article:</p>
-
-<p>http://timetobleed.com/fixing-threads-in-ruby-18-a-2-10x-performance-boost/</p>
-
-<p>Seems to suggest that the stack that needs to be copied when context
-switching includes interpreter code, which has many local vars and
-sometimes the stack is up to 4kb, which is cray cray.</p>
-
-<p>Green threads: pre-emptible userland threads. userland = not kernel
-land.</p>
-
-<p>You can hack into the thread-yielding code of old Ruby to allocate
-stacks on the heap so that all you have to do to context switch is
-change what rsp (pointer to the bottom of the stack) points to. This
-means the stack won&#8217;t grow (so you have to pick a sensible size).</p>
-
-<p>Ruby 1.9 performs way better in the benchmarks than his hacks&#8230; why?
-&#8220;Thanks. 1.9 uses pthreads which create stacks in a similar manner to
-what I did.&#8221; Awesome.</p>
-
-<p>pthreads = POSIX threads</p>
-
-<p>http://timetobleed.com/threading-models-so-many-different-ways-to-get-stuff-done/</p>
-
-<p>Threads models:</p>
-
-<h3>1:1 (native threads)</h3>
-
-<p>One kernel thread for every user thread.</p>
-
-<p>Pros</p>
-
-<ul>
-<li>execute threads on different CPUs</li>
-<li>threads don&#8217;t block each other</li>
-<li>shared memory b/w threads</li>
-</ul>
-
-
-<p>Cons</p>
-
-<ul>
-<li>Setup overhead since creating a thread requires a system call (and
-those are slow)</li>
-<li>Low upper bound on the number of threads that can be created</li>
-</ul>
-
-
-<p><code>pthread_create</code> is the fn that makes the system call to create the
-thread.</p>
-
-<h3>1:N (green threads)</h3>
-
-<p>&#8220;lightweight threads&#8221;</p>
-
-<ul>
-<li>thread creation, execution, cleanup are cheap</li>
-<li>lots of threads can be created</li>
-</ul>
-
-
-<p>Cons</p>
-
-<ul>
-<li>kernel doesn&#8217;t know about it, so no parallel execution across CPUs</li>
-<li>blocking IO can block all green threads</li>
-</ul>
-
-
-<p>Forking + threading and cross-process communication is one way around
-limitations.</p>
-
-<h3>M:N</h3>
-
-<p>Hybrid of above</p>
-
-<ul>
-<li>Multi CPUs</li>
-<li>Not all threads blocked by blocking system calls</li>
-<li>Cheap</li>
-</ul>
-
-
-<p>Cons</p>
-
-<ul>
-<li>Really really hard to synchronize userland and kernel scheduler</li>
-<li>Green threads will block within same kernel thread</li>
-<li>Difficult to maintain</li>
-</ul>
-
-
-<p>1:1 has shown itself to be more performant, but in some cases M:N might
-be the right choice.</p>
-
-<p>TODO: read this http://www.akkadia.org/drepper/nptl-design.pdf</p>
-
-<pre><code>b = nil
-
-t = Thread.new do
-  b = Fiber.new {
-    puts "FIBER"
-  }
-end
-
-while !b
-  # just wait
-end
-
-b.resume
-</code></pre>
-
-<p>This results in</p>
-
-<pre><code>fiberthread.rb:13:in `resume': fiber called across threads (FiberError)
-        from fiberthread.rb:13:in `&lt;main&gt;'
-</code></pre>
-
-<p>Of course it would.</p>
-
-<p>Use strace / dtruss to trace sys calls.</p>
-
-<p>Spinlocks are locks that, rather than sleeping, actively busy-wait until
-the lock is free. This only makes sense if the wait is expected to be
-short, otherwise it might block other threads.</p>
-
-<p>Interesting, from the wiki:</p>
-
-<blockquote><p>Most operating systems (including Solaris, Mac OS X and FreeBSD) use a hybrid approach called &#8220;adaptive mutex&#8221;. The idea is to use a spinlock when trying to access a resource locked by a currently-running thread, but to sleep if the thread is not currently running. (The latter is always the case on single-processor systems.)</p></blockquote>
-
-<p>The idea is that a lock by an active thread is likely to be finished
-soon, and since spinlocks avoid the scheduling overhead of a context
-switch, then hooray.</p>
-
-<p>Busy-waiting in general means while-looping until some condition is
-true. You can even do this in JS:</p>
-
-<pre><code>var end = +new Date() + 1000;
-while (+new Date() &lt; end) {}
-</code></pre>
-
-<p>So whether Node or EventMachine, the concept is the same: both run on
-callbacks.</p>
-
-<p>Realization: I was thinking that I could demonstrate the difference b/w
-green threads and OS threads by seeing if a while(true) in a green
-thread would yield to others, but the answer is:</p>
-
-<ul>
-<li>of course it would yield; each iteration of the while true is
-an iteration of the interpreter loop that&#8217;s running commands, so its
-timer would fire at that point.</li>
-<li>the only time it&#8217;d block is if you called out to a C extension that
-looped and didn&#8217;t yield back control.</li>
-</ul>
-
-
-<p>It seems a Fiber&#8217;s 4k stack begins at the point at which it is created.
-Hmm. So does it or does it not include interpreter stuff? Well for one
-it&#8217;s in the same thread as a requirement.</p>
-
-<p>Reasons why Fibers are faster than threads:</p>
-
-<ul>
-<li>limited 4kb stack for quick context switching</li>
-<li>no pre-emption means no aggressive/frequent context switching;
-context-switch as infrequently as you&#8217;d like.</li>
-</ul>
-
-
-<p>https://github.com/eventmachine/eventmachine/blob/master/docs/old/LIGHTWEIGHT_CONCURRENCY</p>
-
-<p>Lightweight Concurrency generally means</p>
-
-<ul>
-<li>putting thread scheduling under the control of your program</li>
-</ul>
-
-
-<blockquote><p>By &#8220;lighter,&#8221; we mean: less
-resource-intensive in one or more dimensions, usually including memory and
-CPU usage. In general, you turn to LC in the hope of improving the
-performance and scalability of your programs.</p></blockquote>
-
-<p>NOTE: race conditions can happen in concurrent environments, even if
-parallelism isn&#8217;t there, e.g. preempting</p>
-
-<p>Mac has a max 2048 thread limit.</p>
-
-<p>&#8220;IO Bound&#8221; means your program is mostly bottlenecked by IO, such that
-swapping for a faster IO would boost your program performance immensely.</p>
-
-<p>In such a case, going multi-threaded is a no-brainer rather than
-serially getting blocked on each slow thing. But if you over do it then
-you might just be wasting memory/CPU resources from thread stacks and
-context switching that it&#8217;s not justified.</p>
-
-<p>&#8220;CPU bound&#8221; means doubling CPU would mean the job would get done that
-much faster.</p>
-
-<p>Quad-core with 4 threads on CPU bound means mega-wins for Rubinius but
-obviously not GIL&#8217;d MRI. If you make it 5, then you get the
-context-switching overhead.</p>
-
-<p>Rails apps are combo of IO-bound and CPU-bound</p>
-
-<p>IO:</p>
-
-<ul>
-<li>Database</li>
-<li>Third party APIs</li>
-<li>Files read</li>
-</ul>
-
-
-<p>CPU:</p>
-
-<ul>
-<li>Rendering templates</li>
-<li>Rendering JSON</li>
-</ul>
-
-
-<p>Measure measure measure.</p>
-
-<p>This is comically incorrect:</p>
-
-<pre><code>Mutex.new.synchronize do
-  puts "LOL please never do this"
-end
-</code></pre>
-
-<p>should be</p>
-
-<pre><code>m = Mutex.new
-
-# ...create thread...
-
-m.synchronize do
-  puts "LOL please never do this"
-end
-</code></pre>
-
-<p>&#8220;critical section&#8221; refers to the part of your concurrent code that
-alters shared data.</p>
-
-<p>Memory Models describe the guarantees made to threads when
-reading-from/writing-to memory, which mostly become important to think
-about in a multi-threaded settings. The memory model describes how
-caching occurs in the registers before actually writing out to memory,
-and it describes the scope of compiler/hardware optimizations that can
-be made that lead to non-determinant order of memory operations which
-can fuck your shit unless you use <code>volatile</code> in Java or explicit mutexes
-in Ruby.  Ruby doesn&#8217;t have a memory model spec yet. Java and Go and
-others do. I guess Rust nips this in the bud w ownership.</p>
-
-<p>Mutex is a form of a memory barrier, and I think <code>volatile</code> is too.</p>
-
-<p>Livelocking is when <code>try_lock</code>s repeatedly fail, so the threads are
-still technically alive but stuck in the same loop.</p>
-
-<p>Best solution is to declare mutex grabbing in the same order via a mutex
-hierarchy.</p>
-
-<h2>Signals in ruby</h2>
-
-<p>Rubyz</p>
-
-<pre><code>Signal.trap("USR1") do
-  puts "lol handling your custom user handler"
-end
-puts Process.pid # =&gt; e.g. 12345
-</code></pre>
-
-<p>Shellz</p>
-
-<pre><code>kill -s USR1 12345
-</code></pre>
-
-<p>So many ways to kill a program:</p>
-
-<ul>
-<li>Abort: often self-initiated by <code>abort</code></li>
-</ul>
-
-
-<h2>Difference b/w seg fault and bus error</h2>
-
-<p>http://stackoverflow.com/questions/838540/bus-error-vs-segmentation-fault</p>
-
-<p>On most architectures I&#8217;ve used, the distinction is that:</p>
-
-<ul>
-<li>a SEGV is caused when you access memory you&#8217;re not meant to
-(e.g., outside of your address space).</li>
-<li>a SIGBUS is caused due to alignment issues with the CPU
-(e.g., trying to read a long from an address which isn&#8217;t a multiple of 4).</li>
-</ul>
-
-
-<h2>Signals in C</h2>
-
-<p>This is just for fun, but you can set up signal masks and signal
-handles and all that fun crap.</p>
-
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
-#include &lt;unistd.h&gt;
-
-static int gotSignal = 0;
-
-void wat(int s) {
-  printf("Got Signal %d", s);
-  gotSignal = 1;
-}
-
-int main() {
-  /* SIGUSR1 == 16 */
-  signal(SIGUSR1, &amp;wat);
-
-  pid_t pid = getpid();
-  printf("The process id is %d", pid);
-
-  // prevent signal from getting here
-  sigset_t s;
-  sigaddset(&amp;s, SIGUSR1);
-  // uncomment to block the signal from arriving
-  //sigprocmask(SIG_BLOCK, &amp;s, NULL);
-
-  while(!gotSignal) {
-    printf(".");
-    fflush(stdout);
-    sleep(1);
-  }
-
-  printf("\nDone!\n");
-}
-</code></pre>
-
-<p>and you can send it usr1 via</p>
-
-<pre><code>kill -s USR1 12345
-</code></pre>
-
-<h2>Signals in Node</h2>
-
-<pre><code>var done = false;
-
-process.on("SIGUSR1", function() {
-  done = true;
-});
-
-console.log("pid: ", process.pid);
-
-var timerId = setInterval(function() {
-  if (done) {
-    console.log("DONEZO");
-    clearInterval(timerId);
-  } else {
-    process.stdout.write(".");
-  }
-}, 500);
-</code></pre>
-
-<p>Note that SIGUSR1 is reserved by node.js to start the debugger.
-The above code will work but if the debugger&#8217;s enabled then that&#8217;ll also
-cause it to start.</p>
-
-<p>Seems that signals are often used to start a debugger, or some kind of
-debugging operation. Interesting.</p>
-
-<h2>Condition Variables</h2>
-
-<p>A provider and consumer both use the same mutex. Provider locks when
-providing an update. Consumer locks when trying to perform an operation,
-but internally does a <code>condvar.wait(mutex)</code> with the locked <code>mutex</code> to
-unlock until the <code>condvar</code> is <code>signal</code>ed by the provider.</p>
-
-<p>So why wrap the consumer in a while loop rather than an if (see page 104
-of storimer)? Because there could be multiple consumers.</p>
-
-<p><code>ConditionVariable#signal</code> wakes up a single thread, <code>ConditionVariable#broadcast</code>
-wakes up all threads.</p>
-
-<h2><code>thread_safe</code> gem</h2>
-
-<ul>
-<li>ThreadSafe::Array</li>
-<li>ThreadSafe::Hash</li>
-<li>ThreadSafe::Cache
-
-<ul>
-<li>similar to Hash, but insertion order enumeration isn&#8217;t preserved,
-which means it can be faster</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Immutable = threadsafe</h2>
-
-<p>Read more about it.</p>
-
-<h2>Globals</h2>
-
-<p>The Ruby AST is a global (is it really an AST at that point? is
-dynamically adding a method an example of modifying an AST? ASTs are for
-parsing, not so much adding/removing methods from a class obj).</p>
-
-<p>Anyway, Kaminari was bitten by this:</p>
-
-<p>https://github.com/amatsuda/kaminari/issues/214</p>
-
-<h2>Thread-locals</h2>
-
-<p>Variables that are global to everything in the current thread but hidden
-to everyone else. So you could do</p>
-
-<pre><code>Thread.current[:some_service] = SomeService.new
-</code></pre>
-
-<p>which could open a new connection. Connections are nice concurrency
-primitives, much like request objects in Rails. But if you have too many
-threads, you might hit a max connection limit, so in that case, use
-pools, lol.</p>
-
-<p>Pools let you specify max concurrency, which is likely less than the
-number of threads that might want to consume it, and then when
-requesting access to a thing in a pool, it&#8217;ll block until a slot&#8217;s
-available.</p>
-
-<p>See: https://github.com/mperham/connection_pool</p>
-
-<p>mperham is Mr Sidekiq. Mr. Concurrency in general I guess.</p>
-
-<p>Question: is a connection pool the same as a thread pool? Probably not,
-connection pool is just a resource pool that is thread-aware, but
-doesn&#8217;t constitute individual threads.</p>
-
-<h2>Rubinius Actor</h2>
-
-<p>https://github.com/rubinius/rubinius-actor</p>
-
-<p>Depends on core Rubinius class <code>Channel</code>. TODO: find out why <code>Channel</code>
-doesn&#8217;t/can&#8217;t exist in MRI.</p>
-
-<h2>Rubinius Ruby JITting</h2>
-
-<p>Talking to IRC folk: one of the major reasons for Ruby all the way down
-or at least Ruby most of the way down is that more of it can be JITted
-rather than having the hard C/C++ boundary after which no more
-optimizations can be made.</p>
-
-<p>Also, in some benchmarks b/w Rubinius and JRuby and MRI, etc., one thing
-that comes up a lot is the suggestion that the tests run for longer so
-that the JIT is primed, all the optimizations have been made, etc etc
-etc.</p>
-
-<h2>Rails Batches</h2>
-
-<p>http://api.rubyonrails.org/classes/ActiveRecord/Batches.html</p>
-
-<pre><code>Article.find_each do |a|
-  a.wat
-end
-</code></pre>
-
-<p>this internally splits DB queries into batches of 1000 so that you&#8217;re
-not instantiating potentially a billion Ruby objects for each row. In
-the end you&#8217;ll still allocate the same amount of memory but it can be
-GC&#8217;d along the way vs causing an insane spike and possibly crashing your
-server.</p>
-
-<h2>Server-sent events</h2>
-
-<p>http://tenderlovemaking.com/2012/07/30/is-it-live.html</p>
-
-<ol>
-<li>A stream obj is added to Rails request object, quacks like IO obj.
-You can write to it and close it, but it doesn&#8217;t actually stream live
-to the client; it buffers, and then flushes.</li>
-<li>With <code>ActionController::Live</code>, it&#8217;ll actually stream live.</li>
-<li>Some WebServers, like WEBrick will thwart this by buffering the
-response until it&#8217;s complete. Unicorn could work, but it&#8217;s meant for
-fast responses; anything taking longer than 30s might get terminated.
-Rainbows/Puma/Thin would work.</li>
-</ol>
-
-
-<h2>Celluloid</h2>
-
-<p>Transforms method invocations into blocking messages. Precede w <code>async</code>
-to prevent blocking (obviously still happens async);</p>
-
-<pre><code>require 'celluloid'
-
-class DoesStuff
-  include Celluloid
-
-  attr_accessor :i
-
-  def foo
-    # currently this displays
-    # one item per second.
-    # if you swap comments with
-    # the line after it'll wait
-    # until the very end to print them all
-    # at once because the each at the end
-    # will evaluate the "longest" future first
-    sleep i
-    #sleep (11 - i)
-    i
-  end
-end
-
-
-futures = []
-
-10.times do |i|
-  thing = DoesStuff.new
-  thing.i = i
-
-  futures &lt;&lt; thing.future.foo
-end
-
-
-futures.each do |f|
-  puts "Completed: #{f.value.i}"
-end
-
-sleep
-</code></pre>
-
-<p>This is interesting: https://github.com/celluloid/celluloid/wiki/Frequently-Asked-Questions#q-can-i-do-blocking-io-inside-an-actor-or-do-i-have-to-use-celluloidio</p>
-
-<p>It&#8217;s fine to have blocking IO such as waiting for a DB query to return,
-or slow HTTP response, but you shouldn&#8217;t have it waiting on
-<em>indefinite</em> IO; for that, use Celluloid::IO.</p>
-
-<p>I believe that an actor can&#8217;t be handling multiple messages at the same
-time. Wrong! That&#8217;s only if Erlang/Exclusive mode is on, and you have to
-be careful about that because it means a higher risk of deadlock:</p>
-
-<p>https://github.com/celluloid/celluloid/wiki/Exclusive</p>
-
-<p>Sidekiq doesn&#8217;t make use of return values a whole lot; rather actors are
-expected to send messages back to their &#8220;callers&#8221;.</p>
-
-<p>Accessing localvars is faster than ivars: https://github.com/puma/puma/commit/fb4e23d628ad77c7978b67625d0da0e5b41fd124</p>
-
-<h2>Compare and set (CAS)</h2>
-
-<p>aka check-and-set</p>
-
-<p>For platforms that support it, CAS is a mutex-free approach to
-thread-safety</p>
-
-<pre><code>a += 1
-</code></pre>
-
-<p>is not thread safe, but</p>
-
-<pre><code>cur = a.value
-new_value = cur + 1
-if (!a.compare_and_set(cur, new_value)) 
-  # try again
-end
-</code></pre>
-
-<p>is.</p>
-
-<p>Worth pointing out that Redis supports a form of this using WATCH.</p>
-
-<pre><code>MULTI # begin transaction
-SET foo lol
-SET bar wat
-EXEC # execute
-</code></pre>
-
-<p>so basically if you do</p>
-
-<pre><code>WATCH someval
-MULTI
-set someval lol
-EXEC
-</code></pre>
-
-<p>and someval changed after the MULTI then it will fail.</p>
-
-<p>So why use CAS over a mutex?</p>
-
-<blockquote><p>If the cost of retrying the operation is cheap, or rare, it may be much less expensive than using a lock.</p></blockquote>
-
-<p>Logic checks out.</p>
-
-<pre><code>require 'atomic'
-v = Atomic.new(0)
-v.update do |current|
-  current + 1
-end
-</code></pre>
-
-<p>This is the shorthand to the idempotent loop with CAS.</p>
-
-<p>Lockless showed mega improvements relative to locking in Rubinius but
-not JRuby for some reason.</p>
-
-<p>Hamster is the immutability gem to check out.</p>
-
-<h2>oni</h2>
-
-<p>https://github.com/olery/oni</p>
-
-<p>Uses SQS, look into it because i am such a nooblet.</p>
-
-<h2>SQS</h2>
-
-<p>Uses a visibility timeout after a consumer has started to receive a
-message in which time it is hidden from other consumers, and in this
-time it should be deleted.</p>
-
-<ul>
-<li>Supports GET/POST requests to public URLs, presuming you pass in a
-valid signature
-
-<ul>
-<li>This means you could fire requests directly to SQS rather than
-having to go to a server first&#8230; that is badass.</li>
-</ul>
-</li>
-<li>Reports of scalability problems</li>
-</ul>
-
-
-<p><a href="http://nsono.net/amazon-sqs-vs-rabbitmq/">Alternative: RabbitMQ</a></p>
-
-<ul>
-<li>SQS: consumers must poll for messages, and SQS charges by the request,
-even if the response is empty.</li>
-<li>RabbitMQ supports push</li>
-<li>is free and open source</li>
-<li>based on erlang</li>
-<li>adheres to AMQP (standard for high performance messages queues)</li>
-<li>supports durable queues (crash-recoverable, written to disk)</li>
-<li>delivered in order unless message requeued</li>
-<li>more consistent (much less likely to deliver a message twice unless
-the message actually failed)</li>
-</ul>
-
-
-<p>cons</p>
-
-<ul>
-<li>not necessarily highly available (because it&#8217;s a server that runs on
-whatever instance you wanna put it on, so you have to manage failover,
-redundancy, etc, whereas SQS is a system that handles all of that)</li>
-<li>this is configurable, but the default is for RabbitMQ to drop messages
-if there are no consumers; surprising to SQS folk.</li>
-</ul>
-
-
-<h2>Heartbeats</h2>
-
-<p>https://www.rabbitmq.com/reliability.html</p>
-
-<blockquote><p>In some types of network failure, packet loss can mean that disrupted TCP connections take some time to be detected by the operating system. AMQP offers a heartbeat feature to ensure that the application layer promptly finds out about disrupted connections (and also completely unresponsive peers). Heartbeats also defend against certain network equipment which may terminate &#8220;idle&#8221; TCP connections. In RabbitMQ versions 3.0 and higher, the broker will attempt to negotiate heartbeats by default (although the client can still veto them). Using earlier versions the client must be configured to request heartbeats.</p></blockquote>
-
-<p>Re: &#8216;Heartbeats also defend against certain network equipment which may
-terminate &#8220;idle&#8221; TCP connections.&#8217;: I bet that&#8217;s referring to NAT, which
-manages a cache of IP translations and will go inactive if nothings been
-sent to / received from an IP for a while.</p>
-
-<p>YAY I WAS RIGHT http://stackoverflow.com/questions/865987/do-i-need-to-heartbeat-to-keep-a-tcp-connection-open#comment1713801_866003</p>
-
-<p>So Heartbeats</p>
-
-<ul>
-<li>reassure you the connection is alive in some cases where the failure
-conditions aren&#8217;t otherwise detectable</li>
-<li>keep the NAT state tables warm for your IP</li>
-</ul>
-
-
-<h2>Celluloid::IO</h2>
-
-<p>https://github.com/celluloid/celluloid-io</p>
-
-<p>Provides a different class of Actor that&#8217;s heavier than normal Celluloid
-actors, but contains a high performance reactor like EventMachine or
-cool.io (todo: check out cool.io). So unlike EventMachine you can have
-multiple loops, e.g. one in each actor (resources permitting). (Also,
-does EM really force you to just have one?)</p>
-
-<h2>Autoload</h2>
-
-<p>Yes we know it&#8217;s not threadsafe in MRI. Recent JRuby versions make it
-thread safe, but just eager load your shits before spawning threads.</p>
-
-<h2>Requests as concurrency unit</h2>
-
-<p>I guess in general you should always look for the concurrency unit; that
-domain object that encapsulates all the data you need to get a job done
-so that hopefully you&#8217;re not sharing data between threads. Each request
-gets handled by its own thread.</p>
-
-<h2>Queue</h2>
-
-<p><code>Queue#pop</code> will suspend a thread until data is in the queue. Like a
-mofuggin stream.</p>
-
-<p>Queue is apparently the only thread-safe data structure that ships with
-Ruby.</p>
-
-<h2>JRuby</h2>
-
-<p>Foreign function interface</p>
-
-<p>http://en.wikipedia.org/wiki/Foreign_function_interface</p>
-
-<p>Mechanism for languages to invoke routines from other languages.</p>
-
-<p>Write your extension code in Ruby, FFI will call the write C / Java /
-whatever stuff. It won&#8217;t even be compiled. I guess it just links into
-dynamic libs?</p>
-
-<p>JRuby obviously doesn&#8217;t support C extensions, but FFI extensions will
-work.</p>
-
-<p>JRuby</p>
-
-<ul>
-<li>has no fork(), since JVMs mostly can&#8217;t safely be forked
-(<code>NotImplementedError: fork is not available on this platform</code>)</li>
-<li>Fibers are native threads, rather than MRI green threads, which means
-you are constrained to native thread overhead/limits.</li>
-</ul>
-
-
-<h2>Rubinius (rbx)</h2>
-
-<ul>
-<li>Designed for concurrency, speed.</li>
-<li>Rubinius 2.0 has no GIL</li>
-<li>All tools written in Ruby, including bytecode VM, compiler,
-generational GC, JIT, etc</li>
-<li>No continuations (because dependent on callcc, a C thing)</li>
-<li>At some point, when dealing with locks and low level things, you&#8217;ll
-find C++.</li>
-</ul>
-
-
-<p>http://rubini.us/2011/02/25/why-use-rubinius/</p>
-
-<h2>Ruby Enterprise Edition</h2>
-
-<p>By Phusion. No longer alive.</p>
-
-<ul>
-<li>Compatible w 1.8.7</li>
-<li>End of Life since 2012</li>
-<li>No more work being done, reasons being:
-
-<ul>
-<li>Rails 4 no longer supporting 1.8</li>
-<li>COW patch accepted on Ruby 2.0</li>
-<li>Many Ruby Enterprise Edition patches addressed in 1.9, 2.0</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>MacRuby</h2>
-
-<p>Implementation of 1.9 Ruby directly on top of Mac OS X core tech, e.g.</p>
-
-<ul>
-<li>Obj-C runtime and GC</li>
-<li>LLVM compiler infrastructure</li>
-</ul>
-
-
-<h2>Reactive manifesto</h2>
-
-<p>TODO: read this http://www.reactivemanifesto.org/</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-26T15:10:00-04:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/19/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Crank</h2>
-
-<p>Meth.</p>
-
-<p>An eccentric person, esp. one who is obsessed by a particular subject or
-theory: when he first started to air his views, they labeled him a
-crank | [ as modifier ] : I am used to getting crank calls from
-conspiracy theorists.</p>
-
-<h2>Roko&#8217;s modern basilisk</h2>
-
-<p>It&#8217;s happening.</p>
-
-<h2>Transactional UIs</h2>
-
-<p>People build forms. Ember gives you sweet syntax sugar for 2wb.
-Not for transactional UI, anything that needs a buffer.</p>
-
-<p>Old mindset: if you need 1wb, just&#8230; don&#8217;t set on the other side of a
-2wb.</p>
-
-<p>TODO: ask kris more about the async/sync cocoa observer binding
-limitations.</p>
-
-<ul>
-<li>Most observers just do something and stop.</li>
-<li>And they mostly want to know the last thing they cared about.</li>
-</ul>
-
-
-<p>Bubbling doesn&#8217;t describe actions; actions go wherever. Bubbling only in
-route hierarchy.</p>
-
-<p>Services:</p>
-
-<ul>
-<li>session/user</li>
-<li>timer</li>
-<li>websocket</li>
-<li>analytics</li>
-</ul>
-
-
-<p>Idea: components provide services to the components the render. They
-have a ServiceCertificate</p>
-
-<p>Goal:</p>
-
-<ul>
-<li>Try and associate actions with objects.</li>
-<li><code>actions</code> themselves can just be passed into the <code>actions</code></li>
-</ul>
-
-
-<h2>Non-dynamic routes</h2>
-
-<pre><code>resolveEntry: function(params, model, transition) {
-  return model || this.store.find(params.id);
-}
-
-resolveEntry: function(params, model, transition) {
-  return model || this.store.find(params.id);
-}
-</code></pre>
-
-<p>Initializers vs <code>applicationRoute#beforeModel</code>.</p>
-
-<p>retcon for how to use controllers</p>
-
-<p>asop to data binding</p>
-
-<p>HTMLbars knows what parts of the template are dynamic vs static.</p>
-
-<p>In React, if you have a conditional</p>
-
-<h2>Skunkworks project</h2>
-
-<blockquote><p>A skunkworks project is a project developed by a small and loosely
-structured group of people who research and develop a project
-primarily for the sake of radical innovation.[1] The terms
-originated with Lockheed&#8217;s World War II Skunk Works project.</p></blockquote>
-
-<p>http://en.wikipedia.org/wiki/Skunk_Works</p>
-
-<blockquote><p>The designation &#8220;skunk works&#8221;, or &#8220;skunkworks&#8221;, is widely used
-in business, engineering, and technical fields to describe a
-group within an organization given a high degree of autonomy
-and unhampered by bureaucracy, tasked with working on advanced
-or secret projects.</p></blockquote>
-
-<p>Lockheed Martin&#8217;s Skunk Works project made SR-71.</p>
-
-<h2>Project Svelte</h2>
-
-<p>http://www.trustedreviews.com/opinions/android-4-4-kitkat-s-project-svelte-what-it-is-and-why-you-should-care</p>
-
-<blockquote><p>‘dogfooding’ – that is making its employees use and live with their own projects</p></blockquote>
-
-<p>They dogfooded their employees by forcing them to dev on handicapped
-phones. Android 4.4 was the result, apparently it was way more
-performant.</p>
-
-<h2>RACK_ENV vs RAILS_ENV</h2>
-
-<p><code>Rails.env</code> is decided by <code>RAILS_ENV || RACK_ENV || "development"</code>. It&#8217;s
-common to set <code>RACK_ENV</code> which will also set <code>RAILS_ENV</code>, but if you
-have any rack middleware that behaves differently in different
-environments, you might screw yourself if you&#8217;re using <code>RAILS_ENV</code>.</p>
-
-<h2>wythoughts on blocks</h2>
-
-<p>The reason <code>|i|</code> is ok is for the same reason you can&#8217;t do the following
-in Ruby:</p>
-
-<pre><code>a = { |it| wat }
-</code></pre>
-
-<p>You have to do</p>
-
-<pre><code>a = proc { |it| wat }
-</code></pre>
-
-<p>Case in point you need an fn to save a block.</p>
-
-<h2>mythoughts on mutability</h2>
-
-<p>Can/should we swap POJOs when an observed property changes? Is there any
-value to</p>
-
-<pre><code>var pojo = {
-  a: {
-    b: 123
-  }
-};
-
-var a = pojo.a;
-Ember.set(pojo, 'a.b'
-</code></pre>
-
-<h2>ASI: automatic semicolon insertion</h2>
-
-<p>Nuff said.</p>
-
-<h2>old browser disagreements on ws</h2>
-
-<pre><code>[ text ws text]
-</code></pre>
-
-<p>cloneNode produces:</p>
-
-<ul>
-<li>ie8: 1 node</li>
-<li>ie9: 2 nodes</li>
-<li>else: 3 nodes</li>
-</ul>
-
-
-<h2>NoScope</h2>
-
-<p>http://www.thecssninja.com/javascript/noscope</p>
-
-<p>tldr NoScope is an old IE categorization of nodes, and NoScope dictates
-that innerHTML and cloneNode will strip these els.</p>
-
-<h2>Ropes: DAG of string implementation for FF/Chrome</h2>
-
-<p>http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=181EEF66EB411F4277C009A1D492CF75?doi=10.1.1.14.9450&amp;rep=rep1&amp;type=pdf</p>
-
-<p>Look into this more. Too lazy to read / comment.</p>
-
-<p>How to force Chrome to not use a rope:</p>
-
-<ul>
-<li>Less than 12 chars</li>
-</ul>
-
-
-<p>What does it mean to intern strings?</p>
-
-<h2>CSP: Content Security Policy</h2>
-
-<p>http://www.html5rocks.com/en/tutorials/security/content-security-policy/</p>
-
-<h2>String interning</h2>
-
-<pre><code>String.prototype.intern = (function() {
-   "use strict";
-   var o = {"- ": 0};
-   delete o["- "];
-   return function() {
-       var str = this;
-       o[str] = true;
-       var ret = Object.keys(o)[0];
-       delete o[str];
-       return ret;
-       try {} finally {}
-   };
-})();
-</code></pre>
-
-<h2>Component pinning</h2>
-
-<p>Associating the re-render with the pre-existing fragment.</p>
-
-<h2>localStorage on iOS Cordova webviews</h2>
-
-<ol>
-<li>Run dev, set <code>localStorage.wat = "lol"</code></li>
-<li>Stop and re-run the app, and <code>localStorage.wat</code> still is &#8220;lol&#8221;</li>
-<li>Delete the app, re-install, still dev, <code>localStorage.wat</code> is undefined</li>
-</ol>
-
-
-<p>I don&#8217;t even have to check&#8230; your app can&#8217;t run in both dev and prod.
-You can&#8217;t share userSessions across dev and prod apps. Then again, our
-servers could maintain keys for both APNS and APNS_SANDBOX.</p>
-
-<h2>GCM project number vs project ID</h2>
-
-<p>https://developers.google.com/compute/docs/faq#whatisthedifference</p>
-
-<p>You pick project ID, they pick project number. Project number is the
-Sender ID you use for GCM.</p>
-
-<h2>Pointer comparisons for such perf</h2>
-
-<pre><code>if (wat === false) {
-}
-</code></pre>
-
-<p><code>false</code> can be implemented to just refer to a unique memory location,
-such that all browsers need to comparison in the above code is <code>wat</code>&#8217;s
-memory address against <code>false</code>&#8217;s.</p>
-
-<p>Same goes with</p>
-
-<pre><code>if (wat === undefined) {
-}
-</code></pre>
-
-<p>just that the presence of <code>foo</code> in <code>cache.foo</code> is ambiguous without
-testing <code>foo in cache</code>; might be easier to do <code>cache.foo = UNDEFINED</code>
-where</p>
-
-<pre><code>function UNDEFINED() {}
-</code></pre>
-
-<p>Sentinel as fuck.</p>
-
-<h2>PushPlugin</h2>
-
-<p>Only starts firing PNs after <code>register</code>. We need a user session to
-register, right? Seems weird we can&#8217;t query it for information before
-immediately registering&#8230; either way, works fine for us, at least we
-killed Zalgo.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-19T11:30:00-04:00" pubdate data-updated="true">Jul 19<span>th</span>, 2014</time></div>
 	
 
 

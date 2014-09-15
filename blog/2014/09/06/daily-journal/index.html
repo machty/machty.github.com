@@ -1,0 +1,875 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>netcat (nc)</h2>
+
+<p>Utility to spinning up arbitrary tcp servers for testing, sending
+packets, etc.</p>
+
+<pre><code>Socket.new(Socket::AF_INET, Socket::SOCK_STREAM)
+or symbols:
+Socket.new(:INET6, :STREAM)
+</code></pre>
+
+<p>INET = internet, specifically IPv4, <code>SOCK_STREAM</code> means a TCP stream
+will be set up, as opposed to <code>DGRAM</code>, which would set up UDP.</p>
+
+<p>Set up bullshit listener:</p>
+
+<pre><code>nc -l localhost 4481
+</code></pre>
+
+<h2>Loopback</h2>
+
+<p><code>localhost</code> is a loopback, which is a virtual interface where any data
+sent to the loopback is immediately received. <code>127.0.0.1</code> is the IP.</p>
+
+<p>Check dat <code>/etc/hosts</code> file:</p>
+
+<pre><code>##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+</code></pre>
+
+<p>Funny how I never notice stuff like that until someone officially
+defines it for me.</p>
+
+<h2>&#8220;well-known&#8221; ports</h2>
+
+<p>Hosted by IANA.org, the Internet Assigned Numbers Authority.</p>
+
+<h2>Gerrymandering</h2>
+
+<blockquote><p>manipulate the boundaries of (an electoral constituency) so as to favor one party or class.</p></blockquote>
+
+<p>Knew what this was, forgot the word for it.</p>
+
+<h2>AWS Spot Instances</h2>
+
+<p>Running interruption-tolerant applications on EC2 unused capacity, where
+you can bid on price per hour and maximum bid price.</p>
+
+<h2>Chekhov&#8217;s Gun</h2>
+
+<p>http://en.wikipedia.org/wiki/Chekhov&#8217;s_gun</p>
+
+<blockquote><p>Remove everything that has no relevance to the story. If you say in the first chapter that there is a rifle hanging on the wall, in the second or third chapter it absolutely must go off. If it&#8217;s not going to be fired, it shouldn&#8217;t be hanging there.</p></blockquote>
+
+<p>Anton Chekhov is considered to be among the greatest writers of short
+stories in history. Guess I should start reading.</p>
+
+<h2>Binding to an interface</h2>
+
+<p>You can bind to a single interface, or ALL interfaces, lol!</p>
+
+<p><code>0.0.0.0</code> means all interfaces. I guess that means that requests to
+localhost, and potentially some other external facing interface, will
+route requests to this socket. So what if someone has already bound
+specifically to localhost:12345 and you try to bind to <code>0.0.0.0:12345</code>?</p>
+
+<p>Answer: I don&#8217;t know&#8230; need to learn about what other interfaces are
+available</p>
+
+<p>REVISED ANSWER: I can use the IP provided by my router.</p>
+
+<pre><code>ruby -run -e httpd . --port=4124 --bind-address=192.168.1.3
+</code></pre>
+
+<p>Then if I type <code>localhost:4124</code> in the browser, it don&#8217;t work, but if I
+type <code>192.168.1.3:4124</code> in the browser, IT WORKS. :)</p>
+
+<p>But to the original question, it turns out you can run ALL THREE of
+these:</p>
+
+<pre><code>ruby -run -e httpd . --port=4123 --bind-address=0.0.0.0
+ruby -run -e httpd . --port=4123 --bind-address=192.168.1.3
+ruby -run -e httpd . --port=4123 --bind-address=localhost
+</code></pre>
+
+<p>So the first and 3rd of these should be able to respond to</p>
+
+<pre><code>curl localhost:4123 &gt; /dev/null
+</code></pre>
+
+<p>It seems that the third (localhost) always wins. Makes sense. What about</p>
+
+<pre><code>curl 192.168.1.3:4123 &gt; /dev/null
+</code></pre>
+
+<p>And the more specific second one always wins. So I guess the OS will
+look for a match of interface+port before falling back to 0.0.0.0.
+Makes sense.</p>
+
+<h2>listen queue size</h2>
+
+<pre><code>socket.listen(10)
+</code></pre>
+
+<p>This means your socket will buffer up to 10 connections before
+<code>ECONNREFUSED</code> is return to the shits on the other side.</p>
+
+<p>If you&#8217;re getting a lot of ECONNREFUSED, it probably means users are
+already experiencing some some queue-based lag, and you should rethink
+your architecture, spin up more server instances, etc. But you can also
+just set to the max size via</p>
+
+<pre><code>server.listen(Socket::SOMAXCONN)
+</code></pre>
+
+<h2>A connection is a socket</h2>
+
+<p>When you accept() after binding, you&#8217;ll get a connection object, which
+is just a Socket, but different from your server socket; it&#8217;s just a
+file wrapper for that particular connection that you can write shit to.</p>
+
+<h2>quadruple of remote/ip/port must be unique</h2>
+
+<p>You can&#8217;t have more than one connection where</p>
+
+<pre><code>local addr, local port, remote addr, and remote port
+</code></pre>
+
+<p>are not totally unique. Hmmm, so where is this prevented? TODO</p>
+
+<h2>Close socket file descriptors</h2>
+
+<p>Why, doesn&#8217;t this happen automatically on exit/GC?</p>
+
+<ol>
+<li>GC might not clean up for you fast enough;</li>
+<li>Might hit file descriptor limit</li>
+</ol>
+
+
+<p>Wat wat wat wat in the boot.</p>
+
+<p>You can close the read side, or close the write side, or both. This make
+use of <code>shutdown</code>, and shutdown will close a side of a connection even
+if you&#8217;re dup&#8217;d file descriptors (explicitly or via fork). <code>close</code>
+wouldn&#8217;t actually close unless there were no other file descriptors
+holding on to that socket.</p>
+
+<h2>Keybase</h2>
+
+<p>Uses social media accounts to prove crypto identity.</p>
+
+<h2>Clients don&#8217;t need to bind</h2>
+
+<p>to a port when connecting to a server. For obvious reasons. Namely that
+a server needs to have a known/consistent port in order for clients to
+reach it, but a client can just send from any ol po,]rt.</p>
+
+<h2>Long ass timeouts</h2>
+
+<pre><code>require 'socket'
+socket = Socket.new(:INET, :STREAM)
+remote_addr = Socket.pack_sockaddr_in(666, 'machty.com')
+socket.connect(remote_addr)
+</code></pre>
+
+<p>This won&#8217;t fail any time soon. (Note if i&#8217;d given a BS DNS then it would: SocketError
+exception from getaddrinfo). Only after a long ass time do you get a
+ETIMEDOUT.</p>
+
+<p>getaddrinfo seems cool. I guess it&#8217;s the C function that does a DNS
+lookup? Nevermind, man <code>getaddrinfo</code> makes me cry.</p>
+
+<p>So when does ECONNREFUSED happen vs just a long ass timeout? I guess it
+means you&#8217;ve hit a server but a) no app is bound to the requested port
+or b) the queue is full, and probably c) some other reason. No that&#8217;s
+not valid; google.com:70 hangs for a while rather than ECONNREFUSED.</p>
+
+<p>Maybe localhost knows what&#8217;s connected or not? I have NO IDEA.</p>
+
+<h2><code>TIME_WAIT</code></h2>
+
+<p>If you close a socket with pending outbound data, it won&#8217;t discard that
+data but rather finish sending (and wait for ack) before totally closing
+the socket. This is the <code>TIME_WAIT</code> state. Unless you&#8217;ve enabled
+<code>REUSEADDR</code>, you&#8217;ll get an <code>EADDRINUSE</code> if you try to bind to a socket
+that&#8217;s still in <code>TIME_WAIT</code> state.</p>
+
+<h2><code>EAGAIN</code></h2>
+
+<p>Commonly seen in non-blocking IO operations when there&#8217;s no data
+available to read. Reading nonblockingly from a socket that hasn&#8217;t had EOF set yet but
+doesn&#8217;t have data at the moment would cause that.</p>
+
+<p>Non blocking reads will find any data in Ruby buffers, followed by
+kernel buffers. If there&#8217;s nothing in there, then blocking read is
+necessary.</p>
+
+<h2>Ruby IO.write</h2>
+
+<p><code>IO.write_nonblock</code> behavior maps to sys call <code>write()</code>, in that it can
+fail to write all the data you provided it. Ruby&#8217;s <code>IO.write</code> tries to
+be helpful and might internally call <code>write()</code> many times.</p>
+
+<p>A saturated <code>write()</code> followed immediately by <code>write()</code> will cause an
+<code>EAGAIN</code> because you haven&#8217;t given the kernel/network enough time to
+flush the data you gave it. This is when you&#8217;d use <code>IO.select</code> to let
+you know when a socket is available for writing/reading again.</p>
+
+<p>Wat wat wat. In the BOOT.</p>
+
+<p><code>select</code> returns an array of descriptors that are ready to be written
+to. I guess it blocks?</p>
+
+<p>Writes are blocked by TCP congestion prevention algo requirements
+(cwnd, rwnd, etc).</p>
+
+<p>There&#8217;s also <code>accept_nonblock</code> which <code>EAGAIN</code>s if there are no pending
+connection on dat queue.</p>
+
+<p><code>connect_nonblock</code> is sp</p>
+
+<h2>TPC Resets</h2>
+
+<p>http://en.wikipedia.org/wiki/TCP_reset_attack</p>
+
+<p>There&#8217;s a usually-0 flag in a packet that can be set to 1 that tells the
+receiver to stop using this TCP connection. Useful, for instance, when a
+computer&#8217;s crashed, gets a packet it has no context for, so it tells the
+sender to stop it, so that it might make a new connection and start from
+there.</p>
+
+<h2>Edge Device</h2>
+
+<p>http://en.wikipedia.org/wiki/Edge_device</p>
+
+<p>Basically, all the stuff that separates the public network (internet)
+from your private network.</p>
+
+<ul>
+<li>routers</li>
+<li>routing switches</li>
+</ul>
+
+
+<h2>traceroute</h2>
+
+<p>I&#8217;ve already written about this before, but traceroute is useful for
+tracing all the gateways your packet goes through to get to its
+destination.</p>
+
+<p>A gateway is any node that might forward packets along to some other
+destination. Could be a router, switch, etc. Could also be a protocol
+converter. Gateways could be software too.</p>
+
+<p>Anyway, traceroute makes use of ICMP <code>TIME_EXCEEDED</code> response.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Internet_Control_Message_Protocol">What is ICMP?</a></p>
+
+<p>One of the many protocols that can be communicated via packets. Packets
+have an 8 bit protocol field. The protocol values are decided by the
+IANA (just like common/reserved ports&#8230; MIND BLOWN).</p>
+
+<p>The list is here: http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</p>
+
+<h2><code>host google.com</code></h2>
+
+<p>I noticed that the DNS lookup results via <code>host google.com</code> differed
+almost each time I ran it.</p>
+
+<pre><code>google.com has address 74.125.226.72
+google.com has address 74.125.226.65
+google.com has address 74.125.226.68
+google.com has address 74.125.226.67
+google.com has address 74.125.226.64
+google.com has address 74.125.226.70
+google.com has address 74.125.226.78
+google.com has address 74.125.226.69
+google.com has address 74.125.226.73
+google.com has address 74.125.226.71
+google.com has address 74.125.226.66
+...
+</code></pre>
+
+<p>and then</p>
+
+<pre><code>google.com has address 74.125.226.2
+google.com has address 74.125.226.5
+google.com has address 74.125.226.8
+google.com has address 74.125.226.9
+google.com has address 74.125.226.6
+google.com has address 74.125.226.4
+google.com has address 74.125.226.3
+google.com has address 74.125.226.14
+google.com has address 74.125.226.7
+google.com has address 74.125.226.0
+google.com has address 74.125.226.1
+...
+</code></pre>
+
+<p>I&#8217;m asking the friendly folk at <code>##networking</code>. They turned me on to
+<code>dig</code>. <code>dig</code> is the most raw and flexible DNS lookup tool. <code>host</code> is
+apparently for chumps (i.e. it&#8217;s useful/quick/easy but not as much
+functionality).</p>
+
+<pre><code>dig google.com @ns1.google.com +short | sort | md5
+</code></pre>
+
+<p>This queries a specific name server&#8230;</p>
+
+<p>OK i have a bunch of questions:</p>
+
+<p>Why do DNS records contain
+<a href="http://en.wikipedia.org/wiki/Fully_qualified_domain_name">Fully Qualified Domain Names</a>
+as references to name servers? That seems to make no sense&#8230; you have
+to turn something like <code>ns1.google.com</code> into an IP by querying&#8230; the
+DNS system?</p>
+
+<p>Answer: http://en.wikipedia.org/wiki/Domain_Name_System#Circular_dependencies_and_glue_records</p>
+
+<ul>
+<li>GET www.example.com /
+
+<ul>
+<li>Look up record, find its NS records</li>
+<li>NS ns1.example.com</li>
+<li>Need to get IP of ns1.example.com (we need to issue another DNS
+request)</li>
+<li>&#8230; circular dependency: you have to look up a name server&#8217;s IP
+using that name server. Need some way to break dependency</li>
+<li><p>Dependency broken by <code>AUTHORITY SECTION</code>, e.g.</p>
+
+<p>;; AUTHORITY SECTION:
+google.com.             60      IN      SOA     ns1.google.com. dns-admin.google.com. 1566886 7200 1800 1209600 300</p></li>
+</ul>
+</li>
+</ul>
+
+
+<p>This is called the &#8220;glue&#8221;. It&#8217;s either in Authority or Additional
+section? (I should find this out.)</p>
+
+<p>Related: http://support.dnsimple.com/articles/vanity-nameservers/</p>
+
+<p>DNSimple allows &#8220;vanity&#8221; name servers, which lets you pretend like
+you&#8217;re a bigass enough company to own/maintain your own name servers,
+and anyone looking at your DNS records will see your fake name servers,
+like ns1.machty.com, but these servers obviously don&#8217;t actually exist;
+DNSimple provides this service by sending &#8220;glue&#8221; that maps your fake
+name servers to the IP addresses of their actual name servers.</p>
+
+<p>Top-level domains live under root (.).</p>
+
+<p>http://www.tldp.org/HOWTO/DNS-HOWTO-5.html</p>
+
+<p>That&#8217;s why sometimes you&#8217;ll see stuff ending in a period, like
+<code>ns1.dnsimple.com.</code>.</p>
+
+<pre><code>;; ANSWER SECTION:
+dnssimple.com.          597     IN      A       184.168.221.96
+</code></pre>
+
+<p>The dot is important! You know how you can just put <code>www</code> is the record
+value? You could also do a fully qualified shit e.g. <code>www.machty.com.</code>
+(note the period at the end).</p>
+
+<p>So my question is: when does the glue record get sent?</p>
+
+<p>Gimme the NS records for www.machty.com</p>
+
+<pre><code>$ dig machty.com NS
+...
+;; ANSWER SECTION:
+machty.com.             3481    IN      NS      ns1.dnsimple.com.
+machty.com.             3481    IN      NS      ns1a.dnsimple.com.
+machty.com.             3481    IN      NS      ns2.dnsimple.com.
+machty.com.             3481    IN      NS      ns2a.dnsimple.com.
+machty.com.             3481    IN      NS      ns3.dnsimple.com.
+machty.com.             3481    IN      NS      ns3a.dnsimple.com.
+machty.com.             3481    IN      NS      ns4.dnsimple.com.
+machty.com.             3481    IN      NS      ns4a.dnsimple.com.
+</code></pre>
+
+<p>Cool, so internally it&#8217;d need to look up ns1.dnsimple.com, so something
+like:</p>
+
+<pre><code>$ dig @ns1.dnsimple.com. www.machty.com
+</code></pre>
+
+<p>http://www.tldp.org/HOWTO/DNS-HOWTO-5.html</p>
+
+<blockquote><p>+norec means that dig is asking non-recursive questions so that we get to do the recursion ourselves. The other options are to reduce the amount of dig produces so this won&#8217;t go on for too many pages:</p></blockquote>
+
+<pre><code>a.root-servers.net. 518400  IN  A   198.41.0.4
+a.root-servers.net. 518400  IN  AAAA    2001:503:ba3e:0:0:0:2:30
+</code></pre>
+
+<p>AAAA records serve the same purpose as A records, just that they are
+IPv6.</p>
+
+<p>WebPageTest.org: breaks your requests down into blah blah blah why is
+this different than Network tab in devtools? Ah because it does it from
+many different browsers.</p>
+
+<p>162.212.105.24</p>
+
+<h2>Turntable.fm</h2>
+
+<p>Me: &#8220;there should be an app where multiple people have a playlist, but
+there&#8217;s a single player that alternates between different people&#8217;s
+playlists.&#8221;</p>
+
+<p>Person next to me: &#8220;yes, that&#8217;s turntable.fm&#8221;</p>
+
+<p>Should probably check that out.</p>
+
+<h2>non-blocking connect</h2>
+
+<p>http://stackoverflow.com/questions/8277970/what-are-possible-reason-for-socket-error-einprogress-in-solaris</p>
+
+<p>There are two error codes for &#8220;shit is underway&#8221; when doing a
+non-blocking connect/accept:</p>
+
+<pre><code> [EALREADY]         The socket is non-blocking and a previous connection attempt
+                    has not yet been completed.
+
+ [EINPROGRESS]      The socket is non-blocking and the connection cannot be com-
+                    pleted immediately.  It is possible to select(2) for comple-
+                    tion by selecting the socket for writing.
+</code></pre>
+
+<p>Nice docs yo. The difference is that <code>EINPROGRESS</code> is the error that
+gets returned if the operation has started but hasn&#8217;t finished (as
+opposed to not yet being able to start because it can&#8217;t allocate the
+resources it needs, file handlers, sockets, etc.). Most likely, the 3
+way handshake packets have been sent, but SYN-ACK hasn&#8217;t been sent.</p>
+
+<h2>Inversion of Control / DI</h2>
+
+<p>Matthew Beale and I were discussing whether the proposed
+<code>Ember.service()</code> violated the inversion of control that dependency
+injection is meant to provide, e.g.:</p>
+
+<pre><code>export default Controller.extend({
+  foo: Ember.service() // request that 'service:foo' be injected
+});
+</code></pre>
+
+<p>The fact that the consumer is requesting a specific thing to be injected
+into it seems like it might be an IOC violation, but to me, all that&#8217;s
+happening is that you&#8217;re specifying a provider, and it&#8217;s still up to the
+outside world to decide what it&#8217;ll specifically inject into you. Also,
+regardless of whether it&#8217;s explicit or not, if you use whatever is
+injected into you, you are implicitly specifying a duck-typed provider
+interface by the consumer; in other words, if we do things the classic
+way and use <code>app.inject('controller:article', 'articleLookup', 'service:article-lookup')</code>,
+this may seem like we&#8217;re moving all &#8220;control&#8221; to the injector, but
+still, the article controller is going access <code>articleLookup</code>&#8217;s
+properties and methods in a very specific way, which is the most
+powerful / crucial way that you could specify a dependency (by
+describing / using the duck type interface).</p>
+
+<p>So, tl;dr, your consumer is always going to be specifying its
+dependency, whether explicitly (<code>Ember.service()</code>) or implicitly (by
+whatever methods/properties it uses from <code>this.injectedThing</code>), and it&#8217;s
+therefore not a violation for a consumer to specify a Provider of the
+dependency, so long as it&#8217;s still possible for the injector to disregard
+the specifically-requested provider and substitute another one (e.g. a
+stub) in its place.</p>
+
+<p>This is what Angular&#8217;s <a href="https://github.com/angular/di.js">di.js</a> does
+and I think it&#8217;s correct. I want it.</p>
+
+<h2>Password-less SSH</h2>
+
+<p>I&#8217;ve done this a bunch of times before but always forget, now I&#8217;m
+writing about it:</p>
+
+<p>The remote server you&#8217;re SSHing into needs to have your public key if
+you want to be able to skip providing a password every time you ssh in.
+I wanted to use a different public rsa key, so I made a new one:</p>
+
+<pre><code>ssh-keygen
+</code></pre>
+
+<p>The optional passphrase you&#8217;re asked to supply is NOT the same password
+you would have otherwise needed to use to log into SSH (which we&#8217;re
+trying to avoid). Rather, it&#8217;s an additional security measure that&#8217;s
+required every time you want to use your private RSA key to try and
+decrypt data. I guess: if private RSA keys are a kind of password, the
+passphrase is a password for your password. It means that someone who
+steals your private key also needs to know your passphrase in order to
+use it.</p>
+
+<p>Anyway, let&#8217;s say I save the newly generated key pair to
+<code>~/.ssh/shortcut_rsa</code> and <code>~/.ssh/shortcut_rsa.pub</code>, now I want to make
+it possible to just type <code>ssh shortcut</code> and have it never ask me for a
+password again. This means I need a few things:</p>
+
+<ol>
+<li><code>ssh shortcut</code> should translate into the IP I&#8217;m connecting to
+(because I&#8217;d rather not type the IP every time and <code>shortcut</code> is not
+a domain name that&#8217;d do the translating for me)</li>
+<li><code>ssh shortcut</code> should supply the user name that the remote machine
+expects (so that I don&#8217;t have to do <code>ssh remote_user_name@shortcut</code>).</li>
+<li><code>ssh shortcut</code> should use the key pair I just generated w
+<code>ssh-keygen</code>.</li>
+</ol>
+
+
+<p>To do all of these things, I need to append the following to
+<code>~/.ssh/config</code>.</p>
+
+<pre><code>Host shortcut
+  HostName 162.123.123.123
+  User remote_user_name
+  IdentityFile "/Users/machty/.ssh/shortcut_rsa"
+  IdentitiesOnly yes
+</code></pre>
+
+<p>Pretty self explanatory and does the job. Note that you&#8217;ll be prompted
+for the passphrase you provided for your RSA private key, but that&#8217;ll be
+cached for a little while, and if you want, you can just save it to your
+Apple keychain if you feel safe doing that.</p>
+
+<p>The SSH config file also allows for wildcards, so you could literally do</p>
+
+<pre><code>Host *
+  HostName 162.123.123.123
+  User remote_user_name
+  IdentityFile "/Users/machty/.ssh/shortcut_rsa"
+  IdentitiesOnly yes
+</code></pre>
+
+<p>and then this would cause <code>ssh somerandombullshit</code> to connect to the
+same remote machine. Obviously that use case is a little nuts, but it&#8217;s
+useful if you wanna say &#8220;every remote machine I connect to should use
+this same RSA key pair&#8221;.</p>
+
+<h2>say+say+say = choir</h2>
+
+<p>I devised the most badass script.</p>
+
+<pre><code>#!/usr/bin/env sh
+
+# use/uncomment this instead to weed out the annoying singing voices
+#voices=`say -v ? | grep en_US | grep -v Cellos | grep -v Good | grep -v Hysterical | grep -v Bad | grep -v Pipe | grep -v Bells | cut -f1 -d ' '`
+voices=`say -v ? | grep en_US | cut -f1 -d ' '`
+num=`echo $voices | wc -w`
+echo $voices | xargs -n 1 -P $num say $* -v
+</code></pre>
+
+<h2>How many segments are sent per SSH character?</h2>
+
+<p>http://blog.hyfather.com/blog/2013/04/18/ssh-uses-four-tcp-segments-for-each-character/</p>
+
+<p>Answer: 4</p>
+
+<ol>
+<li>You: Hey SSH server, user pressed &#8216;b&#8217;</li>
+<li>SSH: cool, got it (ack)</li>
+<li>SSH: hey btw, this is what <code>bash</code> (or whatever shell) ended up doing
+with that character you type (description of screen update)</li>
+<li>You: cool, got it (ack)</li>
+</ol>
+
+
+<p>What&#8217;s the difference between a segment and a packet?</p>
+
+<ul>
+<li>Segment: TCP header + application data</li>
+<li>Packet: wraps segment w IP header information; a packet is a routable
+piece of data</li>
+</ul>
+
+
+<p>This seems like the best answer: http://superuser.com/a/505134</p>
+
+<p>A TCP segment is not enough information to know where to route data
+within a network; you need IP headers for that, and where do those shits
+live? In packets.</p>
+
+<p>Take a packet and rip off its IP head: voila, a packet. Take a packet
+and rip off its TCP (or UDP) head: voila, application data.</p>
+
+<p>Don&#8217;t forget &#8220;frames&#8221;: frames wrap packets. If you wanna send your shit
+over an ethernet, you need to wrap in a frame, whether wired or
+wireless. Frames have MAC addresses. MAC addresses are generally
+hard-wired into some hardware and are never expected to collide, lest
+undefined behavior.</p>
+
+<p>Now my question is: does TCP ever have access to IP headers? I guess it
+must get forwarded along in some way&#8230; then again I dunno.</p>
+
+<h2>RFC3439: Some Internet Architectural Guidelines and Philosophy</h2>
+
+<p>http://tools.ietf.org/html/rfc3439</p>
+
+<p>Clearly I need to read this.</p>
+
+<h2>Nagle&#8217;s Algo</h2>
+
+<p>When sending data:</p>
+
+<ol>
+<li>If there&#8217;s enough data in local packet buffer to comprise a whole TCP
+packet, send that shit.</li>
+<li>If no pending data in buffers and no pending acks, send immediately.</li>
+<li>If there&#8217;s a pending ack, and not enough data to fill a packet, put
+data in local buffer.</li>
+</ol>
+
+
+<p>This prevents protocols like telnet from saturating with
+one-packet-per-char traffic. For telnet, if you type a bunch of chars in
+a row, you could expect that the first char would send immediately and
+the following ones would buffer and then send once the first char&#8217;s ack
+came back.</p>
+
+<p>All Ruby servers disable this since Ruby does its own internal buffering
+in the socket lib. You disable by sending with NODELAY.</p>
+
+<h2>URG flag</h2>
+
+<p>Apparently you can break the FIFO-ness of TCP with Urgent data.</p>
+
+<p><code>Socket#send</code> is the same as <code>write</code> except that you can pass flags to
+<code>send</code>, e.g.</p>
+
+<pre><code>socket.send 'urgent data', Socket::MSG_OOB
+</code></pre>
+
+<p>OOB stands for out of band. Note that the receiver must use the same
+flag w <code>recv</code> to read the OOB data or else it won&#8217;t notice it.</p>
+
+<p>OOB is rarely used because:</p>
+
+<ul>
+<li>only one byte of urgent data can be sent</li>
+<li>there are issues w <code>select</code> wherein consumed urgent data continues to
+be reported as unread, requires additional state tracking to get
+right, etc.</li>
+</ul>
+
+
+<p>You could also use OOBINLINE flag to stick in an urgent byte amidst
+normal queued data, and <code>read</code> will stop once it hits an urgent thing.</p>
+
+<p>I&#8217;m guessing OOB is only a TCP thing since in UDP there&#8217;s no concept of
+connection and &#8220;in order&#8221;.</p>
+
+<h2>Datagram</h2>
+
+<p>Data + telegram. From RFC 1594:</p>
+
+<blockquote><p>“A self-contained, independent entity of data carrying sufficient information to be routed from the source to the destination computer without reliance on earlier exchanges between this source and destination computer and the transporting network.”</p>
+
+<p>The term datagram is often considered synonymous to packet but there are some nuances. The term datagram is generally reserved for packets of an unreliable service, which cannot notify the sender if delivery fails, while the term packet applies to any packet, reliable or not. Datagrams are the IP packets that provide a quick and unreliable service like UDP, and all IP packets are datagrams;[4] however, at the TCP layer what is termed a TCP segment is the sometimes necessary IP fragmentation of a datagram,[5] but those are referred to as &#8220;packets&#8221;.</p></blockquote>
+
+<p>So, datagrams imply unreliability of delivery, whereas packet could
+refer to reliable or unreliable packets. I guess a TCP segment is a
+packet. But you can&#8217;t call it a datagram, since the protocol makes it
+its business to be a shit.</p>
+
+<h2>Bill Burr</h2>
+
+<p>How&#8217;s your danish?</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T14:30:00-04:00" pubdate data-updated="true">Sep 6<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/09/06/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/09/06/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
