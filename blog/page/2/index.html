@@ -112,6 +112,214 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/07/28/daily-journal-2/">
+		
+			Daily Journal 2</a>
+	</h2>
+	<div class="entry-content">
+		<h2>User and Kernel</h2>
+
+<p>http://blog.codinghorror.com/understanding-user-and-kernel-mode/</p>
+
+<p>Non-idle tasks.</p>
+
+<p>The CPU graph is tasty. Red means kernel.</p>
+
+<p>CPU hardware knows all about kernels n shit. It isn&#8217;t just a software
+divide. CPU instructions and certain memory locations can only be
+accessed by the kernel, enforced by hardware. User mode makes it so that
+only the app crashes, not the entire system.</p>
+
+<p>http://en.wikipedia.org/wiki/Ring_(computer_security)</p>
+
+<p>Interesrserseting.</p>
+
+<p>x86 CPU hardware:</p>
+
+<ul>
+<li>0 is kernel</li>
+<li>3 is user</li>
+</ul>
+
+
+<p>1 and 2 are device drivers but they&#8217;re not often used. On Windows,
+device drivers can be user or kernel mode, mostly to the user, but video
+cards are often kernel level since they so perfy. In Vista+, the Windows
+Driver Display Model is such that only kernel mode is used for executing
+the GPU commands, but the translation from API to GPU now takes place in
+userland.</p>
+
+<p>Exceptions fire in kernel land I guess? Sometimes?</p>
+
+<h2>Old Foreman Orphans Sidekiq</h2>
+
+<p>After lots of starts/stops of foreman, I noticed lots of sidekiq
+instances with ppid 1. They was orphans. I killed em.</p>
+
+<h2>fspawn</h2>
+
+<p>Refers to the fork+exec approach to spawning a process.</p>
+
+<h2>Daemons</h2>
+
+<p>https://github.com/ghazel/daemons</p>
+
+<p>Library of fun little trinkets.</p>
+
+<ul>
+<li>given some-server.rb, let&#8217;s you write a some-server-control.rb</li>
+<li>inline the server inside such a daemon (you can still run it
+without forking via <code>run</code> command)</li>
+<li>manage multiple daemons</li>
+<li>Ability to take existing server and daemonize it; you do lose control
+over the daemon unless you&#8217;re a <code>ps</code>/<code>kill</code> JOURNEYMAN.
+
+<ul>
+<li>this takes advantage of the <code>fork</code> <code>getsid</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p>https://github.com/ghazel/daemons/blob/master/lib/daemons.rb#L45-L53</p>
+
+<pre><code># 1.  Forks a child (and exits the parent process, if needed)
+# 2.  Becomes a session leader (which detaches the program from
+#     the controlling terminal).
+# 3.  Forks another child process and exits first child. This prevents
+#     the potential of acquiring a controlling terminal.
+# 4.  Changes the current working directory to "/".
+# 5.  Clears the file creation mask (sets +umask+ to 0000).
+# 6.  Closes file descriptors (reopens +STDOUT+ and +STDERR+ to point to a logfile if
+#     possible).
+</code></pre>
+
+<p>Controlling terminal:</p>
+
+<p>http://www.gnu.org/software/libc/manual/html_node/Controlling-Terminal.html</p>
+
+<blockquote><p>An individual process disconnects from its controlling terminal when it calls setsid to become the leader of a new session.</p></blockquote>
+
+<p>Ah I get it:</p>
+
+<ul>
+<li>first fork is to orphan the child, but it&#8217;s still connected to a
+controlling terminal/session.</li>
+</ul>
+
+
+<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L201</p>
+
+<p>They actually loop through all known IO files to close file
+descriptors using ObjectSpace:</p>
+
+<p>http://www.ruby-doc.org/core-2.1.2/ObjectSpace.html</p>
+
+<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L221</p>
+
+<p>That&#8217;s pretty rad. I guess the GC uses it too.</p>
+
+<h2>.pid file</h2>
+
+<p>It&#8217;s a file in a well known location that contains only the pid of
+some running process, usually a daemon. Useful because daemons are often
+hard to detect, kinda look like forgotten orphan processes, and there
+might be multiple similar ones. But pid files let you look up the pid of
+the running process so that you can send it signals.</p>
+
+<h2><code>$0</code> or <code>$PROGRAM_NAME</code></h2>
+
+<p>If you run this script</p>
+
+<pre><code>fork {
+  $PROGRAM_NAME = "WAT"
+  sleep
+}
+</code></pre>
+
+<p>then <code>ps | grep WOOT</code> yields</p>
+
+<pre><code>62724 ttys022    0:00.00 WOOT
+</code></pre>
+
+<p>Woot wat wat wotasoasdas lol.</p>
+
+<h2><code>pidof</code></h2>
+
+<pre><code>brew install pidof
+
+$ pidof bash
+754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-28T20:43:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Them processes</h2>
+
+<p>Kernel</p>
+
+
+		
+		<a href="/blog/2014/07/28/daily-journal/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-28T08:16:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/07/26/daily-journal/">
 		
 			Daily Journal</a>
@@ -2501,147 +2709,6 @@ networking attached to it.</p>
 
 
 <time datetime="2014-07-08T14:31:00-04:00" pubdate data-updated="true">Jul 8<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/05/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Bandwidth</h2>
-
-<p>Grigorik&#8217;s book confused me when he switched from the bits/second
-definition of bandwidth to the more signal processing definition.</p>
-
-<pre><code>http://en.wikipedia.org/wiki/Bandwidth_(computing)
-vs
-http://en.wikipedia.org/wiki/Bandwidth_(signal_processing)
-</code></pre>
-
-<p>Computing bandwidth refers to bits/s. Signal bandwidth is the difference
-in the max and min Hz that you transmit on.</p>
-
-<p>This is interesting:</p>
-
-<blockquote><p>A key characteristic of bandwidth is that any band of a given width can
-carry the same amount of information, regardless of where that band is
-located in the frequency spectrum. For example, a 3 kHz band
-can carry a telephone conversation whether that band is at baseband
-(as in a POTS telephone line) or modulated to some higher frequency.</p></blockquote>
-
-<p>My understanding of this is that regardless of the modulation alphabet
-you use, modulation will always cause a signal to vary between a
-minimumm and maximum frequency, which determines the bandwidth of a
-signal. For example, transmitting a &#8220;01&#8221; might mean squeezing the waves
-together tightly until the next &#8220;letter&#8221; to transmit, and the tightest
-those waves are squeezed determines the maximum frequency, while &#8220;10&#8221;
-might might loosening the waves, and other letters could be some
-combination of the two, but the key thing here is that bandwidth
-determines the min and max frequencies that those waves can compress
-or expand to; any more and you might be interfering with someone else&#8217;s
-band.</p>
-
-
-		
-		<a href="/blog/2014/07/05/daily-journal/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-05T16:44:00-04:00" pubdate data-updated="true">Jul 5<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/01/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>window vs document events</h2>
-
-<p><code>window</code> and <code>document</code> have different events. Duh.</p>
-
-<p><code>window</code>:</p>
-
-<ul>
-<li>resize</li>
-</ul>
-
-
-<p><code>document</code>:</p>
-
-<ul>
-<li>DOMContentLoaded</li>
-</ul>
-
-
-<p>Breakdown of events and their originators:</p>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/Events</p>
-
-<p>Fun fact: DOMContentLoaded is considered a DOM mutation event.</p>
-
-<h2>Treat stubbed cordova as its own platform</h2>
-
-<p>I&#8217;m doing a Phonegap/Cordova app and it&#8217;s been tricky settling on a
-pattern for stubbing out the cordova library when I&#8217;m just running in
-Chrome or anywhere not in the actual native cordova wrapper, and I think
-I found the final solution: clone https://github.com/apache/cordova-js,
-define a new platform with a fake exec, have the fake exec look up some
-stubbed handlers that you can define in your app, (e.g.
-<code>window._stubbedCordovaHandlers[blahblah]</code>) and basically leave it up to
-your app to stub out all the native plugin services/actions. The effect
-of all of this is that your index.html always loads a cordova.js (which
-has some other conveniences like stick event handlers, pub sub channels,
-etc) but you don&#8217;t have to have a bunch of conditionals asking whether
-this is a stubbed version of the app or not.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-01T10:03:00-04:00" pubdate data-updated="true">Jul 1<span>st</span>, 2014</time></div>
 	
 
 

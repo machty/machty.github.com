@@ -1,0 +1,360 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Journal</h2>
+	<div class="entry-content"><h2>FTP</h2>
+
+<p>Plaintext, unless you&#8217;re using SFTP or some variant.</p>
+
+<p>FTP uses multiple connections: 1 control connection for sending
+commands and tracking current directory, etc, and a connection for
+actually streaming the file data.</p>
+
+<p>How the second connection (data) is established depends on active vs
+passive mode: in active mode, the server will try to connect back to the
+client at PORT+1, and in most modern cases, this will fail due to NATs
+and firewalls, hence passive mode (via PASV) command is meant to get
+around this. In passive mode, the client requests an IP and port from
+the server (via the control connection), and then the client makes the
+second connection to whatever the server returns. This works as clients can
+generally connect to servers without NAT/firewall issues.</p>
+
+<p>Note that active connections are rare. The man page for <code>ftp</code> is
+telling:</p>
+
+<pre><code>-A          Force active mode ftp.  By default, ftp will try to use passive mode
+            ftp and fall back to active mode if passive is not supported by the
+            server.  This option causes ftp to always use an active connection.
+            It is only useful for connecting to very old servers that do not
+            implement passive mode properly.
+</code></pre>
+
+<h2>Application-level gateway</h2>
+
+<p>http://en.wikipedia.org/wiki/Application-level_gateway</p>
+
+<p>TODO: learn more.</p>
+
+<h2>Process per connection</h2>
+
+<p>One way of handling a new connection is to fork and let the forked
+process handle that connection. Makes sense for the parent instance to
+use Ruby&#8217;s <code>Process.detach</code>, which doesn&#8217;t have a native kernel
+equivalent but is just a Ruby convenience that spins up a thread that
+calls <code>wait()</code> on the forked process to prevent it from becoming a
+zombie if the parent process exits before the forked one.</p>
+
+<p>Remember that forking isn&#8217;t available on Windows or JRuby.</p>
+
+<p><code>shotgun</code> is a Ruby server that forks per connection. Why? Isn&#8217;t this
+wasteful (relative to pre-forking solutions like Unicorn)? Yes, but it
+has specific purpose: assuming it&#8217;s not painfully expensive to spin up
+your server (like Rails), and that you don&#8217;t have a mechanism for
+reloading after code changes (like Rails), <code>shotgun</code> will fork per
+connection and entirely reload / spin up the rack server, less reloading
+the latest version of any Ruby code, thus not requiring you to manually
+restart your server.</p>
+
+<h2>Thread per connection</h2>
+
+<p>Typical state-sharing caveats apply when working with threads, hence
+it&#8217;s useful to thing about the simple unit of concurrency that will keep
+your threads isolate and minimize their access to shared data. That unit
+would be a connection; each thread should get its own connection object.
+Create a connection object, immediately create a new thread, and let
+that connection object fall out of scope in the creator thread so that
+only the newly spawned thread has access to it. Simple enough.</p>
+
+<h2>How to verify your code is on multiple cores</h2>
+
+<p>You have to dig in a little bit to verify that Ruby code you&#8217;re writing
+is actually being processed on multiple CPU cores. There are many
+variables:</p>
+
+<ol>
+<li>Does your system even have more than one core? (try <code>system_profiler | grep 'Total Number of Cores'</code> to find out, probably some other ways too)</li>
+<li>Does your Ruby have a GIL? (MRI does, Rubinius and JRuby don&#8217;t)</li>
+<li>Some third thing to pad my arbitrary list of bullshit.</li>
+</ol>
+
+
+<p>Anyway, one easy way is to run the following code:</p>
+
+<pre><code>NUM_CORES = 2
+
+threads = []
+NUM_CORES.times do |t|
+  threads &lt;&lt; Thread.new do
+    log_every = 1000000
+    i = 0
+    loop do
+      i += 1
+      if i == log_every
+        i = 0
+        putc t.to_s
+      end
+    end
+  end
+end
+
+threads.each(&amp;:join)
+</code></pre>
+
+<p>Running this on MRI Ruby results in 100% CPU usage. Running in JRuby
+yields 200%, which means two cores are operating at 100%. Pretty rad,
+yes?</p>
+
+<p>CPU usage reported by activity monitor or <code>top -o cpu</code>.</p>
+
+<h2>Preforking</h2>
+
+<p>e.g Unicorn</p>
+
+<p>What&#8217;s nice is that the kernel will handle load-balancing for us: when
+there are no incoming requests, you have N forked instances blocked on
+<code>accept</code>, and the kernel will choose which instance gets the next
+incoming request. If all forked instances are busy, the kernel will just
+queue up the request internally. If the queue gets full, you&#8217;ll get an
+ECONNREFUSED. Easy peazy.</p>
+
+<p>Unicorn (and probably Rainbows) does some extra tracking on child
+processes to make sure it&#8217;s not getting stuck on long requests, etc.</p>
+
+<p>Main disadvantage is memory usage. By the time you fork, if the parent
+process is 100 mb, then 4 forks and you&#8217;re at 500 mb&#8230; unless 1) your
+OS has COW and 2) you don&#8217;t write to it all that much.</p>
+
+<h2>Reactor</h2>
+
+<p>e.g. Node.js, Twisted, EventMachine</p>
+
+<p>High levels of concurrency (not necessarily parallelism) achievable,
+relative to threading/forking models, which hit their RAM limit much
+faster (Reactor patterns mean that everything is just heap allocations
+on the same thread).</p>
+
+<p>Impacts on programming model:</p>
+
+<ul>
+<li>No processes/threads, so no shared memory, synchronization, etc, to
+have to worry about</li>
+<li>Don&#8217;t block the single Reactor thread (because nothing else will be able to
+run). You wouldn&#8217;t have to worry about this in thread/processland.
+This is why if you&#8217;re using EventMachine, your gems must be
+event-machine aware, otherwise they&#8217;ll block (which would be fine in a
+threading/forking environment).</li>
+</ul>
+
+
+<h2>Node cluster</h2>
+
+<p>http://nodejs.org/api/cluster.html</p>
+
+<p>Based on the fact that you can use child process forking to split heavy
+duty work into process that can each live on a different core, if that&#8217;s
+what you&#8217;re about.</p>
+
+<p>Note that there&#8217;s no C-like or Ruby-like fork in Node; you can&#8217;t just
+call fork and then have both the parent and newly forked child process
+continue execution from that <code>fork()</code> invocation&#8230;</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T19:57:00-04:00" pubdate data-updated="true">Sep 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/09/15/daily-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/09/15/daily-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

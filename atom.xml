@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-15T19:13:37-04:00</updated>
+  <updated>2014-09-20T12:20:34-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,782 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journeaux]]></title>
+    <link href="http://machty.github.com/blog/2014/09/17/daily-journeaux/"/>
+    <updated>2014-09-17T08:08:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/09/17/daily-journeaux</id>
+    <content type="html"><![CDATA[<h2>nginx book</h2>
+
+<p>This is nice: http://aosabook.org/en/nginx.html</p>
+
+<p>Some random notes:</p>
+
+<p>For CPU-bound loads, number of nginx workers should equal the number of
+cores (&#8220;TCP/IP, doing SSL, or compression&#8221;). For IO-bound stuff
+(&#8220;serving different sets of content from storage, or heavy proxying&#8221; &#8211;
+presumably teh &#8220;different sets&#8221; is important because if it were
+the same stuff, it&#8217;d probably be cached which I guess means the IO would
+be negligible? unsure) &#8211; you might want 1.5-2 times the number of
+cores.</p>
+
+<h2>SSL/TLS random questions:</h2>
+
+<p>I have so many misconceptions? For anyone who reads this, this is stream
+of thought as I try to answer my own questions before looking shit up.</p>
+
+<p>How come domains are signed and not IPs?</p>
+
+<p>Reasoned guess: first off, everyone can encrypt data. It&#8217;s just that the
+key thing that TLS brings in is certification of a sending. It&#8217;s not
+enough to say &#8220;yo here&#8217;s my public key&#8221;, you still have to answer the
+question &#8220;uh ok yes but who are you?&#8221;. Certificate authority to the
+rescue.</p>
+
+<p>So what if CA&#8217;s certified IPs, rather than domain names (maybe they do,
+I don&#8217;t actually know at this point)? Some ideas come to mind:</p>
+
+<ul>
+<li>DNS can map to multiple IPs, and a single IP might load balance to
+many different servers, all of which should be able to (de)/encrypt
+incoming traffic.</li>
+</ul>
+
+
+<p>That&#8217;s actually probably the only reason. I was originally thinking
+that since IPs can change, you might certify server A and then the next
+day the IP changes to server B, and that that would mean the CA is
+giving a stamp of approval to the wrong server, but then, duh, it&#8217;s key
+pairs that are being validated, and server B wouldn&#8217;t have these keys
+and wouldn&#8217;t know how to do the handshake. I think this is close to
+correct, it&#8217;s just I&#8217;m forgetting everything that happens internally
+within the handshake.</p>
+
+<p>http://en.wikipedia.org/wiki/Transport_Layer_Security</p>
+
+<h2>Symmetric Key</h2>
+
+<p>A single key encrypts plaintext and decrypts the ciphertext generated
+from the encryption.</p>
+
+<p>Example: AES.</p>
+
+<h2>Cipher suite</h2>
+
+<p>https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4</p>
+
+<p>A triple of</p>
+
+<ul>
+<li>authentication</li>
+<li>encryption</li>
+<li>and message authentication c</li>
+</ul>
+
+
+<h2>SSL / TLS</h2>
+
+<p>Lots of people use them interchaangeably, but SSL was originally created
+at Netscape and used to be implemented at the application layer, living
+on top of TCP. When it was IETF standardized, it was renamed TLS and
+moved out of the application layer.</p>
+
+<p>TLS provides:</p>
+
+<ul>
+<li>encryption
+
+<ul>
+<li>obfuscate data transmitted from one computer to another</li>
+<li>example: plaintext means zero encryption and easily breakable
+ciphertext means shitty encryption</li>
+</ul>
+</li>
+<li>authentication</li>
+<li>verify that you&#8217;re talking to who you think you&#8217;re talking to</li>
+<li>example: the CA validates the certificate that a server sends you</li>
+<li>integrity
+
+<ul>
+<li>detect message forgery or tampering</li>
+<li>example:</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Beware the intermediaries</h2>
+
+<p>Intermediaries are caching servers, gateways, web accelerators, content
+filters, blah blah blah, all the stuff that&#8217;s come out to aid and extend
+HTTP. They&#8217;re often transparent to the end user, but they come with the
+limitation that if you start wanting to deviate from HTTP on port 80 in some
+application specific way, you&#8217;re boned. And it&#8217;s kinda rare to find
+other ports that are open: 80 and 443 (HTTPS) are usually open but
+everything else is often closed. These intermediaries might improperly
+try to apply their logic to the non HTTP, etc, there&#8217;s no easy way to
+detect when or when not to apply.</p>
+
+<p>Solution: HTTPS tunnel all the things. All data is obfuscated from
+intermediaries and intermediaries have no way of known whether the
+encrypted data is HTTP or some custom proprietary crazy thing.</p>
+
+<h2>Self-signed certificates</h2>
+
+<p>http://www.akadia.com/services/ssh_test_certificate.html</p>
+
+<p>Things learned:</p>
+
+<ul>
+<li>&#8220;If the private key is no longer encrypted, it is critical that this file only be readable by the root user!&#8221;</li>
+<li>You can remove the DES from the private key so that you don&#8217;t have to
+type in the password all the god damn time when your server starts.
+(Verified this with a node app)</li>
+</ul>
+
+
+<p>Turns out you could also just run the following:</p>
+
+<pre><code>openssl req -new 
+</code></pre>
+
+<p>So why is DES required at all? I&#8217;m guessing it&#8217;s possible to generate a
+CSR without it, right?</p>
+
+<h2>ALPN: Application-Layer Protocol Negotiation</h2>
+
+<p>Note to dummy: there&#8217;s no TLS 3 way handshake. You&#8217;re thinking of TCP
+ACK SYN SYNACK that has to happen before app data is exchanged.</p>
+
+<p>ALPN takes place during the</p>
+
+<h2>SNI: Server Name Indication</h2>
+
+<p><a href="https://www.ietf.org/rfc/rfc3546.txt">rfc, page 8</a></p>
+
+<p>If you have a server that you want to host multiple sites with their own
+respective TLS certificates,</p>
+
+<h2>self-signed-certificate</h2>
+
+<p>Useful for testing SSL before you go ahead and buy a certificate for 3rd
+party validation.</p>
+
+<h2>AES vs RSA</h2>
+
+<p>AES is symmetric, and generally speaking symmetric encryption/decryption
+is a lot faster than assymetric, hence AES is used for the
+encryption/decryption of data.</p>
+
+<h2>Sprite gotchas</h2>
+
+<p>I used to think sprites were bitchin; save HTTP requests, combine all
+your images into one. Obviously, these are lame application-level
+optimizations/hacks to cover the ass of the transport layer&#8217;s (HTTP&#8217;s)
+shortcomings (addressed in SPDY / HTTP 2.0).</p>
+
+<p>Downsides of sprites:</p>
+
+<ul>
+<li>all the application-layer crap you have to do to handle it</li>
+<li>change a single pixel of a single image and you&#8217;ve busted a massive
+cached of all the other images in the sprite</li>
+<li>memory intensive; you might not be using each image but you have to
+load all of it in memory, might be too much for mobile clients</li>
+</ul>
+
+
+<h2>Octet</h2>
+
+<p>It means byte. Saw it all over the place in the
+<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-http2/?include_text=1">HTTP 2 spec draft</a></p>
+
+<h2>nginx</h2>
+
+<p>After <code>brew install nginx</code></p>
+
+<pre><code>Docroot is: /usr/local/var/www
+
+The default port has been set in /usr/local/etc/nginx/nginx.conf to 8080 so that
+nginx can run without sudo.
+
+To have launchd start nginx at login:
+    ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
+Then to load nginx now:
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.nginx.plist
+Or, if you don't want/need launchctl, you can just run:
+    nginx
+
+WARNING: launchctl will fail when run under tmux.
+</code></pre>
+
+<p>What is docroot?</p>
+
+<ul>
+<li>It&#8217;s a file&#8230; not a directory?</li>
+<li>But you can delete it and replace with a directory and put an
+index.html in there and it works</li>
+<li>So I guess there&#8217;s some default configuration of nginx that just hosts
+static files from this doc root directory</li>
+</ul>
+
+
+<p>What do them commands does?</p>
+
+<pre><code>ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
+</code></pre>
+
+<p>What are launchd and launchctl?</p>
+
+<p><code>launchd</code> is a daemon (conventions dictate that daemons end in a <code>d</code>).
+<code>launchctl</code> is what you use to control that daemon. So if you want to
+schedule something to start</p>
+
+<p>What&#8217;s the <code>mxcl</code> in <code>homebrew.mxcl.redis.plist</code>?</p>
+
+<p>It refers to <code>mxcl</code>, maintainer of Homebrew. Just normal reverse domain
+name notation. So does that mean any homebrew-installed domains get
+prefixed like that? I&#8217;m guessing <code>mxcl</code> also made the Redis recipe.
+Or maybe every homebrew daemon gets prefixed like that? Not sure, who
+cares.</p>
+
+<pre><code> In the launchd lexicon, a "daemon" is, by definition, a system-wide service of
+ which there is one instance for all clients. An "agent" is a service that runs
+ on a per-user basis. Daemons should not attempt to display UI or interact
+ directly with a user's login session. Any and all work that involves interacting
+ with a user should be done through agents.
+</code></pre>
+
+<p><a href="https://developer.apple.com/library/mac/technotes/tn2083/_index.html">TN2083 - Daemons and Agents</a></p>
+
+<p>Wow, &#8220;Daemonomicon&#8221; is an awesome word: &#8220;formal definition of the types
+of bg programs you can write&#8221;.</p>
+
+<ul>
+<li>bootstrap server: launchd</li>
+<li>root session: first and last session. Boot-time processes and daemons
+live here. User-independent. e.g. <code>mDNSResponder</code></li>
+<li>login session: proceses launched by or for a user live in login
+session. Login sessions are associated w authenticated users. Each
+user</li>
+</ul>
+
+
+<p>If I</p>
+
+<h2>Origins of TTY</h2>
+
+<p>http://www.linusakesson.net/programming/tty/</p>
+
+<ul>
+<li>stock tickers, then ASCII teletype within a network called Telex.</li>
+<li>Telex was a network that used level of current to respresent different
+characters, vs different voltages used by analog telephone shit</li>
+<li>Telex existed before integration w computers</li>
+<li>When command lines became the norm, teletypes were used as input and
+output since they were readily available on the market</li>
+<li>Lots of different models, needed to standardize in some way; UNIX
+philosophy dictated letting kernel handle low level word length, baud
+rate, flow control, etc., later things like color output, cursor
+movement, etc, was left to application (not kernel)</li>
+<li>Line editing is managed by OS-provided line discipline. Default is
+cooked/canonical mode. raw mode disables things like editing,
+backspace, and generally disables any IO processing within the line
+discipline.</li>
+</ul>
+
+
+<p>Skipping ahead, you can force your terminal into stty raw mode via</p>
+
+<pre><code>stty raw #enable
+stty -raw #disable
+</code></pre>
+
+<p>Now I know how to write a Ruby impl of Press Any Key</p>
+
+<pre><code>print "Press any key... "
+
+begin
+  system("stty raw -echo")
+  c = STDIN.getc
+ensure
+  # re-enable
+  system("stty -raw echo")
+end
+
+puts "Thanks!"
+</code></pre>
+
+<p>Note that it&#8217;ll consume CTRL-C as well rather than signalling an
+interrupt (hence CTRL-C prints &#8220;Thanks!&#8221; rather than terminating
+immediately).</p>
+
+<p>This is also how any text editor functions.</p>
+
+<p>This must be what&#8217;s happening when I kill some script when it doesn&#8217;t
+expect it and then my terminals fucked. Typing in <code>stty -raw</code> even
+though I can&#8217;t see it probably would fix it&#8230; need to try.</p>
+
+<p>Back to the thing:</p>
+
+<ul>
+<li>Kernel provides many line disciplines, only one attached to serial
+device at a time. Default is <code>n_tty</code>. I guess that&#8217;s what we&#8217;re
+configuring when we futz w <code>stty</code></li>
+<li>Other disciplines are for things like packet switched data</li>
+<li><a href="http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/drivers/char/n_tty.c">tty C source code</a></li>
+<li>UART (Universal Async Receiver and Transmitter): converts teletype
+signal into bytes that the OS can process. OS has a UART driver.</li>
+<li>TTY driver: allows user to kill/suspend an infinite looped program,
+bg processes can process til they try to write to terminal (at which
+point they suspend), and user input to fg process only.
+(implemented in <code>tty_io.c</code>)</li>
+<li>TTY Device: triplet of UART driver, line discipline, and TTY driver.</li>
+<li>TTY devices live in <code>/dev</code> w file mode <code>c</code> for &#8220;Character special
+file&#8221;. To manipulate one, you need ownership of the device file
+(e.g. via <code>login</code>).</li>
+<li>TTYs are just objects. Not alive. Other things plug into it. Those
+other things have execution contexts.</li>
+<li>pty = pseudoterminal, as opposed to TTY.</li>
+</ul>
+
+
+<p><code>ps -o stat</code> prints out <code>Ss</code> <code>Ss+</code>, etc&#8230; here&#8217;s what the capital
+letters mean:</p>
+
+<pre><code>R   Running or runnable (on run queue)
+D   Uninterruptible sleep (waiting for some event)
+S   Interruptible sleep (waiting for some event or signal)
+T   Stopped, either by a job control signal or because it is being traced by a debugger.
+Z   Zombie process, terminated but not yet reaped by its parent.
+</code></pre>
+
+<p>Most things are in <code>S</code>. An example of <code>R</code>:</p>
+
+<pre><code>ruby -e 'loop {}'
+</code></pre>
+
+<p><code>s</code> means session group leader. <code>+</code> means process is part of foreground
+process group.</p>
+
+<ul>
+<li>Ctrl Z suspends a process, puts it in <code>T</code> state.</li>
+</ul>
+
+
+<p>Jobs, e.g. <code>fg</code> and <code>bg</code> are just process groups. Consider</p>
+
+<pre><code>ruby -e 'loop {}'  | grep a | grep a | grep a
+</code></pre>
+
+<p>This causes as CPU-intensive loop and will be in R state.</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 45754 45014 45754      0    4 R+   s045    7:03.43 ruby -e loop {}
+machty 45755 45014 45754      0    4 S+   s045    0:00.00 grep a
+machty 45756 45014 45754      0    4 S+   s045    0:00.00 grep a
+machty 45757 45014 45754      0    4 S+   s045    0:00.00 grep a
+</code></pre>
+
+<p>and when I suspend:</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 45754 45014 45754      0    4 T    s045    7:29.05 ruby -e loop {}
+machty 45755 45014 45754      0    4 T    s045    0:00.00 grep a
+machty 45756 45014 45754      0    4 T    s045    0:00.00 grep a
+machty 45757 45014 45754      0    4 T    s045    0:00.00 grep a
+</code></pre>
+
+<p>Everything below it suspends.</p>
+
+<p><code>jobs</code> are tied to session leaders, and terminals are session leaders.
+If I go to another tmux pane and type <code>jobs</code>, the suspended job <em>won&#8217;t</em>
+show up; I have to be in the same terminal that started it. TODO: can I
+change session IDs?</p>
+
+<p>If I <code>bg 1</code>, the following happens:</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 45754 45014 45754      0    4 R    s045    7:39.63 ruby -e loop {}
+machty 45755 45014 45754      0    4 S    s045    0:00.00 grep a
+machty 45756 45014 45754      0    4 S    s045    0:00.00 grep a
+machty 45757 45014 45754      0    4 S    s045    0:00.00 grep a
+</code></pre>
+
+<p>Note how it&#8217;s back to running, but note the missing foreground <code>+</code>. <code>fg 1</code>
+would bring it back.</p>
+
+<p>Note that we could turn one of those greps into <code>R</code> if it was actively
+processing data, e.g.</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 46054 45014 46054      0    4 R+   s045    0:37.84 ruby -e loop { puts "a" }
+machty 46055 45014 46054      0    4 R+   s045    0:45.56 grep a
+machty 46056 45014 46054      0    4 R+   s045    0:27.01 grep b
+machty 46057 45014 46054      0    4 S+   s045    0:00.00 grep a
+</code></pre>
+
+<p>(Actually, the first 3 R&#8217;s might be S&#8217;s if you re-run this command;
+there&#8217;s a race condition as to whether the CPU is actually running code
+or whether it&#8217;s blocked on an IO syscall waiting for piped data to come
+in, but the last grep is always S+ because it never gets output from the
+<code>grep b</code>).</p>
+
+<p>A Job is a Processs Group.</p>
+
+<p>If you&#8217;re just starting/stopping/piping processes, all those child
+processes with have a parent process ID of <code>bash</code>&#8217;s pid.</p>
+
+<p>What constitutes a job/process group? Piped commands for one.
+Let&#8217;s see about Process Subsitution. Answer: process substitution
+doesn&#8217;t consider it as a pipe. It considers it as a shit of epic
+fartitude. In other words, process substitution ends up being miserably
+old and mortal and definitely going to die. In other words, process
+substitution is not in the same process group. It&#8217;s its own process
+group. If you do <code>echo &lt;(some long living thing)</code>, the long living thing
+will survive as a sibling process, in its own process GROUP WHO CARES.</p>
+
+<p>You can only read from  / write to TTY if you&#8217;re foreground. If you&#8217;re
+not <code>fg</code> and you try and write to TTY, kernel will suspend your ass.</p>
+
+<ul>
+<li><code>ioctl</code> is the UNIX swiss army knife; manipulates special files like
+terminals.</li>
+<li><code>ioctl</code> requests must be initated from processes, so the kernel can&#8217;t
+asyncly communicate w an application unless the app asked for it.</li>
+<li>Signals are how kernel communicates asyncly w a process. Messy and
+error prone they are.</li>
+</ul>
+
+
+<p>Question: nohup detaches into its own session id to prevent closing on
+SIGHUP&#8230; why does it have to do that? Why can&#8217;t it just ignore that
+signal? Let&#8217;s see.</p>
+
+<pre><code>Signal.trap(:HUP) do
+  puts "I WILL NOT"
+end
+sleep
+</code></pre>
+
+<p>If I ssh localhost and run that in background (with <code>&amp;</code>) and then
+logout, it stays running, PPID changes to 1 (root). So how is that
+different than nohup? TODO: find out. Something with setsid, etc.</p>
+
+<p>SIGINT&#8217;s originate from the terminal&#8230; is it correct to say they
+originate from TTY? I think it is based on the <code>n_tty.c</code> code.
+Also, in raw mode it doesn&#8217;t even fire. COOL.</p>
+
+<ul>
+<li>SIGPIPE isn&#8217;t just an error but also a way to know whoever was
+listening to you has stopped listening to you, e.g. <code>yes | head</code>.</li>
+<li>SIGSTOP is to SIGTSTP as SIGKILL is to SIGQUIT.</li>
+<li>SIGCONT can be sent to a ^Z-suspended process. It behaves as if you
+started the process with <code>&amp;</code>. It&#8217;s running, but it&#8217;s bg. In other
+words, if you have a suspended process 12345, <code>bg 1</code> or
+<code>kill -CONT 12345</code> would do the same thing; it&#8217;d start running in the
+background, spitting out output</li>
+<li>You can break shit with
+<code>ruby -e 'Signal.trap(:TTIN) { puts "wat" }; sleep 1; gets' &amp;</code>
+(recursive SIGTTIN). You try and write to TTY in the background and
+then keep ignoring the signal that it&#8217;s failing. I don&#8217;t know what
+causes the deadlock though, but <em>something</em> screwing up sounds right.</li>
+<li>If you press ^Z, that sends a message to the foreground process group.
+The line discipline sends <code>SIGTSTP</code> to the foreground process group.
+This will suspend the whole process group, whatever the main</li>
+</ul>
+
+
+<p>Question: if you use pipes combined with <code>&amp;</code>, what gets put into the
+background? All tasks? Answer (I think): <code>&amp;</code> ultimately results in a
+process group getting put into the background, and a process group
+contains any pipes, child processes, etc, so it <em>must</em> apply to all of
+the different processes as a whole, and there&#8217;s no way to say that only
+one of the pipe segments runs in the background.</p>
+
+<p>Fun fact: you can reimplement the default ^Z behavior as follows:</p>
+
+<pre><code>has_ignored = false
+Signal.trap(:TSTP) do
+  if has_ignored
+    Process.kill(:STOP, Process.getpgrp)
+  else
+    has_ignored = true
+    puts "ignoring"
+  end
+end
+
+sleep
+</code></pre>
+
+<p>TL;DR the default SIGTSTP ^Z handler fires a STOP. You can catch TSTP
+and immediately do the same for the same effect.</p>
+
+<p>Vim&#8217;s source code (and probably everyone&#8217;s) does some variant of</p>
+
+<pre><code>settmode(TMODE_COOK);
+kill(0, SIGTSTP);       /* send ourselves a STOP signal */
+</code></pre>
+
+<p>So, you return TTY mode to cook mode.</p>
+
+<ul>
+<li>If you run something like <code>echo "wat" | less &amp;</code>, you&#8217;ll immediately
+see <code>[2]+  Stopped   echo "wat" | less</code> because <code>less</code> is always going
+to try and write to TTY in a raw manner&#8230;?</li>
+<li>If you suspend, say, vim, vim will catch the SIGTSTP, move the cursor
+to the last line of the screen w control signals (it&#8217;s still attached
+to TTY) and then fires a SIGSTOP.</li>
+<li>Once stopped, a SIGCHLD is sent to the session leader with the pid of
+the suspended process. When all processes in fg have been suspended
+(T&#8217;d), the current TTY config is stashed for later restoration
+(<code>stty -g</code> is one way of doing this).</li>
+</ul>
+
+
+<p>So why doesn&#8217;t ^Z suspend bash?</p>
+
+<p>Ahh, so here&#8217;s how you get TTOU to fire (and cause a process to suspend)</p>
+
+<pre><code>ruby -r "io/console" -e "IO.console.raw { puts 'wat' }" &amp;
+</code></pre>
+
+<p>Note that if we hadn&#8217;t used <code>.raw</code> to put TTY in raw mode, it would have
+just printed &#8220;wat&#8221; into the same terminal even though the process is
+running in the background, but if you grab full control of the TTY with
+<code>raw</code>, it&#8217;ll cause a TTOU.</p>
+
+<p>You can go in and configure another TTY to update its rows/cols. I can
+fuck w the vim in another tmux pane, tell it its skinnier/wider than it
+is, but once i resized a tmux pane then BOOM it fires its own tty
+commands, and tty fires a SIGWINCH, and then that causes vim to query
+the tty for the current width and repaint.</p>
+
+<p>Ah: realization: the ultimate decider in whether TTOU fires is whether
+topstop</p>
+
+<h2><code>read</code></h2>
+
+<pre><code>read words &lt; &lt;(echo "wat")
+echo $words
+</code></pre>
+
+<h2>resetting the keyboard when things go crazy</h2>
+
+<p><code>reset</code>, or typing Escape and c.</p>
+
+<pre><code>stty raw
+reset
+</code></pre>
+
+<p>and we&#8217;re back. It resets your TTY driver, I guess.</p>
+
+<h2><code>yes</code></h2>
+
+<p>Repeatedly enter <code>y</code> for saying yes to everything. Like the dropper bird
+from the simpsons when homer gets fat. You can also do <code>yes no</code> to say
+other things.</p>
+
+<h2>Ack</h2>
+
+<p>is written in Perl.</p>
+
+<h2>100 Continue status</h2>
+
+<p>An HTTP 1.1 mechanism.</p>
+
+<p>http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html</p>
+
+<p>In some cases, a server knows just by looking at request headers that it
+won&#8217;t process the request, making it potentially wasteful for the client to send a
+giant doomed-to-fail payload. In these cases, the client can decide not
+the send the full payload unless the server has told it &#8220;based on your
+headers, you should Continue sending this full payload because I don&#8217;t
+see any reason why it should fail, just by looking at the headers.&#8221;</p>
+
+<p>To opt into this, the client must provide the following header:</p>
+
+<pre><code>Expect: 100-continue
+</code></pre>
+
+<p>The server will see this, decide if the request will succeed, and if so,
+it send back 100 Continue and keeps reading from the input stream.
+Client then sends the whole payload.</p>
+
+<p>Proxies can reject if it knows the next-hop server is HTTP 1.0 or less
+with a 417 Expectation Failed.</p>
+
+<h2>IOS8 breaks file uploads in Safari</h2>
+
+<p>http://blog.fineuploader.com/2014/09/10/ios8-presents-serious-issues-that-prevent-file-uploading/</p>
+
+<p>Jesus. No workaround? Apple, you suck.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/09/15/daily-journal/"/>
+    <updated>2014-09-15T19:57:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/09/15/daily-journal</id>
+    <content type="html"><![CDATA[<h2>FTP</h2>
+
+<p>Plaintext, unless you&#8217;re using SFTP or some variant.</p>
+
+<p>FTP uses multiple connections: 1 control connection for sending
+commands and tracking current directory, etc, and a connection for
+actually streaming the file data.</p>
+
+<p>How the second connection (data) is established depends on active vs
+passive mode: in active mode, the server will try to connect back to the
+client at PORT+1, and in most modern cases, this will fail due to NATs
+and firewalls, hence passive mode (via PASV) command is meant to get
+around this. In passive mode, the client requests an IP and port from
+the server (via the control connection), and then the client makes the
+second connection to whatever the server returns. This works as clients can
+generally connect to servers without NAT/firewall issues.</p>
+
+<p>Note that active connections are rare. The man page for <code>ftp</code> is
+telling:</p>
+
+<pre><code>-A          Force active mode ftp.  By default, ftp will try to use passive mode
+            ftp and fall back to active mode if passive is not supported by the
+            server.  This option causes ftp to always use an active connection.
+            It is only useful for connecting to very old servers that do not
+            implement passive mode properly.
+</code></pre>
+
+<h2>Application-level gateway</h2>
+
+<p>http://en.wikipedia.org/wiki/Application-level_gateway</p>
+
+<p>TODO: learn more.</p>
+
+<h2>Process per connection</h2>
+
+<p>One way of handling a new connection is to fork and let the forked
+process handle that connection. Makes sense for the parent instance to
+use Ruby&#8217;s <code>Process.detach</code>, which doesn&#8217;t have a native kernel
+equivalent but is just a Ruby convenience that spins up a thread that
+calls <code>wait()</code> on the forked process to prevent it from becoming a
+zombie if the parent process exits before the forked one.</p>
+
+<p>Remember that forking isn&#8217;t available on Windows or JRuby.</p>
+
+<p><code>shotgun</code> is a Ruby server that forks per connection. Why? Isn&#8217;t this
+wasteful (relative to pre-forking solutions like Unicorn)? Yes, but it
+has specific purpose: assuming it&#8217;s not painfully expensive to spin up
+your server (like Rails), and that you don&#8217;t have a mechanism for
+reloading after code changes (like Rails), <code>shotgun</code> will fork per
+connection and entirely reload / spin up the rack server, less reloading
+the latest version of any Ruby code, thus not requiring you to manually
+restart your server.</p>
+
+<h2>Thread per connection</h2>
+
+<p>Typical state-sharing caveats apply when working with threads, hence
+it&#8217;s useful to thing about the simple unit of concurrency that will keep
+your threads isolate and minimize their access to shared data. That unit
+would be a connection; each thread should get its own connection object.
+Create a connection object, immediately create a new thread, and let
+that connection object fall out of scope in the creator thread so that
+only the newly spawned thread has access to it. Simple enough.</p>
+
+<h2>How to verify your code is on multiple cores</h2>
+
+<p>You have to dig in a little bit to verify that Ruby code you&#8217;re writing
+is actually being processed on multiple CPU cores. There are many
+variables:</p>
+
+<ol>
+<li>Does your system even have more than one core? (try <code>system_profiler | grep 'Total Number of Cores'</code> to find out, probably some other ways too)</li>
+<li>Does your Ruby have a GIL? (MRI does, Rubinius and JRuby don&#8217;t)</li>
+<li>Some third thing to pad my arbitrary list of bullshit.</li>
+</ol>
+
+
+<p>Anyway, one easy way is to run the following code:</p>
+
+<pre><code>NUM_CORES = 2
+
+threads = []
+NUM_CORES.times do |t|
+  threads &lt;&lt; Thread.new do
+    log_every = 1000000
+    i = 0
+    loop do
+      i += 1
+      if i == log_every
+        i = 0
+        putc t.to_s
+      end
+    end
+  end
+end
+
+threads.each(&amp;:join)
+</code></pre>
+
+<p>Running this on MRI Ruby results in 100% CPU usage. Running in JRuby
+yields 200%, which means two cores are operating at 100%. Pretty rad,
+yes?</p>
+
+<p>CPU usage reported by activity monitor or <code>top -o cpu</code>.</p>
+
+<h2>Preforking</h2>
+
+<p>e.g Unicorn</p>
+
+<p>What&#8217;s nice is that the kernel will handle load-balancing for us: when
+there are no incoming requests, you have N forked instances blocked on
+<code>accept</code>, and the kernel will choose which instance gets the next
+incoming request. If all forked instances are busy, the kernel will just
+queue up the request internally. If the queue gets full, you&#8217;ll get an
+ECONNREFUSED. Easy peazy.</p>
+
+<p>Unicorn (and probably Rainbows) does some extra tracking on child
+processes to make sure it&#8217;s not getting stuck on long requests, etc.</p>
+
+<p>Main disadvantage is memory usage. By the time you fork, if the parent
+process is 100 mb, then 4 forks and you&#8217;re at 500 mb&#8230; unless 1) your
+OS has COW and 2) you don&#8217;t write to it all that much.</p>
+
+<h2>Reactor</h2>
+
+<p>e.g. Node.js, Twisted, EventMachine</p>
+
+<p>High levels of concurrency (not necessarily parallelism) achievable,
+relative to threading/forking models, which hit their RAM limit much
+faster (Reactor patterns mean that everything is just heap allocations
+on the same thread).</p>
+
+<p>Impacts on programming model:</p>
+
+<ul>
+<li>No processes/threads, so no shared memory, synchronization, etc, to
+have to worry about</li>
+<li>Don&#8217;t block the single Reactor thread (because nothing else will be able to
+run). You wouldn&#8217;t have to worry about this in thread/processland.
+This is why if you&#8217;re using EventMachine, your gems must be
+event-machine aware, otherwise they&#8217;ll block (which would be fine in a
+threading/forking environment).</li>
+</ul>
+
+
+<h2>Node cluster</h2>
+
+<p>http://nodejs.org/api/cluster.html</p>
+
+<p>Based on the fact that you can use child process forking to split heavy
+duty work into process that can each live on a different core, if that&#8217;s
+what you&#8217;re about.</p>
+
+<p>Note that there&#8217;s no C-like or Ruby-like fork in Node; you can&#8217;t just
+call fork and then have both the parent and newly forked child process
+continue execution from that <code>fork()</code> invocation&#8230;</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Journal]]></title>
@@ -4555,1179 +5331,6 @@ you typed in.</p>
     <id>http://machty.github.com/blog/2014/07/08/daily-journal</id>
     <content type="html"><![CDATA[<p>This blog left intentionally blank. There are flashcards about browser
 networking attached to it.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/05/daily-journal/"/>
-    <updated>2014-07-05T16:44:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/05/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Bandwidth</h2>
-
-<p>Grigorik&#8217;s book confused me when he switched from the bits/second
-definition of bandwidth to the more signal processing definition.</p>
-
-<pre><code>http://en.wikipedia.org/wiki/Bandwidth_(computing)
-vs
-http://en.wikipedia.org/wiki/Bandwidth_(signal_processing)
-</code></pre>
-
-<p>Computing bandwidth refers to bits/s. Signal bandwidth is the difference
-in the max and min Hz that you transmit on.</p>
-
-<p>This is interesting:</p>
-
-<blockquote><p>A key characteristic of bandwidth is that any band of a given width can
-carry the same amount of information, regardless of where that band is
-located in the frequency spectrum. For example, a 3 kHz band
-can carry a telephone conversation whether that band is at baseband
-(as in a POTS telephone line) or modulated to some higher frequency.</p></blockquote>
-
-<p>My understanding of this is that regardless of the modulation alphabet
-you use, modulation will always cause a signal to vary between a
-minimumm and maximum frequency, which determines the bandwidth of a
-signal. For example, transmitting a &#8220;01&#8221; might mean squeezing the waves
-together tightly until the next &#8220;letter&#8221; to transmit, and the tightest
-those waves are squeezed determines the maximum frequency, while &#8220;10&#8221;
-might might loosening the waves, and other letters could be some
-combination of the two, but the key thing here is that bandwidth
-determines the min and max frequencies that those waves can compress
-or expand to; any more and you might be interfering with someone else&#8217;s
-band.</p>
-
-<!-- more -->
-
-
-<p>And as to the ability to transmit the same amount of information, I
-don&#8217;t understand that; I&#8217;ll have to read up on that a bit more.</p>
-
-<h2>allocWithZone</h2>
-
-<p>Cocoa&#8217;s <code>alloc</code> method calls <code>allocWithZone</code> zone with some sensible
-default. The whole point of <code>allocWithZone</code> is to allow you to
-explicitly specify which memory zone an object lives in, allowing you to
-put related objects into the same zone so as to avoid thrashing.</p>
-
-<p>NOTE: <code>allocWithZone</code> is old school, and as memory becomes cheap and
-approaches to memory management improve, the zone passed in becomes
-ignored, particularly with ARC.</p>
-
-<p>Also, if any instance vars need to be <code>alloc</code>d, they should be done
-within the same zone, or else you&#8217;re defeating the whole purpose of zone
-allocation (then again, ARC ignores this, so&#8230;). Anyway, you can do
-things like <code>self.label = [[NSString allocFromZone:[self zone]] initWithString:@"balls"]</code></p>
-
-<h2>Designated Initializer</h2>
-
-<p>In Cocoa, the designated initializer is the one initializer in a class
-that all others defer to perform the full initialization of an object.
-As such, it&#8217;s usually the one with the most arguments, and other
-initializers will usually choose sensible defaults to pass to the
-designated initializer.</p>
-
-<p>Designated Initializers in subclasses must call the Designated
-Initializers in its superclass.</p>
-
-<p>NOTE: sometimes a class might have multiple Designated Initializers,
-e.g. NSCell.</p>
-
-<p>Drawback: having to know what the Designated Initializer is for a given
-class&#8230; yeah, that sucks.</p>
-
-<h2>Two-Stage Creation</h2>
-
-<p>e.g. <code>[[Thing alloc] init]</code></p>
-
-<ol>
-<li>Assign implicit <code>self</code> local var to <code>[super init]</code>, which might
-return something other than <code>self</code> where alloc fails or singleton
-pattern returns another instance.</li>
-<li>If <code>self</code> not nil, continue to perform initialization.</li>
-</ol>
-
-
-<p>Step 2 is extremely defensive and possibly overkill, but nil is a valid
-return value for initializers so you have to watch out for it. Aren&#8217;t
-nils awesome?</p>
-
-<h2><code>self</code> and <code>cmd</code></h2>
-
-<p>These are the two implicit variables provided within a method
-invocation.</p>
-
-<ol>
-<li><code>self</code> is the instance, durr</li>
-<li><code>_cmd</code> is the message received that caused the method to be run</li>
-</ol>
-
-
-<p>Question: what happens if you don&#8217;t assign <code>self</code>? Does it actually make
-a difference outside of the method? Is it a reference or just a value
-used within the method?</p>
-
-<h2>ARC</h2>
-
-<p>Automatic Reference Counting: been around since Mac OS X 10.5, but if
-you&#8217;re writing a class with ARC, all consumers must also be using ARC
-(but it&#8217;s possible for ARC to consume non-ARC). Hence, it&#8217;s important to
-understand old school memory management.</p>
-
-<h2><code>dealloc</code> and <code>finalize</code></h2>
-
-<p>No-ARC:</p>
-
-<p><code>dealloc</code> called automatically (don&#8217;t call it yourself) when reference count down
-to 0.</p>
-
-<p>ARC:</p>
-
-<p><code>finalize</code> called instead of <code>dealloc</code>, but often doesn&#8217;t need to be
-implemented unless any non-ARC objects were alloc&#8217;d that need to be
-manually released, or some file handles need to be closed, etc.</p>
-
-<h2><code>stringWithString</code> vs <code>[alloc] initWithString</code></h2>
-
-<p><code>autorelease</code> is called within these convenience methods like
-<code>stringWithString</code>, but not called with the <code>alloc</code> + <code>init</code> pattern.
-<code>autorelease</code> is often idiomatically meant for temporary vars.
-You must call <code>retain</code> on something that&#8217;s autoreleased if you want to
-hold on to it.</p>
-
-<p>One drawback to the convenience methods is that their allocation is
-hard-wired to their initialization; you can&#8217;t swap the approach to
-allocation, or pick zones or anything like that.</p>
-
-<h2><code>drawRect</code> and <code>setNeedsDisplay</code></h2>
-
-<p><code>drawRect</code> is a template method which you&#8217;re never supposed to call
-yourself; if you&#8217;re tempted to use it, chances are you want
-<code>setNeedsDisplay</code> instead.</p>
-
-<h2>Template Methods vs Delagate</h2>
-
-<p>Template Methods as an approach to customizing/overriding a super
-class&#8217;s default behavior in a subclass result in tight coupling to the
-super class. Also, if you need to override lots of different unrelated
-behaviors in a superclass, likely the super class should have been
-designed to use Delegates instead.</p>
-
-<h2><code>NSClassFromString</code> =~ <code>const_get</code></h2>
-
-<p>Objective-C&#8217;s runtime supports class lookup from strings via
-<code>NSClassFromString</code>. I had no idea. And like in Ruby, Objective C
-classes are objects as well.</p>
-
-<h2>NSBundle</h2>
-
-<p>Makes use of NSClassFromString (or some variety of it?) to look up
-classes in a bundle. Can either use <code>+classNamed</code> if you know the class,
-or <code>+principalClass</code>, which uses the class defined in the Bundle&#8217;s
-plist.</p>
-
-<h2>Obj-C Categories =~ <code>reopen</code></h2>
-
-<pre><code>@interface Horseshit (SomeCategory)
-- (void)newMethod;
-@end
-
-@implementation Horseshit (SomeCategory)
-- (void)newMethod
-{
-  // stuff
-}
-@end
-</code></pre>
-
-<p>This can be used to reopen classes, which, like <code>Module#reopen</code> in Ruby,
-is inherited by subclasses as well.</p>
-
-<p>This is familiar:</p>
-
-<blockquote><p>but there is no good way to force exist- ing compiled code to
-return instances of your subclass instead of instances of NSMutableArray.</p></blockquote>
-
-<p>The same gotcha is true for Ruby, where you can&#8217;t trivially subclass
-<code>Array</code> without running into the often undesirable behavior of methodsl
-like <code>#map</code> returning an instance of <code>Array</code>, rather than your subclass.</p>
-
-<p>The Ruby approach to this (credit to Avdi Grimm), is something like</p>
-
-<pre><code>require 'forwardable'
-class MyArray
-  include Enumerable
-  extend Forwardable
-
-  def initialize
-    @a = []
-  end
-
-  def_delegators :@a, :each, :&lt;&lt;
-end
-
-a = MyArray.new
-a &lt;&lt; 123
-a.map { |i| i*2 } # =&gt; [246] # works because Enumerable#map uses #each
-</code></pre>
-
-<p>But in the case of <code>NSMutableArray</code>, since you&#8217;d have to override a
-great many methods in a subclass of <code>NSMutableArray</code> to return instances
-of your subclass, it might just make more sense to reopen
-<code>NSMutableArray</code> by declaring a new category, and just throw methods
-onto that; that way, these methods will still return their hard-wired
-<code>NSMutableArray</code> instances, but they&#8217;ll have the new methods that you
-were tempted to put on an <code>NSMutableArray</code> subclass. A little sucky but
-hey that&#8217;s framework code.</p>
-
-<h3>Categories for Framework Division</h3>
-
-<p>Kinda like how Ember progressively reopens ControllerMixin and other
-classes in the various <code>ember-xxx</code> libraries that get combined into the
-final complete Ember package, Cocoa uses categories to &#8220;reopen&#8221; certain
-classes as libraries/frameworks are added. For instance,
-<code>NSAttributedString</code> exists in Cocoa Foundation and can be used in
-non-graphical contexts, but once Application Kit is added, categories
-that included string-drawing logic are added to <code>NSAttributedString</code>.</p>
-
-<p>Reserving judgement as to whether it makes sense to keep dumping code
-into <code>NSAttributedString</code> vs adding utility classes that know how to
-draw <code>NSAttributedString</code>s.</p>
-
-<h2>(Informal) Protocols</h2>
-
-<p>A formal protocol, or just protocol, is a language construct in Obj-C
-that is used to declare methods than an object must implement in order
-to work in certain scenarios. The compiler can guarantee that a protocol
-is adhered to and will throw errors (warnings?) if not.</p>
-
-<p>An <em>informal protocol</em> is a protocol where no compiler time checks are
-made to make sure an object/class actually implements the methods in the
-informal protocol. Informal protocols are implemented as categories of
-<code>NSObject</code> (which means virtually all classes inherit those informal
-protocol methods), but Cocoa will often only provide an interface to
-these categories, but no implementation; the compiler doesn&#8217;t check
-this, so lots of Cocoa classes use runtime checks to see if these
-methods have been implemented on an object before sending such a
-message.</p>
-
-<p>One of the crappiest parts about informal protocols is that you have to
-know, when subclassing, whether a super class provides an implementation
-of an informal protocol method. If you just do <code>[super method]</code> and
-<code>method</code> doesn&#8217;t exist, then boom. The safest way around this if you
-don&#8217;t have the original source code is a run-time check, a la</p>
-
-<pre><code>if ([Superclass instancesRespondToSelector:@selector(method)]) {
-  [super method];
-}
-// more crap
-</code></pre>
-
-<p>Additionally, you could just stub out all the methods that Apple
-&#8220;forgot&#8221; to implement via a new NSObject category, but this</p>
-
-<ol>
-<li>Overrides the method definitions for classes that <em>do</em> provide an
-implementation</li>
-<li>Might interfere with runtime logic that checks if a method is
-implemented and performs some additional logic if it is.</li>
-</ol>
-
-
-<p>But mean that just seems to scream with mega design flaws.
-Tell-don&#8217;t-ask, much?</p>
-
-<blockquote><p>it’s a best practice to provide a default implementation for each
-method you declare in your informal protocol.</p></blockquote>
-
-<p>If that&#8217;s the case, then why not just do a normal ol category? Answer:
-because the key difference w informal protocols is that they&#8217;re declared
-on <code>NSObject</code>, so any object/class has the option of providing it.</p>
-
-<p>Note that Obj-C 2.0 (Mac OS X 10.5) provides <code>@required</code> and <code>@optional</code>
-keywords in plain ol protocols to allow informal protocol semantics on
-formal protocols.</p>
-
-<h2>Category (and reopen) gotchas</h2>
-
-<ol>
-<li>Collisions are more likely when reopening is the norm</li>
-<li>Apple (or whatever vendor) might add methods in future versions that
-clash with the ones you&#8217;ve added</li>
-<li>Replacing methods means you have to be very careful to duplicate all
-of the effects of a method (but why do methods have so much logic in
-them in the first place?). Replacing should kinda be a last resort.</li>
-</ol>
-
-
-<p>If you&#8217;re going to extend Cocoa classes, it&#8217;s wise to use a prefix.</p>
-
-<p>One nice convention is when you&#8217;re extending NSArray with your custom
-Wat category, you could throw it in a file named <code>NSArray+Wat.h</code>.</p>
-
-<h2>Anonymous type: <code>id</code></h2>
-
-<p>Unlike C++ and Java (et al), knowing the receiver type of a message is
-not a requirement and can be deferred until runtime. This supports duck
-typing. Bark bark.</p>
-
-<p>Selectors can be dynamically constructed from strings as run-time. (But
-beware of standard security issues surrounding code injection.)</p>
-
-<p><code>id</code> as a type says nothing more than &#8220;this object can receive
-messages&#8221;. An <code>id</code> var can point to <code>nil</code> (as opposed to <code>NULL</code>), which
-evaluates to zero. Also, sending messages to <code>nil</code> is NOT an error, and
-returns <code>nil</code>.</p>
-
-<p><code>id</code> can be an alternative to forward class declaration, but obviously
-the tradeoff is that you&#8217;re giving the compiler less information to use
-for catching errors/typos.</p>
-
-<p>Unrecognized messages/methods are warnings rather than errors because
-sometimes the compiler cannot guarantee that the object definitely
-cannot respond to a message.</p>
-
-<p>Two ways to do a runtime check to see if an object/class responds to a
-selector:</p>
-
-<pre><code>[SomeClass instancesRespondToSelector:@selector(method)]
-[instance respondsToSelector:(SEL)aSelector]
-</code></pre>
-
-<p>Check if an <code>id</code> is an instance of some class via</p>
-
-<pre><code>[someIdVar isKindOfClass:[NSArray class]]
-</code></pre>
-
-<p>What about <code>nil</code>? I guess it&#8217;ll always return falsy (<code>nil</code>) for all
-selectors, so <code>isKindOfClass</code> would correctly return falsy.</p>
-
-<p>There is also a <code>conformsToProtocol</code> selector. In addition to a
-<code>NSObject</code> class, there is an <code>NSObject</code> protocol&#8230; why? How is it
-useful? Dunno.</p>
-
-<p>You can use anonymous types scoped to protocols so that you can get all
-those lovely compiler warnings you expect, e.g.:</p>
-
-<pre><code>id &lt;MyDumbProtocol&gt; wat = something;
-[wat someMessage]
-</code></pre>
-
-<p>If you catch yourself doing this a bunch:</p>
-
-<pre><code>id &lt;MyDumbProtocol, NSObject&gt; woot;
-</code></pre>
-
-<p>then maybe consider having MyDumbProtocol inherit from NSObject.</p>
-
-<p>Of note: the presence of an anonymous type prevents the need for generic
-programming features, like C++ templates. Then again you could just
-store everything as a void pointer, right? But then in C++ you have to
-do address translation in some cases. I think. I forget.</p>
-
-<h2>NSEnumerator</h2>
-
-<p>Simple interface:</p>
-
-<ul>
-<li>nextObject: call until nil</li>
-<li>allObjects: returns an array of all remaining untraversed items;
-nextObject guaranteed to be nil after calling this</li>
-</ul>
-
-
-<p>NSEnumerators retain the underlying container until traversal is
-complete so that it&#8217;s not dealloc&#8217;d mid-traversal.</p>
-
-<p>Unsafe to modify collection mid-traversal.</p>
-
-<p>Common example:</p>
-
-<pre><code>id instance;
-NSEnumerator *enumerator = [myCollection objectEnumerator]; while (instance = [enumerator nextObject])
-{
-  // do something with instance 
-}
-</code></pre>
-
-<p>Fast enumeration:</p>
-
-<pre><code>id instance;
-for (instance in myCollection) {
-  // do something with instance 
-}
-// or, alternatively:
-for (id instance2 in myCollection) {
-  // do something with instance2 
-}
-</code></pre>
-
-<p>An object needs to support Fast Enumeration to be used in a for-in loop.
-Enumerators themselves support fast enumeration, so you can do:</p>
-
-<pre><code>id instance;
-for (instance in [myArrayInstance reverseObjectEnumerator]) {
-  // do something with instance 
-}
-</code></pre>
-
-<p>Internal Enumeration is like <code>each</code> in Ruby, where the iteration is
-internal to the collection or enumerator. Cocoa offers:</p>
-
-<pre><code>- (void)makeObjectsPerformSelector:(SEL)aSelector
-- (void)makeObjectsPerformSelector:(SEL)aSelector withObject:(id)anObject
-</code></pre>
-
-<h2>Objective-C runtime files</h2>
-
-<p>Explore <code>/usr/include/objc/*.h</code> for fun and profit.</p>
-
-<h2>Selectors</h2>
-
-<pre><code>SEL aSelector = @selector(myDumbMethod);
-</code></pre>
-
-<p>NSObject has the following method for running <code>aSelector</code> later:</p>
-
-<pre><code>-(id)performSelector:(SEL)aSelector
-</code></pre>
-
-<p>Interchangeable:</p>
-
-<pre><code>id result1 = [someObject update];
-id result2 = [someObject performSelector:@selector(update)];
-id result3 = [someObject performSelector:aSelector];
-</code></pre>
-
-<p>Get a SEL from a String:</p>
-
-<pre><code>SEL NSSelectorFromString(NSString *)
-</code></pre>
-
-<p>Passing an arg to performSelector</p>
-
-<pre><code>- (id)performSelector:(SEL)aSelector withObject:(id)anObject
-</code></pre>
-
-<p>Need to use NSInvocation if</p>
-
-<ul>
-<li>more than one arg</li>
-<li>non object arg</li>
-<li>returns non-object value</li>
-</ul>
-
-
-<p>Perform a method async&#8230;?</p>
-
-<pre><code>- (void)performSelector:(SEL)aSelector withObject:(id)anArgument afterDelay:(NSTimeInterval)delay
-</code></pre>
-
-<p>This schedules the event to fire via NSRunLoop, which only guarantees
-that it won&#8217;t fire before <code>delay</code>, but you might catch it mid slow
-operation and it won&#8217;t fire til after that&#8217;s done. Obvious parallels to
-Ember&#8217;s Backburner.js.</p>
-
-<p>Async performs are cancelable via <code>cancelPreviousPerformRequestsWithTarget</code>.</p>
-
-<p><code>NSRunLoop</code> runs in different modes which govern which sources of input
-are read by the loop; async schedules are put in to <code>NSDefaultRunLoopMode</code>, and
-the run loop might not be in that mode, which would cause that to be
-ignored. Interesting, will need to follow up on that. Maybe that&#8217;s
-because there are different threads? And you can set up the different
-threads to listen for different events? And a performSelector afterDelay
-is just like any other events, like user tapped something, etc.</p>
-
-<h2>Implementation of Obj-C message sending</h2>
-
-<p>First off, a <code>runtime</code> is any collection of functions/functionality that
-comes with the compiled language and is depended upon to perform certain
-tasks at runtime. That was a shitty definition. A runtime is any
-collection of functionality you need at runtime that comes with the
-language you&#8217;re using. Handlebars has a runtime; even though your
-templates are precompiled, they all depend on shared functionality that
-lives within the Handlebars runtime that must be present to actually
-render a template. I knew that, kinda, but it just clicked as a generic
-concept. JVM is a runtime. C++ has a runtime.</p>
-
-<p>Two most important C functions:</p>
-
-<pre><code>id objc_msgSend(id self, SEL op, ...);
-id objc_msgSendSuper(struct objc_super *super, SEL op, ...);
-</code></pre>
-
-<p>These fns search for a handling method on the receiver.</p>
-
-<p>Here&#8217;s the typedef for a C function pointer of a method that responds to
-a selector:</p>
-
-<pre><code>typedef id (*IMP)(id self, SEL _cmd, ...);
-// e.g.:
-IMP fn = &amp;someFn;
-// i think this is valid C, I forget.
-</code></pre>
-
-<p>The search for the method on the receiver is slow, but the result is
-cached on the receiver class so future lookups are fast.</p>
-
-<p>You can convert a message send into a C fn pointer via:</p>
-
-<pre><code>- (IMP)methodForSelector:(SEL)aSelector;
-+ (IMP)instanceMethodForSelector:(SEL)aSelector;
-</code></pre>
-
-<p>The late binding provided by all of the above makes it possible for
-other threads to schedule operations on the main thread via super
-convenient methods like</p>
-
-<pre><code>- (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait
-- (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait modes:(NSArray * )array
-</code></pre>
-
-<h2>Accessors</h2>
-
-<p>Some obvious general benefits mixed w Cocoa-specific:</p>
-
-<ul>
-<li>Uniform access principle: flexibility to switch from simple instance
-variable storage to some other complex logic. In Ember this like how
-you can effortlessly switch between a raw value property and a
-computed property and any consuming code won&#8217;t need to change if it
-has been using <code>.get()</code> from the start.</li>
-<li>Facilitate Cocoa&#8217;s non-ARC memory maintenance</li>
-<li>Facilitate Cocoa Key-value coding and observation</li>
-<li>Facilitate special logic when (re)-connecting Interface Builder outlets.</li>
-</ul>
-
-
-<p>Naming conventions: if you&#8217;re returning a value, just name the getter
-the name of the property (i.e. not prefixed with &#8220;get&#8221;):</p>
-
-<pre><code>- (float) interestRate 
-{
-  return interestRate;
-}
-</code></pre>
-
-<p>If you&#8217;re returning by reference (via pointers), prefix with get:</p>
-
-<pre><code>- (void)getInterestRate:(float * )aFloatPtr {
-  if(NULL != aFloatPtr) {
-    *aFloatPtr = interestRate; 
-  }
-}
-</code></pre>
-
-<p>Apparently this is seldom-used, hence there&#8217;s not many <code>get</code> methods in
-Cocoa, but common in some cases where size of array returned is not
-known ahead of time, or there are more than one &#8220;return&#8221; values, e.g.:</p>
-
-<pre><code>-(void)getRed:(CGFloat *)red green:(CGFloat *)green blue:(CGFloat *)blue alpha:(CGFloat *)alpha
-</code></pre>
-
-<p>Setters are obviously prefixed by set</p>
-
-<pre><code>- (void)setInterestRate:(float)aRate 
-{
-  interestRate = aRate; 
-}
-</code></pre>
-
-<p>They make a good point about debugging utility:</p>
-
-<blockquote><p>During debugging, if a property has an incorrect or suspicious value,
-a debugger break-point set within the implementation of an accessor
-halts execution whenever the property is changed and helps track
-down how and why the value is being changed incorrectly.</p></blockquote>
-
-<p>This isn&#8217;t super easy to do in Ember as a general capability unless it&#8217;s
-one of the rare cases where you&#8217;re writing a getter-setter computed
-property&#8230; maybe we can do something in ember-inspector that hooks into
-ember-metal?</p>
-
-<h2>Thread safety + Memory Management</h2>
-
-<p>Thread safety w memory management: consider the following:</p>
-
-<pre><code>- (NSString * ) aString {
-  return _myString ;
-}
-</code></pre>
-
-<p>An obvious getter that returns an NSString instance var. But lets say
-there are two threads, where Thread A is retrieving <code>aString</code> and
-intends to <code>retain</code> it, and Thread B releases the object that <code>aString</code>
-lives on, thus causing it to be deallocated. In this case, there&#8217;s a
-race condition in multi-threaded environments:</p>
-
-<pre><code>A: NSString * str = [alexObject aString];
-B: [alexObject release]; 
-B: // ref count is now 0, dealloc occurs
-B: // _myString gets `release`d and dealloc'd because ref count is 0
-A: [str retain];
-A: // BOOM. can't `retain` a dealloc'd obj
-</code></pre>
-
-<p>Realization: the &#8220;intending to <em>retain</em>&#8221; distinction isn&#8217;t so important;
-more important is &#8220;intending to use in any way&#8221;; sending a message to a
-suddenly dealloc&#8217;d obj is going to break, it&#8217;s just that the obvious way
-to prevent dealloc is to immediately <code>retain</code> the return value of a
-getter, but then you&#8217;re still exposed to the race condition above. So
-the retain needs to happen in the getter, a la:</p>
-
-<pre><code>- (NSString * )title {
-  id result;
-
-  // Lock
-  result = [[_myTitle retain] autorelease];
-  // Unlock
-
-  return result; 
-}
-</code></pre>
-
-<p>Makes sense, but I need to learn about when autorelease actually fires
-its release&#8230; this would cause issues if the autorelease just happened
-at the end of a thread&#8217;s run loop, since another thread might not have
-had time to use/retain an obj before the other thread released it at the
-end of its run loop. AH CRUCIAL MISTAKE: I was some reason thinking that
-the getting would happen in one thread and that retaining of that return
-value would happen in another thread; no, all of that happens on one
-thread, and autorelease, assuming my assumptions about the run loop are
-correct, will always correctly fire after the code that called the
-getter had a chance to use/retain its return value.</p>
-
-<p>So actually, it sounds like consumers of getters don&#8217;t need to call
-<code>retain</code> unless they really intend to hold on to that value beyond the
-end of the run loop.</p>
-
-<pre><code>- (void)setTitle:(NSString * ) aTitle {
- ￼[aTitle retain];
-</code></pre>
-
-<p>  ￼￼￼￼[ _myTitle release];</p>
-
-<pre><code>  _myTitle = aTitle; 
-}
-</code></pre>
-
-<p>So if you had no locks on the above getters and setters, there&#8217;d be a
-race condition where <code>[_myTitle release]</code> and <code>[_myTitle retain]</code> are
-called at the same time, release happens first, and then <code>retain</code> gets
-called on a dealloc&#8217;d my obj. So really you&#8217;d need</p>
-
-<pre><code>- (void)setTitle:(NSString * ) aTitle {
- ￼[aTitle retain];
-
-  // Lock
-</code></pre>
-
-<p>  ￼￼￼￼[ _myTitle release];</p>
-
-<pre><code>  _myTitle = aTitle; 
-  // Unlock
-}
-</code></pre>
-
-<p>The above handles all the following cases:</p>
-
-<ul>
-<li>changing a value from nil to aTitle</li>
-<li>changing a value from somethingElse to aTitle</li>
-<li>changing a value from aTitle to aTitle</li>
-<li>changing a value from somethingElse to nil</li>
-<li>changing a value from nil to nil</li>
-</ul>
-
-
-<p>This is due to the precise ordering of retains/release and assignment,
-as well as the fact that sending messages to <code>nil</code> is harmless so long
-as you don&#8217;t count on the return value.</p>
-
-<p>Hmm, I&#8217;m told that the following is actually the correct answer, but I&#8217;m
-not sure why:</p>
-
-<pre><code>- (void)setTitle:(NSString * )aTitle {
-  id oldValue; 
-  [aTitle retain];
-
-  // Lock
-  oldValue = _myTitle; 
-  _myTitle = aTitle; 
-  // Unlock
-
-  [oldValue release]; 
-}
-</code></pre>
-
-<h2>NSKeyValueCoding</h2>
-
-<p>An informal protocol. Allows properties to be read/written by string
-name.</p>
-
-<h2>Archiving / Unarchiving</h2>
-
-<p>Objects can be (de)serialized into a binary format (or XML) and back,
-and Cocoa handles all the issues of cross-platform byte ordering and 32
-vs 64 bit, etc, issues that normally crop up when you try to store in
-binary (apparently though it doesn&#8217;t have to handle big/little-endian
-issues?).</p>
-
-<p>When Archiving, an object can conditionally or unconditionally
-reference another obj; if unconditional, force the object to be stored;
-if conditional, only store the object if something else has declared it
-as unconditional, and if not, when unarchived, that object will be
-<code>nil</code>.</p>
-
-<p>So in Cocoa, a View knows about its subviews, but little to nothing about
-its parent view, so it conditionally references its parentView, and
-unconditionally references child views.</p>
-
-<p>To archive an object:</p>
-
-<pre><code>[NSKeyedArchiver archivedDataWithRootObject:someObject];
-+(NSData *)archivedDataWithRootObject:(id)rootObject
-</code></pre>
-
-<p><code>rootObject</code> conforms to <code>NSCoding</code> protocol, and is sent a message to
-unconditionally archive itself, causing the chain reaction that
-ultimately archives the whole thing and returns <code>NSData</code> that can be
-written to a file.</p>
-
-<p><code>NSUserDefaults</code> is the standard way of storing user preferences, but
-it only supports storing <code>NSData</code>, <code>NSString</code>, and a few others&#8230; how
-to encode something like an <code>NSColor</code>? Answer: &#8220;reopen&#8221; <code>NSUserDefaults</code>
-by adding a custom category to it that defines <code>setColor</code> and
-<code>colorForKey</code> to use <code>NSKeyedArchiver</code> to archive and unarchive to the
-color to and from an <code>NSData</code>, which <em>can</em> be stored in UserDefaults.</p>
-
-<p>To implement <code>NSCoder</code> protocol, implement:</p>
-
-<pre><code>- (void)encodeWithCoder:(NSCoder * )coder
-- (id)initWithCoder:(NSCoder * )
-</code></pre>
-
-<p>To encode/decode arbitrary C structs/unions:</p>
-
-<blockquote><p>Either wrap the unsupported data types in objects that conform to the
-NSCoding protocol and then encode those objects, or break the data
-types down to supported components like int and float and encode
-the individual components.</p></blockquote>
-
-<p>Cocoa supports object substitution when encoding. I don&#8217;t know what it&#8217;s
-used for, need to research more.</p>
-
-<p><code>-awakeFromNib</code> is almost like a <code>didInsertElement</code>, or rather an
-<code>afterRender</code> callback called on an object after all the objects in the
-archive have been unpacked, so you have the guarantee when the hook is
-called that all <code>IBOutlet</code>s are connected.</p>
-
-<p>&#8220;Simulation&#8221; mode in Interface Builder encodes and decodes all objects
-to simulate the real thang.</p>
-
-<p>A <code>.nib</code> specificies a File Owner that will &#8220;own&#8221; the objects decoded
-from the <code>.nib</code>. The owner object also receives an <code>awakeFromNib</code>
-anytime a <code>.nib</code> is unarchived with that file as the owner. Obviously
-this means you can associate a <code>.nib</code> with whichever owner you want (not
-sure if you can do this dynamically?), and a single owner can own (be
-associated with) multiple <code>.nib</code>s. That&#8217;s kinda rad.</p>
-
-<h2>Copying</h2>
-
-<p>Some things don&#8217;t make sense to be copied, like singletons e.g.
-<code>NSApplication</code>, which is meant to contain a single connection to OS X&#8217;s
-Quartz window server.</p>
-
-<p><code>NSCopying</code> in Cocoa is meant to produce shallow copies. One approach
-for deep copies, if everything adheres to <code>NSCoding</code> protocol, is to
-archive and then unarchive.</p>
-
-<p>On mutability: Cocoa provides lots of immutable classes, like <code>NSString</code>
-and <code>NSArray</code>. Why? Issues surrounding concurrency come to mind, e.g. if
-you can only create new modifies versions of a string rather than
-modify the string, then threads will each have their own copies of
-strings to fart around with rather than have to manage complex locking
-procedures when making changes to the thing.</p>
-
-<p>But the other thing to realize is that immutable objects can be shared,
-and passed by reference without fear of someone mucking with them.
-Multiple objects can &#8220;own&#8221; the same immutable object. Maybe this will
-help me remember:</p>
-
-<blockquote><p>Everyone owns immutable objects</p></blockquote>
-
-<p>or</p>
-
-<blockquote><p>There is no tragedy of the commons with immutable objects</p></blockquote>
-
-<p><code>NSCopying</code> returns immutable copies, but there&#8217;s also
-<code>NSMutableCopying</code>.</p>
-
-<p>If you&#8217;re implementing copy on an immutable object, it&#8217;s as easy as:</p>
-
-<pre><code>- (id)copyWithZone:(NSZone * )aZone 
-{
-  return [self retain]; 
-}
-</code></pre>
-
-<p>Optimal as fuck.</p>
-
-<p>There is no formal <code>NSDeepCopying</code> protocol, but you can make your own
-<code>deepCopy</code> method using Archiving and Unarchiving.</p>
-
-<p><code>NSDictionary</code> copies objects used as keys, so those need to conform to
-<code>NSCopying</code>.</p>
-
-<p>In Obj-C 2.0, it&#8217;s common to have a public interface with <code>readonly</code>
-properties, only to have an anonymous category class extension redefine
-them as <code>readwrite</code> so that they are mutable within the implementation
-but immutable to the public.</p>
-
-<blockquote><p>The compiler allows redeclarations to replace readonly with readwrite,
-but no other attributes of the property can be changed in a redeclaration.</p></blockquote>
-
-<p>So you could change something from</p>
-
-<pre><code>@property (readonly, retain) NSString *word;
-</code></pre>
-
-<p>to</p>
-
-<pre><code>@property (readwrite, retain) NSString *word;
-</code></pre>
-
-<p><code>retain</code> means setters retain their args rather than copy them.</p>
-
-<p>Note that <code>assign</code> is the default among <code>assign</code>, <code>copy</code>, or <code>retain</code>,
-so the following are equivalent:</p>
-
-<pre><code>@property (readonly, assign)
-@property (readonly)
-</code></pre>
-
-<p>But the Obj-C 2.0 compiler will warn you if you use the default <code>assign</code> for a
-property that adheres to <code>NSCopying</code>.</p>
-
-<h2>Strong and Weak pointers</h2>
-
-<p>Obj-C 2.0 supports <code>__strong</code> and <code>__weak</code> pointers. Presumably that
-means <code>__strong</code> pointers can &#8220;own&#8221; the referenced object and increase
-its retain count, while <code>__weak</code> pointer can only refer to an object but
-have no ownership. It probably circumvents cycles. And it probably
-implies that there&#8217;s no mark and sweep phase? Is that true? There&#8217;s no
-weak reference in JavaScript, but maybe there&#8217;s some other use case.
-Mark and Sweep gets rid of the need for strong and weak pointers in the
-case of handling circular dependencies, but are there use cases beyond
-that? I guess there are, if you want to say &#8220;let this weak pointer
-reference this thing that might disappear at any point.&#8221; That could
-exist even if mark and sweep were used&#8230; right? Yeah, it could. It just
-means that the sweeper wouldn&#8217;t traverse weak pointers.</p>
-
-<p>So weak pointers can make sense in mark and sweep or reference counting.</p>
-
-<p>But mark and sweep is better at cycles and don&#8217;t require manual cycle
-breaking before garbage can be collected.</p>
-
-<h2>Singletons</h2>
-
-<p>Given Obj-C classes are objects, why use instances over class objects?</p>
-
-<p>Answer: rewriting all the references to the superclass when you
-subclass. Class object or no, you&#8217;re treating it as an instance, and
-tightly coupling to that instance. Also, I don&#8217;t really know enough
-about how class objects work, but can you also inherit/override methods
-with class objects the same way? Well, you can&#8217;t store a pointer to a
-class object without it looking really weird, right? Like:</p>
-
-<pre><code>id foo = [NSObject class];
-[foo classMethod];
-</code></pre>
-
-<p>Is there a more specific type than <code>id</code> that lets you store classes?
-Dunno. Point is: you could get in the habit of storing pointers to class
-objects but using the factory pattern to avoid initializing them, and so
-long as the interface the same you would have maintained loose coupling.
-But this is no different than just saying Obj-C supports duck-typing so
-your factory could return anything that conforms to whatever
-informal informal protocol you&#8217;re conforming to.</p>
-
-<p>So to sum it up: the main reason not to do this is it becomes really
-really confusing what you&#8217;re trying to accomplish and subclassing
-becomes extremely convoluted.</p>
-
-<p>The Cocoa pattern is to have a class object encapsulate access to the
-singleton instance and have the singleton encapsulate all the stuff
-unique to what that object is doing. Derp.</p>
-
-<p><code>+sharedInstance</code> is usually the name of the singleton accessor.</p>
-
-<pre><code>+ (MySingleton * )sharedInstance {
-  static MySingleton *myInstance = nil; 
-  if (!myInstance) {
-    myInstance = [[[self class] alloc] init];
-  }
- ￼return myInstance; 
-}
-</code></pre>
-
-<p>Note the <code>[[self class] alloc]</code>, rather than <code>[MySingleton alloc]</code>. This
-lets you subclass and defer the alloc to which subclass you&#8217;re using it.
-You can choose the subclass that locks in in an app ready hook by doing</p>
-
-<pre><code>[MySingletonSubclass sharedInstance];
-</code></pre>
-
-<p>But you&#8217;d have to be careful that this ran before anyone else called
-<code>[MySingleton sharedInstance]</code>, which is the API anywhere else in your
-code. This parallels to Ember requiring that you&#8217;ve registered/injected
-everything before your first lookup. Both feel kinda jank.</p>
-
-<p>Also, obviously this won&#8217;t work for <code>NSApplication</code> singleton because
-it&#8217;s created before your code even runs; to handle that, you have to set
-the Principal Class in the XCode info panel when the application target
-is selected, whatever that means. This actually writes through to the
-Info.plist file. You could rewrite the above code to similarly look up
-<code>infoDictionary</code> in <code>mainBundle</code> and choose which class to init.</p>
-
-<p>Prediction: this code isn&#8217;t thread-safe, right?</p>
-
-<pre><code>Thread A: [MySingleton sharedInstance]
-          if (!myInstance) {
-Thread B: [MySingleton sharedInstance]
-          if (!myInstance) {
-            myInstance = ALLOC INIT STUFF;
-Thread A:   myInstance = ALLOC INIT STUFF;
-</code></pre>
-
-<p>Boom. Needs moar mutex.</p>
-
-<p>There&#8217;s also <code>alloc</code> and <code>allocWithZone</code> and a bunch of others and use a
-<code>hiddenAlloc</code> not defined in the public interface. It&#8217;s really messy and
-error-prone. Kinda like a lot of Cocoa?</p>
-
-<p>But if you&#8217;re using a singleton in Interface Builder (I guess this just
-means referencing it as a File Owner?) you have to preserve normal alloc
-and init semantics, so you end up having <code>alloc</code> return sharedInstance
-and adding code to <code>init</code> to make sure it only inits once.</p>
-
-<p>Singleton examples:</p>
-
-<ul>
-<li><code>NSApplication</code>: maintains Quartz window server connection. Apparently
-it receives and distributes events via First Responder pattern. That&#8217;s
-rad. Event delegation, or something else? What does it mean?</li>
-<li><code>NSWorkStation</code>: encapsulates connection to Finder and underlying file
-system</li>
-<li><code>NSFontManager</code>: maintains per-font singleton flyweights</li>
-<li>and friends</li>
-</ul>
-
-
-<p><code>+new</code> is old school Obj-C, deprecated as eff, and not to be used in
-Cocoa.</p>
-
-<p>Some classic Cocoa singletons became instances over time as their
-assumptions changed, like <code>NSPrintPanel</code> and <code>NSPageLayout</code>. Be careful
-about your assumptions, then?</p>
-
-<h2>Random: parallel b/w calculus and OO?</h2>
-
-<p>The relationship between an instance and a class object could be
-described as an integral relative to its derivative.</p>
-
-<pre><code>derivative(class) = instance
-integral(instance) = class + C
-</code></pre>
-
-<p>where <code>C</code> is all the methods declared on an object&#8217;s singleton class.</p>
-
-<p>What&#8217;s the derivative of an instance? Often it&#8217;s 0.</p>
-
-<h2>Notifications / Observers / Run loop scheduling</h2>
-
-<p>This is like Evented in Ember, except that the observer state lives in a
-global <code>NSNotificationManager</code> in Cocoa whereas it lives on instance
-meta in Ember. The Ember benefit is that testing becomes easier when you
-don&#8217;t have to remember to flush a global instance. It also means
-you don&#8217;t have to remember to teardown observers when you destroy an
-object, observer or observee (I think; need to verify this).</p>
-
-<p>Notifications are synchronous, so be mindful of performance implications
-when complex interactions are involved. You can asyncify by doing a</p>
-
-<pre><code>[self performSelector:@selector(doSlowAssShit:) 
-      withObject:[aNotification object]
-      afterDelay:0.0f];
-</code></pre>
-
-<p>I wonder if the 0.0f performs in the same run loop or not? In Ember, I
-remember making the change so that Ember.run.later would guarantee
-running on a separate run loop.</p>
-
-<p>For more complex async messaging, you can use <code>NSNotificationQueue</code>,
-which handles the async-ness, and then posts notifications later, after
-which point it&#8217;s back in sync-land.</p>
-
-<p>Oo oo oo:</p>
-
-<blockquote><p>The NSPostASAP style directs the queue to post the notification
-at the beginning of the next run loop iteration and is effectively
-identical to the -performSelector:withObject:afterDelay:</p></blockquote>
-
-<p>So afterDelay 0.0f forces onto the next run loop iteration.</p>
-
-<p>Three styles of async flags for a notification queue&#8217;s
-<code>-enqueueNotification</code>:</p>
-
-<ul>
-<li>NSPostASAP: same as afterDelay:0.0f approach above</li>
-<li>NSPostWhenIdle: runs when run loop is ideal, e.g. no user input events
-or other things.</li>
-<li>NSPostNow: post the notification immediately and synchronously. Will
-still perform <code>NSNotificationQueue</code>-specific coalescing if there are
-other events with NSPostASAP or NSPostWhenIdle whose args match. This
-is like Ember.run.once except that it works cross run loop, whereas
-Ember.run.once only guarantees once-ness within a run loop.</li>
-</ul>
-
-
-<p>So far I don&#8217;t think I&#8217;ve seen an example of enqueuing and action to the
-same run loop&#8230; or maybe there was something earlier.</p>
-
-<p>Cocoa lets you describe how once-ness coalesces via the following
-<code>coalesceFlags</code> masks:</p>
-
-<ul>
-<li>NSNotificationNoCoalescing: same as Ember.run.schedule. No coalescing occurs</li>
-<li>NSNotificationCoalescingOnName: coalesce if notification names match</li>
-<li>NSNotificationCoalescingOnSender: <code>postNotification</code> includes a string
-<code>sender</code>, which Ember doesn&#8217;t have, but this flag will cause events to
-coalesce on sender.</li>
-</ul>
-
-
-<p>Ember doesn&#8217;t let you specify coalesce options for <code>run.once</code>. It will
-coalesce on action names, and replace any args present on a previously
-scheduled action with the same name.</p>
-
-<p>Since NSRunLoop supports multiple modes of operations (which I still
-don&#8217;t understand), you can also specify run loop modes in <code>forModes</code>.</p>
-
-<p><code>NSDistributedNotificationCenter</code> lets you post inter-process
-notifications. Other apps must <code>addObserver</code> to register to receive them
-of course. You can control suspended app behaviors, etc etc etc.</p>
-
-<p>One downside about framework notifications is that you end up posting
-notifications that no one may ever use, or you might not post a crucial
-one that people would love to have, and there&#8217;s a performance cost to
-un-judicious use.</p>
-
-<p>Notifications are similar to delegates, except that delegates are meant
-to be the sole receiver/manager of these events.</p>
-
-<h2>Delegation</h2>
-
-<p>Delegation is a benefit over subclassing and overriding hooks (Template
-Pattern) because subclass-superclass coupling is bad, and it&#8217;s also
-hardwired at compile time whereas you can switch delegates dynamically
-at runtime.</p>
-
-<p>Another way to think about it is that sometimes model/controller state
-dictate constraints on the view layer, e.g. <code>NSWindow</code> sizing and what
-not, but subclassing <code>NSWindow</code> to pollute it with model/controller
-concerns would break the separation of concerns. Delegates obviously do
-this to some degree, but this breakage, if it can be considered that,
-is way more encapsulated.</p>
-
-<p><code>setDelegate</code> should only assign an instance variable but not retain it;
-an object doesn&#8217;t own its delegate, but a delegate knows about the
-object. This avoids cycles and makes conceptual sense. Delegate objects
-are responsible sending <code>setDelegate:nil</code> to all the objects it stands
-in for upon <code>dealloc</code>.</p>
-
-<p>Data Sources are like delegates, but provides data rather than
-responding to a change.</p>
-
-<p><code>NSOutlineView</code> and <code>NSTableView</code> use a data source.</p>
-
-<h2>UIKit is iOS-only!</h2>
-
-<p>UIKit is iOS only (Cocoa Touch), dweebleton. Apparently UIKit is based on
-<code>Application Kit</code>.</p>
-
-<pre><code>Cocoa:ApplicationKit::CocoaTouch:UIKit
-</code></pre>
-
-<h2>Prefix.pch for globally used framework headers</h2>
-
-<p>Save on typing by adding an <code>import</code> to <code>YourApp-Prefix.pch</code>, which
-literally prepends it to every Objective-C source file in your proj.</p>
-
-<p>Also, <code>.pch</code> means Pre-Compile Header.</p>
-
-<h2>View Hierarchy</h2>
-
-<p>Non-opaque views let clicks through. Like <code>pointer-events</code> in CSS land.</p>
-
-<p>Each view tracks two rectangles:</p>
-
-<ul>
-<li>bounds: always <code>0,0</code> origin unless reset at some point (there&#8217;s a
-method to use this, apparently scrollview uses it).</li>
-<li>frame: the box within the parent view&#8217;s coord system.</li>
-</ul>
-
-
-<p>Scaling is supported, resetting the origin (which affects bounds) is
-supported. There are methods for translating between coord systems.</p>
-
-<p>TODO: finish this bitchass book.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/01/daily-journal/"/>
-    <updated>2014-07-01T10:03:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/01/daily-journal</id>
-    <content type="html"><![CDATA[<h2>window vs document events</h2>
-
-<p><code>window</code> and <code>document</code> have different events. Duh.</p>
-
-<p><code>window</code>:</p>
-
-<ul>
-<li>resize</li>
-</ul>
-
-
-<p><code>document</code>:</p>
-
-<ul>
-<li>DOMContentLoaded</li>
-</ul>
-
-
-<p>Breakdown of events and their originators:</p>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/Events</p>
-
-<p>Fun fact: DOMContentLoaded is considered a DOM mutation event.</p>
-
-<h2>Treat stubbed cordova as its own platform</h2>
-
-<p>I&#8217;m doing a Phonegap/Cordova app and it&#8217;s been tricky settling on a
-pattern for stubbing out the cordova library when I&#8217;m just running in
-Chrome or anywhere not in the actual native cordova wrapper, and I think
-I found the final solution: clone https://github.com/apache/cordova-js,
-define a new platform with a fake exec, have the fake exec look up some
-stubbed handlers that you can define in your app, (e.g.
-<code>window._stubbedCordovaHandlers[blahblah]</code>) and basically leave it up to
-your app to stub out all the native plugin services/actions. The effect
-of all of this is that your index.html always loads a cordova.js (which
-has some other conveniences like stick event handlers, pub sub channels,
-etc) but you don&#8217;t have to have a bunch of conditionals asking whether
-this is a stubbed version of the app or not.</p>
 ]]></content>
   </entry>
   

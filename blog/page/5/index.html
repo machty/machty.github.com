@@ -112,6 +112,229 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/04/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2><code>npm install</code> git repos</h2>
+
+<p>NOTE: this section is not complete; placeholding for later.</p>
+
+<p>After many abortive attempts to find the right syntax for running
+<code>npm install</code>, I figured I&#8217;d delve into what URL syntax it actually
+expected, and why.</p>
+
+<p>Here&#8217;s a bunch of stuff that didn&#8217;t work:</p>
+
+<pre><code>npm install git+ssh@github.com:stefanpenner/ember-cli.git
+npm install https://github.com/stefanpenner/ember-cli.git
+</code></pre>
+
+<p>Why couldn&#8217;t <code>npm install</code> just figure out what I meant? Well, I don&#8217;t
+know, but here&#8217;s a breakdown of the above.</p>
+
+<p><em>This is a helpful resoure: https://help.github.com/articles/which-remote-url-should-i-use</em></p>
+
+<p>Basically, you can clone GitHub repos either with HTTPS or SSH urls. SSH
+urls require an SSH keypair to generated on your computer and registered
+to your GitHub accounts.</p>
+
+<p>So here&#8217;s the first thing I tried:</p>
+
+<pre><code>https://help.github.com/articles/using-ssh-agent-forwarding
+</code></pre>
+
+<p>This is an HTTPS url.</p>
+
+<p>Q: Why does/did GitHub even require a password for cloning a repo?
+What&#8217;s insecure about that read info? Possible answer: even if you don&#8217;t
+have read access to a repo, a man in the middle might tell you you do,
+and then you&#8217;re sending priv data, blah blah blah.</p>
+
+<h2><code>Gdiff</code>, diffing in vim</h2>
+
+<p>This was a very helpful resource:</p>
+
+<p>http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/</p>
+
+<pre><code>:Gdiff
+:ls # list all the open buffers in their names
+:diffget BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:diffput BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:only # close all buffer except this one
+</code></pre>
+
+<p>I ended up adding the following to my <code>.vimrc.after</code>:</p>
+
+<pre><code>:nnoremap &lt;Leader&gt;dg :diffget &lt;CR&gt;
+:nnoremap &lt;Leader&gt;dp :diffput &lt;CR&gt;
+</code></pre>
+
+<p>Note that this arg-less form is useful when diffing between local
+changes and your last checkin; I use it a bunch for <code>ember-cli</code> when I
+call <code>ember init</code> to reset my app structure to the latest <code>ember-cli</code>
+blueprint (note that this process is still pretty miserable).</p>
+
+<h2>Broccoli <code>ignoredModules</code> and <code>legacyFilesToAppend</code></h2>
+
+<p>These options come from the <code>broccoli-es6-concatenator</code>.</p>
+
+<ul>
+<li><code>ignoredModules</code>: don&#8217;t transpile this module or add it to the list of
+importable modules. This is useful when you have a file that&#8217;s already
+in AMD format (not ES6), and you want to be able to es6 <code>import</code> that
+module, so you put it in <code>ignoredModules</code> so it&#8217;s not treated as an
+es6 file that needs to be imported.</li>
+<li><code>legacyFilesToAppend</code>: non-es6 files (global libraries) that should be
+appended to the end of the final output JS file.</li>
+</ul>
+
+
+<p>Note: <code>loaderFile</code> is automatically added as a legacy files, why, duh,
+because the loader file obviously needs to be a global, non-module file.</p>
+
+<p>So, wtf does this mean (the latest iteration of the blueprint
+Brocfile.js from ember-cli):</p>
+
+<pre><code>if (app.env !== 'production') {
+  push.apply(app.ignoredModules, [
+    'qunit',
+    'ember-qunit'
+  ]);
+
+  push.apply(app.legacyFilesToAppend, [
+    'test-shims.js',
+    'ember-qunit/dist/named-amd/main.js'
+  ]);
+}
+</code></pre>
+
+<p>Well, thanks to the geniuses in freenode IRC <code>#ember-cli</code>, I&#8217;ve learned
+that:</p>
+
+<ul>
+<li>This shouldn&#8217;t be in the blueprint Brocfile.js, but rather should be
+in the ember-cli lib <code>EmberApp</code> abstraction over the Brocfile.js, but
+anyway:</li>
+<li>The intent is that by specifying an <code>ignoredModules</code> item, you&#8217;re
+basically saying &#8220;I intent to import a module with this name, and
+because I&#8217;m opting out of generating it now via an ES6 file, I&#8217;ll be
+adding an AMD module for this file later&#8221;</li>
+</ul>
+
+
+<p>And if you try to <code>import something from 'nonexistent-module'</code>, you&#8217;ll
+get a loader error.</p>
+
+<p>This all seems really obvious, right? Naw, it&#8217;s really freaking hard for
+me to keep in my dumb brain. :(</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-28T14:11:00-04:00" pubdate data-updated="true">Apr 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/04/26/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>JavaScript: <code>Object#constructor</code></h2>
+
+<pre><code>function A() {}
+function B() {}
+B.prototype = Object.create(A.prototype);
+console.log(new B().constructor); // "[Function: A]"
+</code></pre>
+
+<p>That&#8217;s not what we want. If we use <code>Object.create</code> on a parent class&#8217;s
+prototype, you need to also do</p>
+
+<pre><code>B.prototype.constructor = B;
+console.log(new B().constructor); // "[Function: B]"
+</code></pre>
+
+<p>TL;DR, you must manually set <code>constructor</code> on a subclass&#8217;s prototype to
+point to that subclass&#8217;s constructor function, or else <code>.constructor</code>
+will refer to a parent class&#8217;s constructor.</p>
+
+<h2>Duck duck go</h2>
+
+<p>Search engine that I should be using.</p>
+
+<h2><code>tree</code></h2>
+
+<p><code>tree</code> is a command you can install with <code>brew install tree</code> that
+gives you a visual, recursive display of a folder. Output looks like
+this:</p>
+
+<pre><code>app/routes
+├── ad.js
+├── application.js
+├── builds
+│   ├── form.js
+│   ├── index.js
+│   ├── select
+│   │   └── index.js
+│   └── select.js
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-26T14:49:00-04:00" pubdate data-updated="true">Apr 26<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/04/21/daily-journal/">
 		
 			Daily Journal</a>
@@ -629,116 +852,6 @@ yesterday</a>.</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>, <a class='category' href='/blog/categories/nyc-meetup/'>nyc meetup</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">
-		
-			Slaying the Ember/Handlebars JS-RB Dependency Demons With Gem Wrappers</a>
-	</h2>
-	<div class="entry-content">
-		<p>Ember.js devotees may have noticed a series of related commits that I
-put in recently with reference to &#8220;removing vendored .js files in favor
-of ember-source, handlebars-source, etc&#8221;, or something of the like.
-They&#8217;re all checked in now, and I think they&#8217;ve gone a long way towards
-alleviating the dependency hell stemming from multiple gems packaging
-vendored .js files.</p>
-
-<p>For a better understanding of the motivation behind these
-changes and how they might affect you, read on.</p>
-
-
-		
-		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-27T23:28:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/emblem-source/'>emblem-source</a>, <a class='category' href='/blog/categories/gemifying/'>gemifying</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/">
-		
-			Emblem.js - Indented Templating Targeting Handlebars.js and Ember.js</a>
-	</h2>
-	<div class="entry-content">
-		<p>I wrote a templating language called
-<a href="https://github.com/machty/emblem.js">Emblem</a> which you can use instead
-of Handlebars to write templates for your views in Ember.js (and soon,
-in any other setting). It&#8217;s still very new, and I definitely have more
-planned as far as syntax enhancements/refinements, but what&#8217;s there is
-pretty solid and I hope you&#8217;ll take it for a test drive and give me some
-feedback, or better yet submit a PR or two.</p>
-
-<p>You can check out a zany little demo <a href="http://jsbin.com/ulegec/17/edit">here</a>, which
-gives you an opportunity to try out some syntactical experiments
-yourself.</p>
-
-<p>Aaand
-<a href="https://speakerdeck.com/machty/emblem-dot-js-ember-targeting-indentation-based-templates">here</a>
-are the slides from the presentation at made at the NYC Ember.js meetup
-I made this week. The rest of this post goes into some of the
-motivation and architecture behind Emblem.</p>
-
-
-		
-		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-27T14:13:00-05:00" pubdate data-updated="true">Jan 27<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember/'>ember</a>, <a class='category' href='/blog/categories/emblem/'>emblem</a>, <a class='category' href='/blog/categories/handlebars/'>handlebars</a>, <a class='category' href='/blog/categories/indentation/'>indentation</a>, <a class='category' href='/blog/categories/parsing/'>parsing</a>, <a class='category' href='/blog/categories/pegjs/'>pegjs</a>, <a class='category' href='/blog/categories/templates/'>templates</a>
 
 </div>
 
