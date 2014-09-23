@@ -1,0 +1,414 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Juggernaut  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Juggernaut</h2>
+	<div class="entry-content"><h2>Rust is a &#8220;Systems&#8221; programming language</h2>
+
+<p>Seems vague. You can use it for games (<code>#rust-gamedev</code> or
+<code>/r/rust_gamedev</code>). What does systems mean?</p>
+
+<p><code>#rust</code> tells me more vague stuff, but basically:</p>
+
+<ul>
+<li>Rust doesn&#8217;t impose garbage collection, so you maintain fine-grained
+control over memory in that regard</li>
+<li>Rust integrates nicely with C</li>
+</ul>
+
+
+<p>These features are often compared with Go. Go has GC. Go apparently
+doesn&#8217;t integrate as nicely with C (not sure how true this is, need to
+dig in). Apparently Go used to advertise itself as systems, then they
+stopped, and Rust adopted that term to make it clear how it is different
+from the oft-compared Go.</p>
+
+<h2><code>source</code> and <code>export</code></h2>
+
+<p>I always knew the <code>source</code> command as the command you use when you want
+to run a script with a bunch of <code>export</code> definitions, but all it really
+means is that <code>source</code> doesn&#8217;t actually make new process but just runs
+the code in the source file as shell commands. As such, it means that
+any environment vars set in the sourced command don&#8217;t get set in a
+separate child process that dies and forgets set vars.</p>
+
+<p><code>export</code> makes sure that an env var gets passed to child processes. Just
+setting an env var without <code>export</code> won&#8217;t mark it to be shared with
+child processes.</p>
+
+<p>You can verify all of this by <code>source</code>ing a script with a long <code>sleep</code>
+and then checking <code>ps</code> to verify that <code>sleep</code> is a direct child of
+<code>bash</code>; there&#8217;s no intermediate process running that execution.</p>
+
+<h2>prey project</h2>
+
+<p>Protect your devices from theft:</p>
+
+<p>https://preyproject.com/</p>
+
+<p>TODO: look into this shit.</p>
+
+<h2>awesome cheese</h2>
+
+<p>Stompetoren Grand Cru. With Effie&#8217;s Homemade Oatcakes.</p>
+
+<p>So fucking good.</p>
+
+<p>http://bedfordcheeseshop.com/products/stompetoren-gouda-grand-cru</p>
+
+<h2>Why is CORS disabled for XHR but not a 3rd party post?</h2>
+
+<p>CSRF is still a thing, but falls outside of CORS because CORS intends to
+make JavaScript-initiated requests safe. Then again didn&#8217;t
+Chrome/Mozilla just make fonts CORS-y?</p>
+
+<h2>Access-Control-Allow-Origin</h2>
+
+<p>I&#8217;d get this error in devtools console whenever my Rails code errored
+out during an XHR request:</p>
+
+<pre><code>XMLHttpRequest cannot load http://localhost:5000/wat
+No 'Access-Control-Allow-Origin' header is present on the requested resource.
+Origin 'http://localhost:4200' is therefore not allowed access. 
+</code></pre>
+
+<p>It&#8217;s misleading since I have CORS set up correctly, but apparently not
+for erroring requests? Basically, using XMLHTTPRequest (ajax) is going
+to set the <code>Origin</code> request header, which flags the server to send back
+CORS headers. If the browser doesn&#8217;t see those CORS headers, or the
+provided ones don&#8217;t match / grant proper permissions, then the XHR
+request will fail.</p>
+
+<p>So basically I have an error in my server code I need to fix. Maybe it&#8217;s
+good that CORS fails upon error? Because if not, then I might be opening
+up some third party door that&#8217;s sniffing my site due via erroneous
+requets? I can&#8217;t really see it but maybe.</p>
+
+<h2>Why won&#8217;t my dumbass server work?</h2>
+
+<p>Scenario: I have a remote Minecraft server. It runs from a persistent
+tmux session so that I can log in and run server commands on it. I can
+ping it successfully but when I try to join, it fails to connect with
+authentication servers. There&#8217;s lots of reported issues online with
+authentication servers but I think in my case no outbound requests are
+succeeding. <code>curl google.com</code> yields no response, and neither do pings.</p>
+
+<p>Whoops. I just remotely turned off the server&#8217;s wifi and got
+disconnected. I figured I&#8217;d turn it off and on again to see if that
+&#8220;rebooted&#8221; things. But, uh, kinda need internet through that whole
+process. Dumbest moment of 2014.</p>
+
+<h2>Do shells fork to start new processes?</h2>
+
+<p>Yes. Bash will fork itself and then calls execve to transform itself
+into a new process.</p>
+
+<p>There&#8217;s also an <code>exec</code> built-in command that will replace your bash
+instance with whatever you wanna run, which means when the new command
+terminates, your bash terminal will close, e.g.:</p>
+
+<pre><code>exec sleep 1
+</code></pre>
+
+<p>An &#8220;Environment list&#8221; maintains the key value pairs of env vars. When
+you exec a new process, it either inherits the env of its parent or gets
+a new one. In C-land, the <code>char ** environ</code> variable is exposed contain
+all env vars, testable via:</p>
+
+<pre><code>#include &lt;stdio.h&gt;
+extern char **environ;
+int main() {
+  printf("%s\n", environ[0]);
+  return 0;
+}
+</code></pre>
+
+<h2>mmap</h2>
+
+<p>Virtual memory mapping. It&#8217;s a syscall to map a region of virtual memory
+to a file, or to create an anonymous mapping that doesn&#8217;t write to a
+file.</p>
+
+<h2>CGI / Rack limitations</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Common_Gateway_Interface">Common Gateway Interface</a></p>
+
+<p>http://blog.plataformatec.com.br/2012/06/why-your-web-framework-should-not-adopt-rack-api/</p>
+
+<p>Shortcoming: middlewares that allocate/release resources</p>
+
+<h2>Mac Desktop Shell Scripts</h2>
+
+<p>Save this with <code>+x</code> chmod permissions as <code>~/Desktop/wat.command</code>.</p>
+
+<pre><code>#!/bin/bash
+echo "wat"
+</code></pre>
+
+<h2>htop</h2>
+
+<p><code>brew install htop</code></p>
+
+<p>It&#8217;s top but way way more bitchin. OMG, it even has a tree mode.</p>
+
+<h2>man vs info</h2>
+
+<p>Just discovered that there&#8217;s both <code>man bash</code> and <code>info bash</code>. <code>info</code> was
+added in the 90s by GNU, who felt <code>man</code> was too crappy a manual system for
+sophisticated software.</p>
+
+<h2>Job control / monitor mode</h2>
+
+<p>Bash (et al, but apparently not Bourne?) implement job control, the
+ability to suspend resume jobs (process groups) via an interactive
+shell. Job control is enabled when &#8220;monitor mode&#8221; is on. In bash, this
+is enabled by default. To disable: <code>set +m</code>. To enable: <code>set -m</code>. When
+disabled, you&#8217;ll see things like:</p>
+
+<pre><code>$ fg
+-bash: fg: no job control
+</code></pre>
+
+<p>You also won&#8217;t be able to ^Z out of a running process (a SIGTSTP still
+fires but bash ignores it). <code>ruby -e "Process.kill(:TSTP,0)"</code> runs to
+completion when monitor mode is disabled.</p>
+
+<p>Actually hmm, interesting, if you disable monitor mode and run</p>
+
+<pre><code>ruby -e "Process.kill(:STOP, 0); puts 'done'"
+</code></pre>
+
+<p>then it just runs to completion? How is that possible?
+My guess is that the process stops, and then is immediately resumed
+because there&#8217;s nothing to take its place? Seems SIGSTOP is ignored even
+when you sent it from another terminal to a terminal with -m.</p>
+
+<p>Also, you can display all the shell options via <code>echo $-</code></p>
+
+<pre><code>himBH
+hiBH # monitor mode disabled
+</code></pre>
+
+<h2>Dollar signs</h2>
+
+<p>http://stackoverflow.com/a/5163260/914123</p>
+
+<pre><code> 1. Positional parameters `$1,$2,$3…` and their corresponding array representation, count and IFS expansion `$@`, `$#`, and `$*`.
+ 2. `$-` current options set for the shell.
+ 3. `$$` pid of the current shell (not subshell)
+ 4. `$_` most recent parameter (or the abs path of the command to start the current shell immediately after startup)
+ 5. `$IFS` the (input) field separator
+ 6. `$?` most recent foreground pipeline exit status
+ 7. `$!` PID of the most recent background command
+ 8. `$0` name of the shell or shell script
+</code></pre>
+
+<h2>syscalls</h2>
+
+<p>Example: <a href="http://www.opensource.apple.com/source/tcl/tcl-5/tcl/compat/waitpid.c">waitpid</a></p>
+
+<p>Wrapper C functions stash args in registers, stash syscall id in <code>%eax</code>,
+and then runs a <code>trap</code> machine instruction, which tells the processor to
+switch into kernel mode. (Recent hardware uses <code>sysenter</code> instead of
+slower <code>trap</code>, which incurred interrupt overhead&#8230; TODO: learn about
+interrupts!). The rest is obvious enough.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-20T12:30:00-04:00" pubdate data-updated="true">Sep 20<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/09/20/daily-juggernaut/';
+        var disqus_url = 'http://machty.github.com/blog/2014/09/20/daily-juggernaut/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
