@@ -4,7 +4,7 @@
   <title><![CDATA[Category: OpenGraph | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/opengraph/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-23T11:17:23-04:00</updated>
+  <updated>2014-09-30T16:55:34-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -87,59 +87,33 @@ cropped or black-bar'd for internal YouTube use.</p>
 user-provided video URL for the og:image tag value via the following
 code:</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  before_validation :set_attachment&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="kp">protected</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  def set_attachment&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">return</span> <span class="k">if</span> <span class="n">attachment</span><span class="o">.</span><span class="n">present?</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Download and parse the video URL</span>
-</span><span class='line'><span class="n">doc</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">video_url</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Use CSS selection to query og:image url.</span>
-</span><span class='line'><span class="n">image_url</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_css</span><span class="p">(</span><span class="s1">&#39;meta[property=&quot;og:image&quot;]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:[]</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Save the downloaded thumbnail image to paperclip attachment.</span>
-</span><span class='line'><span class="nb">self</span><span class="o">.</span><span class="n">attachment</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">rescue</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;errors.add :attachment, &quot;couldn&#39;t be determined by the video URL you supplied&quot;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}</p>
+
+<p>  before_validation :set_attachment</p>
+
+<p>  protected</p>
+
+<p>  def set_attachment</p>
+
+<pre><code>return if attachment.present?
+
+# Download and parse the video URL
+doc = Nokogiri::HTML(open(video_url))
+
+# Use CSS selection to query og:image url.
+image_url = doc.at_css('meta[property="og:image"]').try(:[], 'content')
+
+# Save the downloaded thumbnail image to paperclip attachment.
+self.attachment = open(URI.parse(image_url))
+</code></pre>
+
+<p>  rescue</p>
+
+<pre><code>errors.add :attachment, "couldn't be determined by the video URL you supplied"
+</code></pre>
+
+<p>  end
+{% endcodeblock %}</p>
 
 <p>This fails quietly if there are no og:image tags at the provided URL
 (which just means the user will have to uplaod their own thumbnail).</p>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rake pipeline | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/rake-pipeline/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-23T11:17:23-04:00</updated>
+  <updated>2014-09-30T16:55:34-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -86,35 +86,28 @@ server returned.)</p>
 
 <p>You'll notice this at the bottom of the gist:</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rake</span><span class="o">::</span><span class="no">Pipeline</span><span class="o">::</span><span class="no">DSL</span><span class="o">::</span><span class="no">PipelineDSL</span><span class="o">.</span><span class="n">module_eval</span> <span class="k">do</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">remote_replace</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">block</span><span class="p">)</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;filter(RemoteReplaceFilter, *args, &amp;amp;block)</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
-</span><span class='line'><span class="sr">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+Rake::Pipeline::DSL::PipelineDSL.module_eval do
+  def remote_replace(*args, &amp;block)</p>
+
+<pre><code>filter(RemoteReplaceFilter, *args, &amp;block)
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}</p>
 
 <p>This makes it possible to use</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">remote_replace</span> <span class="s2">&quot;http://www.megancoxmusic.com/new2/&quot;</span><span class="p">,</span> <span class="s2">&quot;.content&quot;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+  remote_replace "http://www.megancoxmusic.com/new2/", ".content"
+{% endcodeblock %}</p>
 
 <p>in your Assetfile instead of the more verbose</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">filter</span><span class="p">(</span><span class="no">RemoteReplaceFilter</span><span class="p">,</span> <span class="s2">&quot;http://www.yourstaticsite.com/root_of_content&quot;</span><span class="p">,</span> <span class="s2">&quot;.content&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:ruby %}
+  filter(RemoteReplaceFilter, "http://www.yourstaticsite.com/root_of_content", ".content")
+{% endcodeblock %}</p>
 
 <h3>Skipping the filter while running <code>rakep server</code></h3>
 

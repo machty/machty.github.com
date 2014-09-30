@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vim | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/vim/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-23T11:17:23-04:00</updated>
+  <updated>2014-09-30T16:55:34-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -43,7 +43,7 @@ terminal, using <a href="http://tmux.sourceforge.net/">tmux</a> as better
 screen-splitting replacement for <code>screen</code>, and Vim as my editor
 (with the <a href="https://github.com/carlhuda/janus">Janus</a> plugin bundle).</p>
 
-<p><img src="/images/tmuxsetup.jpg"></p>
+<p>{% img /images/tmuxsetup.jpg %}</p>
 
 <p>I figured the easiest way for me to address the above need for quick Gem
 source code perusal would be to split my Vim pane and open a new
@@ -62,31 +62,20 @@ it's extremely useful.</p>
 <p>Here's what I ended up throwing into my .vimrc (actually .vimrc.after
 since I'm using Janus).</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="c">&quot; Split current tmux window, running &lt;code&gt;bundle open&lt;/code&gt; on the</span>
-</span><span class='line'><span class="c">&quot; argument-specified Gem name. Auto-completes from Gemfile.lock.</span>
-</span><span class='line'>command<span class="p">!</span> <span class="p">-</span>nargs<span class="p">=</span>* <span class="p">-</span><span class="nb">complete</span><span class="p">=</span>custom<span class="p">,</span>ListGems BundleOpen <span class="k">silent</span> execute <span class="s2">&quot;!tmux splitw &#39;bundle open &lt;args&gt;&#39;&quot;</span><span class="p">&lt;</span>/<span class="k">p</span><span class="p">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">&lt;</span><span class="k">p</span><span class="p">&gt;</span>&quot; The <span class="k">function</span> used <span class="k">to</span> produce the autocomplete results.
-</span><span class='line'><span class="k">fun</span> ListGems<span class="p">(</span>A<span class="p">,</span>L<span class="p">,</span><span class="k">P</span><span class="p">)</span>
-</span><span class='line'><span class="c">  &quot; Note that vim will filter for us... no need to do anything with A args.</span>
-</span><span class='line'>  <span class="k">return</span> system<span class="p">(</span><span class="s2">&quot;grep -s &#39;^ &#39; Gemfile.lock | sed &#39;s/^ *//&#39; | cut -d &#39; &#39;  -f1 | sed &#39;s/!//&#39; | sort | uniq&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="k">endfun</span><span class="p">&lt;</span>/<span class="k">p</span><span class="p">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">&lt;</span><span class="k">p</span><span class="p">&gt;</span>&quot; Shortcut mapping.
-</span><span class='line'>nmap <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">o</span> :BundleOpen
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:vim %}
+" Split current tmux window, running <code>bundle open</code> on the
+" argument-specified Gem name. Auto-completes from Gemfile.lock.
+command! -nargs=* -complete=custom,ListGems BundleOpen silent execute "!tmux splitw 'bundle open <args>'"</p>
+
+<p>" The function used to produce the autocomplete results.
+fun ListGems(A,L,P)
+  " Note that vim will filter for us... no need to do anything with A args.
+  return system("grep -s '^ ' Gemfile.lock | sed 's/^ *//' | cut -d ' '  -f1 | sed 's/!//' | sort | uniq")
+endfun</p>
+
+<p>" Shortcut mapping.
+nmap <leader>o :BundleOpen
+{% endcodeblock %}</p>
 
 <p>Basically, <code>command!</code> declares the command that tells Tmux to split the
 current pane and call <code>bundle open</code> with whatever I pass to the Vim
