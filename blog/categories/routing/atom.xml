@@ -4,7 +4,7 @@
   <title><![CDATA[Category: routing | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/routing/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-30T16:55:34-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -36,38 +36,70 @@ that describes an application that allows you to create new Campaigns,
 but the forms for filling out all the information about a Campaign are
 split between multiple pages.</p>
 
-<p>{% codeblock app_router.js.coffee lang:coffeescript %}
-App.Router = Em.Router.extend
-  root: Em.Route.extend</p>
-
-<pre><code># ... index route, redirect-to's, etc.
-
-new_campaign: Em.Route.extend
-  route: '/new_campaign'
-  connectOutlets: (router) -&gt;
-    # 1. Instantiate a NewCampaignController and NewCampaignView,
-    # and inject the latter into applicationController's outlet.
-    # also create the empty Campaign object that will be 
-    # shared between the multiple pages of forms and pass it in
-    # as the context object to the controller.
-    router.get('applicationController').connectOutlet('newCampaign', App.Campaign.createRecord())
-
-  basic_info: Em.Route.extend
-    route: '/basic_info'
-    connectOutlets: (router) -&gt;
-      # 2. Create BasicInfoController and BasicInfoView, inject
-      # into the NewCampaignView outlet.
-      router.get('newCampaignController').connectOutlet('basicInfo')
-
-  more_info: Em.Route.extend
-    route: '/more_info'
-    connectOutlets: (router) -&gt;
-      router.get('newCampaignController').connectOutlet('moreInfo')
-
-  #... a third page
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.Router = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Router</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">root: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="c1"># ... index route, redirect-to&#39;s, etc.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">new_campaign: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">route: </span><span class="s">&#39;/new_campaign&#39;</span>
+</span><span class='line'>  <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1"># 1. Instantiate a NewCampaignController and NewCampaignView,</span>
+</span><span class='line'>    <span class="c1"># and inject the latter into applicationController&#39;s outlet.</span>
+</span><span class='line'>    <span class="c1"># also create the empty Campaign object that will be </span>
+</span><span class='line'>    <span class="c1"># shared between the multiple pages of forms and pass it in</span>
+</span><span class='line'>    <span class="c1"># as the context object to the controller.</span>
+</span><span class='line'>    <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;applicationController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;newCampaign&#39;</span><span class="p">,</span> <span class="nx">App</span><span class="p">.</span><span class="nx">Campaign</span><span class="p">.</span><span class="nx">createRecord</span><span class="p">())</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">route: </span><span class="s">&#39;/basic_info&#39;</span>
+</span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>      <span class="c1"># 2. Create BasicInfoController and BasicInfoView, inject</span>
+</span><span class='line'>      <span class="c1"># into the NewCampaignView outlet.</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;basicInfo&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">route: </span><span class="s">&#39;/more_info&#39;</span>
+</span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span><span class="p">(</span><span class="s">&#39;moreInfo&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#... a third page</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>There's two main problems with the code above:</p>
 
@@ -80,19 +112,30 @@ Controllers, namely:</li>
 </ol>
 
 
-<p>{% codeblock app_router.js.coffee lang:coffeescript %}
-App.NewCampaignView = Em.View.extend
-  templateName: "new_campaign"
-App.NewCampaignController = Em.Controller.extend()</p>
-
-<p>App.BasicInfoView = Em.View.extend
-  templateName: "basic_info"
-App.BasicInfoController = Em.Controller.extend()</p>
-
-<p>App.MoreInfoView = Em.View.extend
-  templateName: "more_info"
-App.MoreInfoController = Em.Controller.extend()
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.NewCampaignView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">templateName: </span><span class="s">&quot;new_campaign&quot;</span>
+</span><span class='line'><span class="nv">App.NewCampaignController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nv">App.BasicInfoView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">templateName: </span><span class="s">&quot;basic_info&quot;</span>
+</span><span class='line'><span class="nv">App.BasicInfoController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nv">App.MoreInfoView = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">templateName: </span><span class="s">&quot;more_info&quot;</span>
+</span><span class='line'><span class="nv">App.MoreInfoController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>First off, if you're a 1-to-1 class-to-file kind of person, your
 codebase, app namespace, and editor tab space will bloat with nearly
@@ -104,22 +147,39 @@ a string to specify exactly which Views / Controllers to create and what
 your context option should be. Let us kill off the <code>BasicInfo</code>- and <code>MoreInfo</code>-
 Controllers via the following:</p>
 
-<p>{% codeblock lang:coffeescript %}</p>
-
-<h1>App.Router = ...</h1>
-
-<pre><code>  basic_info: Em.Route.extend
-    connectOutlets: (router) -&gt;
-      router.get('newCampaignController').connectOutlet
-        viewClass: App.BasicInfoView
-
-  more_info: Em.Route.extend
-    connectOutlets: (router) -&gt;
-      router.get('newCampaignController').connectOutlet
-        viewClass: App.MoreInfoView
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nv">App.Router = </span><span class="p">...</span><span class="o">&lt;/</span><span class="nx">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nv">more_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>    <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>      <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>        <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">MoreInfoView</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Turns out we've actually solved both problems: we no longer need
 <code>BasicInfoController</code> or <code>MoreInfoController</code>, and we've actually
@@ -158,9 +218,10 @@ encourage you to really dig into the Ember source, particularly the test
 cases that deal with these kinds of issues. For example, tucked right in
 the middle of <code>controller_test.js</code> is</p>
 
-<p>{% codeblock app_router.js.coffee lang:javascript %}
-test("if the controller is explicitly set to null while connecting an outlet, the instantiated view will inherit its controller from its parent view", function() { ...
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;if the controller is explicitly set to null while connecting an outlet, the instantiated view will inherit its controller from its parent view&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Which isn't exactly what's happening regarding context resolution, but still clued me into this
 approach.</p>
@@ -184,28 +245,52 @@ actually need the outlet, just give it a sensible name that won't
 collide with any other outlet attached to the shared controller. Then
 when you want to inject a view into <em>that</em> outlet, you can do:</p>
 
-<p>{% codeblock app_router.js.coffee lang:coffeescript %}</p>
-
-<p>  basic_info: Em.Route.extend</p>
-
-<pre><code>route: '/basic_info'
-connectOutlets: (router) -&gt;
-  router.get('newCampaignController').connectOutlet
-    viewClass: App.BasicInfoView
-
-index: Em.Route.extend
-  route: '/'
-
-captcha: Em.Route.extend
-  route: '/captcha'
-  connectOutlets: (router) -&gt;
-    # Assume theres an outlet named captcha in the basic_info template.
-    router.get('newCampaignController').connectOutlet
-      viewClass: App.CaptchaView
-      outletName: 'captcha'
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app_router.js.coffee  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nv">basic_info: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nv">route: </span><span class="s">&#39;/basic_info&#39;</span>
+</span><span class='line'><span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>    <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">BasicInfoView</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">index: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">route: </span><span class="s">&#39;/&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">captcha: </span><span class="nx">Em</span><span class="p">.</span><span class="nx">Route</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">route: </span><span class="s">&#39;/captcha&#39;</span>
+</span><span class='line'>  <span class="nv">connectOutlets: </span><span class="p">(</span><span class="nx">router</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>    <span class="c1"># Assume theres an outlet named captcha in the basic_info template.</span>
+</span><span class='line'>    <span class="nx">router</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s">&#39;newCampaignController&#39;</span><span class="p">).</span><span class="nx">connectOutlet</span>
+</span><span class='line'>      <span class="nv">viewClass: </span><span class="nx">App</span><span class="p">.</span><span class="nx">CaptchaView</span>
+</span><span class='line'>      <span class="nv">outletName: </span><span class="s">&#39;captcha&#39;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   

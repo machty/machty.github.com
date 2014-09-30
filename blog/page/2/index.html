@@ -112,6 +112,441 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/08/05/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>ES6 fat arrow</h2>
+
+<pre><code>var a = this;
+var fn = () =&gt; {
+  console.log(this === a); // true
+}
+</code></pre>
+
+<p>http://tc39wiki.calculist.org/es6/arrow-functions/</p>
+
+<p>yuno CoffeeScript single arrow syntax?</p>
+
+<blockquote><p>However, we don&#8217;t want CoffeeScript&#8217;s ->, it&#8217;s confusing to have two arrows and dynamic this binding is an oft-fired footgun.</p></blockquote>
+
+<h2>SaltStack</h2>
+
+<p>http://docs.saltstack.com/en/latest/</p>
+
+<h2>Open Core</h2>
+
+<p>http://en.wikipedia.org/wiki/Open_core</p>
+
+<p>Open Source core functionality with paid/proprietary add-ons, e.g.
+Sidekiq, or MySQL</p>
+
+<p>Related:</p>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Crippleware">Crippleware</a>: free versions
+cripple the ability to save/export/whatever</li>
+<li><a href="http://en.wikipedia.org/wiki/Freemium">Freemium</a>: free core features,
+pay for higher usage/capacity, e.g. most heroku add-ons</li>
+</ul>
+
+
+<h2>Ember First Class Actions</h2>
+
+<p>http://emberjs.jsbin.com/ucanam/5919/edit</p>
+
+<p>Questions:</p>
+
+<ul>
+<li>singleton vs multiples?</li>
+<li>actions that depend on others?</li>
+<li>link-to?
+
+<ul>
+<li>idea: a LinkView asks the router or url service for an Action
+using the route params, query params, etc.</li>
+<li>LinkView&#8217;s active CP is <code>action.pending</code> || present day isActive</li>
+<li>action will internally delegate to a shared transitionTo action
+that everyone in the world can see; everyone can know where it&#8217;s
+going, etc etc etc.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>We need to separate fake link font decoration style from the underlying
+action.</p>
+
+<p>Link&#8217;s display components:</p>
+
+<pre><code>routeDescriptor: function() {
+  // when resolvedParams change, we need to recalculate
+  // our route object... this should refire only when
+  // params change, not when the URL changes
+  this.urlService.getRouteObject('articles', 1)
+
+
+  this.urlService.createRouteDescriptor({
+    routeName: alias('_linkView.params.firstObject'),
+    contexts: alias('_linkView.contexts'),
+    queryParams: alias('_linkView.queryParams'),
+    _linkView: this
+  });
+}//.property('resolvedParams')
+
+createRouteDescriptor: function(_attrs) {
+  var attrs = {
+    router: this.router, // or maybe just `this`?
+  };
+  Ember.merge(attrs, _attrs);
+  return RouteDescriptor.createWithMixins(attrs);
+}
+
+RouteDescriptor = Ember.Object.extend({
+  // required
+  router: null,
+  routeName: null,
+  contexts: null,
+  queryParams: null,
+
+  allParams: computed('routeName', 'contexts', 'queryParams', function() {
+    // this is just a perfy thing; since all calculations depend
+    // on all these params, we'll avoid the overhead of multiple
+    // CPs depending on each of these params
+    return this.getProperties(['routeName', 'contexts', 'queryParams']);
+  }),
+
+  path: computed('router.url', 'allParams', function() {
+    var allParams = this.get('allParams');
+    var router = this.get('router');
+
+    // presently we only use router.url as a cue that the router
+    // is at a new route
+    var url = this.get('router.url');
+
+    // pass crap to routerJS
+  }),
+
+  perform: function() {
+    // invoke, blah blah blah, same logic as in link to.
+    this.get('allParams');
+  }
+});
+
+service.getRouteDescriptor('articles', 1)
+
+{
+  action:   FCA,
+  isActive: true,
+  path: "/some/dynamic/thing"
+}
+</code></pre>
+
+<p>RouteDescriptors are objects</p>
+
+<ul>
+<li>inactive: !routeObject.active</li>
+<li>active:   routeObject.active</li>
+<li>visited</li>
+</ul>
+
+
+<p>Weird thing: ember link-to&#8217;s concept of &#8220;active&#8221; doesn&#8217;t match with
+<code>&lt;a&gt;</code> tag&#8217;s concept of active; link-to &#8216;active&#8217; means you&#8217;re currently
+in the route specified by that link; <code>&lt;a&gt;</code> tag&#8217;s active means you&#8217;re
+currently clicking this link.</p>
+
+<p>I think I know how to refactor link-to and LinkView and all that</p>
+
+<p>Goals</p>
+
+<ul>
+<li>make linking/routing/active calc logic shareable</li>
+<li>make it possible to click a link to make it active before a slow
+transition has completed.</li>
+<li>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
+anything else in general too.</li>
+</ul>
+
+
+<h2>RFCs</h2>
+
+<p>Rust tempered it&#8217;s freewheeling feature additions by requiring RFCs.</p>
+
+<p>https://github.com/rust-lang/rfcs/blob/master/active/0001-rfc-process.md
+https://github.com/rust-lang/rfcs/blob/master/active/0039-lifetime-elision.md</p>
+
+<p>Sounds like we&#8217;ll be doing this for Ember.</p>
+
+<h2>Elide</h2>
+
+<blockquote><p>omit (a sound or syllable) when speaking: (as adj. elided) : the indication of elided consonants or vowels.</p></blockquote>
+
+<h2>Variadic</h2>
+
+<p>http://en.wikipedia.org/wiki/Variadic_function</p>
+
+<p>A function that is variadic has an indefinite number of arguments.
+<code>.bind</code></p>
+
+<blockquote><p>8:50 PM <spion> bind is variadic and I think it also has to do some stuff with constructors
+8:51 PM <spion> (additional arguments can be used for partial application)
+8:52 PM <spion> the constructor stuff: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Bound_functions_used_as_constructors
+8:53 PM <spion> (creates significant additional overhead)
+8:53 PM <spion> so a simple non-variadic closure implementation of bind has a lot less work to do :P</p></blockquote>
+
+<h2>React forms</h2>
+
+<p>https://github.com/wingspan/wingspan-forms</p>
+
+<p>Powerded by KendoUI</p>
+
+<h2>Reflux</h2>
+
+<p>https://github.com/spoike/refluxjs</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>╔═════════╗       ╔════════╗       ╔═════════════════╗
+</span><span class='line'>║ Actions ║──────&gt;║ Stores ║──────&gt;║ View Components ║
+</span><span class='line'>╚═════════╝       ╚════════╝       ╚═════════════════╝
+</span><span class='line'>     ^                                      │
+</span><span class='line'>     └──────────────────────────────────────┘</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rationale: http://spoike.ghost.io/deconstructing-reactjss-flux/</p>
+
+<h2>Promixo dedicated</h2>
+
+<p>https://addons.heroku.com/proximo#dedicated</p>
+
+<h2>CIDR: Classless Inter-Domain Routing</h2>
+
+<p>http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing</p>
+
+<p>Classful allocation of IP addresses (pre 1993) defined class A, B, C
+network groups split along the 8 bit chunks. Problem is the smallest
+allocation (256 addresses, assuming you were allocated something like
+123.456.789.XXX) was often too small for companies, whereas the next
+step up from that (123.456.XXX.XXX) was generally too huge (65536) for
+companies/entities to efficiently take advantage of. SOLUTION: CIDR
+blocks and subnet masks.</p>
+
+<blockquote><p>This led to inefficiencies in address use as well as routing because the large number of allocated small (class-C) networks with individual route announcements, being geographically dispersed with little opportunity for route aggregation, created heavy demand on routing equipment.</p></blockquote>
+
+<p>In other words, class C allocations are 123.456.789.XXX allocations,
+each containing 256 addresses, with no requirement that they be
+geographically grouped, such that routers had to maintain large tables
+for very similar looking addresses rather than being able to rely on
+some grouping rules to minimize the routing information they had to know
+about. But now subnet masking is a thing and blah blah blah I&#8217;m done
+learning this shit.</p>
+
+<p>192.168.2.0/24 means that the network is identified by the first 24 bits</p>
+
+<blockquote><p>192.168.100.0/24 represents the given IPv4 address and its associated routing prefix 192.168.100.0, or equivalently, its subnet mask 255.255.255.0 (i.e. 24 &#8220;1&#8221; bits).</p>
+
+<p>the IPv4 block 192.168.100.0/22 represents the 1024 IPv4 addresses from 192.168.100.0 to 192.168.103.255.</p></blockquote>
+
+<h2>TokenEx client-side encryption</h2>
+
+<p>Original misconception:</p>
+
+<ul>
+<li>You post directly to TokenEx via AJAX, and they give you an encrypted
+value that you can pass to your server and exchange for a token</li>
+</ul>
+
+
+<p>Correction:</p>
+
+<ul>
+<li>You only use JSEncrypt to encrypt the PAN via a public key.</li>
+</ul>
+
+
+<p>Wait, I don&#8217;t understand, with tokenizing, if you have a token saved in
+the database, then your server, if compromised, could still send data
+through to TokenEx, which would proxy it through to whomever.</p>
+
+<h2>Form Factor</h2>
+
+<p>https://www.pcisecuritystandards.org/documents/Mobile_Payment_Security_Guidelines_Merchants_v1.pdf</p>
+
+<blockquote><p>The PCI Security Standards Council charter provides a forum for collaboration across the payment space
+to develop security standards and guidance for the protection of payment card data wherever it may be
+stored, processed, or transmitted—regardless of the <em>form factor</em> or channel used for payment.</p></blockquote>
+
+<p>the physical size and shape of a piece of computer hardware.</p>
+
+<p>http://en.wikipedia.org/wiki/Mobile_phone_form_factor</p>
+
+<p>or phone.</p>
+
+<p>what a stupid fucking phrase/word/definition.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T08:47:00-04:00" pubdate data-updated="true">Aug 5<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/08/02/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>NPM is killing me</h2>
+
+<p>Apparently this fixed everything.</p>
+
+<pre><code>npm cache clear &amp;&amp; npm install
+</code></pre>
+
+<p>https://www.npmjs.org/doc/cli/npm-cache.html</p>
+
+<p>npm caches everything in <code>npm config get cache</code>, which for me is:</p>
+
+<pre><code>~/.npm
+</code></pre>
+
+<p>Folder structure is something like</p>
+
+<pre><code>~/.npm/PACKAGE_NAME/VERSION/
+</code></pre>
+
+<p>which contains:</p>
+
+<ul>
+<li>.cache.json
+
+<ul>
+<li>lots of overlap w the project&#8217;s package.json, with additional
+cache-specific things like</li>
+<li>etag, shasum</li>
+<li>deployment-specific data about the package</li>
+</ul>
+</li>
+<li>package.tgz
+
+<ul>
+<li>the original tarball downloaded for this packaage</li>
+</ul>
+</li>
+<li>package/
+
+<ul>
+<li>the unzipped tarball</li>
+</ul>
+</li>
+</ul>
+
+
+<p>In other words</p>
+
+<blockquote><p>Additionally, whenever a registry request is made, a .cache.json file is placed at the corresponding URI, to store the ETag and the requested data. This is stored in {cache}/{hostname}/{path}/.cache.json.</p></blockquote>
+
+<h2>Food Shit</h2>
+
+<p>Pok Pok is a legit ass Thai place I need to check out.</p>
+
+<pre><code>http://pokpokny.com/
+</code></pre>
+
+<h2><code>sed</code> to select lines</h2>
+
+<pre><code>$ git branch
+  cp-qp
+* master
+  new-doctitle
+  setup-controller-qp
+</code></pre>
+
+<p>I wanted to switch to the fourth one without typing
+<code>setup-controller-qp</code>. Here&#8217;s how you could do it by using the line
+number</p>
+
+<pre><code>$ git branch | sed -n '4p' | xargs git checkout
+Switched to branch 'setup-controller-qp'
+</code></pre>
+
+<p>Obviously this is just a dumb exercise since it&#8217;s waaay more typing.
+This is me practicing.</p>
+
+<p>You can also display multiple lines using a syntax similiar to cut&#8217;s
+<code>-f1,2</code> syntax:</p>
+
+<pre><code>$ git branch | sed -n '3,4p' 
+  new-doctitle
+  setup-controller-qp
+</code></pre>
+
+<h2>commissary</h2>
+
+<p>From Orange is the New Black</p>
+
+<blockquote><p>commissary: a restaurant in a movie studio, military base, prison, or other institution.</p></blockquote>
+
+<h2>HRT</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Hormone_replacement_therapy">Hormone replacement therapy</a></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-02T21:24:00-04:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/07/29/daily-journal/">
 		
 			Daily Journal</a>
@@ -2267,594 +2702,6 @@ now it&#8217;ll just be one giant progressively-updated blog.</p>
 
 
 <time datetime="2014-07-15T12:18:00-04:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/14/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Website Push != Push Notifications</h2>
-
-<p>So when you&#8217;re rummaging through the Apple Dev Portal, don&#8217;t confuse the
-two and generate the wrong certs. K?</p>
-
-<h2>WWDC 2011 video on UIViewController Containment</h2>
-
-<pre><code>https://developer.apple.com/videos/wwdc/2011/
-</code></pre>
-
-<p>First off, WWDC stands for the Apple World-Wide Developer Conference.</p>
-
-<h2>Why view controllers</h2>
-
-<ul>
-<li>Make it easy to make high quality apps</li>
-<li>Reusable</li>
-</ul>
-
-
-<p>A View Controller just a Controller. Mediates model data with many
-views. View controllers maintain entire hierarchies of views. They&#8217;re
-heavyweight, meant to manage a &#8220;screenful of content&#8221;. Often packaged
-with a model, e.g.</p>
-
-<ul>
-<li>TweetViewController</li>
-<li>ImagePickerController</li>
-</ul>
-
-
-<p>View Controllers are social, meant to connect to each other. They push
-and pop each other, etc. They talk to each other a lot.</p>
-
-<p>The &#8220;manage a screenful of content&#8221;:</p>
-
-<p>View Controllers anticipate being presented in different ways. More
-accurately: they should maintain a unit of content. Only
-<code>rootViewController</code> manages a &#8220;screenful of content&#8221;, specifically the
-<code>rootViewController</code> property of the window object. Knows how to forward
-rotation events, decides overall layout.</p>
-
-<p>How to use View Controllers</p>
-
-<ul>
-<li>subclass UIViewController</li>
-<li>associate VC w view hierarchy</li>
-<li>override callbacks</li>
-</ul>
-
-
-<p>Apperance callbacks: viewWillAppear, viewDidAppear, etc
-Rotation callbacks: viewWillRotate, etc</p>
-
-<p>ViewControllers manage an entire view hierarchy. Not just one to one
-with a view.</p>
-
-<p>View Controller Containers, a tale of Two Hierarchies: view hierarchies
-and view controller hierarchies.</p>
-
-<p>Container controllers</p>
-
-<ul>
-<li>responsible for parent child relationships
-
-<ul>
-<li>API like <code>initWithRootViewController</code> implies parent-child in nav
-controller</li>
-<li>split view controllers lets you set view controller children.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Controller container api</p>
-
-<ul>
-<li>addChildViewController
-
-<ul>
-<li>not meant to be called by anyone but its own implementation; don&#8217;t
-call it on other controllers, basically</li>
-</ul>
-</li>
-<li>remoteFromParentViewController
-
-<ul>
-<li>^^ ditto</li>
-</ul>
-</li>
-<li>childViewControllers array</li>
-<li>callbacks
-
-<ul>
-<li>willMoveToParentViewController</li>
-<li>didMoveToParentViewController</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Shouldn&#8217;t be able to walk up view hierarchy and totally skip over a
-parent view controller: UIViewControllerHierarchyInconsistencyException,
-prevents you from manually adding views into the wrong view controller
-hierarchy.</p>
-
-<p>When are appearance callbacks called?</p>
-
-<p>viewWillAppear etc has nothing to do w addChildViewController, which has
-nothing to do w view appearance.</p>
-
-<p>viewWillAppear just means it&#8217;s in the window view hiearchy, but doesn&#8217;t
-mean it&#8217;s actually visible (same w viewDidAppear).</p>
-
-<p>TODO: what is view layoutSubviews?</p>
-
-<p>viewDidAppear after the view added to viewHierarchy. Called after
-layoutSubviews.</p>
-
-<p>When implementing transitions, you have to implement
-didTransitionToBlahBlah, one of the options is <code>animations</code> lambda.</p>
-
-<p>VS Layout callbacks:</p>
-
-<ul>
-<li>viewWillLayoutSubviews&#8230;</li>
-</ul>
-
-
-<p>Presentation and Dismissal of VCs</p>
-
-<p>set presentation style and then do presentViewController</p>
-
-<p>Can also present VCs by direct subview manipulation.</p>
-
-<pre><code>[root.someView addSubview: vc.view]
-</code></pre>
-
-<p>But this is bad form; better to make the VC a child of the root VC. VC
-knows where subviews should go rather than the ass backwards way.</p>
-
-<p>When to create a custom view controller container?</p>
-
-<ul>
-<li>Hopefully you don&#8217;t need to, so think twice first</li>
-<li>Aesthetics</li>
-<li>Custom app flows</li>
-<li>Your app manipulates view hiearchy directly</li>
-</ul>
-
-
-<p>Use case: make split view show up in both landscape and portrait: no
-need to make custom VC because now there&#8217;s API to just better configure
-split view.</p>
-
-<p>View controllers know themselves if they&#8217;re moving to or from parent
-view controllers within viewWillAppear and viewDidAppear by checking:</p>
-
-<pre><code>// used in viewDid/WillAppear
-- (BOOL)isMovingToParentViewController;
-
-// used in viewDid/WillDisappear
-- (BOOL)isMovingFromParentViewController;
-
-- isBeingPresented;
-- isBeingDismissed;
-</code></pre>
-
-<p>Lol:</p>
-
-<pre><code>- (BOOL) automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
-</code></pre>
-
-<h2>RFC</h2>
-
-<p>RFC&#8217;s (Request for Comments):</p>
-
-<blockquote><p>Memos in the Requests for Comments (RFC) document series contain technical and organizational notes about the Internet</p></blockquote>
-
-<p>http://www.ietf.org/about/</p>
-
-<p>So many standards organizations. How am I supposed to keep this separate
-from IEEE?</p>
-
-<p>Anyway, RFCs are docs produced by IETF. I don&#8217;t think anyone else
-(notable) produces docs called RFCs.</p>
-
-<h2>Push Notifications</h2>
-
-<p>Two levels of trust involved in publishing a push notifications:</p>
-
-<h3>Connection Trust</h3>
-
-<ul>
-<li>Provider-side: provider proves it is an authorized provider that
-Apple&#8217;s agreed to publish notifications for</li>
-<li>Device-side: APNs must validate the connection is a with a legit
-device</li>
-</ul>
-
-
-<h3>Token Trust</h3>
-
-<p>Establishes certainty that messages are routed correctly; a provider
-shouldn&#8217;t be able to send messages to random iPhones.</p>
-
-<ul>
-<li>APNs gives device a token</li>
-<li>Devices gives it to provider</li>
-<li>Provider uses it when publishing to APNs</li>
-<li>APNs uses it to route back to device</li>
-</ul>
-
-
-<p>A <code>device token</code> is not a device <code>UDID</code>; aside from being a totally
-different string, it is conceptually different in that it identifies not
-only the unique device, but the application the Push Notification is
-delivered to.</p>
-
-<p>Maybe that&#8217;s what&#8217;s confusing: don&#8217;t call it a <code>device token</code>, call
-it&#8230; an app-token? I get confused by the easiest things.</p>
-
-<h3>Providers must maintain persistent connection</h3>
-
-<p>If you want to send a notification through APNS (and GCM),
-you must maintain a persistent connection to the server. In other words,
-you can&#8217;t just connect-sendmessage-disconnect a la HTTP, which makes
-push notifications inconvenient for Rails-y architectures without
-using Sidekiq/Resque to reuse a persistent connection.</p>
-
-<p>I both:</p>
-
-<ol>
-<li>failed to realize that this was a requirement for a while and</li>
-<li>failed to understand why</li>
-</ol>
-
-
-<p>The best justification for this architecture that I can determine from
-the docs and people I&#8217;ve talked to is that constantly
-connecting/disconnecting to what is a high-performance, low-latency,
-distributed system would be a colossal waste of resources and a latency
-hit. An app capable of notifications is essentially a stream that APNS
-consumes, and might be sending thousands of messages, so either way
-they&#8217;d at least need to support a persistent connection for performance
-reasons, and if they&#8217;re going to support that, why bother supporting
-an obviously deficient connect/disconnect-based server interaction.</p>
-
-<p>How many other services can be considered consumers of your stream?</p>
-
-<h3>Service-to-Device Connection Trust</h3>
-
-<p>Device identity is established via TLS peer-to-peer auth (internally;
-iOS devs don&#8217;t need to implement this).</p>
-
-<ul>
-<li>Device TLS auths w APNs</li>
-<li>APNs returns certificate, which it validates</li>
-<li>Device sends device certificate to APNs</li>
-<li>APNs valiates device certificate</li>
-</ul>
-
-
-<p>So I guess this prevents:</p>
-
-<ul>
-<li>an iPhone mimicker pretending to be something it&#8217;s not</li>
-<li>an APNs ripoff pretending to be something it&#8217;s not</li>
-</ul>
-
-
-<h3>Provider-to-APNS connection trust</h3>
-
-<p>Same process as above, just w provider (your server) and APNS.</p>
-
-<p>A connection to APNs can only serve a single application, identified by
-the topic (bundle ID) specified in the certificate, presumably the
-one you generate in the online dev console. Also, APNs has a certificate
-revocation list; if a provider is on that list, it&#8217;s connection will be
-refused/closed. I think this would happen if you didn&#8217;t implement a
-persistent connection to APNs but rather treated it like HTTP and kept
-closing/opening the connection.</p>
-
-<h3>Token Generation and Dispersal / token trust</h3>
-
-<p>Jesus christ why don&#8217;t I just RTFM? It solves all the problems. Ah yes,
-arm-chair ADD.</p>
-
-<ul>
-<li>Application asks system to register</li>
-<li>System (iOS) forwards this to APNs</li>
-<li>APNs generates device token using info in the certficate (presumably
-the one established as described above) and encrypts it, and sends
-back the encrypted token</li>
-<li>App gets the encrypted key as an <code>NSData</code>, and must send it to the
-provider in hexidecimal format</li>
-</ul>
-
-
-<p>This guarantees that only APNs generated the token used for routing
-(since it&#8217;s encrypted by some private key within APNs). This token can
-only be used for the device that originally connected to receive
-notifications.</p>
-
-<h3>Trust components</h3>
-
-<p>e.g. keys/certificates you need to create/provide to APNs for all of
-this shit to work:</p>
-
-<ul>
-<li><p>Provider</p>
-
-<ul>
-<li>unique provider certificate and private key for validating
-connection to APNs</li>
-<li>certificate identifies a topic that the provide can publish to (the
-app&#8217;s bundle id).</li>
-<li>Provider provides device token.</li>
-<li>Provider can additionally validate that it&#8217;s talking to APNs using
-the public server certificate provide&#8230; at connection time?</li>
-</ul>
-</li>
-<li><p>Device</p>
-
-<ul>
-<li>obvious stuff already covered</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Note: &#8220;topic&#8221; today is literally the bundle ID of the app. A certificate
-identifies which apps it&#8217;s allowed to broadcast notifications to via
-this topic. Maybe in the future, topics can refer to multiple apps?
-Right now it&#8217;s coupled to bundle ID, in the future, this could be a
-configurable thing&#8230; multiple apps could subscribe to the same topic?
-This is all bullshit atm but what I think based on their terminology.
-It&#8217;s really just a really constrained pub-sub, where apps can&#8217;t
-subscribe to message channels other than the one that uniquely
-identifies their app+device tuple.</p>
-
-<h3>Coalescing</h3>
-
-<p>APNs is last-write wins in that that in the case of multiple
-notifications, only the last one will be stored-forwarded to the app.
-This isn&#8217;t to say they coalesce within your device (validated by the
-fact that you&#8217;ll see multiple messages from IRCCloud rather than a
-single one saying &#8220;new messages available&#8221;), but specifically refers to
-the storage of messages undeliverable because the client app&#8217;s turned
-off. GCM gives you more fine-grained control over this.</p>
-
-<h3>Summary</h3>
-
-<p>So, given that I&#8217;ve been fighting this bullshit, realizations:</p>
-
-<p>I need to stop revoking/re-creating the APNs app certificate generated
-in the Apple Dev console. It&#8217;s not like it&#8217;s tied to some private/public
-key or anything.</p>
-
-<h2>Difference b/w .pem and .cer, etc</h2>
-
-<p>I had to run this to convert .cer to .pem</p>
-
-<pre><code>openssl x509 -in aps_development.cer -inform DER -out aps_development.pem
-</code></pre>
-
-<h3>X.509</h3>
-
-<pre><code>http://en.wikipedia.org/wiki/X.509
-</code></pre>
-
-<p>X.509 is an ITU-T (Telecommunication Standardization Sector)
-standard that describes certificate generation, revocation, and other
-utilities. <code>openssl</code> just happens to support x509 certificate
-generation.</p>
-
-<p>Remember: x509 means one thing: certificates. If you see x509 in the
-wild, it&#8217;s probably talking about certificates. x509 certificates.
-Certificates.</p>
-
-<p>x509 is unlike PGP in that it maintains a hierarchical chain of
-certificate signers, each validated by the previous, with a root CA
-(Certificate Authority) starting the chain. PGP relies (or at least
-originally relied on) a Web of Trust.</p>
-
-<h3>PEM</h3>
-
-<p><code>---BEGIN CERTIFICATE---</code> and <code>---END CERTIFICATE---</code>.</p>
-
-<p>Can contain multiple certificate and even the prviate key. &#8220;The private
-key&#8221;? Which private key? Answer: the one that&#8217;s automatically generated
-by Keychain Access and similar utilities when you create a Certificate
-Signing Request (CSR).</p>
-
-<p><a href="http://stackoverflow.com/a/7947362/914123">See here</a></p>
-
-<p>TODO: can you even use an existing public/private key? Probably, but
-possibly less secure:</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Certificate_signing_request">Read the wiki, you dingus</a></p>
-
-<h2>PKCS</h2>
-
-<p>(public key cryptography standards) created by RSA Security in the 90s.
-It&#8217;s a family of standards relating to cryptography.</p>
-
-<p>PCKS 1 is a standard, PCKS 9 is a standard, PCKS 12 is a standard.</p>
-
-<p>Exporting multiple cryptography shits in a single file falls under the
-PKCS 12 standard. PKCS 12 also handles bundling all the members of a
-CHAIN OF TRUST.</p>
-
-<blockquote><p>It is commonly used to bundle a private key with its X.509 certificate or to bundle all the members of a chain of trust.</p></blockquote>
-
-<p>Makes sense, must be a common thing. Apple obviously does that. AWS SNS
-expects you to upload a <code>.p12</code> that it splits into a cert and priv key.</p>
-
-<p>File name extension is <code>.p12</code> (which I&#8217;ve seen) or <code>.pfx</code> which I&#8217;ve
-not.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/PKCS_12">Wiki</a></p>
-
-<p>So if I understand correctly, the purpose of certificate is so that you
-can encrypt data, and anyone who wants to validate that you are who you
-say you are can look up the certificate chain.</p>
-
-<p>You create a pub/priv key pair, create a CSR with it, and then the
-approving authority gives you a certificate that you can hand to other
-people. The certificate can be used to validate that whatever you
-encrypted with your (still unshared and totally) private key, can be
-guaranteed to have originated from you. Without certification, you&#8217;re
-just some entity with a pub/priv key pair&#8230; and&#8230; I don&#8217;t know, need
-to read up more on the implications of this. Amazing how hard this stuff
-is.</p>
-
-<p>Anyway, <code>pkcs12</code> is the <code>openssl</code> file utility for creating/parsing
-pkcs12 file.</p>
-
-<h2><code>man</code> page sections</h2>
-
-<p>Valid:</p>
-
-<pre><code>man crontab
-man 1 crontab # equiv to above
-man -s 1 crontab # equiv to above
-man 5 crontab 
-man -s 5 crontab # equiv to above
-</code></pre>
-
-<p>Invalid:</p>
-
-<pre><code>man 2 crontab # No entry for crontab in section 2 of the manual
-man 3 crontab # ditto
-man 4 crontab # ditto
-</code></pre>
-
-<p>Why would it have pages 1 and 5 but not 2-4?</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Man_page">Ahhhh!</a></p>
-
-<p>Turns out there are sections (that vary by platform):</p>
-
-<pre><code>1   General commands
-2   System calls
-3   Library functions, covering in particular the C standard library
-4   Special files (usually devices, those found in /dev) and drivers
-5   File formats and conventions
-6   Games and screensavers
-7   Miscellanea
-8   System administration commands and daemons
-</code></pre>
-
-<p><code>crontab</code> has no system calls, lib fns, special files, but it does have
-general commands and file formats.</p>
-
-<p><code>man</code> isn&#8217;t just unix commands, but also lib, system calls, C functions,
-etc.</p>
-
-<p>These sections also handle cases when unrelated concepts have the same
-name&#8230; there might be an <code>exit</code> C fn (there is) and an <code>exit</code> terminal
-command.</p>
-
-<p>This explains the wording here:</p>
-
-<pre><code>No entry for printf in section 4 of the manual
-</code></pre>
-
-<p>You don&#8217;t look up the <code>printf</code> page, and then its section 4
-subsection&#8230; rather, you look up entries in a section of <code>man</code>.</p>
-
-<p>That&#8217;s the same reason it&#8217;s <code>man 3 printf</code> rather than <code>man printf 3</code></p>
-
-<p>God, such an obvious thing I never understood/remembered.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-14T09:33:00-04:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/13/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>HTML is an API, getAttribute</h2>
-
-<p>HTML is just a string of characters that get converted into DOM. You can
-also create DOM via the JavaScript DOM API. Seems like an obvious thing
-I guess but it just clicked for me.</p>
-
-<p>What&#8217;s an attribute? It&#8217;s any key-value pair (or occasional boolean)
-within an open tag.</p>
-
-<pre><code>&lt;div id="lol" snaggletooth="blorg"&gt;&lt;/div&gt;
-</code></pre>
-
-<p><code>id</code> and <code>snaggletooth</code> are attributes. During HTML parsing, the browser
-will convert this isn&#8217;t an HTML element (which is a node). HTML elements
-have a fixed set of <em>properties</em>. All the <em>attributes</em> you provide in
-your HTML that map to known properties will set the values of those
-properties, hence <code>.id</code> gets set to &#8220;lol&#8221;, but <code>.snaggletooth</code> would
-yield <code>undefined</code>, because that&#8217;s obviously not a real property name.</p>
-
-<p>http://jsbin.com/bejog/1/edit</p>
-
-<p>This also explains why you can set an <code>&lt;input&gt;</code>&#8217;s value to &#8220;wat&#8221;, then
-type in a new value in the input field, and <code>getAttribute("value")</code> will
-still yield <code>"wat"</code> even though <code>inputElement.value</code> will equal whatever
-you typed in.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-13T15:18:00-04:00" pubdate data-updated="true">Jul 13<span>th</span>, 2014</time></div>
 	
 
 

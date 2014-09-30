@@ -4,7 +4,7 @@
   <title><![CDATA[Category: binding:w | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/binding-w/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-30T16:55:34-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -82,20 +82,35 @@
 
 <p>Here's a snippet from the run loop, in the middle of a loop through all the queues in the run loop. Note the special case for the <code>sync</code> queue: because <code>sync</code> is a particularly volatile queue, in which data is being propagated in every direction, <code>Ember.beginPropertyChanges()</code> is called to prevent any observers from being fired, followed by a call to <code>Ember.endPropertyChanges</code>. This is wise: if in the course of flushing the <code>sync</code> queue, it's entirely possible that a property on an object will change multiple times before resting on its final value, and you wouldn't want to waste resources by immediately firing observers per every single change.</p>
 
-<p>{% codeblock lang:javascript %}</p>
-
-<pre><code>    if (queueName === 'sync') {
-       log = Ember.LOG_BINDINGS;
-       if (log) { Ember.Logger.log('Begin: Flush Sync Queue'); }
-       Ember.beginPropertyChanges();
-       Ember.tryFinally(tryable, Ember.endPropertyChanges);
-       if (log) { Ember.Logger.log('End: Flush Sync Queue'); }
-    } else {
-       forEach.call(queue, iter);
-    }
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span>    <span class="k">if</span> <span class="p">(</span><span class="nx">queueName</span> <span class="o">===</span> <span class="s1">&#39;sync&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>       <span class="nx">log</span> <span class="o">=</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">LOG_BINDINGS</span><span class="p">;</span>
+</span><span class='line'>       <span class="k">if</span> <span class="p">(</span><span class="nx">log</span><span class="p">)</span> <span class="p">{</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Begin: Flush Sync Queue&#39;</span><span class="p">);</span> <span class="p">}</span>
+</span><span class='line'>       <span class="nx">Ember</span><span class="p">.</span><span class="nx">beginPropertyChanges</span><span class="p">();</span>
+</span><span class='line'>       <span class="nx">Ember</span><span class="p">.</span><span class="nx">tryFinally</span><span class="p">(</span><span class="nx">tryable</span><span class="p">,</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">endPropertyChanges</span><span class="p">);</span>
+</span><span class='line'>       <span class="k">if</span> <span class="p">(</span><span class="nx">log</span><span class="p">)</span> <span class="p">{</span> <span class="nx">Ember</span><span class="p">.</span><span class="nx">Logger</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;End: Flush Sync Queue&#39;</span><span class="p">);</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>       <span class="nx">forEach</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">queue</span><span class="p">,</span> <span class="nx">iter</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Hope this helps. I definitely had to learn quite a bit just to write this thing, which was kind of the point.</p>
 ]]></content>

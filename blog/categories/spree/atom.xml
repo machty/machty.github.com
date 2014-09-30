@@ -4,7 +4,7 @@
   <title><![CDATA[Category: spree | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/spree/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-30T16:55:34-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -87,16 +87,22 @@ navigate to my local server hosting a sample Spree website and add a
 product to my shopping cart while observing <code>log/development.log</code> in my
 Rails app folder:</p>
 
-<p>{% codeblock %}
-$ : tail -F log/development.log</p>
-
-<p>// Add an item to the shopping cart from the browser</p>
-
-<p>Started POST "/store/orders/populate" for 127.0.0.1 at 2012-11-02 21:48:41 -0400
-Processing by Spree::OrdersController#populate as HTML
-  Parameters: {"utf8"=>"✓", "authenticity_token"=>"6kdui/lTyLCBTSZTsEQAR1UgUxyqaY8mhBaUouwjhXA=", "products"=>{"12"=>"45"}, "quantity"=>"1"}
-...
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ : tail -F log/development.log&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>// Add an item to the shopping cart from the browser&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>Started POST "/store/orders/populate" for 127.0.0.1 at 2012-11-02 21:48:41 -0400
+</span><span class='line'>Processing by Spree::OrdersController#populate as HTML
+</span><span class='line'>  Parameters: {"utf8"=>"✓", "authenticity_token"=>"6kdui/lTyLCBTSZTsEQAR1UgUxyqaY8mhBaUouwjhXA=", "products"=>{"12"=>"45"}, "quantity"=>"1"}
+</span><span class='line'>...</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Ah hah, the controller that handles adding items to the shopping cart is
 <code>Spree::OrdersController</code> and the action is <code>populate</code>. Now all I have
@@ -113,15 +119,25 @@ have the whole project locally to inspect and prod. I find a file called
 <code>orders_controller.rb</code>, and here's an excerpt of its <code>def populate</code>
 block:</p>
 
-<p>{% codeblock lang:ruby %}</p>
-
-<pre><code>  fire_event('spree.cart.add')
-  fire_event('spree.order.contents_changed')
-  respond_with(@order) { |format| format.html { redirect_to cart_path } }
-end
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;  fire_event(&#39;spree.cart.add&#39;)</span>
+</span><span class='line'><span class="sr">  fire_event(&#39;spree.order.contents_changed&#39;)</span>
+</span><span class='line'><span class="sr">  respond_with(@order) { |format| format.html { redirect_to cart_path } }</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Balls, they've got it hard-wired in there to respond only to <code>html</code>
 requests. How so? Because in the <code>respond_with</code> block, they only
@@ -156,25 +172,41 @@ we add items to it?</p>
 item to the cart. Our <code>orders_controller_decorator.rb</code> looks something
 like this:</p>
 
-<p>{% codeblock lang:ruby %}
-Spree::OrdersController.class_eval do
-  def populate</p>
-
-<pre><code>@order = current_order(true)
-
-#...
-
-fire_event('spree.cart.add')
-fire_event('spree.order.contents_changed')
-respond_with(@order) do |format|
-  format.html { redirect_to cart_path }
-  format.json { render json: current_order } # &lt;----
-end
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Spree</span><span class="o">::</span><span class="no">OrdersController</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">populate</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;@order = current_order(true)</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#...</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">fire_event(&#39;spree.cart.add&#39;)</span>
+</span><span class='line'><span class="sr">fire_event(&#39;spree.order.contents_changed&#39;)</span>
+</span><span class='line'><span class="sr">respond_with(@order) do |format|</span>
+</span><span class='line'><span class="sr">  format.html { redirect_to cart_path }</span>
+</span><span class='line'><span class="sr">  format.json { render json: current_order } # &amp;lt;----</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  end</span>
+</span><span class='line'><span class="sr">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <h3>Storing Cart Updates in Ember.js</h3>
 
@@ -189,34 +221,61 @@ our modified <code>populate</code> action and save it to the controller, so that
 anything that's bound to the controller's cart properties get
 automatically updated.</p>
 
-<p>{% codeblock lang:coffeescript %}
-App.CartController = Em.ObjectController.extend
-  content: window.cart</p>
-
-<p>  saving: false</p>
-
-<p>  addItem: (variantId, quantity, callback) -></p>
-
-<pre><code>variants = {}
-variants[variantId] = quantity
-
-@set 'saving', true
-
-$.ajax '/add_item.json',
-  type: 'POST'
-  data:
-    variants: variants
-  success: (data) =&gt;
-    @set 'content', data
-    callback(true) if callback
-  error: (data) -&gt;
-    alert "Error adding item to Shopping Cart. Please try again."
-    callback(false) if callback
-  complete: =&gt;
-    @set 'saving', false
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nv">App.CartController = </span><span class="nx">Em</span><span class="p">.</span><span class="nx">ObjectController</span><span class="p">.</span><span class="nx">extend</span>
+</span><span class='line'>  <span class="nv">content: </span><span class="nb">window</span><span class="p">.</span><span class="nx">cart</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nv">saving: </span><span class="kc">false</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nv">addItem: </span><span class="nf">(variantId, quantity, callback) -&gt;</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nv">variants = </span><span class="p">{}</span>
+</span><span class='line'><span class="nx">variants</span><span class="p">[</span><span class="nx">variantId</span><span class="p">]</span> <span class="o">=</span> <span class="nx">quantity</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">@set</span> <span class="s">&#39;saving&#39;</span><span class="p">,</span> <span class="kc">true</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span> <span class="s">&#39;/add_item.json&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nv">type: </span><span class="s">&#39;POST&#39;</span>
+</span><span class='line'>  <span class="nv">data:</span>
+</span><span class='line'>    <span class="nv">variants: </span><span class="nx">variants</span>
+</span><span class='line'>  <span class="nv">success: </span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">@set</span> <span class="s">&#39;content&#39;</span><span class="p">,</span> <span class="nx">data</span>
+</span><span class='line'>    <span class="nx">callback</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="k">if</span> <span class="nx">callback</span>
+</span><span class='line'>  <span class="nv">error: </span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">-&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">alert</span> <span class="s">&quot;Error adding item to Shopping Cart. Please try again.&quot;</span>
+</span><span class='line'>    <span class="nx">callback</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span> <span class="k">if</span> <span class="nx">callback</span>
+</span><span class='line'>  <span class="nv">complete: </span><span class="o">=&amp;</span><span class="nx">gt</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">@set</span> <span class="s">&#39;saving&#39;</span><span class="p">,</span> <span class="kc">false</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="nx">code</span><span class="o">&gt;&lt;/</span><span class="nx">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <h3>Checkout</h3>
 
@@ -253,15 +312,23 @@ top of every Spree page. This Javascript will attempt to grab the
 <code>current_order</code>, if it exists, serialize it, and pass it to the parent
 frame, if it exists. The Deface override looks like this:</p>
 
-<p>{% codeblock lang:ruby %}
-Deface::Override.new(:virtual_path => "spree/layouts/spree_application",</p>
-
-<pre><code>                 :name =&gt; "cart_updater",
-                 :insert_bottom =&gt; "[data-hook='inside_head']",
-                 :partial =&gt; "store_overrides/cart_updater")
-</code></pre>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Deface</span><span class="o">::</span><span class="no">Override</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:virtual_path</span> <span class="o">=&gt;</span> <span class="s2">&quot;spree/layouts/spree_application&quot;</span><span class="p">,</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;                 :name =&amp;gt; &quot;cart_updater&quot;,</span>
+</span><span class='line'><span class="sr">                 :insert_bottom =&amp;gt; &quot;[data-hook=&#39;inside_head&#39;]&quot;,</span>
+</span><span class='line'><span class="sr">                 :partial =&amp;gt; &quot;store_overrides/</span><span class="n">cart_updater</span><span class="s2">&quot;)</span>
+</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>This can reside in <code>app/overrides/overrides.rb</code>. Basically, this says
 that we're overriding the Spree template in the Spree source code at
@@ -274,26 +341,47 @@ create the <code>cart_updater</code> that's referenced. We'll do that by creatin
 file called <code>app/store_overrides/_cart_updater.html.erb</code>, which looks
 something like this:</p>
 
-<p>{% codeblock lang:html %}</p>
-
-<script type="text/javascript">
-
-if(window.parent && window.parent.shopCallback)
-{
-  var cart;
-  <% if current_order %>
-    cart = <%= OrderSerializer.new(current_order).to_json.html_safe %>;
-  <% else %>
-    cart = <%= nil.to_json.html_safe %>;
-  <% end %>
-
-  window.parent.shopCallback(cart);
-}
-
-</script>
-
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">parent</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">shopCallback</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">cart</span><span class="p">;</span>
+</span><span class='line'>  <span class="o">&lt;%</span> <span class="k">if</span> <span class="nx">current_order</span> <span class="o">%&gt;</span>
+</span><span class='line'>    <span class="nx">cart</span> <span class="o">=</span> <span class="o">&lt;%=</span> <span class="nx">OrderSerializer</span><span class="p">.</span><span class="k">new</span><span class="p">(</span><span class="nx">current_order</span><span class="p">).</span><span class="nx">to_json</span><span class="p">.</span><span class="nx">html_safe</span> <span class="o">%&gt;</span><span class="p">;</span>
+</span><span class='line'>  <span class="o">&lt;%</span> <span class="k">else</span> <span class="o">%&gt;</span>
+</span><span class='line'>    <span class="nx">cart</span> <span class="o">=</span> <span class="o">&lt;%=</span> <span class="nx">nil</span><span class="p">.</span><span class="nx">to_json</span><span class="p">.</span><span class="nx">html_safe</span> <span class="o">%&gt;</span><span class="p">;</span>
+</span><span class='line'>  <span class="o">&lt;%</span> <span class="nx">end</span> <span class="o">%&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">window</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">shopCallback</span><span class="p">(</span><span class="nx">cart</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>This chunk of code passes a serialized order to the parent page, if it
 exists. Now all we need to do is add the <code>shopCallback</code> function.</p>
@@ -303,12 +391,15 @@ exists. Now all we need to do is add the <code>shopCallback</code> function.</p>
 <p>Jumping a bit ahead, here's the code for the <code>window.shopCallback</code>
 function.</p>
 
-<p>{% codeblock lang:coffeescript %}
-window.shopCallback = (cartJson) ->
-  # Have to $.extend to reconstruct object in Emberized environment
-  # so that we get prototype extensions on the arrays.
-  Chimera.router.set('cartController.content', $.extend(true, {}, cartJson))
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='coffeescript'><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nv">shopCallback = </span><span class="nf">(cartJson) -&gt;</span>
+</span><span class='line'>  <span class="c1"># Have to $.extend to reconstruct object in Emberized environment</span>
+</span><span class='line'>  <span class="c1"># so that we get prototype extensions on the arrays.</span>
+</span><span class='line'>  <span class="nx">Chimera</span><span class="p">.</span><span class="nx">router</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s">&#39;cartController.content&#39;</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="p">{},</span> <span class="nx">cartJson</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Note that we don't just set <code>content</code> to <code>cartJson</code>, but rather to
 <code>$.extend(true, {}, cartJson))</code>. Why is this? Well, prepare yourself for

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ember | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/ember/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-30T16:55:34-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -43,66 +43,116 @@ motivation and architecture behind Emblem.</p>
 
 <p>Here's what Handlebars (in an Ember setting) looks like:</p>
 
-<p>{% codeblock lang:html %}
-{% raw %}</p>
-
-<div id="main-container" class="padded active">
-  <h1>Greetings, {{name}}</h1>
-
-  {{! comment that doesn't get rendered. }}
-
-  {{#if loggedIn}}
-    <button {{action logout}}>Log Out</button>
-  {{else}}
-    <button {{action login}}>Log In</button>
-  {{/if}}
-
-  <div class="text-container">
-    {{#each paragraphs}}
-      <p>{{{this}}}</p>
-    {{/each}}
-  </div>
-</div>
-
-
-<p>{% endraw %}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;main-container&quot;</span> <span class="na">class=</span><span class="s">&quot;padded active&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;h1&gt;</span>Greetings, {{name}}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  {{! comment that doesn&#39;t get rendered. }}
+</span><span class='line'>
+</span><span class='line'>  {{#if loggedIn}}
+</span><span class='line'>    <span class="nt">&lt;button</span> <span class="err">{{</span><span class="na">action</span> <span class="na">logout</span><span class="err">}}</span><span class="nt">&gt;</span>Log Out<span class="nt">&lt;/button&gt;</span>
+</span><span class='line'>  {{else}}
+</span><span class='line'>    <span class="nt">&lt;button</span> <span class="err">{{</span><span class="na">action</span> <span class="na">login</span><span class="err">}}</span><span class="nt">&gt;</span>Log In<span class="nt">&lt;/button&gt;</span>
+</span><span class='line'>  {{/if}}
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;text-container&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    {{#each paragraphs}}
+</span><span class='line'>      <span class="nt">&lt;p&gt;</span>{{{this}}}<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>    {{/each}}
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>and here's the equivalent Emblem.js code:</p>
 
-<p>{% codeblock %}
-{% raw %}</p>
-
-<h1>main-container.padded.active</h1>
-
-<p>  h1 Greetings, {{name}}</p>
-
-<p>  / comment that doesn't get rendered</p>
-
-<p>  if loggedIn</p>
-
-<pre><code>button click="logout" Log Out
-</code></pre>
-
-<p>  else</p>
-
-<pre><code>button click="login" Log In
-</code></pre>
-
-<p>  .text-container</p>
-
-<pre><code>each paragraphs
-  p == this
-</code></pre>
-
-<p>  / Could also write the</p>
-
-<pre><code>.text-container = each paragraphs
-  p == this
-</code></pre>
-
-<p>{% endraw %}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;h1>main-container.padded.active&lt;/h1>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  h1 Greetings, {{name}}&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  / comment that doesn't get rendered&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  if loggedIn&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>button click="logout" Log Out
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  else&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>button click="login" Log In
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  .text-container&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>each paragraphs
+</span><span class='line'>  p == this
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  / Could also write the&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>.text-container = each paragraphs
+</span><span class='line'>  p == this
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p></span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Note how indentation is used to determine what gets placed inside HTML
 elements or block Handlebars helpers. This prevents a lot of unnecessary
@@ -119,41 +169,63 @@ to re-render themselves when the data they're tied to changes.</p>
 <p>One of the hacks I used to allow me to write indentation-based templates
 that played nicely with Ember was to use Hamlbars, a light-weight
 wrapped around HAML that exposed an <code>hb</code> helper to the HAML code which
-could be used to generate the {{}} mustache'd Handlebars code, that
+could be used to generate the  mustache'd Handlebars code, that
 Handlebars would then process as if you'd just written the mustache'd
 HTML yourself. A Hamlbars version of the above example would go as
 follows:</p>
 
-<p>{% codeblock lang:haml %}
-{% raw %}</p>
-
-<h1>main-container.padded.active</h1>
-
-<p>  %h1 Greetings, {{name}}</p>
-
-<p>  -# comment that doesn't get rendered</p>
-
-<p>  = hb 'if loggedIn' do</p>
-
-<pre><code>%button{ _action: "logout" } Log Out
-= hb 'else'
-%button{ _action: "login" } Log In
-</code></pre>
-
-<p>  .text-container</p>
-
-<pre><code>= hb 'each paragraphs' do
-  %p 
-    = hbb 'this'
-</code></pre>
-
-<p>{% endraw %}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='haml'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;main-container.padded.active&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  %h1 Greetings, {{name}}&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  -# comment that doesn&#39;t get rendered&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  = hb &#39;if loggedIn&#39; do&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;%button{ _action: &quot;logout&quot; } Log Out
+</span><span class='line'><span class="p">=</span> <span class="n">hb</span> <span class="s1">&#39;else&#39;</span>
+</span><span class='line'><span class="nt">%button</span><span class="p">{</span> <span class="n">_action</span><span class="p">:</span> <span class="s2">&quot;login&quot;</span> <span class="p">}</span> Log In
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  .text-container&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;= hb &#39;each paragraphs&#39; do
+</span><span class='line'>  <span class="nt">%p</span>
+</span><span class='line'>    <span class="p">=</span> <span class="n">hbb</span> <span class="s1">&#39;this&#39;</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>I prefer this over Handlebars, but it's still extremely jank, due to the
 <code>hb</code> helper showing up all over the place and the fact that you can't
 properly indent the <code>else</code> the way you'd expect without closing the
-{{#if}} tag before injecting the <code>else</code>.</p>
+ tag before injecting the <code>else</code>.</p>
 
 <p>So, with all this in mind, I wrote Emblem.js for the following reasons:</p>
 
@@ -189,22 +261,19 @@ the <code>|</code> prefix.</li>
 
 <p>Check out the following valid Emblem:</p>
 
-<p>{% codeblock %}
-{% raw %}
-  p Hello
-  foo Hello
-{% endraw %}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>p Hello
+</span><span class='line'>  foo Hello</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Emblem doesn't intermediately compile to Handlebars input text, but if
 it did, the above code would generate something like:</p>
 
-<p>{% codeblock lang:html %}
-{% raw %}
-  <p>Hello</p>
-  {{foo Hello}}
-{% endraw %}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="nt">&lt;p&gt;</span>Hello<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>  {{foo Hello}}
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>So, a paragraph tag and helper invocation. How does Emblem know the
 difference? Answer: Emblem looks out for the known HTML helpers and

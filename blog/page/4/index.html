@@ -112,6 +112,719 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/31/ember-meta/">
+		
+			Ember Meta</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Ember Meta</h3>
+
+<p><em>This will start off in my typical meandering daily journal form and
+hopefully evolve into something good enough for an ARCHITECTURE.md</em></p>
+
+<p>Ember&#8217;s internals make heavy use of meta objects, which are generated
+and attached to objects in order to keep track of bindings, computed
+properties, observers, and all sorts of other things evolving Ember magic.</p>
+
+<h4><code>EMPTY_META</code></h4>
+
+<p><code>EMPTY_META</code> is a default, empty meta object that represents an object
+with no observers, bindings, or computed properties.</p>
+
+<p><code>Ember.meta</code> is the function that takes an object and returns its meta
+object; asking Ember.meta for a read-only meta object for a POJO
+will return <code>Ember.EMPTY_META</code></p>
+
+<pre><code>Ember.meta({}, false) === Ember.EMPTY_META // true
+
+http://emberjs.jsbin.com/ucanam/5173/edit
+</code></pre>
+
+<p>This is an optimization that lets us pretend as if every object in
+Emberland had a meta object, simplifying our binding/observer algorithms
+while not wastefully generating meta objects for objects that don&#8217;t need
+their own separate copies. It&#8217;s a form of copy-on-write.</p>
+
+<pre><code>var pojo = {
+  foo: 'wat'
+};
+
+console.assert(Ember.meta(pojo, false) === Ember.EMPTY_META);
+
+// Add a computed property, which requires writing to meta.
+Ember.defineProperty(pojo, 'fooAlias', Ember.computed.alias('foo'));
+
+console.assert(Ember.get(pojo, 'foo') === 'wat');
+
+var newMeta = Ember.meta(pojo, false)
+
+console.assert(newMeta !== Ember.EMPTY_META);
+
+// http://emberjs.jsbin.com/ucanam/5176/edit
+</code></pre>
+
+<h4><code>META_DESC</code></h4>
+
+<p>This is the ES5 descriptor for the property stashed on an object that
+points to its meta object:</p>
+
+<pre><code>{
+  writable: true,
+  configurable: false,
+  enumerable: false,
+  value: null
+};
+</code></pre>
+
+<p>This makes the property non-enumerable, which is why the meta object
+won&#8217;t show up when iterating over an object with <code>for..in</code>.</p>
+
+<h4>Meta obj structure</h4>
+
+<p><code>EMPTY_META</code> is just <code>new Meta(null)</code>, and here&#8217;s the meta structure:</p>
+
+<pre><code>Meta.prototype = {
+  // Set to {} by constructor
+
+    // dictionary of all Ember.Descriptor properties
+    // defined on for the obj, e.g computed properties
+    descs: null,    
+
+    // dictionary of properties on the object that are
+    // being observed, where the key is the observed
+    // property name and the value is the number of
+    // active observers of this property.
+    // e.g. meta.watching.foo === 2 means that two
+    // observers are watching obj.foo for changes.
+    watching: null,
+
+    // TODO
+    cache: null,
+
+    // TODO
+    cacheMeta: null,
+
+    // The owner of this meta object; important to keep track
+    // of because when prototypal inheritance is involved, a
+    // child object will initially point to the same meta obj
+    // as its prototype, even though they should have separate
+    // meta obj. `Ember.meta()` detects this by checking to see
+    // if meta.source equals the passed in object, and if not,
+    // it generates a new meta object
+    source: null,
+
+  // Left as null by constructor
+  deps: null,
+  listeners: null,
+  mixins: null,
+  bindings: null,
+  chains: null,
+  chainWatchers: null,
+  values: null,
+
+  // The prototype of source
+  //   meta.proto.isPrototypeOf(meta.source) // true
+
+
+  proto: null
+};
+
+//    ret = o_create(ret);
+//    ret.descs     = o_create(ret.descs);
+
+// why is this o_create? 
+// if proto.foo is being watched, and obj.foo is overwritten
+// to some other value, then it's definitely disconnected at
+// that point, right? Even if it's not overwritten, if you have
+// 
+// proto = {
+// }
+// 
+//    ret.watching  = o_create(ret.watching);
+//    ret.cache     = {};
+//    ret.cacheMeta = {};
+//    ret.source    = obj;
+
+// TODO: categorize this realization
+// removeDependentKeys calls iterDeps, which loops
+// over deps[propName] &gt; 0,
+// and then the cp.didChange method decrements
+// the deps in the meta in removeDependentKeys();
+// this method is called in two places:
+// - didChange()
+// - teardown()
+// 
+// note that it doesn't do this for non-cacheables CPs.
+</code></pre>
+
+<p>If CP#didChange removes dependent keys, who adds it back in template situations?
+The view that was installed will call get() on that CP, and .get() on a cacheable property will call addDependentKeys</p>
+
+<p>So the rule is that if you want an observer be/stay alive, you need to
+call get on that changed prop. AH HA.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-31T07:27:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-metal/'>ember-metal</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Rubymotion</h3>
+
+<p>The next version will support Android. Ruby on Android. By PHH.</p>
+
+<p>http://blog.rubymotion.com/post/87048665656/rubymotion-3-0-sneak-peek-android-support</p>
+
+<h3>Magnet Link</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Magnet_uri">Wikipedia</a></p>
+
+<p>e.g. for all my illegal torrent downloads</p>
+
+<pre><code>magnet:?xt=urn:btih:7O4OWESOQIXMYWY6U36MXWRICAUDB2OU&amp;dn=Louie.S04E05.HDTV.x264-LOL&amp;tr=udp://tracker.openbittorrent.com:80&amp;tr=udp://tracker.publicbt.com:80&amp;tr=udp://tracker.istole.it:80&amp;tr=udp://open.demonii.com:80&amp;tr=udp://tracker.coppersurfer.tk:80
+</code></pre>
+
+<ul>
+<li>&#8220;de facto&#8221; standard; no official spec</li>
+<li>The scheme is &#8220;magnet&#8221;, even though there&#8217;s not &#8220;magnent&#8221; protocol in
+the way &#8220;http&#8221; is a scheme that refers to the Hyper Text Transfer
+Protocol.</li>
+<li>URI has target file&#8217;s contents built into hash; anyone with the file
+can generate the URL without needing to refer to a central authority.
+This makes search results guaranteed; the server either has the thing
+you&#8217;re looking for or it doesn&#8217;t, and if you&#8217;d, say, like to continue
+downloading the latest episode of Louie from a source, you could
+search by content hash rather than by &#8220;Louie S04E07&#8221; which might yield
+a bunch of different encodings and other things you don&#8217;t actually
+want.</li>
+<li>magnet URIs have no <a href="http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax">hierarchical part</a>,
+but rather immediately begin with a query param.</li>
+<li><code>xt</code> query param refers to &#8220;exact topic&#8221;; this is followed by the hash
+type, such as sha1, or in the example above, &#8220;btih&#8221;, which is a SHA1
+hash of a BitTorrent Info Hash (TODO: write about bittorrent meta)</li>
+<li><code>dn</code> = display name, e.g. <code>Louie.S04E05.HDTV.x264-LOL</code></li>
+<li><code>tr</code> = tracker url for bittorrent downloads; note in the above sample
+magnet URL <code>tr</code> appears multiple types; wiki suggests appending an
+incrementing <code>.N</code> to query param keys, but I guess that&#8217;s not a
+requirement.</li>
+</ul>
+
+
+<blockquote><p>The Pirate Bay migrated from .torrent files to magnet URI in February 2012. This migration made the storage footprint of The Pirate Bay exceptionally small. A user demonstrated that the total size of The Pirate Bay magnets would be approximately 90MB of compressed data.[2]</p></blockquote>
+
+<h3>STOMP</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Streaming_Text_Oriented_Messaging_Protocol">Wikipedia</a></p>
+
+<p>Streaming Text Oriented Messaging Protocol: protocol designed for
+working with Message-Oriented Middleware (MOM). It&#8217;s language-agnostic,
+so you could have a Ruby STOMP client talking to a Java STOMP server,
+etc.</p>
+
+<p>Go figure the Ruby Server that I found depends on EventMachine. How
+could it not? I should probably figure out how servers queue up
+requests. Is that the job of Thin/Mongrel/Unicorn?</p>
+
+<h3>Ember overwriting get-only computed properties</h3>
+
+<p>Best explained in a <a href="http://emberjs.jsbin.com/ucanam/5139/edit">JSBin</a>.</p>
+
+<p>Setting a computed property that is get-only (which is determined
+by the fact that the supplied function has an arity of &lt;= 1) will
+overwrite that CP with whatever static value you&#8217;re setting it to.</p>
+
+<p>Relevant
+<a href="https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/lib/computed.js#L490-L492">Ember</a>
+<a href="https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/lib/computed.js#L1224-L1228">links</a></p>
+
+<h3>Defeaturify doesn&#8217;t get run before Ember API docs get generated</h3>
+
+<p>This is probably the least timeless thing I could write about.</p>
+
+<h3>Drop permissions in a server setting</h3>
+
+<p>It&#8217;s an OS requirement that running a server on port 80 requires root
+permissions, which means you need to be logged in as root or running
+sudo to start up a server on port 80, but it can be risky to leave a
+server running with full permissions, so it&#8217;s common practice to <em>drop
+permissions</em> after the server has been start up.</p>
+
+<p>I stumbled upon this concept while reading
+<a href="https://github.com/ruby/ruby/blob/trunk/lib/webrick.rb#L14-L15">WEBrick code</a>:</p>
+
+<pre><code># WEBrick also includes tools for daemonizing a process and starting a process
+# at a higher privilege level and dropping permissions.
+</code></pre>
+
+<h3>Michael McKean</h3>
+
+<p><img src="http://f.cl.ly/items/0x23191Z3K1J0M0Z1e3D/coneheads03.jpg" alt="Michael McKean" /></p>
+
+<p>A total hateable 90s &#8220;that guy&#8221;.</p>
+
+<h3>Ruby Fiber-local variables</h3>
+
+<p><code>Thread#[]</code> is <a href="http://www.ruby-doc.org/core-2.1.1/Thread.html#method-i-5B-5D">a thing</a></p>
+
+<p>It&#8217;s an accessor for fiber-local variables. What does that mean? It
+means even though you&#8217;re saying <code>Thread.current[:a]</code>, which looks as if
+you&#8217;re grabbing <code>a</code> as tied to the current thread, it&#8217;ll actually be
+grabbing <code>a</code> from the currently active Fiber within that Thread, which
+is a little misleading (and obviously wasn&#8217;t a problem before Fibers
+were a thing in 1.9.2).</p>
+
+<p>Example:</p>
+
+<pre><code>Thread.new {
+  Thread.current[:a] = "lol"
+  Fiber.new {
+    puts "in new fiber: #{Thread.current[:a]}"
+  }.resume
+  puts "in original fiber: #{Thread.current[:a]}"
+}.join
+</code></pre>
+
+<p>This prints</p>
+
+<pre><code>in new fiber:
+in original fiber: lol
+</code></pre>
+
+<h3>Thread#join</h3>
+
+<p>I knew this but I&#8217;m forgetful.</p>
+
+<p>The following program prints &#8220;DONE&#8221; and exits:</p>
+
+<pre><code>Thread.new {
+  sleep 1
+  puts "OMG"
+}
+puts "DONE"
+</code></pre>
+
+<p>The following program waits a second, prints &#8220;OMG&#8221;, prints &#8220;DONE&#8221; and quits:</p>
+
+<pre><code>Thread.new {
+  sleep 1
+  puts "OMG"
+}.join
+puts "DONE"
+</code></pre>
+
+<p><code>Thread#join</code> pauses the current thread until the <code>.join</code>d thread
+completes. Dur.</p>
+
+<h3>Rack Request Store</h3>
+
+<p><a href="https://github.com/steveklabnik/request_store">GitHub</a></p>
+
+<p>Apparently <code>Thread.current</code> is already well known as common storage
+place for global state for whichever thread you&#8217;re on (which is safer
+than sharing/clobbering some truly global var shared b/w threads). The
+problem is that servers don&#8217;t agree on Thread re-use:</p>
+
+<pre><code>def index
+  Thread.current[:counter] ||= 0
+  Thread.current[:counter] += 1
+  render :text =&gt; Thread.current[:counter]
+end
+</code></pre>
+
+<blockquote><p>If we ran this on MRI with Webrick, you&#8217;d get 1 as output, every time. But if you run it with Thin, you get 1, then 2, then 3&#8230;</p></blockquote>
+
+<p>Presumably that&#8217;s because WEBrick spawns a new thread for every request
+while Thin reuses threads. (TODO: confirm this?)</p>
+
+<p>So anyway, Rack RequestStore is a thread-local storage mechanism that
+gets cleared at the beginning of every web request. The functioning code
+is literally no more than:</p>
+
+<pre><code>module RequestStore
+  def self.store
+    Thread.current[:request_store] ||= {}
+  end
+
+  def self.clear!
+    Thread.current[:request_store] = {}
+  end
+end
+</code></pre>
+
+<p>and</p>
+
+<pre><code>module RequestStore
+  class Middleware
+    def initialize(app)
+      @app = app
+    end
+
+    def call(env)
+      RequestStore.clear!
+      @app.call(env)
+    end
+  end
+end
+</code></pre>
+
+<p>and then you&#8217;d write in your app code:</p>
+
+<pre><code>def index
+  RequestStore.store[:foo] ||= 0
+  RequestStore.store[:foo] += 1
+  render :text =&gt; RequestStore.store[:foo]
+end
+</code></pre>
+
+<p>so you still have to use <code>||=</code> to initialize values but you have the
+guarantee that a previous value doesn&#8217;t stick around.</p>
+
+<h3>Deadlock detected</h3>
+
+<pre><code>1.9.3p484 :004 &gt; Thread.current.join
+fatal: deadlock detected
+</code></pre>
+
+<p>Dur.</p>
+
+<h3>POSIX: Portable Operating System Interface</h3>
+
+<p>I had no idea what this was. It always &#8220;the thing that has something to
+do with linux/unix and has opinions about utilities that you might find
+both on linux and Mac OS&#8221;.</p>
+
+<p>It&#8217;s a family of standards specified by the IEEE, specifically IEEE
+1003. Linux, UNIX, and Mac OS X are POSIX-compliant, I believe, but what
+does that mean?</p>
+
+<p><a href="http://stackoverflow.com/questions/1780599/i-never-really-understood-what-is-posix">good SO question</a></p>
+
+<p><a href="http://pubs.opengroup.org/onlinepubs/9699919799/">Readable POSIX Standard</a></p>
+
+<p>The C programming language was standardized by POSIX, also BSD variant
+exists.</p>
+
+<h3>Difference b/w linux and unix</h3>
+
+<p><a href="http://www.cyberciti.biz/faq/what-is-the-difference-between-linux-and-unix/">Source</a></p>
+
+<p>UNIX is a copyrighted name; most UNIX system sare commercial in nature.
+Open Group holds UNIX trademark.</p>
+
+<p>Linux is a UNIX clone created by Linus Torvalds and aims for POSIX
+compliance.</p>
+
+<p>Linux is just a kernel; everything else that goes into a Linux distro is
+GUI systems and GNU utilities, filled in by third parties, whereas with
+a UNIX OS, everything comes from a single source/vendor so it&#8217;s
+considered a &#8220;complete operating system&#8221;.</p>
+
+<p>Linux is free, redistributable under GNU licenses. Most UNIX-like
+systems not free, w OpenSolaris as exception. But some Linux systems
+are accompanied by Linux support, consultancy, bug fixing, and training
+for additional fees, e.g. Redhat.</p>
+
+<p>Some UNIX OS&#8217;s</p>
+
+<ul>
+<li>HP-UX</li>
+<li>IBM AIX</li>
+<li>Sun Solaris</li>
+<li>Mac OS X (the X emphasizes relation w UNIX)</li>
+<li>IRIX</li>
+</ul>
+
+
+<p>Some Linux Distributions</p>
+
+<ul>
+<li>Redhat Enterprise Linux</li>
+<li>Fedora Linux</li>
+<li>Debian Linux</li>
+<li>Suse Enterprise Linux</li>
+<li>Ubuntu Linux</li>
+</ul>
+
+
+<p>Commonalities b/w Unix and Linux</p>
+
+<ul>
+<li>GUI, file, windows manager</li>
+<li>Shells (ksh, csh, bash)</li>
+<li>Various office apps (open office)</li>
+<li>Development tools (perl, php, python, GNU C/C++ compilers)</li>
+<li>POSIX interface (wat? i guess this means both are POSIX compliant)</li>
+</ul>
+
+
+<p><a href="http://en.wikipedia.org/wiki/File:Unix_history.svg">Unix History graphic</a></p>
+
+<h3>IEEE: Institute of Electrical and Electronics Engineers</h3>
+
+<p>A professional association with corp office in NYC, dedicated to
+technical advancement and excellence. Known for their conferences,
+educational activities, and in particular their standards development.</p>
+
+<p>How do they make money? Let&#8217;s look at their
+<a href="http://sites.ieee.org/annualreport/files/2013/10/IEEE-2012-Annual-Report-Full.pdf">annual report</a>.</p>
+
+<p>Members pay dues. Full year membership is $187. They have 429,000
+members. Membership bolsters your tech career, I guess. Hear about
+conferences n shit.</p>
+
+<p>$406M in revenue, mostly in periodicals and conferences, then
+membership, then standards, then other things.</p>
+
+<p>So how do they make money off of standards? Someone approaches them and
+says &#8220;hey you usually do a good job on this stuff; we&#8217;ll pay you to help
+out on these standards?&#8221;</p>
+
+<p><a href="http://standards.ieee.org/develop/process.html">what a nice resource</a></p>
+
+<blockquote><p>The development of a new standard is typically triggered by a formal request, submitted to an SDO (Standards Development Organization) by a Sponsoring Body (individual or entity, such as an industry society) for review and evaluation. The SDO mandates, oversees, and helps facilitate the process for standards development. The Sponsor for the standards project assumes responsibility for the respective area of standards development, including the organization of the standards development team and its activities.</p></blockquote>
+
+<p><a href="http://standards.ieee.org/develop/projstart.html">then there&#8217;s this</a></p>
+
+<ul>
+<li>An idea or concept needs to be standardized</li>
+<li>Sponsorship organization comes along to coalesce the ideas of
+individuals and to financially back the standardization process.</li>
+</ul>
+
+
+<p>What are some of their most &#8220;popular&#8221; standards? These are based on the
+Wikipedia search autocomplete of &#8220;IEEE &#8220;:</p>
+
+<ul>
+<li>IEEE 802.11: MAC (media access control) and physical layer (PHY) specs
+for implementing wireless LAN (WLAN) in certain frequency bands. IEEE
+802 is the</li>
+<li>IEEE 802.11g-2003 et al: enhancements to the original spec, expanding
+to other frequencies.</li>
+<li>IEEE 1394: FireWire</li>
+<li>IEEE 1003: POSIX</li>
+</ul>
+
+
+<p>&#8220;IEEE 802&#8221; refers to the family of standards dealing with LAN. Different
+suffixes refer to different standards (rather than versions of
+standards).</p>
+
+<p>Also, when an amendment comes out, e.g. 802.11g-2003, it is
+revoked when fully incorporated into the main standard, but
+manufacturers will still refer to the amendment code as a means to
+concisely advertise a product&#8217;s capability:</p>
+
+<blockquote><p>While each amendment is officially revoked when it is incorporated in the latest version of the standard, the corporate world tends to market to the revisions because they concisely denote capabilities of their products. As a result, in the market place, each revision tends to become its own standard.</p></blockquote>
+
+<h3>Pass a return value to &#8220;break&#8221; in Ruby</h3>
+
+<p><img src="http://f.cl.ly/items/0Q311t0Y1R2v1O29081u/Image%202014-05-29%20at%2011.51.58%20AM.png" alt="twitter convo" /></p>
+
+<pre><code>[1,2,3].map { |i| break "shit" } # =&gt; "shit"
+</code></pre>
+
+<p>More generally:</p>
+
+<pre><code>def foo
+  yield
+  "shit"
+end
+
+foo { break "naw" } # =&gt; "naw"
+</code></pre>
+
+<p><code>break x</code> means &#8220;force the method that yielded me to return x&#8221;.</p>
+
+<h3>Ruby Garbage Collection</h3>
+
+<p>Phrasing from <a href="http://samsaffron.com/archive/2014/04/08/ruby-2-1-garbage-collection-ready-for-production">this article</a></p>
+
+<p>Ruby 2.0: collect GC every 8MB; too small for most Rails apps
+Ruby 2.1: Revised to have defaults make sense for both script and web apps</p>
+
+<p>Specifically, expand GC limit every time limit hit, with ceilings.</p>
+
+<p>But there was a 2.1 bug fixed in 2.1.1. In addition, there&#8217;s still a
+&#8220;memory doubling&#8221; issue under 2.1.1 due to the generational GC added to
+2.1.</p>
+
+<p>The gist of generational GC is that:</p>
+
+<ul>
+<li>Oftentimes, an allocated piece of memory is transient; it&#8217;s used once
+and immediately its consumer lets go of it, and it can be released
+back to the system</li>
+<li>Objects that survive a first sweep are statistically likely to
+maintain in use for a long time, so it doesn&#8217;t make sense to
+constantly sweep these objects in every GC pass.</li>
+<li>So separate garbage collection into two generations, old and new.
+New-gen allocations get moved to old-gen if they survive the first
+sweep, and old-gen sweeps (major GC events) happen way less
+frequently.</li>
+</ul>
+
+
+<p>This apparently made Ruby 2.1 10x faster on average. But according to
+this article, the 2.1 algo was too simplistic for web apps since web
+apps perform lots of &#8220;medium&#8221; allocations (allocations that survive a
+first sweep but can thereafter very quickly be swept up), e.g. most
+(all?) allocations will take place during a web request, so if a GC hits
+in the middle of a request, a lot of new-gen allocations will be moved
+to old-gen, even though much of the new-genners could be cleaned up at
+the end of the request.</p>
+
+<p>Bad side effects:</p>
+
+<ul>
+<li>Major GC events run more often (triggered by oldgen growth)</li>
+<li>Oldgen grows beyond what we need (saturated by medium-gen)</li>
+</ul>
+
+
+<p>.NET and Java use 3 generations, gen0 survivors go to gen1, then gen1 to
+gen2, where they remain.</p>
+
+<p>The planned (and I guess implemented at this point) refactor is to
+requires that objects will have to survive 2 minor GCs to be promoted to
+oldgen, therefore, if no more than 1 minor GC runs during a request,
+heaps will stay at optimal sizes. Slated for 2.2 release (not yet
+released).</p>
+
+<p>BTW, RSS refers to &#8220;resident set size&#8221;, the portion of a process&#8217;s
+memory that is held in RAM, as in &#8216;in residence&#8217;. If it weren&#8217;t in
+residence, it might be in swap or in filesystem.</p>
+
+<p>So the Ruby algo is called <code>RGenGC</code>.</p>
+
+<h3>Bitmap marking</h3>
+
+<p><a href="http://patshaughnessy.net/2012/3/23/why-you-should-be-excited-about-garbage-collection-in-ruby-2-0">source</a></p>
+
+<p>In MRI, lots data stored as metadata + RValue, e.g. &#8220;abc&#8221; stored as an
+RString which is flags + &#8220;abc&#8221; stored on an RValue heap with lots of
+other strings.</p>
+
+<pre><code>[a,b,c,s,o,m,e,o,t,h,e,r,s,t,r,i,n,g]
+</code></pre>
+
+<p>Fun fact: your ruby code itself is converted into RValue structures as
+it is parsed and converted into byte code.</p>
+
+<p>GC is run when we&#8217;re out of RValue storage, loop over references an set
+<code>FL_MARK</code> to mark the obj. Then leftover unmarked freeable objs are
+collected into a singly-linked list, which will then be used for future
+RValue allocs. If a heap (collection of RValue pointers) can&#8217;t free up
+any more space, and additional heap is alloc&#8217;d.</p>
+
+<h4>Copy-on-Write optimization</h4>
+
+<p>(brought to you by POSIX, right? or BSD? TODO: nail this down)</p>
+
+<p>Linux/UNIX/UNIX-like systems have COW (copy on write). Semantically, a
+fork of a process means copying all of memory from starting process. But
+a full copy doesn&#8217;t actually need to happen until one of the proces
+writes.</p>
+
+<p>Presumably this same thing happens if it&#8217;s the parent process that
+writes to COW data, right? How does that work? Are they both considered
+child processes? TODO!!!</p>
+
+<p>But before bitmap sweeping, COW didn&#8217;t work for Ruby, because Ruby&#8217;s GC
+involves writing to <code>FL_MARK</code> to mark a piece of data as referenced by
+some other thing, and this sets off the OS&#8217;s copy-on-write behavior;
+writing to <code>FL_MARK</code> looks like any other kind of memory write and the
+OS doesn&#8217;t know the difference.</p>
+
+<p>(note: <a href="http://www.rubyenterpriseedition.com/">Ruby Enterprise Edition</a>
+fixed this, if you&#8217;re interested)</p>
+
+<p>The MRI fix came with replacing <code>FL_MARK</code> with a bitmap of marked
+values. It&#8217;s not a 2D bit map, it just means bits mapped to RValue
+heap array elements. Obviously the bitmaps themselves are heavily
+modified so they&#8217;ll definitely be fully copied, but they&#8217;re small so no
+biggie.</p>
+
+<p>Heaps now must be &#8220;aligned&#8221; with their maps, so we can&#8217;t just use boring
+ol malloc, but rather <code>posix_memalign</code> to alloc something that
+presumably doesn&#8217;t align with a word.</p>
+
+<h3>Enumerable Lazy</h3>
+
+<p>This is in 2.0. You don&#8217;t want to use it all the time for performance
+reasons (the construction of all the intermediate blocks outweighs the
+cost of evaluating some array you might not entirely consume), but it
+allows you to do things like:</p>
+
+<pre><code>require 'prime'
+Prime.lazy.select {|x| x % 4 == 3 }.take(10).to_a
+</code></pre>
+
+<p><a href="http://railsware.com/blog/2012/03/13/ruby-2-0-enumerablelazy/">Read more</a></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T15:42:00-04:00" pubdate data-updated="true">May 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/26/daily-journal/">
 		
 			Daily Journal</a>
@@ -1425,262 +2138,6 @@ methods to subclasses.</p>
 	<a class='category' href='/blog/categories/ruby/'>Ruby</a>
 
 </div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/04/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Vim surround</h2>
-
-<p>https://github.com/tpope/vim-surround</p>
-
-<ul>
-<li>ysiw] : surround a word in ]</li>
-<li>ysiW] : surround a chunk word in ]</li>
-<li>cs&#8221;&#8217; : change surrounding &#8221; to &#8217;</li>
-<li>ds&#8221; : delete surrounding &#8221;</li>
-<li>yss( : wrap line in parens</li>
-</ul>
-
-
-<h2>DAS: Conflicting Principles</h2>
-
-<ul>
-<li>User/profile/account
-
-<ul>
-<li>All this other stuff that relates to that single giant model</li>
-</ul>
-</li>
-<li>User
-
-<ul>
-<li><code>disable!</code></li>
-<li><code>send_disable_notication</code></li>
-</ul>
-</li>
-<li>Law of demeter
-
-<ul>
-<li>Motivation for decomposition</li>
-<li>move controller logic to model <code>enforce_good_standing!</code></li>
-</ul>
-</li>
-<li>User model will get huge; lots of complexity there.</li>
-<li>Pull out service classes, e.g. GoodStandingPolicy, or
-AccountStandingPolicy
-
-<ul>
-<li><code>#initialize(user)</code></li>
-<li><code>enforce!</code>
-
-<ul>
-<li>still breaks law of demeter.</li>
-<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
-<li>but this breaks Tell Don&#8217;t Ask
-
-<ul>
-<li>TDA means asking an object about properties and deciding what to
-do instead of telling it to do things and giving it enough info
-to do so.</li>
-</ul>
-</li>
-<li>TDA vs Single Responsibility Principle (SRP)?
-
-<ul>
-<li>If you follow TDA, you end up putting responsibility back into
-User class, but now User class has much responsibility</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Pick one: SRP often makes sense</li>
-</ul>
-
-
-<h2>DAS: Wrapping Third Party APIs</h2>
-
-<ul>
-<li>e.g. accepting Braintree payment from secure redirect back to your
-site with data in QPs</li>
-<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
-<li>Goal: move traversal of these objs to a different class.</li>
-<li>Spec
-
-<ul>
-<li>Had to stub deeply nested crap</li>
-</ul>
-</li>
-<li>TDD
-
-<ul>
-<li>it &#8220;konws the newest credit card&#8221;</li>
-<li>qp is a stub</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Pend-out an Rspec test</h2>
-
-<pre><code>it "does something" {}
-</code></pre>
-
-<p>can be made pending via <code>xit</code></p>
-
-<pre><code>xit "does something" {}
-</code></pre>
-
-<h2>Cisgender</h2>
-
-<p>http://en.wikipedia.org/wiki/Cisgender</p>
-
-<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
-related types of gender identity where an individual&#8217;s experience of
-their own gender matches the sex they were assigned at birth.</p></blockquote>
-
-<h2>Hypermedia API</h2>
-
-<p>Hyper = above</p>
-
-<p>Media = well, media, but not just hypertext because more things than
-just text can be conveyed</p>
-
-<p>Examples:</p>
-
-<ul>
-<li>http://jsonapi.org/</li>
-<li>HAL - Hypermedia Application Language</li>
-</ul>
-
-
-<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
-
-<ul>
-<li>HAL embeds child docs recursively; JSON API flattens the entire graph
-at the top level.</li>
-<li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
-<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
-https://github.com/json-api/json-api/pull/123/files#r12265234</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-04T10:11:00-04:00" pubdate data-updated="true">May 4<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/das/'>DAS</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/01/daily-journal-2/">
-		
-			Daily Journal 2</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Cryptoballs</h2>
-
-<pre><code>openssl speed rsa
-openssl speed aes
-</code></pre>
-
-<h3>RSA</h3>
-
-<p>Encryption key is public. Decryption key is secret.
-Used for generating symmetric key in TLS.</p>
-
-<p>AES is way faster (TODO: wat?).</p>
-
-<h2>Active-model serializers</h2>
-
-<p>How do tell an attribute to use a serializer?</p>
-
-<p>Trick question: you don&#8217;t; rather, if it has a serializer, it&#8217;s probably
-an association, not an attribute, so you probably want something like</p>
-
-<pre><code>has_many :action_items, serializer: ActionItemSerializer
-has_one :originator, serializer: OriginatorSerializer
-</code></pre>
-
-<p>and in both cases you can probably remove <code>serializer</code> once you de-stub
-<code>action_items</code> and <code>originator</code>.</p>
-
-<h2>QUnit filter</h2>
-
-<p>In Mocha JS test suites if you click a suite header, it&#8217;ll run tests
-only from that module or children by way of a <code>grep=blahlbahbl</code> query
-param. I&#8217;m using <a href="https://github.com/square/qunit-bdd">qunit-bdd</a>, which
-is a layer over QUnit, which generates a bunch of concatenated module
-names based on the nested <code>describe</code>s and <code>context</code>s, which doesn&#8217;t let
-you easily run all the nested child modules of a top-level describe if
-you&#8217;re used to using the Module dropdown on the upper right.</p>
-
-<p>If you want to run a family of describe modules, you can manually
-provide a <code>filter</code> query param, e.g.:</p>
-
-<pre><code>http://localhost:4200/tests?filter=LiveQuery
-</code></pre>
-
-<p>This runs all modules w &#8220;LiveQuery&#8221; is part of their name.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-01T22:46:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
-	
 
 
 	

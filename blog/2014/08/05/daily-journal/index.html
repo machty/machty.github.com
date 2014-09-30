@@ -158,12 +158,9 @@ pay for higher usage/capacity, e.g. most heroku add-ons</li>
 <li>idea: a LinkView asks the router or url service for an Action
 using the route params, query params, etc.</li>
 <li>LinkView&#8217;s active CP is <code>action.pending</code> || present day isActive</li>
-<li><p>action will internally delegate to a shared transitionTo action
+<li>action will internally delegate to a shared transitionTo action
 that everyone in the world can see; everyone can know where it&#8217;s
-going, etc etc etc.</p>
-
-<p><code>{{link-to action=myAction}}</code>
-any reason for this? what do you gain? nothing?</p></li>
+going, etc etc etc.</li>
 </ul>
 </li>
 </ul>
@@ -259,29 +256,8 @@ currently clicking this link.</p>
 <li>make linking/routing/active calc logic shareable</li>
 <li>make it possible to click a link to make it active before a slow
 transition has completed.</li>
-<li><p>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
-anything else in general too.</p>
-
-<p>  {{#link-wrapper tagName=&#8221;li&#8221; |w|}}</p>
-
-<pre><code>{{w.link-to "wat" 1 2 3 (query-params)}}
-</code></pre>
-
-<p>  {{/link-wrapper}}</p>
-
-<p>  {{#link-to &#8216;articles&#8217; article.id |l|}}</p>
-
-<pre><code>{{! providing block params kicks it into
-    wrapper mode }}
-
-&lt;li class="{{l.active}}"&gt;
-  {{#l.tag}}
-    {{article.title}}
-  {{/l.tag}}
-&lt;/li&gt;
-</code></pre>
-
-<p>  {{/link-to}}</p></li>
+<li>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
+anything else in general too.</li>
 </ul>
 
 

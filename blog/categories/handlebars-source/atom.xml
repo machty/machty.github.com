@@ -4,7 +4,7 @@
   <title><![CDATA[Category: handlebars-source | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/handlebars-source/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-30T16:55:34-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -90,35 +90,59 @@ now a lightweight gem wrapper for the following:</p>
 to help you determine an absolute path to the .js file contained within
 the gem. Example:</p>
 
-<p>{% codeblock lang:ruby %}
-{% raw %}
-require 'handlebars/source'</p>
-
-<p>context = ExecJS.compile(File.read(Handlebars::Source.bundled_path))
-puts context.call 'Handlebars.precompile', '{{hello}}'</p>
-
-<h1>=></h1>
-
-<h1>function (Handlebars,depth0,helpers,partials,data) {</h1>
-
-<h1>this.compilerInfo = [2,'>= 1.0.0-rc.3'];</h1>
-
-<h1>helpers = helpers || Handlebars.helpers; data = data || {};</h1>
-
-<h1>var stack1, functionType="function", escapeExpression=this.escapeExpression;</h1>
-
-<h1></h1>
-
-<h1>if (stack1 = helpers.hello) { stack1 = stack1.call(depth0, {hash:{},data:data}); }</h1>
-
-<h1>else { stack1 = depth0.hello; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }</h1>
-
-<h1>return escapeExpression(stack1);</h1>
-
-<h1>}</h1>
-
-<p>{% endraw %}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;handlebars/source&#39;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;context = ExecJS.compile(File.read(Handlebars::Source.bundled_path))</span>
+</span><span class='line'><span class="sr">puts context.call &#39;Handlebars.precompile&#39;, &#39;{{hello}}&#39;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;=&gt;&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;function (Handlebars,depth0,helpers,partials,data) {&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">this</span><span class="o">.</span><span class="n">compilerInfo</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;&gt;= 1.0.0-rc.3&#39;</span><span class="o">]</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;helpers = helpers || Handlebars.helpers; data = data || {};&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">var</span> <span class="n">stack1</span><span class="p">,</span> <span class="n">functionType</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="n">escapeExpression</span><span class="o">=</span><span class="n">this</span><span class="o">.</span><span class="n">escapeExpression</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="k">if</span> <span class="p">(</span><span class="n">stack1</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">hello</span><span class="p">)</span> <span class="p">{</span> <span class="n">stack1</span> <span class="o">=</span> <span class="n">stack1</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">depth0</span><span class="p">,</span> <span class="p">{</span><span class="nb">hash</span><span class="p">:{},</span><span class="n">data</span><span class="ss">:data</span><span class="p">});</span> <span class="p">}</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;else { stack1 = depth0.hello; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="k">return</span> <span class="n">escapeExpression</span><span class="p">(</span><span class="n">stack1</span><span class="p">);</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;}&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>At the time of writing, most of the gems you'd ever use for your Ember
 projects use these gems, and since they don't specify dependencies upon
@@ -156,51 +180,87 @@ nearest non-pre-release version of the gem it can find, rather than
 staying within the bounds of an <code>rc</code> sub-version. So, TL;DR, do the
 following:</p>
 
-<p>{% codeblock lang:ruby %}</p>
-
-<h1>Gemfile</h1>
-
-<p>gem 'ember-source', '1.0.0.rc1.2'</p>
-
-<h1>This won't work.</h1>
-
-<h1>gem 'ember-source', '~> 1.0.0.rc1.0'</h1>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="s1">&#39;ember-source&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0.0.rc1.2&#39;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;This won&#39;t work.&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">gem</span> <span class="s1">&#39;ember-source&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 1.0.0.rc1.0&#39;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <h2>Appendix: Getting the .js files out of the <code>___-source</code> gems</h2>
 
 <p>Handlebars:</p>
 
-<p>{% codeblock lang:ruby %}</p>
-
-<h1>Gemfile</h1>
-
-<p>gem 'handlebars-source'</p>
-
-<h1>Code</h1>
-
-<p>require 'handlebars/source'
-Handlebars::Source.bundled_path # => "/Users/.../handlebars.js"
-Handlebars::Source.runtime_bundled_path # => "/Users/.../handlebars.runtime.js"
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="s1">&#39;handlebars-source&#39;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Code&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">require</span> <span class="s1">&#39;handlebars/source&#39;</span>
+</span><span class='line'><span class="no">Handlebars</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path</span> <span class="c1"># =&gt; &quot;/Users/.../handlebars.js&quot;</span>
+</span><span class='line'><span class="no">Handlebars</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">runtime_bundled_path</span> <span class="c1"># =&gt; &quot;/Users/.../handlebars.runtime.js&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Ember / Ember Data:</p>
 
-<p>{% codeblock lang:ruby %}</p>
-
-<h1>Gemfile</h1>
-
-<p>gem 'ember-source'
-gem 'ember-data-source'</p>
-
-<h1>Code</h1>
-
-<p>require 'ember/source'
-require 'ember/data/source'
-Ember::Source.bundled_path_for("ember.js") # => "/Users/.../ember.js"
-Ember::Data::Source.bundled_path_for("ember-data.js") # => "/Users/.../ember-data.js"
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Gemfile&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">gem</span> <span class="s1">&#39;ember-source&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;ember-data-source&#39;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Code&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="nb">require</span> <span class="s1">&#39;ember/source&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;ember/data/source&#39;</span>
+</span><span class='line'><span class="no">Ember</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path_for</span><span class="p">(</span><span class="s2">&quot;ember.js&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;/Users/.../ember.js&quot;</span>
+</span><span class='line'><span class="no">Ember</span><span class="o">::</span><span class="no">Data</span><span class="o">::</span><span class="no">Source</span><span class="o">.</span><span class="n">bundled_path_for</span><span class="p">(</span><span class="s2">&quot;ember-data.js&quot;</span><span class="p">)</span> <span class="c1"># =&gt; &quot;/Users/.../ember-data.js&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   

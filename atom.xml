@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-23T11:17:23-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,971 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Shnurgle]]></title>
+    <link href="http://machty.github.com/blog/2014/09/27/daily-shnurgle/"/>
+    <updated>2014-09-27T09:29:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/09/27/daily-shnurgle</id>
+    <content type="html"><![CDATA[<h2>lseek</h2>
+
+<p>&#8220;long&#8221; (int) seek. There used to just be a <code>seek</code> that took a smaller
+int.</p>
+
+<p>You can seek past EOF and the kernel will be fine with it; reads yield 0
+and set EOF flag, but writing will cause a &#8220;file hole&#8221; to exist, wherein
+null bytes are returned but aren&#8217;t actually written to disk until
+someone writes into the hole.</p>
+
+<pre><code>File.open("seektestfile", "r+") do |f|
+  f.write("begin")
+  f.seek(10, IO::SEEK_SET)
+  f.write("end")
+end
+</code></pre>
+
+<p>Then open <code>seektestfile</code> in vim to see the null bytes. Pretty rad. But
+again keep in mind that those null bytes aren&#8217;t actually there on disk
+(well actually I guess it&#8217;s up to the kernel to figure out whether the
+hole is large enough to warrant the overhead of splitting into a
+different block; some file systems don&#8217;t offer file holes at all).</p>
+
+<p>A file is just a collection of allocated disk blocks. No guarantee their
+in the same order. But you could use <code>posix_fallocate</code> to reserve
+multiple blocks even if you&#8217;re writing to different places in it to make
+sure that future writes will succeed rather than risk some other
+application filling a hole and blah.</p>
+
+<p>How many bytes in a block/sector in OS X? <code>diskutil info /</code> reveals
+(among other things):</p>
+
+<pre><code>Device Block Size:        512 Bytes
+</code></pre>
+
+<p>That&#8217;s the hardware block size, which can be different than the file system
+block size (the fs block size must of course be >= device block size).</p>
+
+<p>The <code>stat</code> command tells you information about files, like their size n
+shit. It has a format option which is like printf. You could be like
+<code>stat -f "hello world"</code> and &#8220;hello world&#8221; would be the output, having
+run <code>lstat</code> on STDIN and printing out no actual information about it.</p>
+
+<p><code>ioctl</code> is useful for special-cased IO scenarios, like controlling a
+terminal device special file. You pass it an op code which determines
+what the remaining parameters are.</p>
+
+<h2>syscalls and atomicity</h2>
+
+<p>Examples of system calls that accept flags to ease race condition pain:</p>
+
+<ol>
+<li><code>O_EXCL</code> when opening a file throws an error if it already exists;
+otherwise you&#8217;d have to try and open it (to see if it exists), and
+then try to create it if it doesn&#8217;t, in which time another process
+could have come in and created it. <code>O_EXCL</code> guarantees that if the
+open succeeds, that process is the owner of the new file.</li>
+<li><code>O_APPEND</code> opens a file AND moves its pointer to the end in one shot,
+otherwise two processes trying to append might clobber each other
+between their <code>seek</code> and <code>write</code>s. Some systems like NFS don&#8217;t
+support it and are prone to this race condition. WRONG. I wrote the
+wrong thing. <code>O_APPEND</code> actually works by opening the file, flagging
+it in such a way that all writes also atomically include an EOF seek.
+If <code>O_APPEND</code> worked the way I first described (an <code>open</code> + a
+<code>seek</code>), the race condition described could still happen.</li>
+</ol>
+
+
+<h2>File descriptors vs open files</h2>
+
+<p>You can have multiple file descriptors point to the same open file. This
+for example happens automatically every time you fork a program (its FDs
+get dup&#8217;d).</p>
+
+<p>The kernel maintains</p>
+
+<ul>
+<li>a per-process table of descriptors
+
+<ul>
+<li>close-on-exec flag</li>
+<li>reference to the system-wide open file description</li>
+</ul>
+</li>
+<li>a system-wide table of open file descriptions (the open file table)
+
+<ul>
+<li>current file offset (from reads/writes/seeks)</li>
+<li>status flags from when the file was open()ed (read-only, etc)</li>
+<li>reference to the i-node</li>
+</ul>
+</li>
+<li>file system i-node table</li>
+</ul>
+
+
+<p>Note that there&#8217;s an on-disk i-node and an in-memory i-node that has a
+lot more information about locks and other kernel-specific things that only make sense
+to open files rather than just static files living on a disk somewhere.</p>
+
+<p><code>fork</code>ing and UNIX domain sockets are two (of many? maybe?) ways for two
+processes to have a file descriptor that points to the same system wide
+descriptions.</p>
+
+<p>I originally thought the file offset was stored per descriptor, but
+apparently it lives in the shared description record? Only one way to
+find out:</p>
+
+<pre><code>File.open('shareddesctest.txt', 'w') do |f|
+  if fork
+    # parent
+    f.seek(1, IO::SEEK_SET)
+    Process.wait
+  else
+    # child
+    sleep 1
+    f.write "wat"
+  end
+end
+</code></pre>
+
+<p>If I open vim, I see <code>^@wat</code>, which means in fact the offset is shared:
+parent seeks to offset 1, child waits for this to happen, and then
+writes to a file descriptor it hasn&#8217;t touched yet, and it starts writing
+at where the parent <code>seek</code>ed to. So indeed offsets are stored in the
+shared system-level open file description.</p>
+
+<h2>Redirection and dup2</h2>
+
+<p><code>./a.out &gt; wat 2&gt;&amp;1</code> will pipe both STDOUT and STDERR into the <code>wat</code>
+file, using a single system-level file description. How does this work?
+Pretty hilariously-jankly.</p>
+
+<ul>
+<li>File descriptors are just integers (stdout=1, stderr=2)</li>
+<li>To redirect stderr to stdout, you have to duplicate stdout&#8217;s file
+descriptor but make sure that that final descriptor has a value of 2,
+so that code that writes to stderr (2) is unaffected and will
+successfully keeping writing to the newly redirected stream.</li>
+<li>File descriptor integers are reused; the various syscalls that
+allocate file descriptors always choose the smallest unused file
+descriptor int.</li>
+<li>So you could 1. close stderr and 2. dup stdout, and this would work,
+but not if stdin (0) had already been closed, since the new handle
+would take the lower value 0. LOL.</li>
+<li>So you have to use <code>dup2</code>, which lets you specify the number of the
+file descriptor you&#8217;d like to allocate. Which is what shells with
+stream redirection support. :)</li>
+</ul>
+
+
+<p>Duping FDs can also be done w <code>fcntl</code> and <code>F_DUPFD</code>.</p>
+
+<h2>IO at specific offset</h2>
+
+<p>Good for concurrent processes in some cases, you can use <code>pread</code> and
+<code>pwrite</code> to perform IO at a specific offset without modifying the file
+pointer.</p>
+
+<p>A single syscall is way more performant than multiple ones, hence the
+value in <code>pread</code> and friends. You also sidestep certain race conditions.
+Then again the time to do IO often dwarfs syscall overhead.</p>
+
+<h2>Scatter IO</h2>
+
+<p><code>readv</code> reads a contiguous chunk of data from a file descriptor and
+distributes into multiple buffers supplied to the syscall. <code>writev</code>
+writes a contiguous chunk of data to the file.</p>
+
+<p>This avoids certain race conditions, allows you to combine multiple
+reads/writes.</p>
+
+<h2><code>/dev/fd</code></h2>
+
+<p>Virtual directory of file descriptors, e.g. 0, 1, 2 (stdin, stdout,
+stderr, and some others). Useful for passing a command line utility a
+filename when you really want it to read from stdin, e.g.</p>
+
+<pre><code>echo 'wat' | diff /dev/fd/0 olderwat
+</code></pre>
+
+<p>Note that you could also do process substitution:</p>
+
+<pre><code>diff &lt;(echo 'wat') olderwat
+</code></pre>
+
+<p>which has the same effect but creates a new descriptor rather than
+reusing the stdin descriptor.</p>
+
+<p>Note that these process subsitution file handles also live in <code>/dev/fd</code>:</p>
+
+<pre><code>echo &lt;(echo wat) 
+# /dev/fd/63
+</code></pre>
+
+<h2>&#8220;Header Search Paths&#8221; vs &#8220;User Header Search Paths&#8221;</h2>
+
+<p>User: <code>#include "wat.h"</code>
+Non-user: <code>#include &lt;wat.h&gt;</code></p>
+
+<h2>Process vs Program</h2>
+
+<p>A Process is an instance of a Program. A Program is a description of how
+to construct a Process.</p>
+
+<p>Program consists of:</p>
+
+<ul>
+<li>Binary format ID: describes the format of the executable.</li>
+<li>Machine code</li>
+<li>Program entry point address; address to <code>int main</code>, or something that
+quickly calls <code>int main</code>.</li>
+<li>data (constants, default starting values)</li>
+<li>symbol/relocation tables: locations and names of functions, for
+debugging purposes but also dynamic linking</li>
+<li>shared libs: list of dynamic libs for run time linking</li>
+</ul>
+
+
+<p>A process has an initialized data segment and uninitialized data
+segment. The former contains all starting values for a program, hence
+it&#8217;s stored in disk space, whereas uninitialized data gets initialized
+at process start up through a more dynamic process and hence the space
+it occupies doesn&#8217;t need to be stored on disk. Uninitialized data gets
+zeroed out.</p>
+
+<ul>
+<li>Program break: the &#8220;top&#8221; of the heap</li>
+</ul>
+
+
+<p>Application Binary Interface (ABI) set of rules for what registers are
+set, etc., when interacting with some low-level service, like the
+kernel. SUSv3 standardizes this API so that you&#8217;re using a higher level
+than some ultra low level API.</p>
+
+<h2>Locality of reference</h2>
+
+<p>In regards to memory access and optimizations based thereupon.</p>
+
+<ul>
+<li>spatial locality: tendency for memory accesses to be near recent
+memory accesses (e.g. traversing a data structure, sequential
+execution of code)</li>
+<li>temporal locality: tendency to access a recently accessed location
+(e.g. a loop)</li>
+</ul>
+
+
+<p>This is part of what makes virtual memory possible; it&#8217;s largely pretty
+rare to suddenly need to access a non-resident page.</p>
+
+<p>Each process has a page table, which maps pages to their physical RAM
+locations. If you access a page that&#8217;s not in RAM, then page fault
+occurs (kernel takes over).</p>
+
+<p>Not all virtual memory address regions have a corresponding page, in
+which case, SIGSEGV.</p>
+
+<p>The range of valid virtual addresses changes as the stack grows and more
+stuff is allocated on the heap (malloc). Also when you run <code>mmap</code>.</p>
+
+<p>Virtual memory requires hardware support, specifically a Paged Memory
+Management Unit, which needs to be smart enough to do address
+translating but also notify the kernel of page faults.</p>
+
+<p>VM keeps memory isolated between processes unless you really really want
+to share: <code>shmget</code> and <code>mmap</code> let you do this as a means of
+Inter-Process Communication. It works by having page table entries point
+to the same region of RAM, allowing for the different process page table
+entries to have different permissions, e.g. one process might have read
+access but other has write access to the same page frame in physical
+memory.</p>
+
+<p>There&#8217;s a per-process kernel stack which maps to kernel RAM and is
+therefore inaccessible when not in kernel mode. This is used for syscall
+stacks. I need to read more about this; why can&#8217;t there be a system-wide
+kernel stack shared between processes? Isn&#8217;t only one process going to
+be in kernel mode at any given time? Maybe not&#8230; if multiple processes
+are blocked on IO, does that mean they&#8217;re all in kernel mode? TODO: come
+back to dis shiz.</p>
+
+<h2>argv argc</h2>
+
+<p><code>argv[0]</code> is the process name which can be used to switch the behavior
+of multiple commands that all point to the same executable.
+<code>gzip/gunzip/etc</code> is an example of this. <code>ls -lai</code> yields:</p>
+
+<pre><code>343041 -rwxr-xr-x  4 root  wheel  43200 Oct 31  2013 /usr/bin/gzip
+343041 -rwxr-xr-x  4 root  wheel  43200 Oct 31  2013 /usr/bin/gunzip
+</code></pre>
+
+<p>Same inode 343041. Here&#8217;s all of em (<code>find /usr/bin -inum 343041</code>):</p>
+
+<pre><code>/usr/bin/gunzip
+/usr/bin/gzcat
+/usr/bin/gzip
+/usr/bin/zcat
+</code></pre>
+
+<p>Apparently there&#8217;s no easy way to find all the files that link to an
+inode (the above was simple only because they all happened to be in the
+same directory).</p>
+
+<p>Note that you can&#8217;t hard-link directories.</p>
+
+<p>Short of stashing global vars, you can&#8217;t access argv and argc (Ruby
+facilitates this for you though), unless you&#8217;re willing to do some
+non-portable stuff.</p>
+
+<pre><code>kernel
+argv,environ
+stack
+...
+heap
+uninitialized data
+initialized data
+text (program code)
+...?
+</code></pre>
+
+<p><code>argv</code> lives right above the stack.</p>
+
+<h2>env vars</h2>
+
+<p>If you just do</p>
+
+<pre><code>wat=lol
+</code></pre>
+
+<p>that sets a shell variable, not strictly an env var tied to the shell
+process that gets with children. Functionally, it&#8217;s an environment var
+that doesn&#8217;t get passed to children when forked.</p>
+
+<p>You could then put it into the process env via</p>
+
+<pre><code>export wat
+</code></pre>
+
+<p>or in one shot</p>
+
+<pre><code>export wat=lol
+</code></pre>
+
+<p>You can set a child processes env var (without polluting parent shell
+variable list or environment vars) via</p>
+
+<pre><code>wat=lol somecommand
+</code></pre>
+
+<p>in which case ARGC for somecommand will be 0. If you did</p>
+
+<pre><code>somecommand wat=lol
+</code></pre>
+
+<p>ARGC would be 1, and ARGV[1] would be &#8220;wat=lol&#8221; rather than an env var.</p>
+
+<p>Order of env vars is implementation specific; you don&#8217;t want to rely on
+this shiznittletons.</p>
+
+<h2>Streams and LazyValue</h2>
+
+<p>LazyValue is coming to Ember along with HTMLbars. LazyValues are a kind
+of / relative of Observables, with the unique feature that they avoid
+the back pressure of pushing values into the stream by merely replacing
+the current value and notifying an end consumer that the stream has been
+invalidated, letting the final consumer decide when it should consume
+and actually flush the lazy value through all of its transformations.</p>
+
+<p>I was wondering what the technical term for a stream that doesn&#8217;t mind
+&#8220;dropping&#8221; &#8220;samples&#8221; before it has a chance to consume the latest value.
+Apparently the word for that is a &#8220;signal&#8221;&#8230;?</p>
+
+<h2>brk and sbrk</h2>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+  void *curBrk;
+
+  for (int i = 0; i &lt; 1; ++i) {
+    curBrk = sbrk(0);
+    printf("brk is %p\n", curBrk);
+  }
+
+  return 0;
+}
+</code></pre>
+
+<p>brk sets the brk lowest address of a process&#8217;s data segment
+(uninitialized) to addr.</p>
+
+<p>These are mad deprecated. Use malloc. Malloc will grow the heap for you
+rather than making you set the break. <code>free</code> won&#8217;t shrink the break but
+rather just return a chunk to the free list. Why?</p>
+
+<ul>
+<li>most frees are in the middle of the heap (as opposed to the edge,
+where shrinking the break makes sense)</li>
+<li>syscalls are expensive</li>
+</ul>
+
+
+<p>Mac OS X specifics: just from a few experiments I can verify that the
+stack grows downward, the break is really small, but malloc seems to be
+producing pointer values much closer to the stack than the break. What
+gives? No idea.</p>
+
+<p><code>free(NULL)</code> is a noop. <code>malloc(NULL)</code> might return a small piece of
+memory that can be freed.</p>
+
+<p><code>malloc</code> scans the free list for something >= the required amount. If >
+than the required amount, the free block is split. Different
+implementations might be first-fit or best-fit. If nothing found, <code>sbrk</code>
+is called to increase it, by some multiple of the virtual memory page
+size.</p>
+
+<p><code>free</code> knows the size of the block to free because malloc sneakishly
+inserts the length at the beginning of a chunk of allocated memory.</p>
+
+<p>Wow, the algorithm for free and malloc is pretty awesome.</p>
+
+<p>Let&#8217;s see nothing&#8217;s been allocated on the heap. Your free list is a
+single element doubly-link list</p>
+
+<pre><code>|Length of Block|prevBlock*|nextBlock*|empty space|
+</code></pre>
+
+<p>Then you <code>malloc(4)</code>. It&#8217;ll start at the beginning of that list, see
+that <code>4</code> is less than the length of the block, and then it&#8217;ll split that
+block. Hmm, so the pointer to the free list needs to remain the same&#8230;
+so either malloc&#8217;d block could get put at the end, length of block is
+decremented. Yeah that&#8217;s probably how it works.</p>
+
+<p>TL;DR: the free list is a doubly-linked list whose nodes are stored in
+the same chunk of memory that&#8217;ll be distributed when mallocs occur. I
+always wondered where the &#8220;free list&#8221; lived&#8230; it seemed like one of
+those problems where it&#8217;d be mallocs all the way down, but this is
+a pretty elegant solution, but it also explains how quickly shit can go
+haywire if you accidentally futz with freed values.</p>
+
+<p>The specific algorithm can vary; glibc uses a boundary tag approach,
+wherein an allocated chunk includes size of previous chunk, size of
+current chunk, and then user space, then size of chunk.</p>
+
+<p>So how are SIGSEGVs detected on double-frees?</p>
+
+<p>http://www.opensource.apple.com/source/Libc/Libc-594.1.4/gen/malloc.c</p>
+
+<p>I think Apple&#8217;s version of malloc tracks allocated blocks (rather than
+just a free list). So it&#8217;ll loop through that list and make sure it&#8217;s
+actually in there. I think glibc see does something else, where it loops
+through the free list to see if it&#8217;s already in there? Or some other
+efficient thing using the boundaries stored in adjacent blocks? Unsure.</p>
+
+<p><code>alloca</code> lets you dynamically allocate on the stack by moving the stack
+frame pointer downward. It gets &#8220;collected&#8221; one you return from the
+function. Not standardized but most systems have it? It&#8217;s useful if
+you&#8217;re actually writing a program that necessitates <code>longjump</code> since
+heap-allocated memory in the stack frames you&#8217;re skipping over can&#8217;t
+possibly be freed, but you get the &#8220;free&#8221; for free if it was allocated
+via <code>alloca</code>. That being said, you probably shouldn&#8217;t use it. :)</p>
+
+<h2>Users and Groups</h2>
+
+<p>You can have multiple usernames/passwords map to the same UID. This
+means multiple users can be granted the exact same privileges by nature
+of them literally being distinguishable by username but not UID.</p>
+
+<p><code>wheel</code> comes from the phrase &#8220;big wheel&#8221; (&#8220;she&#8217;s a big wheel at
+Microsoft&#8221;), it refers to a group with admin privileges. <code>admin</code> is
+also one such group. <code>root</code> is a member of both:</p>
+
+<pre><code>wheel:*:0:root
+admin:*:80:root
+</code></pre>
+
+<p>On Mac OpenDirectory is used instead; you can see all of the
+<code>/etc/group</code> groups in Directory Utility. <code>wheel</code> is System Group,
+<code>admin</code> is Administrators, and there&#8217;s a bunch of other ones specific to
+applications, which seem to be prefixed via underscore blah blah blah
+who cares.</p>
+
+<h2>groups, permissions</h2>
+
+<p>A process with effective user ID of 0 is a <em>privileged process</em>.</p>
+
+<p>A process starts off with a real user and group ID and can change its
+effective user and group ID.</p>
+
+<p>Processes that don&#8217;t start off with the privileges they need can be
+granted the ability to set their effective user and group ids, but only
+to the owner or group, e.g. I, user <code>peon</code>, can execute <code>a.out</code> (if it
+has <code>a+x</code> perms) and have <code>a.out</code> grant itself the permissions that its
+owner has.</p>
+
+<pre><code>machty.github.com :: ls -la wat
+-rw-r--r--  1 machty  staff  0 Sep 28 09:23 wat
+machty.github.com :: chmod u+s wat
+machty.github.com :: ls -la wat
+-rwSr--r--  1 machty  staff  0 Sep 28 09:23 wat
+</code></pre>
+
+<p>The capital <code>S</code> means set-user-id-able but non-executable (this is rare
+and maybe useless?). If I do <code>chmod u+x wat</code> it becomes:</p>
+
+<pre><code>-rwsr--r--  1 machty  staff  0 Sep 28 09:23 wat
+</code></pre>
+
+<p>If I set group, it&#8217;d be the next column of bits.</p>
+
+<p>Note that there&#8217;s no setUID call that the process has to make to enter
+this mode; rather, the bit causes the kernel to set the effective user
+or group ID once the process begins to run.</p>
+
+<p>Here&#8217;s all the <code>/usr/bin</code>s that have set-user-id</p>
+
+<pre><code>machty.github.com :: ls -la /usr/bin | grep '^...[Ss]'
+-r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 at
+-r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 atq
+-r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 atrm
+-r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 batch
+-rwsr-xr-x     1 root   wheel     35136 Oct 31  2013 crontab
+-rws--x--x     1 root   wheel     23008 Oct 31  2013 ipcs
+-r-sr-xr-x     1 root   wheel     68240 Mar 10  2014 login
+-r-sr-xr-x     1 root   wheel     44416 Mar 10  2014 newgrp
+-r-sr-xr-x     1 root   wheel     19664 Oct 31  2013 quota
+-r-sr-xr-x     1 root   wheel     20720 Mar 10  2014 rlogin
+-r-sr-xr-x     1 root   wheel     19856 Mar 10  2014 rsh
+-rwsr-xr-x     1 root   wheel     21488 Oct 31  2013 su
+-r-s--x--x     1 root   wheel    164896 Oct 31  2013 sudo
+-r-sr-xr-x     1 root   wheel     83856 Oct 31  2013 top
+</code></pre>
+
+<p>and all the set-group-ids</p>
+
+<pre><code>machty.github.com :: ls -la /usr/bin | grep '^......[Ss]'
+-rwxr-sr-x     1 root   mail      24640 Oct 31  2013 lockfile
+-rwxr-sr-x     1 root   mail      84656 Oct 31  2013 procmail
+-r-xr-sr-x     1 root   tty       20832 Mar 10  2014 wall
+-r-xr-sr-x     1 root   tty       19920 Oct 31  2013 write
+</code></pre>
+
+<p><code>wall</code> writes some nonsense to everyone&#8217;s terminal: <code>echo wat | wall</code>.</p>
+
+<p>Processes have the ability to switch in and out of their set-uids and
+set-group ids. In other words, a program might have its set-uid enabled
+(and its owner is root), but it&#8217;s bad/unsafe practice to let a program
+just run in root mode the whole time; rather, it should only switch into
+root mode when doing stuff that requires privileges, and then switch
+back.</p>
+
+<p>In Linux there&#8217;s also the concept of file-system IDs and groupd IDs,
+which follow effective ID/group except when <code>setfsuid</code> and <code>setfsfid</code>
+are called. But they&#8217;re seldom used. They only exist to cover use cases
+of <code>NFS</code>.</p>
+
+<h2>Ruby Base64</h2>
+
+<pre><code>require 'base64'
+Base64.encode64("borf") # =&gt; "Ym9yZg==\n"
+Base64.strict_encode64("borf") # =&gt; "Ym9yZg=="
+</code></pre>
+
+<ul>
+<li><code>encode64</code> implements the base64 referenced in
+<a href="https://www.ietf.org/rfc/rfc2045.txt">IETF 2045</a>,
+the RFC on Multipurpose Internet Mail Extensions (MIME).</li>
+<li><code>strict_encode64</code> implements the base64 specified
+in <a href="http://tools.ietf.org/html/rfc4648">IETF 4648</a>, which
+goes into more detail, gets rid of the newlines</li>
+</ul>
+
+
+<p>I used to have to do <code>gsub(/\n/, "")</code> after encoding to get Ruby&#8217;s
+<code>encode64</code> to be compatible with some other that was more picky about
+Base64.</p>
+
+<p>Also, I was wondering why the <code>==</code> exist. Base64 converts any bytestream
+to a 64 bit alphabet. In other words, 2<sup>6</sup> characters. Consider the
+following random 3 byte stream:</p>
+
+<pre><code>01011010 00001111 10101111
+</code></pre>
+
+<p>We&#8217;re used to thinking of them split by 8 bits, but a base64 character
+can only account for 6 bits, so you&#8217;d actually think of it like:</p>
+
+<pre><code>010110 100000 111110 101111
+</code></pre>
+
+<p>This explains why encoding as base 64 has a 4/3 size overhead, an
+important consideration before willy nilly encoding a bunch of giant
+assets at base 64.</p>
+
+<p>It also explains why encoding strings whose lengths aren&#8217;t a multiple of
+3 end up adding <code>=</code> padding (&#8220;borf&#8221; => &#8220;Ym9yZg==\n&#8221;).</p>
+
+<h2><code>ls -d</code></h2>
+
+<p>e.g. <code>ls -ld somedir</code> to show the directory entry rather than expanding
+it and listing all of its files.</p>
+
+<h2>Y2K for epoch 32 bit = year 2038</h2>
+
+<p>The epoch + 32 bit signed int max = year 2038.</p>
+
+<h2>Service Workers</h2>
+
+<p>http://www.w3.org/TR/service-workers/#motivations</p>
+
+<p>https://github.com/slightlyoff/ServiceWorker/blob/master/explainer.md</p>
+
+<p>Alex Russell&#8217;s been working on this. It&#8217;s a huge improvement over the
+declarative app cache. A ServiceWorker is a WebWorker that can get
+installed on page load, and then once installed, is consulted on future
+page loads, even if there isn&#8217;t any internet.</p>
+
+<blockquote><p>Documents live out their whole lives using the ServiceWorker they start with.</p></blockquote>
+
+<p>This means if no service worker existed at initial doc download, then
+installing a ServiceWorker on the first load means the ServiceWorker
+will have to completely sit out for the lifetime of that page. It&#8217;s only
+on feature reload where it might get consulted. This slightly off
+behavior results in:</p>
+
+<ul>
+<li>better fallback for unsupporting browsers</li>
+<li>makes sure that people write good URLs whether using ServiceWorkers
+or not</li>
+<li>Zalgo issues with pages suddenly switching in and out of being managed
+by a ServiceWorker</li>
+</ul>
+
+
+<p>Other things of note:</p>
+
+<ul>
+<li>ServiceWorkers can die, be aborted, be restarted</li>
+<li>So don&#8217;t write them to be stateful.</li>
+<li>Or if so, use IndexedDB. (If ServiceWorkers are available, IndexedDB
+is available)</li>
+</ul>
+
+
+<h2><code>od</code>: octal decimal dumps</h2>
+
+<pre><code>echo "a" | od
+
+0000000    005141
+0000002
+</code></pre>
+
+<p>I&#8217;d expect just one stupid byte, why are there multiples?</p>
+
+<p>Oh duh because <code>echo</code> includes a newline.</p>
+
+<pre><code>echo -n "a" | od 
+
+0000000    000141
+0000001
+</code></pre>
+
+<p>Wat.</p>
+
+<pre><code>echo -n "aa" | od
+0000000    060541
+0000002
+</code></pre>
+
+<p>Oh right, this is an octal dump. Here&#8217;s binary</p>
+
+<pre><code>echo -n "aa" | od -b
+0000000   141 141
+0000002
+</code></pre>
+
+<p>Makes more sense. The leftmost column is just a row indicator.
+At some point it&#8217;ll wrap, and you always look at the last one for an
+indicator of the length thus far.</p>
+
+<pre><code>echo -n "big ass set of bytes" | od -b
+0000000   142 151 147 040 141 163 163 040 163 145 164 040 157 146 040 142
+0000020   171 164 145 163
+0000024
+</code></pre>
+
+<p>See? It wraps automagically.</p>
+
+<h2>cwd</h2>
+
+<p>Processes have <code>cwd</code>s. They&#8217;re the starting point for filename lookups.
+A shell&#8217;s current directory is that shell&#8217;s <code>cwd</code>. You can use
+<code>getcwd(3)</code> to get the current one.</p>
+
+<p>What&#8217;s the difference between <code>pwd</code> and <code>cwd</code>? <code>pwd</code> is a command that
+stands for Print Working Directory. It prints the <code>cwd</code>. But it does so
+with the <code>PWD</code></p>
+
+<p><code>$PWD</code> is an env var you can check. <code>$OLDPWD</code> is set when you <code>cd</code> and
+<code>cd -</code> uses it.</p>
+
+<p>Soooo I believe the answer to everything is this: the kernel knows about
+<code>cwd</code>, but doesn&#8217;t track the absolute path to it in string form; it&#8217;s
+just a pointer, which is all it needs in conjunction with relative file
+paths to locate and open/create/unlink files, etc.</p>
+
+<p>Shells on the other hand provide a convenience built-in <code>pwd</code> and
+expose/manage the <code>$PWD</code> var (et al) to provide a string.</p>
+
+<h2>Hard-linking directories.</h2>
+
+<p>Forbidden in most things, allowed in Mac OS X; twas responsible for
+the data loss bug in Broccoli, since <code>rm -rf</code> ing a directory would
+follow that link and kill shit.</p>
+
+<p>Why does Mac allow it? Apparently it&#8217;s used in Time Machine. If a
+directory hasn&#8217;t changed, a new snapshot can just point to the same
+directory inode without duplicating it.</p>
+
+<p>Great explanation: http://stackoverflow.com/a/4707231/914123</p>
+
+<p>By the way <code>ln</code> and <code>link</code> are the same executable:</p>
+
+<pre><code>$ ls -lai `which link`
+11551 -rwxr-xr-x  2 root  wheel  14976 Oct 31  2013 /bin/link
+$ ls -lai `which ln`
+11551 -rwxr-xr-x  2 root  wheel  14976 Oct 31  2013 /bin/ln
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Daily Snaggletooth]]></title>
+    <link href="http://machty.github.com/blog/2014/09/23/daily-snaggletooth/"/>
+    <updated>2014-09-23T11:18:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/09/23/daily-snaggletooth</id>
+    <content type="html"><![CDATA[<h2>Nginx Heroku Buildpack</h2>
+
+<p>https://github.com/ryandotsmith/nginx-buildpack</p>
+
+<blockquote><p>Some application servers (e.g. Ruby&#8217;s Unicorn) halt progress when
+dealing with network I/O.</p></blockquote>
+
+<p>This was confusing at first but I think it just means that since
+Heroku&#8217;s router only buffers headers and not the entire request, it&#8217;s
+possible that a slow client with a large payload will hog a unicorn
+worker due to a slow blocking <code>read()</code>, in which time that worker isn&#8217;t
+available to process other requests.</p>
+
+<p>The proposed nginx buildpack solution is to put nginx in front of an
+IO-bound (and poorly designed/optimized) server and buffer the entire
+request and not engage the app server until all the data is there, and
+then it can barf the entire request into the app server in one shot,
+minimizing blocking IO.</p>
+
+<p>In general though Unicorn is non-ideal in the following cases:</p>
+
+<ul>
+<li>Slow client and/or large payload</li>
+<li>The app server is internally IO-bound and makes, say, lots of long
+slow 3rd party API requests, because in that time it&#8217;s blocking
+requests that otherwise could have been handled in a less IO-bound
+setting</li>
+</ul>
+
+
+<h2>TTL: Time to Live</h2>
+
+<p>http://en.wikipedia.org/wiki/Time_to_live#IP_packets</p>
+
+<p>Some reason I always pronounced &#8220;live&#8221; as a-live. Rather than the verb
+&#8220;live&#8221;. Why? I don&#8217;t know. Time to Live (verb) makes way more sense. How
+much time it has to live, rather than, how much time until it is live.
+Ridiculous.</p>
+
+<ul>
+<li>IP: a per-gateway decrementing value (as opposed to a unit of time).
+In other words: IP TTL is max hop.</li>
+<li>DNS: time in seconds that a DNS record can be cached. Low values tax
+authoritative name servers. Higher values risk staleness. 86400 (24
+hours) is common. Before a DNS change, DNS admins might change to a
+lower number in advance. QUESTION: why would I, selfish DNS admin, not
+just choose a TTL of 1 all the time? Presumable answer: DNS is another
+roundtrip unless cached; I might be making my application slower.
+Additionally, if DNS goes down (probably rare?), my clients can
+still use
+<code>#networking</code> validates my presumable answer.</li>
+</ul>
+
+
+<h2>HTTPSAP</h2>
+
+<p>HTTPS Ain&#8217;t a Protocol. It&#8217;s just HTTP layered over TLS, an encrypted
+transport layer.</p>
+
+<h2>Resetting Wifi of Remote Mac server</h2>
+
+<p>Heh, this worked</p>
+
+<pre><code>#!/bin/bash
+
+networksetup -setairportpower en1 off
+sleep 10
+networksetup -setairportpower en1 on
+</code></pre>
+
+<p>Run via <code>nohup ./thisdumbscript &amp;</code>.</p>
+
+<p>SSH will be unresponsive for 10+ seconds and then recover. The Magic of
+the INTERNET!</p>
+
+<h2>WebSockets and proxy servers</h2>
+
+<p>http://www.infoq.com/articles/Web-Sockets-Proxy-Servers</p>
+
+<p>Websockets work on port 80 and 443:</p>
+
+<blockquote><p>HTML5 Web Sockets do not require new hardware to be installed, or new ports to be opened on corporate networks&#8211;two things that would stop the adoption of any new protocol dead in its tracks.</p></blockquote>
+
+<p>Transparent proxy server: let&#8217;s stuff through, might manipulate content?</p>
+
+<h2>BOSH: Bidirectional-streams Over Synchronous HTTP</h2>
+
+<p>http://en.wikipedia.org/wiki/BOSH</p>
+
+<p>Isn&#8217;t this just long polling? It&#8217;s long polling with the assurance that
+immediately after receiving a &#8220;push&#8221;, the client makes a new long-lived
+request on the same keep-alive connection. And it can make no more than
+one connection whenever it needs to send data. Why does this have its
+own stupid name?</p>
+
+<h2>SSH Tunneling</h2>
+
+<p>First off, you can just execute commands like</p>
+
+<pre><code>ssh machty@whatever.com ls
+</code></pre>
+
+<p>and assuming I&#8217;ve already done the keygen stuff, that&#8217;ll log in, run
+<code>ls</code>, and output the result of that.</p>
+
+<p>But you can use <code>ssh</code> to spin up a local server that makes your SSH
+connection act as a proxy to some other IP/port, map that to a local
+port, and then connect other things through to that local port.</p>
+
+<p>If I did</p>
+
+<pre><code>ssh machty@wat.com -L 8080:somesite.com:80
+</code></pre>
+
+<p>Then I could do</p>
+
+<pre><code>curl localhost:8080
+</code></pre>
+
+<p>and then see the contents of somesite.com as a request originating from
+the wat.com server I &#8220;logged&#8221; into. (Except that most sites don&#8217;t
+respond the way you&#8217;d like if <code>Host</code> and other headers are incorrect).</p>
+
+<h2>What is my public IP?</h2>
+
+<p>You need some third party to tell your your public IP after all the NAT
+traversals. You shouldn&#8217;t use this for super sensitive stuff (it&#8217;s
+possible the 3rd party server was compromised and maaaaybe there&#8217;s some
+exploit if you use this fake IP for some internal thing?).</p>
+
+<p>But this worked for me:</p>
+
+<pre><code>curl icanhazip.com
+</code></pre>
+
+<p>Someone on SO suggested this: http://www.moanmyip.com/</p>
+
+<p>I can&#8217;t believe that exists.</p>
+
+<h2>SOCKS proxy</h2>
+
+<p>https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-tunneling-on-a-vps</p>
+
+<p>http://en.wikipedia.org/wiki/SOCKS</p>
+
+<p>With a SOCKS proxy</p>
+
+<h2>tcptraceroute</h2>
+
+<p>Instead of ICMP ECHO packets, which often get filtered out at some point
+by some asshole proxy along the way to the destination, tcptraceroute
+uses TCP SYN packets instead. What&#8217;s that you say? Don&#8217;t we still need
+the incrementing TTL that ICMP uses? TRICK QUESTION: TTL is an octet in
+the IP packet, which wraps TCP/UDP/ICMP. So <code>tcptraceroute</code> still uses
+TTL. It&#8217;s also nice enough to send a TCP RST (reset) package if the the
+destination responds with a SYN|ACK so that you don&#8217;t leave it in a
+connection-half-opened state (normally you&#8217;re supposed to send an ACK
+and then start sending application data).</p>
+
+<p>Interesting: you need root privileges to run tcptraceroute. Why? Because
+the custom SYN packets it creates requires root privileges, probably to
+prevent non-privileged users from doing malicious things with packets.
+I&#8217;d be curious to know exactly where that takes place though.</p>
+
+<h2>IP packets have no port</h2>
+
+<p>Why? Because ports map to applications, a concept which IP packets don&#8217;t
+care about; they&#8217;re all about getting messages to an address. Leave it
+to the UDP/TCP packets to provide a source and destination</p>
+
+<p>So hmmm how does ICMP traceroute work? How do the ECHO&#8217;d packets know to
+come back to that specific traceroute command?</p>
+
+<h2>ICMP</h2>
+
+<ul>
+<li>No port</li>
+</ul>
+
+
+<p>There&#8217;s a single ICMP socket apparently?</p>
+
+<p>https://www.cs.utah.edu/~swalton/listings/sockets/programs/part4/chap18/ping.c</p>
+
+<pre><code>/*
+ * pr_pack --
+ *  Print out the packet, if it came from us.  This logic is necessary
+ * because ALL readers of the ICMP socket get a copy of ALL ICMP packets
+ * which arrive ('tis only fair).  This permits multiple copies of this
+ * program to be run without having intermingled output (or statistics!).
+ */
+</code></pre>
+
+<ul>
+<li>ident = getpid() &amp; 0xFFFF;
+
+<ul>
+<li>this is how a pong that returns is identified as originating from a
+pong.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Anyway here&#8217;s a little Ruby program you can run with <code>sudo</code>
+that&#8217;ll open a raw socket and print a Base64&#8217;d ping packet if you
+<code>ping localhost</code>.</p>
+
+<pre><code>require 'socket'
+require 'base64'
+
+rsock = Socket.open(:INET, :RAW)
+
+loop do
+  s = rsock.recv(1024)
+  enc = Base64.encode64(s)
+  puts enc
+end
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Daily Juggernaut]]></title>
@@ -2094,12 +3059,9 @@ pay for higher usage/capacity, e.g. most heroku add-ons</li>
 <li>idea: a LinkView asks the router or url service for an Action
 using the route params, query params, etc.</li>
 <li>LinkView&#8217;s active CP is <code>action.pending</code> || present day isActive</li>
-<li><p>action will internally delegate to a shared transitionTo action
+<li>action will internally delegate to a shared transitionTo action
 that everyone in the world can see; everyone can know where it&#8217;s
-going, etc etc etc.</p>
-
-<p><code>{{link-to action=myAction}}</code>
-any reason for this? what do you gain? nothing?</p></li>
+going, etc etc etc.</li>
 </ul>
 </li>
 </ul>
@@ -2195,29 +3157,8 @@ currently clicking this link.</p>
 <li>make linking/routing/active calc logic shareable</li>
 <li>make it possible to click a link to make it active before a slow
 transition has completed.</li>
-<li><p>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
-anything else in general too.</p>
-
-<p>  {{#link-wrapper tagName=&#8221;li&#8221; |w|}}</p>
-
-<pre><code>{{w.link-to "wat" 1 2 3 (query-params)}}
-</code></pre>
-
-<p>  {{/link-wrapper}}</p>
-
-<p>  {{#link-to &#8216;articles&#8217; article.id |l|}}</p>
-
-<pre><code>{{! providing block params kicks it into
-    wrapper mode }}
-
-&lt;li class="{{l.active}}"&gt;
-  {{#l.tag}}
-    {{article.title}}
-  {{/l.tag}}
-&lt;/li&gt;
-</code></pre>
-
-<p>  {{/link-to}}</p></li>
+<li>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
+anything else in general too.</li>
 </ul>
 
 
@@ -5004,540 +5945,6 @@ day. This is different from the list of things I&#8217;ve learned; that
 approach is useful for packing the things into my brain, hopefully; the
 purpose of this list is to pack things back in when I forget. And for
 now it&#8217;ll just be one giant progressively-updated blog.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/14/daily-journal/"/>
-    <updated>2014-07-14T09:33:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/14/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Website Push != Push Notifications</h2>
-
-<p>So when you&#8217;re rummaging through the Apple Dev Portal, don&#8217;t confuse the
-two and generate the wrong certs. K?</p>
-
-<h2>WWDC 2011 video on UIViewController Containment</h2>
-
-<pre><code>https://developer.apple.com/videos/wwdc/2011/
-</code></pre>
-
-<p>First off, WWDC stands for the Apple World-Wide Developer Conference.</p>
-
-<h2>Why view controllers</h2>
-
-<ul>
-<li>Make it easy to make high quality apps</li>
-<li>Reusable</li>
-</ul>
-
-
-<p>A View Controller just a Controller. Mediates model data with many
-views. View controllers maintain entire hierarchies of views. They&#8217;re
-heavyweight, meant to manage a &#8220;screenful of content&#8221;. Often packaged
-with a model, e.g.</p>
-
-<ul>
-<li>TweetViewController</li>
-<li>ImagePickerController</li>
-</ul>
-
-
-<p>View Controllers are social, meant to connect to each other. They push
-and pop each other, etc. They talk to each other a lot.</p>
-
-<p>The &#8220;manage a screenful of content&#8221;:</p>
-
-<p>View Controllers anticipate being presented in different ways. More
-accurately: they should maintain a unit of content. Only
-<code>rootViewController</code> manages a &#8220;screenful of content&#8221;, specifically the
-<code>rootViewController</code> property of the window object. Knows how to forward
-rotation events, decides overall layout.</p>
-
-<p>How to use View Controllers</p>
-
-<ul>
-<li>subclass UIViewController</li>
-<li>associate VC w view hierarchy</li>
-<li>override callbacks</li>
-</ul>
-
-
-<p>Apperance callbacks: viewWillAppear, viewDidAppear, etc
-Rotation callbacks: viewWillRotate, etc</p>
-
-<p>ViewControllers manage an entire view hierarchy. Not just one to one
-with a view.</p>
-
-<p>View Controller Containers, a tale of Two Hierarchies: view hierarchies
-and view controller hierarchies.</p>
-
-<p>Container controllers</p>
-
-<ul>
-<li>responsible for parent child relationships
-
-<ul>
-<li>API like <code>initWithRootViewController</code> implies parent-child in nav
-controller</li>
-<li>split view controllers lets you set view controller children.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Controller container api</p>
-
-<ul>
-<li>addChildViewController
-
-<ul>
-<li>not meant to be called by anyone but its own implementation; don&#8217;t
-call it on other controllers, basically</li>
-</ul>
-</li>
-<li>remoteFromParentViewController
-
-<ul>
-<li>^^ ditto</li>
-</ul>
-</li>
-<li>childViewControllers array</li>
-<li>callbacks
-
-<ul>
-<li>willMoveToParentViewController</li>
-<li>didMoveToParentViewController</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Shouldn&#8217;t be able to walk up view hierarchy and totally skip over a
-parent view controller: UIViewControllerHierarchyInconsistencyException,
-prevents you from manually adding views into the wrong view controller
-hierarchy.</p>
-
-<p>When are appearance callbacks called?</p>
-
-<p>viewWillAppear etc has nothing to do w addChildViewController, which has
-nothing to do w view appearance.</p>
-
-<p>viewWillAppear just means it&#8217;s in the window view hiearchy, but doesn&#8217;t
-mean it&#8217;s actually visible (same w viewDidAppear).</p>
-
-<p>TODO: what is view layoutSubviews?</p>
-
-<p>viewDidAppear after the view added to viewHierarchy. Called after
-layoutSubviews.</p>
-
-<p>When implementing transitions, you have to implement
-didTransitionToBlahBlah, one of the options is <code>animations</code> lambda.</p>
-
-<p>VS Layout callbacks:</p>
-
-<ul>
-<li>viewWillLayoutSubviews&#8230;</li>
-</ul>
-
-
-<p>Presentation and Dismissal of VCs</p>
-
-<p>set presentation style and then do presentViewController</p>
-
-<p>Can also present VCs by direct subview manipulation.</p>
-
-<pre><code>[root.someView addSubview: vc.view]
-</code></pre>
-
-<p>But this is bad form; better to make the VC a child of the root VC. VC
-knows where subviews should go rather than the ass backwards way.</p>
-
-<p>When to create a custom view controller container?</p>
-
-<ul>
-<li>Hopefully you don&#8217;t need to, so think twice first</li>
-<li>Aesthetics</li>
-<li>Custom app flows</li>
-<li>Your app manipulates view hiearchy directly</li>
-</ul>
-
-
-<p>Use case: make split view show up in both landscape and portrait: no
-need to make custom VC because now there&#8217;s API to just better configure
-split view.</p>
-
-<p>View controllers know themselves if they&#8217;re moving to or from parent
-view controllers within viewWillAppear and viewDidAppear by checking:</p>
-
-<pre><code>// used in viewDid/WillAppear
-- (BOOL)isMovingToParentViewController;
-
-// used in viewDid/WillDisappear
-- (BOOL)isMovingFromParentViewController;
-
-- isBeingPresented;
-- isBeingDismissed;
-</code></pre>
-
-<p>Lol:</p>
-
-<pre><code>- (BOOL) automaticallyForwardAppearanceAndRotationMethodsToChildViewControllers;
-</code></pre>
-
-<h2>RFC</h2>
-
-<p>RFC&#8217;s (Request for Comments):</p>
-
-<blockquote><p>Memos in the Requests for Comments (RFC) document series contain technical and organizational notes about the Internet</p></blockquote>
-
-<p>http://www.ietf.org/about/</p>
-
-<p>So many standards organizations. How am I supposed to keep this separate
-from IEEE?</p>
-
-<p>Anyway, RFCs are docs produced by IETF. I don&#8217;t think anyone else
-(notable) produces docs called RFCs.</p>
-
-<h2>Push Notifications</h2>
-
-<p>Two levels of trust involved in publishing a push notifications:</p>
-
-<h3>Connection Trust</h3>
-
-<ul>
-<li>Provider-side: provider proves it is an authorized provider that
-Apple&#8217;s agreed to publish notifications for</li>
-<li>Device-side: APNs must validate the connection is a with a legit
-device</li>
-</ul>
-
-
-<h3>Token Trust</h3>
-
-<p>Establishes certainty that messages are routed correctly; a provider
-shouldn&#8217;t be able to send messages to random iPhones.</p>
-
-<ul>
-<li>APNs gives device a token</li>
-<li>Devices gives it to provider</li>
-<li>Provider uses it when publishing to APNs</li>
-<li>APNs uses it to route back to device</li>
-</ul>
-
-
-<p>A <code>device token</code> is not a device <code>UDID</code>; aside from being a totally
-different string, it is conceptually different in that it identifies not
-only the unique device, but the application the Push Notification is
-delivered to.</p>
-
-<p>Maybe that&#8217;s what&#8217;s confusing: don&#8217;t call it a <code>device token</code>, call
-it&#8230; an app-token? I get confused by the easiest things.</p>
-
-<h3>Providers must maintain persistent connection</h3>
-
-<p>If you want to send a notification through APNS (and GCM),
-you must maintain a persistent connection to the server. In other words,
-you can&#8217;t just connect-sendmessage-disconnect a la HTTP, which makes
-push notifications inconvenient for Rails-y architectures without
-using Sidekiq/Resque to reuse a persistent connection.</p>
-
-<p>I both:</p>
-
-<ol>
-<li>failed to realize that this was a requirement for a while and</li>
-<li>failed to understand why</li>
-</ol>
-
-
-<p>The best justification for this architecture that I can determine from
-the docs and people I&#8217;ve talked to is that constantly
-connecting/disconnecting to what is a high-performance, low-latency,
-distributed system would be a colossal waste of resources and a latency
-hit. An app capable of notifications is essentially a stream that APNS
-consumes, and might be sending thousands of messages, so either way
-they&#8217;d at least need to support a persistent connection for performance
-reasons, and if they&#8217;re going to support that, why bother supporting
-an obviously deficient connect/disconnect-based server interaction.</p>
-
-<p>How many other services can be considered consumers of your stream?</p>
-
-<h3>Service-to-Device Connection Trust</h3>
-
-<p>Device identity is established via TLS peer-to-peer auth (internally;
-iOS devs don&#8217;t need to implement this).</p>
-
-<ul>
-<li>Device TLS auths w APNs</li>
-<li>APNs returns certificate, which it validates</li>
-<li>Device sends device certificate to APNs</li>
-<li>APNs valiates device certificate</li>
-</ul>
-
-
-<p>So I guess this prevents:</p>
-
-<ul>
-<li>an iPhone mimicker pretending to be something it&#8217;s not</li>
-<li>an APNs ripoff pretending to be something it&#8217;s not</li>
-</ul>
-
-
-<h3>Provider-to-APNS connection trust</h3>
-
-<p>Same process as above, just w provider (your server) and APNS.</p>
-
-<p>A connection to APNs can only serve a single application, identified by
-the topic (bundle ID) specified in the certificate, presumably the
-one you generate in the online dev console. Also, APNs has a certificate
-revocation list; if a provider is on that list, it&#8217;s connection will be
-refused/closed. I think this would happen if you didn&#8217;t implement a
-persistent connection to APNs but rather treated it like HTTP and kept
-closing/opening the connection.</p>
-
-<h3>Token Generation and Dispersal / token trust</h3>
-
-<p>Jesus christ why don&#8217;t I just RTFM? It solves all the problems. Ah yes,
-arm-chair ADD.</p>
-
-<ul>
-<li>Application asks system to register</li>
-<li>System (iOS) forwards this to APNs</li>
-<li>APNs generates device token using info in the certficate (presumably
-the one established as described above) and encrypts it, and sends
-back the encrypted token</li>
-<li>App gets the encrypted key as an <code>NSData</code>, and must send it to the
-provider in hexidecimal format</li>
-</ul>
-
-
-<p>This guarantees that only APNs generated the token used for routing
-(since it&#8217;s encrypted by some private key within APNs). This token can
-only be used for the device that originally connected to receive
-notifications.</p>
-
-<h3>Trust components</h3>
-
-<p>e.g. keys/certificates you need to create/provide to APNs for all of
-this shit to work:</p>
-
-<ul>
-<li><p>Provider</p>
-
-<ul>
-<li>unique provider certificate and private key for validating
-connection to APNs</li>
-<li>certificate identifies a topic that the provide can publish to (the
-app&#8217;s bundle id).</li>
-<li>Provider provides device token.</li>
-<li>Provider can additionally validate that it&#8217;s talking to APNs using
-the public server certificate provide&#8230; at connection time?</li>
-</ul>
-</li>
-<li><p>Device</p>
-
-<ul>
-<li>obvious stuff already covered</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Note: &#8220;topic&#8221; today is literally the bundle ID of the app. A certificate
-identifies which apps it&#8217;s allowed to broadcast notifications to via
-this topic. Maybe in the future, topics can refer to multiple apps?
-Right now it&#8217;s coupled to bundle ID, in the future, this could be a
-configurable thing&#8230; multiple apps could subscribe to the same topic?
-This is all bullshit atm but what I think based on their terminology.
-It&#8217;s really just a really constrained pub-sub, where apps can&#8217;t
-subscribe to message channels other than the one that uniquely
-identifies their app+device tuple.</p>
-
-<h3>Coalescing</h3>
-
-<p>APNs is last-write wins in that that in the case of multiple
-notifications, only the last one will be stored-forwarded to the app.
-This isn&#8217;t to say they coalesce within your device (validated by the
-fact that you&#8217;ll see multiple messages from IRCCloud rather than a
-single one saying &#8220;new messages available&#8221;), but specifically refers to
-the storage of messages undeliverable because the client app&#8217;s turned
-off. GCM gives you more fine-grained control over this.</p>
-
-<h3>Summary</h3>
-
-<p>So, given that I&#8217;ve been fighting this bullshit, realizations:</p>
-
-<p>I need to stop revoking/re-creating the APNs app certificate generated
-in the Apple Dev console. It&#8217;s not like it&#8217;s tied to some private/public
-key or anything.</p>
-
-<h2>Difference b/w .pem and .cer, etc</h2>
-
-<p>I had to run this to convert .cer to .pem</p>
-
-<pre><code>openssl x509 -in aps_development.cer -inform DER -out aps_development.pem
-</code></pre>
-
-<h3>X.509</h3>
-
-<pre><code>http://en.wikipedia.org/wiki/X.509
-</code></pre>
-
-<p>X.509 is an ITU-T (Telecommunication Standardization Sector)
-standard that describes certificate generation, revocation, and other
-utilities. <code>openssl</code> just happens to support x509 certificate
-generation.</p>
-
-<p>Remember: x509 means one thing: certificates. If you see x509 in the
-wild, it&#8217;s probably talking about certificates. x509 certificates.
-Certificates.</p>
-
-<p>x509 is unlike PGP in that it maintains a hierarchical chain of
-certificate signers, each validated by the previous, with a root CA
-(Certificate Authority) starting the chain. PGP relies (or at least
-originally relied on) a Web of Trust.</p>
-
-<h3>PEM</h3>
-
-<p><code>---BEGIN CERTIFICATE---</code> and <code>---END CERTIFICATE---</code>.</p>
-
-<p>Can contain multiple certificate and even the prviate key. &#8220;The private
-key&#8221;? Which private key? Answer: the one that&#8217;s automatically generated
-by Keychain Access and similar utilities when you create a Certificate
-Signing Request (CSR).</p>
-
-<p><a href="http://stackoverflow.com/a/7947362/914123">See here</a></p>
-
-<p>TODO: can you even use an existing public/private key? Probably, but
-possibly less secure:</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Certificate_signing_request">Read the wiki, you dingus</a></p>
-
-<h2>PKCS</h2>
-
-<p>(public key cryptography standards) created by RSA Security in the 90s.
-It&#8217;s a family of standards relating to cryptography.</p>
-
-<p>PCKS 1 is a standard, PCKS 9 is a standard, PCKS 12 is a standard.</p>
-
-<p>Exporting multiple cryptography shits in a single file falls under the
-PKCS 12 standard. PKCS 12 also handles bundling all the members of a
-CHAIN OF TRUST.</p>
-
-<blockquote><p>It is commonly used to bundle a private key with its X.509 certificate or to bundle all the members of a chain of trust.</p></blockquote>
-
-<p>Makes sense, must be a common thing. Apple obviously does that. AWS SNS
-expects you to upload a <code>.p12</code> that it splits into a cert and priv key.</p>
-
-<p>File name extension is <code>.p12</code> (which I&#8217;ve seen) or <code>.pfx</code> which I&#8217;ve
-not.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/PKCS_12">Wiki</a></p>
-
-<p>So if I understand correctly, the purpose of certificate is so that you
-can encrypt data, and anyone who wants to validate that you are who you
-say you are can look up the certificate chain.</p>
-
-<p>You create a pub/priv key pair, create a CSR with it, and then the
-approving authority gives you a certificate that you can hand to other
-people. The certificate can be used to validate that whatever you
-encrypted with your (still unshared and totally) private key, can be
-guaranteed to have originated from you. Without certification, you&#8217;re
-just some entity with a pub/priv key pair&#8230; and&#8230; I don&#8217;t know, need
-to read up more on the implications of this. Amazing how hard this stuff
-is.</p>
-
-<p>Anyway, <code>pkcs12</code> is the <code>openssl</code> file utility for creating/parsing
-pkcs12 file.</p>
-
-<h2><code>man</code> page sections</h2>
-
-<p>Valid:</p>
-
-<pre><code>man crontab
-man 1 crontab # equiv to above
-man -s 1 crontab # equiv to above
-man 5 crontab 
-man -s 5 crontab # equiv to above
-</code></pre>
-
-<p>Invalid:</p>
-
-<pre><code>man 2 crontab # No entry for crontab in section 2 of the manual
-man 3 crontab # ditto
-man 4 crontab # ditto
-</code></pre>
-
-<p>Why would it have pages 1 and 5 but not 2-4?</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Man_page">Ahhhh!</a></p>
-
-<p>Turns out there are sections (that vary by platform):</p>
-
-<pre><code>1   General commands
-2   System calls
-3   Library functions, covering in particular the C standard library
-4   Special files (usually devices, those found in /dev) and drivers
-5   File formats and conventions
-6   Games and screensavers
-7   Miscellanea
-8   System administration commands and daemons
-</code></pre>
-
-<p><code>crontab</code> has no system calls, lib fns, special files, but it does have
-general commands and file formats.</p>
-
-<p><code>man</code> isn&#8217;t just unix commands, but also lib, system calls, C functions,
-etc.</p>
-
-<p>These sections also handle cases when unrelated concepts have the same
-name&#8230; there might be an <code>exit</code> C fn (there is) and an <code>exit</code> terminal
-command.</p>
-
-<p>This explains the wording here:</p>
-
-<pre><code>No entry for printf in section 4 of the manual
-</code></pre>
-
-<p>You don&#8217;t look up the <code>printf</code> page, and then its section 4
-subsection&#8230; rather, you look up entries in a section of <code>man</code>.</p>
-
-<p>That&#8217;s the same reason it&#8217;s <code>man 3 printf</code> rather than <code>man printf 3</code></p>
-
-<p>God, such an obvious thing I never understood/remembered.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/13/daily-journal/"/>
-    <updated>2014-07-13T15:18:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/13/daily-journal</id>
-    <content type="html"><![CDATA[<h2>HTML is an API, getAttribute</h2>
-
-<p>HTML is just a string of characters that get converted into DOM. You can
-also create DOM via the JavaScript DOM API. Seems like an obvious thing
-I guess but it just clicked for me.</p>
-
-<p>What&#8217;s an attribute? It&#8217;s any key-value pair (or occasional boolean)
-within an open tag.</p>
-
-<pre><code>&lt;div id="lol" snaggletooth="blorg"&gt;&lt;/div&gt;
-</code></pre>
-
-<p><code>id</code> and <code>snaggletooth</code> are attributes. During HTML parsing, the browser
-will convert this isn&#8217;t an HTML element (which is a node). HTML elements
-have a fixed set of <em>properties</em>. All the <em>attributes</em> you provide in
-your HTML that map to known properties will set the values of those
-properties, hence <code>.id</code> gets set to &#8220;lol&#8221;, but <code>.snaggletooth</code> would
-yield <code>undefined</code>, because that&#8217;s obviously not a real property name.</p>
-
-<p>http://jsbin.com/bejog/1/edit</p>
-
-<p>This also explains why you can set an <code>&lt;input&gt;</code>&#8217;s value to &#8220;wat&#8221;, then
-type in a new value in the input field, and <code>getAttribute("value")</code> will
-still yield <code>"wat"</code> even though <code>inputElement.value</code> will equal whatever
-you typed in.</p>
 ]]></content>
   </entry>
   

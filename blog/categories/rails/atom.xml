@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-09-30T16:55:34-04:00</updated>
+  <updated>2014-09-30T18:26:05-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -33,10 +33,10 @@ complicated if Amazon S3 is involved.</p>
 <p>You've already pushed your code to Heroku. That's the easy part. Now for the
 database:</p>
 
-<p>{% codeblock %}
-rvm use 1.9.2
-heroku db:push
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rvm use 1.9.2
+</span><span class='line'>heroku db:push</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p><code>heroku db:push</code> uses <code>taps</code> to serialize and transmit all of your dev
 database to the Heroku database. We rvm to Ruby 1.9.2 because Ruby 1.9.3
@@ -56,25 +56,40 @@ bucket you'll be using, then open the bucket's properties, and click
 <code>Add Bucket Policy</code>. Then paste in this, replacing the ALL CAPS
 BUCKETNAME with the production bucket name you'll be using:</p>
 
-<p>{% codeblock %}
-{</p>
-
-<pre><code> "Version": "2008-10-17",
- "Statement": [
-      {
-           "Sid": "AllowPublicRead",
-           "Effect": "Allow",
-           "Principal": {
-                "AWS": "*"
-           },
-           "Action": "s3:GetObject",
-           "Resource": "arn:aws:s3:::BUCKETNAME/*"
-      }
- ]
-</code></pre>
-
-<p>}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code> "Version": "2008-10-17",
+</span><span class='line'> "Statement": [
+</span><span class='line'>      {
+</span><span class='line'>           "Sid": "AllowPublicRead",
+</span><span class='line'>           "Effect": "Allow",
+</span><span class='line'>           "Principal": {
+</span><span class='line'>                "AWS": "*"
+</span><span class='line'>           },
+</span><span class='line'>           "Action": "s3:GetObject",
+</span><span class='line'>           "Resource": "arn:aws:s3:::BUCKETNAME/*"
+</span><span class='line'>      }
+</span><span class='line'> ]
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>The purpose of this is to prepare for the next step, in which we'll be
 pasting a bunch of files into this bucket, and we want them to go in

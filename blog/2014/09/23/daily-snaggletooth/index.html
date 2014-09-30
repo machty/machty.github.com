@@ -1,0 +1,424 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Daily Snaggletooth  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Daily Snaggletooth</h2>
+	<div class="entry-content"><h2>Nginx Heroku Buildpack</h2>
+
+<p>https://github.com/ryandotsmith/nginx-buildpack</p>
+
+<blockquote><p>Some application servers (e.g. Ruby&#8217;s Unicorn) halt progress when
+dealing with network I/O.</p></blockquote>
+
+<p>This was confusing at first but I think it just means that since
+Heroku&#8217;s router only buffers headers and not the entire request, it&#8217;s
+possible that a slow client with a large payload will hog a unicorn
+worker due to a slow blocking <code>read()</code>, in which time that worker isn&#8217;t
+available to process other requests.</p>
+
+<p>The proposed nginx buildpack solution is to put nginx in front of an
+IO-bound (and poorly designed/optimized) server and buffer the entire
+request and not engage the app server until all the data is there, and
+then it can barf the entire request into the app server in one shot,
+minimizing blocking IO.</p>
+
+<p>In general though Unicorn is non-ideal in the following cases:</p>
+
+<ul>
+<li>Slow client and/or large payload</li>
+<li>The app server is internally IO-bound and makes, say, lots of long
+slow 3rd party API requests, because in that time it&#8217;s blocking
+requests that otherwise could have been handled in a less IO-bound
+setting</li>
+</ul>
+
+
+<h2>TTL: Time to Live</h2>
+
+<p>http://en.wikipedia.org/wiki/Time_to_live#IP_packets</p>
+
+<p>Some reason I always pronounced &#8220;live&#8221; as a-live. Rather than the verb
+&#8220;live&#8221;. Why? I don&#8217;t know. Time to Live (verb) makes way more sense. How
+much time it has to live, rather than, how much time until it is live.
+Ridiculous.</p>
+
+<ul>
+<li>IP: a per-gateway decrementing value (as opposed to a unit of time).
+In other words: IP TTL is max hop.</li>
+<li>DNS: time in seconds that a DNS record can be cached. Low values tax
+authoritative name servers. Higher values risk staleness. 86400 (24
+hours) is common. Before a DNS change, DNS admins might change to a
+lower number in advance. QUESTION: why would I, selfish DNS admin, not
+just choose a TTL of 1 all the time? Presumable answer: DNS is another
+roundtrip unless cached; I might be making my application slower.
+Additionally, if DNS goes down (probably rare?), my clients can
+still use
+<code>#networking</code> validates my presumable answer.</li>
+</ul>
+
+
+<h2>HTTPSAP</h2>
+
+<p>HTTPS Ain&#8217;t a Protocol. It&#8217;s just HTTP layered over TLS, an encrypted
+transport layer.</p>
+
+<h2>Resetting Wifi of Remote Mac server</h2>
+
+<p>Heh, this worked</p>
+
+<pre><code>#!/bin/bash
+
+networksetup -setairportpower en1 off
+sleep 10
+networksetup -setairportpower en1 on
+</code></pre>
+
+<p>Run via <code>nohup ./thisdumbscript &amp;</code>.</p>
+
+<p>SSH will be unresponsive for 10+ seconds and then recover. The Magic of
+the INTERNET!</p>
+
+<h2>WebSockets and proxy servers</h2>
+
+<p>http://www.infoq.com/articles/Web-Sockets-Proxy-Servers</p>
+
+<p>Websockets work on port 80 and 443:</p>
+
+<blockquote><p>HTML5 Web Sockets do not require new hardware to be installed, or new ports to be opened on corporate networks&#8211;two things that would stop the adoption of any new protocol dead in its tracks.</p></blockquote>
+
+<p>Transparent proxy server: let&#8217;s stuff through, might manipulate content?</p>
+
+<h2>BOSH: Bidirectional-streams Over Synchronous HTTP</h2>
+
+<p>http://en.wikipedia.org/wiki/BOSH</p>
+
+<p>Isn&#8217;t this just long polling? It&#8217;s long polling with the assurance that
+immediately after receiving a &#8220;push&#8221;, the client makes a new long-lived
+request on the same keep-alive connection. And it can make no more than
+one connection whenever it needs to send data. Why does this have its
+own stupid name?</p>
+
+<h2>SSH Tunneling</h2>
+
+<p>First off, you can just execute commands like</p>
+
+<pre><code>ssh machty@whatever.com ls
+</code></pre>
+
+<p>and assuming I&#8217;ve already done the keygen stuff, that&#8217;ll log in, run
+<code>ls</code>, and output the result of that.</p>
+
+<p>But you can use <code>ssh</code> to spin up a local server that makes your SSH
+connection act as a proxy to some other IP/port, map that to a local
+port, and then connect other things through to that local port.</p>
+
+<p>If I did</p>
+
+<pre><code>ssh machty@wat.com -L 8080:somesite.com:80
+</code></pre>
+
+<p>Then I could do</p>
+
+<pre><code>curl localhost:8080
+</code></pre>
+
+<p>and then see the contents of somesite.com as a request originating from
+the wat.com server I &#8220;logged&#8221; into. (Except that most sites don&#8217;t
+respond the way you&#8217;d like if <code>Host</code> and other headers are incorrect).</p>
+
+<h2>What is my public IP?</h2>
+
+<p>You need some third party to tell your your public IP after all the NAT
+traversals. You shouldn&#8217;t use this for super sensitive stuff (it&#8217;s
+possible the 3rd party server was compromised and maaaaybe there&#8217;s some
+exploit if you use this fake IP for some internal thing?).</p>
+
+<p>But this worked for me:</p>
+
+<pre><code>curl icanhazip.com
+</code></pre>
+
+<p>Someone on SO suggested this: http://www.moanmyip.com/</p>
+
+<p>I can&#8217;t believe that exists.</p>
+
+<h2>SOCKS proxy</h2>
+
+<p>https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-tunneling-on-a-vps</p>
+
+<p>http://en.wikipedia.org/wiki/SOCKS</p>
+
+<p>With a SOCKS proxy</p>
+
+<h2>tcptraceroute</h2>
+
+<p>Instead of ICMP ECHO packets, which often get filtered out at some point
+by some asshole proxy along the way to the destination, tcptraceroute
+uses TCP SYN packets instead. What&#8217;s that you say? Don&#8217;t we still need
+the incrementing TTL that ICMP uses? TRICK QUESTION: TTL is an octet in
+the IP packet, which wraps TCP/UDP/ICMP. So <code>tcptraceroute</code> still uses
+TTL. It&#8217;s also nice enough to send a TCP RST (reset) package if the the
+destination responds with a SYN|ACK so that you don&#8217;t leave it in a
+connection-half-opened state (normally you&#8217;re supposed to send an ACK
+and then start sending application data).</p>
+
+<p>Interesting: you need root privileges to run tcptraceroute. Why? Because
+the custom SYN packets it creates requires root privileges, probably to
+prevent non-privileged users from doing malicious things with packets.
+I&#8217;d be curious to know exactly where that takes place though.</p>
+
+<h2>IP packets have no port</h2>
+
+<p>Why? Because ports map to applications, a concept which IP packets don&#8217;t
+care about; they&#8217;re all about getting messages to an address. Leave it
+to the UDP/TCP packets to provide a source and destination</p>
+
+<p>So hmmm how does ICMP traceroute work? How do the ECHO&#8217;d packets know to
+come back to that specific traceroute command?</p>
+
+<h2>ICMP</h2>
+
+<ul>
+<li>No port</li>
+</ul>
+
+
+<p>There&#8217;s a single ICMP socket apparently?</p>
+
+<p>https://www.cs.utah.edu/~swalton/listings/sockets/programs/part4/chap18/ping.c</p>
+
+<pre><code>/*
+ * pr_pack --
+ *  Print out the packet, if it came from us.  This logic is necessary
+ * because ALL readers of the ICMP socket get a copy of ALL ICMP packets
+ * which arrive ('tis only fair).  This permits multiple copies of this
+ * program to be run without having intermingled output (or statistics!).
+ */
+</code></pre>
+
+<ul>
+<li>ident = getpid() &amp; 0xFFFF;
+
+<ul>
+<li>this is how a pong that returns is identified as originating from a
+pong.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Anyway here&#8217;s a little Ruby program you can run with <code>sudo</code>
+that&#8217;ll open a raw socket and print a Base64&#8217;d ping packet if you
+<code>ping localhost</code>.</p>
+
+<pre><code>require 'socket'
+require 'base64'
+
+rsock = Socket.open(:INET, :RAW)
+
+loop do
+  s = rsock.recv(1024)
+  enc = Base64.encode64(s)
+  puts enc
+end
+</code></pre>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-23T11:18:00-04:00" pubdate data-updated="true">Sep 23<span>rd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/09/23/daily-snaggletooth/';
+        var disqus_url = 'http://machty.github.com/blog/2014/09/23/daily-snaggletooth/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
