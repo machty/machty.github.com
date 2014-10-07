@@ -1,0 +1,904 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Smelly Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Smelly Journal</h2>
+	<div class="entry-content"><h2>TCP/UDP/Sockets/wat</h2>
+
+<p>What&#8217;s a socket?  Depends on who you ask.</p>
+
+<p>The <a href="file:///Users/machty/code/machty.github.com/rfc793.html">TCP RFC</a>
+defines a &#8220;socket&#8221; as an IP address (supplied in IP packet) combined
+with a port (supplied in the TCP packet). So a &#8220;socket&#8221; is
+(IP,PORT). Socket + Socket = Connection. Hence, in this sense, you can
+use the same socket for multiple connections.</p>
+
+<blockquote><p>To allow for many processes within a single Host to use TCP
+communication facilities simultaneously, the TCP provides a set of
+addresses or ports within each host.  Concatenated with the network
+and host addresses from the internet communication layer, this forms
+a socket.  A pair of sockets uniquely identifies each connection.
+That is, a socket may be simultaneously used in multiple
+connections.</p></blockquote>
+
+<ul>
+<li>Socket: an operating system abstraction referring to a communication
+endpoint. You can read from it. You can write to it.</li>
+<li>Note that raw sockets don&#8217;t have ports (ports are a UDP/TCP concept).</li>
+</ul>
+
+
+<h2>Built-ins aren&#8217;t sudo-able</h2>
+
+<pre><code>sudo: cd: command not found
+</code></pre>
+
+<p>:). Makes sense. You either need to use absolute paths or <code>sudo bash</code>.</p>
+
+<h2>Switch into another user</h2>
+
+<pre><code>sudo su - machty
+</code></pre>
+
+<h2>socket bind vs listen vs accept</h2>
+
+<p>Why so many steps? What does each one do?</p>
+
+<h3>Bind</h3>
+
+<p>Registers a socket with the kernel. Even if you do nothing with that
+socket, once you bind, anyone else who tries will get an EADDRINUSE.
+This code gets an EADDRINUSE every time.</p>
+
+<pre><code>require 'socket'
+def wat
+  socket = Socket.new(:INET, :STREAM)
+  addr = Socket.pack_sockaddr_in(4485, '0.0.0.0')
+
+  socket.bind(addr)
+end
+
+fork { wat }
+wat
+Process.wait
+</code></pre>
+
+<p>If the socket had been created, then a new file descriptor pointing to
+the same socket could be used by the forked child process, but you can&#8217;t
+just create a totally separate one that points to the same already-bound
+port.</p>
+
+<h3>Listen</h3>
+
+<p><code>listen()</code> indicates a &#8220;willingness to accept incoming connections&#8221;.
+You provide <code>listen</code> with a <code>backlog</code> integer referring to the max
+number of queued connections allowed before you ECONNREFUSED.</p>
+
+<p>It&#8217;s separate from <code>bind</code> because maybe you want to grab a port right at
+application start, but you still need to do some thing before you know
+a) whether to actually start listening or b) how big the queue size
+should be.</p>
+
+<p>It&#8217;s separate from <code>accept</code> because <code>accept</code> kind of a dead end as far
+as application initialization goes; once you start <code>accept</code>ing, you must
+be all set up and fine with the fact that you&#8217;ll be blocked on IO.</p>
+
+<p>SOMAXCONN is the max backlog number. Probably best to just set
+<code>listen</code>&#8217;s backlog to that number. If you&#8217;ve got people queued up for
+connections, you should probably be fixing whatever&#8217;s causing the wait.</p>
+
+<h3>Accept</h3>
+
+<p><code>accept</code> will block.</p>
+
+<p>So basically here&#8217;s what happens if you try to connect to a server
+that&#8217;s ran through the following steps (followed by a sleep unless
+<code>accept</code> is called):</p>
+
+<ul>
+<li>no <code>bind</code>: ECONNREFUSED</li>
+<li><code>bind</code>: client blocks. If you kill the server, ECONNREFUSED</li>
+<li><code>listen</code>: client blocks, reports a successful connection (which means
+that <code>listen</code> makes the kernel start accepting connections even if no
+one&#8217;s accepting&#8230; this makes sense since at this point we&#8217;ve provided
+the kernel a max queue size)</li>
+</ul>
+
+
+<p>If a connection comes in, the kernel will do the handshake, but the
+connection will remain in the queue and future connection attempts won&#8217;t
+get the handshake until the first one is <code>accept</code>ed.</p>
+
+<p>Does that make sense? The alternative would be the kernel not responding
+to the handshake until <code>accept</code>, which seems like a major performance
+hit.</p>
+
+<h2>Elastic Beanstalk</h2>
+
+<p>Tries to do what Heroku does. Apparently a clunkier CLI. But neato
+features.</p>
+
+<h2>Kernel buffers</h2>
+
+<p>C and Ruby provide buffering on top of a kernel buffers. Why not just
+have one buffer? Because the kernel definitely needs to provide
+buffering in general so that you can get the perfs for free. But
+application specific stuff can benefit from buffering on top of the
+kernel&#8217;s defaults, but unfortunately the system calls are megaslow.</p>
+
+<p>Kernel maintains a kernel thread that makes sure that nothing remains
+unflushed for more than 30 seconds and will flush things.</p>
+
+<p>You can <code>fadvise</code> the kernel about how reads/writes are likely to
+occur so that it can select the best strategy for what you&#8217;re doing.</p>
+
+<p>There&#8217;s an <code>madvise</code> memory equivalent. Wouldn&#8217;t you just write your own
+allocator at that point? Guess I should probably learn my shit.</p>
+
+<p>Different types of strategies:</p>
+
+<ul>
+<li>NORMAL: no special patterns to report, default kernel behavior.
+Read-ahead buffer set to 128k.</li>
+<li>SEQUENTIAL: you&#8217;re gonna be reading from lower to higher offsets.
+Large files, streaming large music files, blah blah blah, etc., on
+linux this yields read-ahead window size 2x the default.</li>
+<li>RANDOM: scattershot reads, hence read-ahead is likely a waste, hence
+it is disabled.</li>
+<li>WILLNEED: notify kernel that you&#8217;ll need a segment of memory soon, so
+kernel loads it into the buffer cache (redundant much?). Memory
+presurre from other processes might eject these buffers from the
+cache, so it&#8217;s good to make sure you <code>read</code> soonish after this
+fadvise.</li>
+<li>WONTNEED: flush a region if possible</li>
+<li>NOREUSE: WILLNEED + WONTNEED, basically. You only expect to read the
+region once.</li>
+</ul>
+
+
+<h2>Unzip a curled tar</h2>
+
+<pre><code>curl https://opensource.apple.com/tarballs/bash/bash-92.tar.gz | tar zxf -
+</code></pre>
+
+<p>Pretty amazing.</p>
+
+<h2><code>O_DIRECT</code>: bypass the buffer cache</h2>
+
+<p>Often this means slower performance, but if you reaaaally know what
+you&#8217;re doing, you can use it. If you use <code>O_DIRECT</code>, here&#8217;s what you
+lose:</p>
+
+<ul>
+<li>sensible read-aheads</li>
+<li>sharing buffers between processes using the same files</li>
+<li>other things</li>
+</ul>
+
+
+<p>Database software probably wants <code>O_DIRECT</code> because databases have
+unique IO requirements, maintain their own caches, etc.</p>
+
+<p>You have to start paying attention to things like alignment
+restrictions. The databuffer must begin on a memory boundary that is a
+multiple of block size. I guess that means you have to shift things in
+memory before writing to disk. File offset must also be multiple of
+block size. Length of data transferred must also be multiple. Else
+<code>EINVAL</code>.</p>
+
+<h2>Write-ahead log</h2>
+
+<p>http://en.wikipedia.org/wiki/Write-ahead_logging</p>
+
+<p>Postgres et al use this to provide atomicity / durability. With WAL, all
+modifications are written to a log before applied. Redo/undo information
+is written to the log.</p>
+
+<p>http://en.wikipedia.org/wiki/Point-in-time_recovery</p>
+
+<p>Restore a previous state in time. Time Machine is OS X is an example of
+this (also why they allow directory hard-linking).</p>
+
+<h2>Virtual devices and device files</h2>
+
+<p>Expose universal IO API.</p>
+
+<p>There are character devices like TTYs which can handle a character at a
+time, and there are block devices, which can handle IO in (often 512b)
+blocks.</p>
+
+<p>Use <code>mknod</code> for making device files. Used to be used for other things,
+now it&#8217;s just device files.</p>
+
+<p><code>ls -l</code> displays major or minor number of special device fields in place
+of the size (from <code>man ls</code>)</p>
+
+<pre><code> If the file is a character special or block special file, the major and
+ minor device numbers for the file are displayed in the size field. 
+</code></pre>
+
+<h2>Cryptonomicomicon</h2>
+
+<p>Words.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Coolie">Coolie</a>: a laborer from Southern
+China, Indian subcontinent, Phillipines or Indonesia. Nowadays a
+racial slur for people of Asian descent (mostly in South African
+vernacular). Etymology not agreed upon, could be from an Urdu word for
+&#8220;slave&#8221; or in reference to the Koli, or a Tamil word that meant payment
+for work. Coolie trade pretty much was like slave trade, with indentured
+servitude, etc. In Crypto they&#8217;re the workers who trade various Shanghai
+banks silver-backed paper money in for silver, transporting large boxes
+of currency hanging from bamboo sticks.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Claque">Claque</a>: people paid to applaud
+(or heckle) a performance. Basically, real-time proto-laugh tracks,
+originating from France. There were laughers (Rieurs), criers
+(Pleureurs), ticklers (Chatouilleurs, who kept the audience in high
+spirits), and encore-ers (bisseurs). North Korea&#8217;s got lots of claquers.
+Entrenched claque-masters also extorted money from performers in
+exchange for not booing their performance. Fucking dickweeds.</p>
+
+<p>Swabbie: &#8220;a member of the navy, typically one who is of low rank.&#8221;</p>
+
+<p>Estuary (esturial): the tidal mouth of a large river, where the tide
+meets the stream.</p>
+
+<h2>Number authorities</h2>
+
+<p>Kinda like the IANA and port numbers, there&#8217;s a Linux
+http://www.lanana.org for controlling things like major version numbers
+for device files.</p>
+
+<h2>Silicon Valley</h2>
+
+<p>Turns out I never knew where it was: it&#8217;s the southern portion of the
+San Francisco bay area.</p>
+
+<h2>Disk Partitions</h2>
+
+<p>Hard disks have platters, platters have tracks of data, split into
+sectors, split into physical blocks.</p>
+
+<p>Platters > data > sectors > blocks.</p>
+
+<p>Blocks are the smallest unit of data a driver can read/write. They&#8217;re
+usually 512 bytes.</p>
+
+<p>Disk partitions are treated by the kernel as separate devices in
+<code>/dev</code>.</p>
+
+<p>Partitions might consist of</p>
+
+<ul>
+<li>a file system</li>
+<li>totally raw data (some databases do this)</li>
+<li>swap area used by kernel for VM</li>
+</ul>
+
+
+<p>File system on disk is composed of</p>
+
+<ul>
+<li>Boot block: how to boot the OS</li>
+<li>Superblock: single block saying:
+
+<ul>
+<li>size of inode table</li>
+<li>logical block size (always a multiple of physical block)</li>
+<li>size of the system in logical blocks</li>
+</ul>
+</li>
+<li>inode table / ilist</li>
+<li>data blocks</li>
+</ul>
+
+
+<p><code>ext2</code> is special in that it breaks down data blocks into block groups
+and prepends a copy of the super block to each to minimize seeks.</p>
+
+<p><code>ls -li</code> shows inode number in first column. inodes contain:</p>
+
+<ul>
+<li>file type</li>
+<li>owner</li>
+<li>group</li>
+<li>access perms</li>
+<li>timestamps
+
+<ul>
+<li>last access</li>
+<li>last mod</li>
+<li>last status change</li>
+<li>(but not a created at? WEIRD. must be a linux thing; mac has this)</li>
+</ul>
+</li>
+<li>number of hardlinks</li>
+<li>size of file in bytes</li>
+<li>number of blocks allocated (might be less than expected due to holes)</li>
+<li>pointers to blocks</li>
+</ul>
+
+
+<p>Note that there is a tradeoff between fragmenting freespace into small
+chunks that are too small to use vs fragmenting data blocks so that all
+free small chunks can be used.</p>
+
+<p>ext2 has 15 pointers, 12 of which are data block pointers, the next
+which points to a block of pointers, the next which points to a an array
+of block pointers, and then a tertiary one for large fucking files.</p>
+
+<p>This (using blocks for inode indirection) allows for fixed size
+of inode table.</p>
+
+<h2>TLDP</h2>
+
+<p>The Linux Documentation Project</p>
+
+<blockquote><p>LDP is a loosely knit team of volunteers who provide documentation for many aspects of Linux. There are several forms of documentation: Guides, HOWTOs, man pages, and FAQs.</p></blockquote>
+
+<p>That&#8217;s nice.</p>
+
+<h2>McRouter</h2>
+
+<p>https://www.youtube.com/watch?v=EYhcumt8YyI</p>
+
+<p>A &#8220;memcache protocol router, for scaling memcache deployments&#8221;.</p>
+
+<p>Two forms of caching at facebook:</p>
+
+<ul>
+<li>demand-filled cache
+
+<ul>
+<li>fetch from memcache with key. if not there, fetch from db, then set
+memcache w key. all of this logic on webserver</li>
+</ul>
+</li>
+<li>read-through / write-through cache
+
+<ul>
+<li>TAO system; query TAO, and if it&#8217;s not there, <em>it</em> fetches from DB
+on your behalf</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Both share the following in common: two orders of magnitude more reads
+than writes.</p>
+
+<p>Cache becomes bottleneck, extremely crucial or whole site fails.</p>
+
+<p>Having inconsistent implementations of memcache libs might result in
+data loss. So, anyway, McRouter to the rescue. It:</p>
+
+<ul>
+<li>is a proxy between memcache client and server (adheres to same ol API,
+makes for good drop-in replacement)</li>
+<li>also an embedded mode for low latency</li>
+<li>a load balancer</li>
+<li><a href="http://en.wikipedia.org/wiki/Consistent_hashing">consistent hashing</a>
+(where hash table resizes minimize the amount of remapping:
+
+<ul>
+<li>Consistent hashing maps objects to the same cache machine, as
+far as possible. It means when a cache machine is added,
+it takes its share of objects from all the other cache
+machines and when it is removed, its objects are shared
+between the remaining machines.</li>
+</ul>
+</li>
+<li>connection pooling (presumably this means connections are maintained
+by mcrouter to the memcache instances and loaned out when mcrouter
+clients make queries, rather than slowly reopening connections each
+time)</li>
+<li>Server pools&#8230; I guess this means multiple instances of McRouter?</li>
+<li>Automatic failover</li>
+<li>Cold cache warmup</li>
+<li>Broadcast operations</li>
+<li>Replicated Data Sets</li>
+</ul>
+
+
+<p>Connection Pooling:</p>
+
+<p>Application threads share McRouter&#8217;s N connections to the memcache
+instances, rather then each thread creating N connections resulting in
+<code>N*T</code> total connections.</p>
+
+<p>Heterogeneous workloads:</p>
+
+<p>Prefixed keys get routed to specific memcache instances, I guess, rather
+than having them all on the same things getting clobbered by others.</p>
+
+<p>Automatic failover:</p>
+
+<p>Normal server, fail over to backup when error returned, timeout,
+ECONNREFUSED, etc, with probing to see when it can be reconnected.</p>
+
+<p>Twitter <code>twemproxy</code> is similar to McRouter.</p>
+
+<h4>Reddit infrastructure</h4>
+
+<ul>
+<li>AWS</li>
+<li>170-300 servers daily (scales in peak hours)</li>
+<li>73 cache nodes with 1TB memory</li>
+<li>App code fragile-y uses memcache</li>
+</ul>
+
+
+<h4>Reddit Scaling Issues</h4>
+
+<p>AWS constantly releases lovely new instance types, but Reddit can&#8217;t just
+hop onto them without testing them out.</p>
+
+<h2>NTFS</h2>
+
+<p>New Technology File System, as in, Windows NT.</p>
+
+<h2>VFS</h2>
+
+<p>Virtual File System: the unified kernel abstraction, providing familiar
+things like <code>read()</code>, <code>write()</code>, etc.</p>
+
+<h2>Journaling</h2>
+
+<p>If an OS running ext2 crashes, you need to run <code>fsck</code> (filesystem check)
+to make sure inode entries point to real things, etc., else you run the
+risk of breaking more shiznittletons.</p>
+
+<p>Journaling FS&#8217;s imply basic database transactions. All intended metadata
+writes are written to a journal file first before they&#8217;re performed, and
+if the operation is interrupted by a crash, recovery is quick. Actually,
+could just be metadata or full on everything data.</p>
+
+<h2>OS X</h2>
+
+<p>Macs use something called HFS Plus, or Mac OS Extended.</p>
+
+<ul>
+<li>lots of metadata</li>
+<li><p>case-preserving though case-insensitive</p>
+
+<p>  machty.github.com :: cat woot
+  lol
+  machty.github.com :: cat WOOT
+  lol</p></li>
+<li><p>journaling</p></li>
+</ul>
+
+
+<h2>mount</h2>
+
+<p><code>mount</code> and <code>unmount</code> will attach a file system to a specified
+directory.</p>
+
+<p>KEEP IN MIND DINGUS this &#8220;mount&#8221; concept is all over the place. Mount
+routes. Mount external thing blah.</p>
+
+<p><code>unmount2</code> is <code>unmount</code> with flags.</p>
+
+<p>You can mount in multiple mount points.</p>
+
+<pre><code>mount /dev/sdva123 /dumbness
+</code></pre>
+
+<p>A device is not accessible as a file system until you mount it. You
+couldn&#8217;t just do <code>cd /dev/sdva123</code>. You have to mount it first.</p>
+
+<p>Just realized something: the EBS provided to your EC2 instance could be
+formatted into any file system. FUCK IT let&#8217;s do ext4.</p>
+
+<p>mounts can be stacked on top of the same mount point. This makes it
+possible to migrate off of an old mount; old processes maintain their
+file handles on the old mount, new processes use the new fs, and
+eventually you can retire the old mounted fs that&#8217;s not at the top of
+the stack. Kinda nifty, weird as it sounds.</p>
+
+<h2>Basic <code>cat</code> shit</h2>
+
+<p>If you want to type some random shit into a new file, do</p>
+
+<pre><code>cat &gt; lolz
+</code></pre>
+
+<p>and then you can type into cat&#8217;s STDIN and then Control D to signal EOF.</p>
+
+<h2>kitchen sink of disk utils</h2>
+
+<p>What&#8217;s the difference between all these shits?</p>
+
+<ul>
+<li>fdisk: manipulate disk partition table</li>
+<li>df: report file system disk space usage</li>
+<li>mkfs: build a linux filesystem</li>
+</ul>
+
+
+<h2>tmpfs</h2>
+
+<p>Virtual memory file system. But the thing about virtual memory is that
+unused portions might get paged to a swap file on the disk&#8230; so it&#8217;s
+not just strictly memory.</p>
+
+<pre><code>sudo mkdir ./wat
+sudo mount -t tmpfs StupidName ./wat
+</code></pre>
+
+<p><code>tmpfs</code> doesn&#8217;t exist on Mac OS X though some other form probably does.</p>
+
+<p>It&#8217;s used to speed up applications like compilers that make heavy use of
+<code>/tmp</code>.</p>
+
+<p><code>tmpfs</code> has also had other use cases, such as implementing shared
+memory (System V) and the <code>glibc</code> implementation of POSIX shared memory
+and POSIX semaphores.</p>
+
+<h2>Ableton Live</h2>
+
+<ul>
+<li>Opt-shift-B: hide Browser</li>
+</ul>
+
+
+<p>Arrangement view is the classic multi track view. You can disable
+portions of the mixer that you don&#8217;t care about.</p>
+
+<ul>
+<li>IO (opt + command + i): input/output for this track
+
+<ul>
+<li>Input type (device, e.g. M-Audio Whatchufuck)</li>
+<li>Input channel (devices often have multiple)</li>
+<li>Monitoring (radio button basically)
+
+<ul>
+<li>In (enable monitoring of input)</li>
+<li>Auto (only enable when track is armed - not just when actively
+recording)</li>
+<li>Off</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Delay (no shortcut)
+
+<ul>
+<li>delay/predelay to compensate for device/hardware/whatever latency</li>
+</ul>
+</li>
+<li>Mixer (opt + command + m)
+
+<ul>
+<li>Activate/deactivate (mute) the track</li>
+</ul>
+</li>
+<li>Return tracks
+
+<ul>
+<li>Note that if you tab into clip view (?) then the R button splits
+into S and R.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note the master track at the bottom. The Preview/Cue volume controls the
+metrononme. Not sure what else Cue refers to&#8230;</p>
+
+<p>Count-in is attached to the metronome menu.</p>
+
+<p>Opt+unfold (triangle button) to unfold all them shits.</p>
+
+<p>You can arm multiple tracks with command+click.</p>
+
+<p>Impulse is an Ableton instrument. Instrument Racks are combinations of
+the Impulse instrument with certain pre-saved audio effects.</p>
+
+<h3>Quantize</h3>
+
+<p>This doesn&#8217;t seem to refer to individual notes in a midi recording but
+rather for playback between clips; when you press the play button by a
+clip, it doesn&#8217;t immediately play unless you have it turned off (which
+can result in crazy timing issues). Also, even if you Command-0 to turn
+it off and get shit out of sync, if you Command-9 back to one bar and
+play a new track, it&#8217;ll make sure it starts in sync with the metronome
+(what else could it be? clips don&#8217;t have meter, just a length).</p>
+
+<p>Ah but if you do want per note quantization you can do it a) while
+recording, by going to Edit > Record Quantization.</p>
+
+<p>Then if you already recorded something unquantized, you can Command-U.</p>
+
+<h3>Recording clips</h3>
+
+<p>If you create an empty clip, that clip has a size, as all do, so you&#8217;ll
+be recording within a loop.</p>
+
+<p>Whereas if you pressed the slot&#8217;s record button, there would be no fixed
+length until you stopped recording. The Notes menu associated with that
+clip (which has length info) doesn&#8217;t even appear until after the new
+recording is finished. How grand!</p>
+
+<h3>Looping</h3>
+
+<ul>
+<li>One-indexing: the quickly set things to the beginning of a clip, you
+do 1 tab 1 tab 1, not 0 tab 0 tab 0 which&#8217;ll normalize to -1. But
+lengths can have zero. 2 0 0 means two measures.</li>
+<li>Known trick: 0 0 16 will normalize into 1. If it&#8217;s more convenient to
+think in terms of odd meters, this could be useful&#8230; INSTANT
+MESHUGGAH.</li>
+<li>When loop enabled, normal end is meaningless. When loop disabled, all
+loop info is useless. (Though these details still seem to be
+displayed.</li>
+</ul>
+
+
+<p>Place insert markers just by clicking the grid.</p>
+
+<p>You can manually copy and paste or you could DuplLoop. DuplLoop also
+conveniently works such that if you duplicate into notes you&#8217;ve already
+written, they&#8217;re overwritten, rather than dubbed or something cray cray.</p>
+
+<h3>Hotswapping</h3>
+
+<p>Constrasted with double-clicking a new instrument in the Browser,
+hotswapping seems to:</p>
+
+<ul>
+<li>preserve the rest of the devices you might have attached to the
+instrument you&#8217;re hotswapping.</li>
+<li>open the browser to the current devices folder; relevant for quickly
+finding the thing you want to switch out.</li>
+</ul>
+
+
+<p>Weird that they make such a big deal out of it (do they, or am i just
+saying).</p>
+
+<h2>SHIT IS EBS BACKED, DUMMY</h2>
+
+<p>Root device type: ebs</p>
+
+<p>Root device: <code>/dev/xvda</code></p>
+
+<p><code>#NotAllEC2InstancesStartOffWithEphemeralStorage</code></p>
+
+<h2>Helicopter parent</h2>
+
+<p>http://en.wikipedia.org/wiki/Helicopter_parent</p>
+
+<p>A hovery overbearing parent who&#8217;s still around even when kids have gone
+to college.</p>
+
+<p>Thought it might mean when you&#8217;re a parent who drops in every so often,
+or drops in on other kids. Nope.</p>
+
+<h2>Geocoder can&#8217;t have radiuses be stored on the row</h2>
+
+<p>The bounding box is calculated before the SQL is fired&#8230; then again
+there&#8217;s all sorts of sin/cos shit going on, but all to translate into
+something that can be compared against that box.</p>
+
+<h2>College</h2>
+
+<p>http://www.nytimes.com/2014/05/18/magazine/who-gets-to-graduate.html</p>
+
+<p>Community College:</p>
+
+<p>Means different things depending on the country, but in America it
+usually means a two-year public institution, often granting certificates
+and associate&#8217;s degrees (two-year degrees).</p>
+
+<p>Dropout rate is apparently 40%, and if you include community college
+dropouts, we&#8217;re the worst other than Hungary.</p>
+
+<p>Rich kids are more likely to graduate (90% of the upper quartile of
+income), whereas 25% of the lower half will expect to graduate by 24.</p>
+
+<p>College students who scored the same on standardized tests still have
+educational outcomes (graduation rates) that correlate with family
+wealth.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-01T08:29:00-04:00" pubdate data-updated="true">Oct 1<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/10/01/smelly-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/10/01/smelly-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
