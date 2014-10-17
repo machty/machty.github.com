@@ -1,0 +1,388 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Crowley Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Crowley Journal</h2>
+	<div class="entry-content"><h2>Comptroller</h2>
+
+<p>Basically the CFO of public institutions. In charge of audits,
+accountability, etc.</p>
+
+<h2>Fetch remote branch</h2>
+
+<p>http://stackoverflow.com/questions/945654/git-checkout-on-a-remote-branch-does-not-work</p>
+
+<p>I was burned by this.</p>
+
+<p>Basically, I had <code>origin</code> in the <code>+fetch</code> section when I wanted the new
+branch in there</p>
+
+<pre><code>fetch = +refs/heads/*:refs/remotes/origin/*
+</code></pre>
+
+<p>TODO: understand this fetch crap. I still don&#8217;t grok it.</p>
+
+<h2>Amazon SES</h2>
+
+<p>http://aws.amazon.com/ses/</p>
+
+<p>Simple Email Service.</p>
+
+<h2>Bash run last command substitute</h2>
+
+<pre><code>$ ls lol
+ls: wat: No such file or directory
+$ ^wat^lol
+ls lol
+ls: lol: No such file or directory
+</code></pre>
+
+<h2>Harp. What is it?</h2>
+
+<p>I don&#8217;t know. You tell me.</p>
+
+<p>http://harpjs.com/</p>
+
+<p>Static web server with built in preprocessing.</p>
+
+<p>https://github.com/silentrob/harp-editor</p>
+
+<h2>Candy kid</h2>
+
+<p><img src="http://kandipatterns.com/images/kandikids.jpg" alt="" /></p>
+
+<h2>Lissajous curve</h2>
+
+<p>http://en.wikipedia.org/wiki/Lissajous_curve</p>
+
+<pre><code>x=A\sin(at+\delta),\quad y=B\sin(bt),
+</code></pre>
+
+<p>Family of curves that seem bounded by a (-1,-1)x(1,1) box. What am I
+doing with my life.</p>
+
+<p>Source: cryptonomicon, bumble bee doing Lissajous across the ceiling.</p>
+
+<h2>CSS history theft</h2>
+
+<p>http://lcamtuf.coredump.cx/css_calc/?utm_source=html5weekly&amp;utm_medium=email</p>
+
+<ul>
+<li>Til mid 2010, a crappy site could use the <code>:visited</code> pseudo class to
+render a bunch of URLs and then check the url to see if the <code>:visited</code>
+styles were applied.</li>
+<li>this loophole was closed by only letting specify color attributes, and
+prevent color lookup via <code>getComputedStyle</code>.</li>
+<li>loophole remains open for clicking a single URL, which doesn&#8217;t scale
+too well.</li>
+</ul>
+
+
+<h2>Milquetoast</h2>
+
+<p>Based on comic cartoon character Caspar Milquetoast, a timid, weak-willed old man,
+whose namesake is breakfast comfort food consisting of toast and a white
+milk-based sauce.</p>
+
+<p>Millhouse is milqtoast, kinda, but more dweeby. Edward Norton in Fight
+Club is milquetoast.</p>
+
+<h2>Gone Girl</h2>
+
+<p>I should see it. Once book, now David Fincher movie that makes people
+not want to get married.</p>
+
+<h2>504 Gateway Timeout</h2>
+
+<p>Never knew what this meant, but this can be returned by an intermediary
+or proxy server that doesn&#8217;t get a timely response from a backend server
+it&#8217;s talking to in order to prepare a response to the client. DOS&#8217;d
+servers might see this, wherein their nginx/whatever reverse proxy can
+handle the load just fine, but the backend server is inundated and can&#8217;t
+keep up with the load.</p>
+
+<h2>Cairns</h2>
+
+<p>City in far north of Queensland, Australia. Scuba.</p>
+
+<h2>FastCGI</h2>
+
+<p>http://en.wikipedia.org/wiki/FastCGI</p>
+
+<p>CGI applications are processes spun up by a web server to handle an
+incoming request. Unscalable since spinning up processes all the time
+takes a toll on the OS, not to mention that there&#8217;s no way to do
+resource sharing (DB connection sharing, in-memory caching (because
+the process dies at the end of request)).</p>
+
+<p>With FastCGI, there&#8217;s a persisting FastCGI server that owns all of the
+CGI programs, and webservers interact with FastCGI via a binary protocol
+(over a socket (local) or TCP connection (remote)).</p>
+
+<p>This decoupling also allows smaller components to be restarted (rather
+than having to restart the entire web server).</p>
+
+<p><code>mod_php</code> is another answer to this problem, which takes the approach to
+embedding the PHP interpreter inside Apache itself. But each Apache
+child then needs to load the interpreter. FastCGI is better on memory
+and not constrained to Apache (nginx implements it).</p>
+
+<p>TODO: reverse proxy rails configuration vs Rails attached to FastCGI.</p>
+
+<h2>Copy as curl</h2>
+
+<p>You can copy a resource request made by Chrome as a curl command.</p>
+
+<h2>HAR format</h2>
+
+<p>You can save network requests (request data/headers and response etc) as
+a HAR files from the Chrome debugger.</p>
+
+<p>Stands for &#8220;HTTP ARchive&#8221;:
+http://www.softwareishard.com/blog/har-12-spec/</p>
+
+<p>HARs are JSON documents containing</p>
+
+<h2>bcrypt stretches</h2>
+
+<p><code>Devise.stretches</code> controls the internal bcrypt stretching amount for
+bcrypt password hashing. When <code>RACK_ENV=test</code>, <code>Devise.stretches</code> is 1,
+else it is 10 (or some higher number).</p>
+
+<p>Increasing stretches drastically increases the CPU time required for
+hashing passwords, which seems like an obvious anti-perf except for the
+nice fact that if you&#8217;re server&#8217;s being bombed by a dictionary attack,
+which sequentially tries to hash many passwords, the attack will be
+thwarted by just how long the server takes to hash the password.</p>
+
+<p>http://en.wikipedia.org/wiki/Key_stretching</p>
+
+<h2>ActiveRecord connection pooling</h2>
+
+<p>http://blog.plataformatec.com.br/2011/12/three-tips-to-improve-the-performance-of-your-test-suite/</p>
+
+<p>Connection pools allow for connection reuse (rather than, say, the
+shitty alternative of opening/closing a connection for every query).
+The ActiveRecord connection pool has the additional stipulation that
+connections are not shared between threads. This makes sense, since
+otherwise if you had a multithreaded Rails application and connections
+were shared between threads, then only one thread at a time could be
+querying the database, and locking would occur, making shit slow.</p>
+
+<p>So by letting each thread have its own connection to a shared resource,
+threads won&#8217;t get blocked on each other. Happy fucking day.</p>
+
+<h2>Rails dbconsole</h2>
+
+<p>http://guides.rubyonrails.org/command_line.html#rails-dbconsole</p>
+
+<pre><code>rails dbconsole
+# or
+rails db
+</code></pre>
+
+<h2>dRuby</h2>
+
+<p>COBRA for Ruby basically.</p>
+
+<p>http://www.ruby-doc.org/stdlib-1.9.3/libdoc/drb/rdoc/DRb.html</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-06T21:15:00-04:00" pubdate data-updated="true">Oct 6<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/10/06/crowley-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/10/06/crowley-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

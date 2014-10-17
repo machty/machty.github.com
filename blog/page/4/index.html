@@ -112,6 +112,226 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/06/20/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Push Notifications</h2>
+
+<p>Apple uses APNS (Apple Push Notification Service) and Android uses
+GCM (Google Cloud Message). Compare/contrast:</p>
+
+<p>Apple:
+- Max payload size: 256 bytes
+- When the app is inactive:
+  - Read <code>aps</code> hash:</p>
+
+<pre><code>- Display `alert`
+- Play `sound`
+- Update app's `badge` number
+</code></pre>
+
+<p>Android
+- Max payload size: 4096 bytes
+- Has no <code>badge</code> option
+- Supports <code>collapse_key</code> to collapse identical messages, like &#8220;New
+  Mail&#8221; messages, which only need to be responded to once, and require
+  only one server fetch.</p>
+
+<p>About payload size: this includes all the JSON padding. The smallest
+message is an empty message, represented by the following payload:</p>
+
+<pre><code>{"aps":{"alert":""}}
+</code></pre>
+
+<p>This is 20 chars/bytes, meaning you have 236 bytes left for a message.
+But push notification payloads often include a badge number, and an
+alert to play.</p>
+
+<p>Source: <a href="http://stackoverflow.com/a/6308462/914123">this lovely SO</a></p>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html">From the docs</a>:</p>
+
+<blockquote><p>If the target application isn’t running when the notification
+arrives, the alert message, sound, or badge value is played or
+shown. If the application is running, the system delivers the
+notification to the application delegate as an NSDictionary
+object. The dictionary contains the corresponding Cocoa
+property-list objects (plus NSNull).</p></blockquote>
+
+<h2>DAS: Boundaries</h2>
+
+<p>https://www.destroyallsoftware.com/talks/boundaries</p>
+
+<p>Integration tests a scam because:
+- if 50 conditionals in your app, 2<sup>50</sup> paths, and no way to
+- as code grows, time of each test grows (due to more setup, DB stuff,
+  etc)</p>
+
+<h2><code>after_commit</code></h2>
+
+<p>This is a hook available within <code>ActiveRecord::Base</code> subclasses
+that let you run some code post-transaction. I was confused by this
+because a lot of the examples made it seem like you could just
+run a method called <code>after_commit</code> in controller code or something,
+but nay.</p>
+
+<p>Controller code isn&#8217;t run in a transaction; transactions are only
+automatic within <code>.save</code>.</p>
+
+<h2>Sidekiq serializers params via JSON.dump</h2>
+
+<p>This answers my question as to whether symbolized keys are preserved
+when passing hash args to a Sidekiq worker: JSON.dump turns string
+keys into symbols.</p>
+
+<h2>Difference between <code>Fiber#resume</code> and <code>transfer</code></h2>
+
+<p>Both will transfer control to the fiber you call it on; the difference
+is that if that new fiber calls yield, it</p>
+
+<pre><code>f0 
+  f1.resume
+    Fiber.yield
+</code></pre>
+
+<p>FUCK! i don&#8217;t know. TODO come back to this.</p>
+
+<p>Followup: transfer transfers control to another Fiber. The transfer-er
+doesn&#8217;t necessarily expect to get returned to, so if the transfer-ee
+yields, it&#8217;ll yield the value back to whoever spawned the transfer-er,
+rather than return control back to the transfer-er. It&#8217;s mega fucking
+confusing.</p>
+
+<p>Also, you have to <code>require 'fiber'</code> to even use this shit.</p>
+
+<h2>~~2.5 in js</h2>
+
+<pre><code>~~2.5  // 2
+~~2    //-3
+~~-4.2 // 4
+</code></pre>
+
+<p>Removes everything to the right of the decimal point, so it&#8217;s like
+Math.floor except Math.floor doesn&#8217;t remove stuff to the right of the
+decimal point for negative numbers.</p>
+
+<h2><code>void</code> operator</h2>
+
+<p><code>void 0</code> or <code>void(0)</code> evaluates the expression and then returns
+undefined. So I could do <code>void (anyNumberOfBullshits())</code> and it&#8217;d be
+undefined. Compared to just writing undefined, it:</p>
+
+<ul>
+<li>works even if <code>undefined</code> (a variable) has been redefined</li>
+<li>is shorter than writing <code>undefined</code></li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-20T10:44:00-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/06/03/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3><code>&lt;base&gt;</code> tag</h3>
+
+<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base">MDN</a>:</p>
+
+<blockquote><p>The HTML Base Element (<code>&lt;base&gt;</code>) specifies the base URL to use for
+all relative URLs contained within a document. There is maximum
+one <code>&lt;base&gt;</code> element in a document.</p></blockquote>
+
+<p>You can also specify the target for all links in the base tag. Crazy?</p>
+
+<p>http://jsbin.com/tedik/1/edit</p>
+
+<p>Note that it also supports values like &#8220;../&#8221;, which is how I got my
+ember-cli tests.html to work when I got rid of the base url config.</p>
+
+<h3>bootleg</h3>
+
+<blockquote><p>(esp. of liquor, computer software, or recordings) made,
+distributed, or sold illegally: bootleg cassettes | bootleg whiskey.</p></blockquote>
+
+<h3>Ember proto CPs</h3>
+
+<p>You can get the proto of an Ember class via <code>Klass.proto()</code> and
+you can even invoke its CPs, but where are they cached? Answer: on the
+meta of the prototype, and invoking the CP on an instance of that class
+will not reuse that cache but rather use its own instance cache.</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5351/edit</p>
+
+<p>Later realization: <em>obviously</em> it had to work this way. What, would all
+instances just magically share the proto cached CP value? That&#8217;s
+idiotic.</p>
+
+<h3>CrossWalk</h3>
+
+<p>Like Cordova but you get your own browser runtime, so no platform
+browser discrepancies.</p>
+
+<p>https://crosswalk-project.org/#documentation/about</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T11:57:00-04:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/31/daily-journal/">
 		
 			Daily Journal</a>
@@ -1858,251 +2078,6 @@ TypeError: Attempted to assign to readonly property.
 <div class="tags">
 
 	<a class='category' href='/blog/categories/global-id/'>global id</a>, <a class='category' href='/blog/categories/use-strict/'>use strict</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/15/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Uniform Type Identifiers</h2>
-
-<p>Turns out I never understood why Java and other languages/frameworks
-embraces this style of &#8220;com.domain.somepackage&#8221;. First off, this is
-called <a href="http://en.wikipedia.org/wiki/Reverse_domain_name_notation">Reverse domain name notation</a>.</p>
-
-<p>The purpose of this naming convention is two-fold:</p>
-
-<h4>Avoids naming collisions from two different vendors</h4>
-
-<p>By prefixing the package name with any sort of
-unique identifier, &#8220;SOME-PREFIX-A.packageName&#8221; won&#8217;t conflict with
-&#8220;SOME-PREFIX-B.packageName&#8221;.</p>
-
-<h4>Sensible sort order / grouping</h4>
-
-<p>You want packages from the same
-vendor to be grouped together in sensible way; if you use the <code>apple</code>
-and <code>carrots</code> packages from <code>food.somevendor.com</code> and the <code>bikes</code> package
-from <code>things.somevendor.com</code>, if you didn&#8217;t reverse the domain order, you might
-end up with the following folder structure</p>
-
-<pre><code>food/
-  somevendor/
-    com/
-      apple
-      carrots
-things/
-  somevendor/
-    com/
-      bikes
-</code></pre>
-
-<p>This is undesirable since you can&#8217;t tell from this structure that apple,
-bikes, and carrots all come from somevendor. Also, you there&#8217;s a
-needless repetition of the <code>somevendor/com</code> path in both directory
-trees. If the domain name were inverted, you&#8217;d end up with:</p>
-
-<pre><code>com/
-  somevendor/
-    food/
-      apple
-      carrots
-    things/
-      bikes
-</code></pre>
-
-<p>Less folders, less repetition, and more information is being conveyed.</p>
-
-<p>Another way to think about it is that domain names are somewhat
-backwards; we know that <code>.com</code>, <code>.net</code>, and
-<a href="http://sandwich.technology"><code>.technology</code></a> are top-level domains (TLD),
-but how/why is something top level appended at the end of a name? It
-definitely makes domain names with subdomains harder to sort in a
-meaningful way. I guess there&#8217;s probably a good reason for this, worth
-investigating in another journal entry.</p>
-
-<p>Another good/quick SO explanation: http://stackoverflow.com/a/2475191/914123</p>
-
-<h2>LevelDB</h2>
-
-<ul>
-<li>require(&#8216;leveldbdatabase&#8217;)</li>
-<li>key value pair</li>
-<li>scales, web scale</li>
-<li>PolicyMic is sponsoring folk to work on it</li>
-<li>IMPORTANT: is a library; you can wrap leveldb entirely in an app via C++ API, whereas Redis is a database server that you communicate with via a custom binary protocol</li>
-</ul>
-
-
-<h2>Vim: Visual Line</h2>
-
-<p>Shift-V in vim goes into visual line mode, which means you select entire
-lines for yanking/cutting, rather than having to precisely position your
-cursor at the beginning or end of a line so as to not accidentally yank/cut
-only part of a line.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-15T11:38:00-04:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/uniform-type-identifiers/'>Uniform Type Identifiers</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/13/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Sharing ignored blank password fields in ActiveAdmin</h2>
-
-<p>I use ActiveAdmin for some stuff, and often you want to update
-some resource while leaving its password the same, but if you have
-a password field on the form, the form will POST with empty password
-and empty confirmation you&#8217;ll get a validation error from an empty
-password. You can override this with a <code>controller</code> block in your
-ActiveAdmin resource config via:</p>
-
-<pre><code>controller do
-  def update
-    param_obj = params['admin_user']
-    if param_obj[:password].blank?
-      param_obj.delete("password")
-      param_obj.delete("password_confirmation")
-    end
-    super
-  end
-end
-</code></pre>
-
-<p>But if you have multiple Devise-esque resources with passwords, it&#8217;d be
-nice to share this with multiple resources. It&#8217;s a bit tricky to solve
-this with idiomatic Ruby since you&#8217;re already in ActiveAdmin&#8217;s DSL land,
-but the following works:</p>
-
-<p><code>/lib/admin/ignore_blank_password.rb</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Admin</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">IgnoreBlankPassword</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">ignore</span><span class="p">(</span><span class="n">dsl</span><span class="p">)</span>
-</span><span class='line'>      <span class="n">dsl</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">controller</span> <span class="k">do</span>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">update</span>
-</span><span class='line'>            <span class="n">param_key</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">model_name</span><span class="o">.</span><span class="n">param_key</span><span class="o">.</span><span class="n">to_sym</span>
-</span><span class='line'>            <span class="n">param_obj</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="n">param_key</span><span class="o">]</span>
-</span><span class='line'>            <span class="k">if</span> <span class="n">param_obj</span><span class="o">[</span><span class="ss">:password</span><span class="o">].</span><span class="n">blank?</span>
-</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>              <span class="n">param_obj</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;password_confirmation&quot;</span><span class="p">)</span>
-</span><span class='line'>            <span class="k">end</span>
-</span><span class='line'>            <span class="k">super</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>/app/admin/admin_user.rb</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;admin/ignore_blank_password&#39;</span>
-</span><span class='line'><span class="no">ActiveAdmin</span><span class="o">.</span><span class="n">register</span> <span class="no">AdminUser</span> <span class="k">do</span>
-</span><span class='line'>  <span class="no">Admin</span><span class="o">::</span><span class="no">IgnoreBlankPassword</span><span class="o">.</span><span class="n">ignore</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-13T13:15:00-04:00" pubdate data-updated="true">May 13<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/active-admin/'>Active Admin</a>
 
 </div>
 

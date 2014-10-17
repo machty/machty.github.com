@@ -1,0 +1,1084 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Faily Burnhole  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Faily Burnhole</h2>
+	<div class="entry-content"><h2>(postgres) Transactions</h2>
+
+<p>http://www.postgresql.org/docs/8.3/static/tutorial-transactions.html</p>
+
+<ul>
+<li>group sequence of SQL into atomic (all-or-nothing) operations</li>
+<li>useful for preventing invalid state of a crash occurs in the middle of
+a sequence of queries</li>
+<li>also, transactions are isolated from each other; one in-progress
+transaction won&#8217;t see the partially complete transaction process of
+another</li>
+<li>postgres implicitly wraps every statement in a transaction block if
+you haven&#8217;t.</li>
+<li>transaction is <code>BEGIN</code> followed by <code>COMMIT</code> or <code>ROLLBACK</code>.</li>
+<li>savepoints allow for finer granularity:
+
+<ul>
+<li><code>BEGIN</code></li>
+<li><code>UPDATE ...</code></li>
+<li><code>SAVEPOINT wat</code></li>
+<li><code>UPDATE ...</code></li>
+<li><code>ROLLBACK TO wat</code></li>
+<li><code>UPDATE ...</code></li>
+<li><code>COMMIT</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p>So how can I use this for nested world environments&#8230;</p>
+
+<h2>Sharing raised error with <code>ensure</code> block</h2>
+
+<p>Saw a Ruby thing I hadn&#8217;t seen before at
+https://github.com/rails/rails/blob/master/activerecord/lib/active_record/connection_adapters/abstract/transaction.rb#L186-L205</p>
+
+<p>Basically, a <code>rescue</code> must precede an optional <code>ensure</code> block, but whats
+cool is that the error caught be the rescue block is available to the
+<code>ensure</code> block. Stripped down, the basic construct is</p>
+
+<pre><code>def wat
+  do_something_that_might_fail
+  rescue Exception =&gt; e
+    # do some error handling
+  ensure
+    # do generic stuff
+    if e
+      # continue to do some error handling
+    end
+end
+</code></pre>
+
+<h2>ramdisk + ember-cli</h2>
+
+<p>tmpfs is a form of ramdisk. ramdisk is just a general purpose term for
+when a virtual file system is provided but the data just lives on memory
+rather than hard disk.</p>
+
+<p>Some questions I need to answer:</p>
+
+<ul>
+<li>are there different rules about paging when you create a ramdisk? Does
+it prevent its own memory from paging to disk any more than other
+processes&#8217; virtual memory?</li>
+<li>can you control paging in general? (other than going out of your way
+to regularly read memory)</li>
+</ul>
+
+
+<p>My ember-cli builds for a decently complex project are about 2s, which
+is waaaay better than the 20s they were a month ago. But I can get my 2s
+down to 1s my mounting a ramdisk and symlinking my tmp folder to it:</p>
+
+<pre><code>diskutil erasevolume HFS+ 'RAM Disk' `hdiutil attach -nomount ram://8388608`
+rm -rf tmp
+mkdir /Volumes/RAM\ Disk/tmp
+ln -s /Volumes/RAM\ Disk/tmp tmp
+</code></pre>
+
+<h2>Photoshop and tmpfs</h2>
+
+<p>http://www.tekrevue.com/tip/how-to-create-a-4gbs-ram-disk-in-mac-os-x/#comment-904649071</p>
+
+<p>This comment speaks of the diminishing returns of using a ramdisk as
+scratch space for Photoshop now that Photoshop is 64bit.</p>
+
+<p>If your system is 32bit, it means running processes can only access
+virtual mem addresses from 0 to 2<sup>32-1</sup> (0xFFFFFFFF or 4294967293).
+On 64 bit systems, that max address is doubled to 0xFFFFFFFFFFFFFFFF, or
+1.84 * 10<sup>19.</sup> If you had more than 4gig of RAM on a 32bit system, each
+process would still be limited to a max of 4gig memory usage simply due
+to the fact that it can&#8217;t reference memory addresses higher than 4gig.
+But Photoshop often needs more than 4gig, so what&#8217;s the solution?
+Scratch disks.</p>
+
+<p>Scratch disks are like virtual memory implemented in user space. If you
+need to store more temporary data than you can put into memory, just
+throw it on scratch disk. The problem is that scratch disks</p>
+
+<p>I could totally be bullshitting right now. I could be wrong. But seems
+right? Less wrong?</p>
+
+<h2>ln</h2>
+
+<p>I never remember the argument order for <code>ln</code>.</p>
+
+<p>It is FUCKING LEFTWARD. The thing you create on the right points to the
+thing on the left.</p>
+
+<pre><code>ln EXISTING_THING LINK
+
+&lt;-------------
+</code></pre>
+
+<p>The thing that confused me was that i kept thinking <code>-s</code> was an option
+that accepted an argument. It is not! It&#8217;s just an argless option. <code>ln</code>
+always has the format of new thing on right points to left. NEVER
+FORGOT.</p>
+
+<h2>Dockyard&#8217;s fixtory</h2>
+
+<p>https://github.com/dockyard/fixtory</p>
+
+<p>Convenient way to populate groups of fixtures, maintain references to
+the created instances, etc.</p>
+
+<h2>Execute/search permission</h2>
+
+<p>http://content.hccfl.edu/pollock/AUnix1/FilePermissions.htm</p>
+
+<p>Directories have different levels of &#8220;readability&#8221; based on their read /
+execute flags. A file record within a directory has a name and an inode.</p>
+
+<p>You can read names of files in a directory (<code>ls</code>) if you have read
+permissions on that directory, and permissions denied if not.</p>
+
+<pre><code>$ ls wat
+lol
+$ chmod -r wat
+$ ls wat
+ls: wat: Permission denied
+</code></pre>
+
+<p>If you want to access the inode in any way, like to read file
+attributes (permissions et al), or to read its contents, you&#8217;ll need
+execute (search) permissions on the directory.</p>
+
+<pre><code>$ chmod +r wat
+$ chmod -x wat
+$ ls wat
+lol
+$ ls -l wat
+ls: wat: Permission denied
+$ ls -i wat
+ls: wat: Permission denied
+$ cat wat/lol
+cat: wat/lol: Permission denied
+$ chmod +x wat
+$ ls wat
+lol
+</code></pre>
+
+<p>Then of course you need file read permissions to access the contents.</p>
+
+<p>So if you&#8217;re using absolute file paths, every directory along the way
+needs execute (search) permissions. But in the unusual case that you&#8217;re
+able to <code>cd</code> into a directory (thus setting the process&#8217;s current
+working directory, something the kernel tracks to control where relative
+file lookups occur from) before a parent directory&#8217;s read permissions
+are revoked, you&#8217;re grandfathered in if you&#8217;re using relative file perms
+from that point on, unless of course the path you provide steps out and
+in again.</p>
+
+<pre><code>$ chmod -x ..
+$ cat ../inner/woot
+../inner/woot: Permission denied
+$ chmod +x ..
+$ cat ../inner/woot
+lol
+</code></pre>
+
+<p>Basically, there&#8217;s no concept of deeper and deeper folders, just
+following pointers (<code>..</code> and <code>.</code> included), and pointers have permissions
+that must be adhered to in order to traverse them.</p>
+
+<h2>dev id and inode</h2>
+
+<p>Device id + inode uniquely identify a file across all file systems.</p>
+
+<p>If the file itself is a special device file, the inode for that file
+contains the major/minor id of the device.</p>
+
+<h2><code>utimes(2)</code> for manually changing access/modify timestamps</h2>
+
+<p>You can change the last modified time and last accessed time of a file.
+One use case is how <code>tar</code> and <code>unzip</code> preserve the original timestamps
+of archived files when they are unarchived.</p>
+
+<p><code>ctime</code> is changed to now when you run <code>utimes</code>.</p>
+
+<h2>group ID of newly created files</h2>
+
+<p>This is governed by 1. how you&#8217;ve configured the file system and 2.
+whether set-group-id is set on parent directory.</p>
+
+<p>I think this is one of the rare cases where set-group-id is meaningfully
+used on files rather than directories.</p>
+
+<h2>File deletion doesn&#8217;t require file permissions</h2>
+
+<p>You can delete a file without having any permissions on it, since all
+you&#8217;re doing is modifying a parent directory.</p>
+
+<h2>Why not have slashes for directories by default?</h2>
+
+<pre><code>$ ls
+inner   lol
+$ ls -F
+inner/  lol
+</code></pre>
+
+<p>Wouldn&#8217;t that slash on <code>inner/</code> be convenient to always display?
+Why isn&#8217;t that a default?</p>
+
+<p>Answer: because knowing whether a file is a normal file or a directory
+requires execute/search permissions on the directory that file lives in.
+You can list file/directory names with next to no permissions, but once
+you start looking at inode information (such as whether a file is a
+normal file or a directory), you&#8217;ll need search/execute perms, and the
+default behavior of <code>ls</code> is much less likely to get permission denied
+errors.</p>
+
+<p>So thinketh I. Could be wrong.</p>
+
+<h2>Accessing files w/o read perms</h2>
+
+<p>Even if a directory has no read permissions, if it has execute
+permissions, then files inside can still be accessed, but their names
+must be known ahead of time since you won&#8217;t be able to list the file
+names in that directory.</p>
+
+<p>Seems crazy, but useful for when you have a public directory and don&#8217;t
+want to list all the contents.</p>
+
+<p>I guess this also means it&#8217;s not possible to hide a single
+file/directory within a directory that has read permissions; i.e. if you
+can list one file in a directory, you can list them all.</p>
+
+<p>Neat tidbit: there is (was?) a process accounting flag ASU that&#8217;s set if
+the process made use of superuser privileges, and the kernel will only
+check superuser permissions last in case it can&#8217;t get privileges any
+other way than so that it can avoid unnecessarily setting ASU.</p>
+
+<p>It&#8217;s possible to wind up in a situation where an owner has less access
+than a group s/he belongs to, due to the fact that the kernel
+permissions algorithm will stop once it finds a matching user or group;
+it won&#8217;t try to find read (etc) permissions in all matching permission
+bits, it&#8217;ll just check the first set of bits it matches.</p>
+
+<p>ACLs (Access Control Lists) allow for per-user and per-group file permissions.</p>
+
+<h2>Sticky bit</h2>
+
+<p>Used to be a signal for a process to stay in swap, now it&#8217;s a signal
+set on directories that, when set, prevents non owners and non write
+accessors from being able to delete files they don&#8217;t own.</p>
+
+<h2>umask</h2>
+
+<p>A mask, attached to a process, that negates certain permissions.</p>
+
+<h2>EA: extended attrs</h2>
+
+<p>User EAs can only be applied to files and folders, because</p>
+
+<ul>
+<li>symlinks have no meaningful permissions, which means anyone in the
+world could clutter symlink w EAs if it were possible</li>
+</ul>
+
+
+<h2>executable permissions</h2>
+
+<p>If no one has executable permissions on a file, then not even <code>sudo</code> can
+get it to run as such.</p>
+
+<pre><code>$ chmod -x exe
+$ ./exe
+-bash: ./exe: Permission denied
+$ sudo ./exe
+sudo: ./exe: command not found
+$ chmod o+x ./exe
+$ sudo ./exe
+wat
+</code></pre>
+
+<p>I guess another way of thinking about it is that a file isn&#8217;t an
+executable if no one has permissions to it.</p>
+
+<h2>Processes, cwd, directories, etc</h2>
+
+<p>Kernel tracks two attributes on running processes:</p>
+
+<ul>
+<li>root: the point from which absolute paths are looked up. Most
+processes have <code>/</code></li>
+<li>cwd: the directory from which relative paths are looked up</li>
+</ul>
+
+
+<p>(you can use <code>chroot</code> to change the root directory for a process)</p>
+
+<p>A directory is different from a file in that 1) it is specially marked
+as a directory in its inode attrs (remember this is why <code>ls -F</code>
+requires execute permissions on the parent directory), and 2)
+its contents are a table of filenames (read perms) and inodes
+(execute/search perms).</p>
+
+<p>You can&#8217;t use <code>read</code> on a directory, you must use other system calls,
+hence <code>cat: wat: Is a directory</code>. Basically, the kernel restricts you to
+certain syscalls to modify the directory; you can&#8217;t <code>read</code> / <code>write</code> it
+the way you would a normal file. The error that gets thrown is <code>EISDIR</code>.</p>
+
+<h2>inode table</h2>
+
+<p>A filesystem has a root inode table that inode entries in directories
+will refer to. The root inode table has the following features:</p>
+
+<ul>
+<li>index 0 is unused since a 0 is how directory inodes signal that an
+entry is unused</li>
+<li>index 1 tracks bad blocks on the disk</li>
+<li><p>index 2 is <code>/</code></p>
+
+<p>  $ ls -di /
+  2 /</p></li>
+</ul>
+
+
+<p>Woot woot! This stuff is so awesome.</p>
+
+<p>So it&#8217;s in this shared inode table that perms are stored. So if you hard
+link, any changes to the permissions of one link affects the other:</p>
+
+<pre><code>permstest :: touch shit1 &amp;&amp; ln shit1 shit2
+permstest :: ls -l shit*
+-rw-r--r--  2 machty  staff  0 Oct 14 10:40 shit1
+-rw-r--r--  2 machty  staff  0 Oct 14 10:40 shit2
+permstest :: chmod -rwx shit1
+permstest :: ls -l shit*
+----------  2 machty  staff  0 Oct 14 10:40 shit1
+----------  2 machty  staff  0 Oct 14 10:40 shit2
+</code></pre>
+
+<p>TODO: Is this the same w ACLs permissions?</p>
+
+<p>Hardlinks not supported by MS VFAT, but yes to NTFS.</p>
+
+<p>inodes don&#8217;t have filenames&#8230; that&#8217;s only in the directory&#8217;s table;
+remember that gzip and gunzip (and some other utilities) share the same
+inode, and depending on <code>argv[0]</code>, do different things:</p>
+
+<pre><code>$ ls -i `which gunzip` `which gzip`
+343041 /usr/bin/gunzip  343041 /usr/bin/gzip
+</code></pre>
+
+<p>The <code>rm</code> algorithm is simple: decrement the inode counter, and if 0,
+then deallocate. Reference counting, bitchez.</p>
+
+<p>Based on the above layout, you can&#8217;t (easily) get the filename of an
+open file, because multiple files might point to that inode, not to
+mention that even if you wanted to loop through the file system&#8217;s inode
+table, you still wouldn&#8217;t have the file name, just a matching inode
+number.</p>
+
+<p>Hardlinks can&#8217;t be created cross-file-system (since they&#8217;re just inode
+numbers. symlinks can handle this though).</p>
+
+<p>Hardlinks can&#8217;t (cept Mac due to Time Machine shit) link to directories
+due to circular dependencies (e.g. a nested folder hardlinking to an
+ancestor folder).</p>
+
+<p>Symlinks can be displayed with trailing <code>@</code> via <code>ls -F</code>. They don&#8217;t bump
+the inode counter. They can be created to point to nothing, or can have
+their target files deleted (dangling). Like all the other extra data
+displayed by <code>ls -F</code>, search perms are needed on the parent directory.
+Symlinks have a symlink file type stored in the inode.</p>
+
+<p>Tools are smart enough to avoid cirular dependencies when symlinks link
+to directories, because they actually can know they&#8217;re dealing with a
+symlink; a multi-hardlink doesn&#8217;t look any different than anything else.</p>
+
+<pre><code>$ ln -s ./circle ./circle
+$ ./circle
+-bash: ./circle: Too many levels of symbolic links
+</code></pre>
+
+<p>For long ass symlinks (> 60 bytes), a data block (where file data is
+normally stored) is used to store the target link. But lots of file
+systems (<code>ext2</code>+ et al) have an optimization where if the target is less
+than 60 bytes, the target is written right into the inode structure
+where the data block pointers are usually kept. I tried reproducing this
+with a test case of a bunch of <code>stat</code> syscalls on a small-target symlink
+and a 60+ byte symlink and it didn&#8217;t make a difference, but that could
+just be due to disk cache on behalf of the kernel; the kernel kept the
+inode data in RAM so it was just as fast, but if the cache was cold then
+symlink lookups should be a lot faster.</p>
+
+<h2>unlinks don&#8217;t complete while files are open</h2>
+
+<p>If there are open file descriptors, an unlinked file won&#8217;t be totally
+deleted. Hence the common practice to create and unlink a temporary file
+so that you&#8217;re guaranteed when the handle closes, the file will be
+totally deleted. This also makes it possible to happily unlink a file
+and not worry whether someone else is using it&#8230; but don&#8217;t we sometimes
+get file-in-use errors, like &#8220;can&#8217;t delete this file since it&#8217;s being
+used be process X&#8221; stuff? Ah, you can delete a file out from under
+someone else. They might still save it if they&#8217;ve buffered the data
+(think Vim&#8217;s OMG THE FILE NO LONGER EXISTS warning).</p>
+
+<h2>NTFS vs FAT32</h2>
+
+<p>Windows 7 prefers NTFS. Earlier versions prefer FAT. FAT doesn&#8217;t have
+security-related features (I&#8217;m guessing permissions?). FAT was
+originally designed for floppies, and then used on hard drives. It&#8217;s
+still often used for thumb drives.</p>
+
+<h2>Transducers</h2>
+
+<p>http://blog.cognitect.com/blog/2014/8/6/transducers-are-coming</p>
+
+<p>http://jlongster.com/Transducers.js&#8211;A-JavaScript-Library-for-Transformation-of-Data</p>
+
+<p>God damn it. Guess I have to learn a new thing.</p>
+
+<h2>Reentrant</h2>
+
+<p><a href="wiki">http://en.wikipedia.org/wiki/Reentrancy_(computing)</a></p>
+
+<p>Reentrancy means the function can be interrupted and re-entered without
+harm. Actually I think more accurately it means it can be re-entered,
+even within the same thread, without causing issue. A function can be
+threadsafe and not re-entrant. e.g.</p>
+
+<pre><code>trap :INT do
+  puts "int"
+end
+Process.kill :INT, Process.pid
+puts "boom"
+</code></pre>
+
+<p>This yields a <code>deadlock; recursive locking (ThreadError)</code> every time,
+the same that would happen if you tried to double lock a mutex within
+the same thread. The reason is that <code>puts</code> calls <code>write</code>, and <code>write</code>
+mutexes around Ruby&#8217;s IO buffer. The signal handler doesn&#8217;t get called
+synchronously at <code>Process.kill</code>, but for whatever reason, the kernel
+decides to fire the signal handler during <code>write</code> in <code>puts "boom"</code>,
+after the write mutex has already been locked. Then the signal handler
+runs, tries to the do the same lock, and BOOM. Weird shit. But proof
+that <code>puts</code> and <code>write</code> aren&#8217;t re-entrant even though they&#8217;re thread
+safe. If you did <code>$stdout.sync = true</code>, they would be reentrant though
+and the above error would go away.</p>
+
+<h2>Process cwd</h2>
+
+<p>Hmmm a process&#8217;s cwd does contain a pathname to the cwd; I thought it&#8217;d
+just be some kind of inode pointer and not know the name? That said, the
+beginning of the path is truncated if there&#8217;s not enough space, though
+this is probably rare. That said, you can <code>readlink</code> the symlink at
+<code>/proc/PID/cwd</code> (this doesn&#8217;t exist on Mac though).</p>
+
+<h2><code>chroot</code> jail</h2>
+
+<ul>
+<li>FTP uses this so that anonymous users can&#8217;t just browse the whole
+system</li>
+<li>Linux doesn&#8217;t have hard-linked directories, but some UNIX varieties
+do, and a hardlink outside of a <code>chroot</code> jail will compromise the jail</li>
+<li>Most programs can&#8217;t run in <code>chroot</code> jail because they rely on
+dynamically linked libraries, and the link targets are often absolute
+and expect <code>/usr</code> to live.</li>
+</ul>
+
+
+<h2>Symlink perfs</h2>
+
+<p>I was enouraged by the fact that on ext2+, symlinks whose targets are
+less than 60 chars long get written into the inode rather than into a
+separate data block (it&#8217;s basically written where the data block
+pointers are usually saved, which amounts to ~60 bytes). Sooo I did a
+quick benchmark to see if ember-cli would benefit, and alas (and go
+figure?) 60 char perfs that apply to ext2 (and 3 and 4) don&#8217;t apply to
+OS X&#8217;s HFS+.</p>
+
+<p>I ran a test creating 100,000 symlinks, one where each symlink target
+was 59 chars, and another with 60, and the difference is dramatic:</p>
+
+<pre><code>Linux, ext4, 60 char symlink, 100,000
+
+real    0m19.642s
+user    0m0.468s
+sys     0m3.988s
+
+Linux, ext4, 59 char symlink, 100,000
+
+real    0m2.005s
+user    0m0.360s
+sys     0m1.436s
+</code></pre>
+
+<p>I&#8217;m sad, because most ember-cli / broccoli symlinks are above the 60
+limit, and this would have brought us some insane perfs, but alas alas
+alas, most people do ember-cli work on OS X, not Linux. Oh god damn
+well.</p>
+
+<h2>ARS Technica on why HFS+ blows</h2>
+
+<p>http://arstechnica.com/apple/2011/07/mac-os-x-10-7/12/#file-system</p>
+
+<ul>
+<li>HFS is from 1985</li>
+<li>HFS+ (aka Mac OS Extended) released in 1998.</li>
+<li>OS X (2001) unfortunately kept HFS+ around even though it sucks</li>
+</ul>
+
+
+<p>So yusuck:</p>
+
+<ul>
+<li>16 bit processing resolution in Mac&#8217;s implementation (Motorola 68000
+hangover). Not really sure what this means, not sure why if the data
+is 32+ bit why 16 is the resolution? So many things I don&#8217;t know.</li>
+<li>Time resolution of HFS+ is only a second, shitty for file timing logic
+in <code>make</code>, et al. Most modern fs&#8217;s have nanosecond resolution.</li>
+<li>Global file lock on metadata; only one process can write to a file at a time. NOPE
+that&#8217;s obviously incorrect. It means only one process can update the
+file system at a time&#8230; I don&#8217;t understand? Can&#8217;t add multiple files to
+a directory at the same time? Metadata?</li>
+<li><p>No sparse files. The following ruby code will instantly eat a gig on
+HFS+. On ext2 you could still use that gig space for other files, and
+intermediate blocks would only be allocated as needed:</p>
+
+<p>  File.open(&#8216;bigassfile_DELETE_ME&#8217;, &#8216;w&#8217;) do |f|</p>
+
+<pre><code>f.seek(1000000000)
+f.puts('l')
+</code></pre>
+
+<p>  end</p></li>
+</ul>
+
+
+<p>Result: Finder reports -=1gig of freespace, as expected (if there are no
+sparse files). Weird though: <code>ls -l</code> reports only 87 block usage; I
+would have expected a lot more give the fact that the file system is
+allegedly allocating a bunch of zeroes? ANSWER: I think it&#8217;s because OS
+X uses a VFS that pretends to support sparse files over HFS+, which
+doesn&#8217;t, but I need to confirm this.</p>
+
+<ul>
+<li>Hard links to directories is supported, which is kinda weird.
+Internally it works by hiding them in hidden a hidden directory (my
+guess is to avoid cycles?)</li>
+<li>No concern about data integrity. Easy for meta data to get corrupted.
+Report showed that ~30% of HFS+ systems had mismatched checksum. Data
+loss likely.</li>
+</ul>
+
+
+<h2>Endianness</h2>
+
+<p>Not to be confused with &#8220;bit-endianness&#8221;, the atomic unit Endianness
+as people normally talk about it is the byte, rather than the order of
+bits. Endianness is concerned with the byte order in a &#8220;word&#8221; (the unit
+of a CPU processing, e.g. 32 bit machine vs 64 bit machine refers to the
+word size and has implications on the size limits of integers, memory
+addresses, etc.). Whether the most significant bits appear at the
+beginning or end of a word is the endianness, big-endian or
+little-endian. You have to care about this stuff if you&#8217;re manually
+converting bytestreams between different systems with different
+endianness. Some processors are bi-endian.</p>
+
+<h2>POODLE attack</h2>
+
+<p>https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00</p>
+
+<p>SSL 3.0 preceded TLS 1.0 and has vulnerabilities that allow an attacker
+to see plaintext communication. Some clients go beyond the TLS handshake
+specifications and will fall back to SSL 3.0 if a TLS handshake fails in
+order to support the case where they&#8217;re talking to a legacy ass server
+that runs SSL 3.0. A man in the middle can fuck with a handshake,
+causing it to fail, and causing the TLS client to try communication with
+SSL 3.0, and many servers supporting legacy SSL 3.0 will just happily
+fall back to that, exposing the connection to SSL 3.0&#8217;s weaknesses.</p>
+
+<p>The solution is for clients falling back to SSL 3.0 to send a backwards
+compatible cipher suggestion that newer patched servers will look out
+for and will treat as a signal that &#8220;this SSL 3.0 connection attempt is
+only a fallback, and you shouldn&#8217;t accept this and start speaking in
+3.0&#8221;. Legacy servers will just see it as a suggested cipher that they
+don&#8217;t understand and will just choose another cipher that they do, and
+continue communicating in their legacy 3.0 way. Case in point: upgrade
+your servers.</p>
+
+<p>The name for the patch is the TLS Signaling Cipher Suite Value (SCSV).</p>
+
+<h2>inotify config</h2>
+
+<p>On Linux you can configure aspects of <code>inotify</code> by writing values in to
+various files in <code>/proc/sys/fs/inotify</code>. Question: why this format of
+config? Why a single value in each? Why not <code>sysctl</code>?</p>
+
+<h2>ssh escape char</h2>
+
+<p><code>~</code> at the beginning of a line is an ssh escape char; if your connection
+is hung, you can do <code>~.</code> (at the beginning of a line; you can force this
+by pressing enter) and that&#8217;ll disconnect.</p>
+
+<pre><code>Supported escape sequences:
+ ~.   - terminate connection (and any multiplexed sessions)
+ ~B   - send a BREAK to the remote system
+ ~C   - open a command line
+ ~R   - request rekey
+ ~V/v - decrease/increase verbosity (LogLevel)
+ ~^Z  - suspend ssh
+ ~#   - list forwarded connections
+ ~&amp;   - background ssh (when waiting for connections to terminate)
+ ~?   - this message
+ ~~   - send the escape character by typing it twice
+</code></pre>
+
+<p>Mmmm command line, this seems interesting if you&#8217;re using ssh for
+proxying:</p>
+
+<pre><code> ~C      Open command line.  Currently this allows the addition of port for-
+         wardings using the -L, -R and -D options (see above).  It also
+         allows the cancellation of existing port-forwardings with
+         -KL[bind_address:]port for local, -KR[bind_address:]port for remote
+         and -KD[bind_address:]port for dynamic port-forwardings.  !command
+         allows the user to execute a local command if the PermitLocalCommand
+         option is enabled in ssh_config(5).  Basic help is available, using
+         the -h option.
+</code></pre>
+
+<h2>Signals</h2>
+
+<p>Signals are sync; between generation and delivery, they are pending.
+Most often sent immediately if running, or once it&#8217;s next scheduled to
+run. Signals can be temporarily blocked by signal masks til the process
+is ready to handle them (to prevent rude interruptions). Signals can
+yield the following reponse from processes:</p>
+
+<ul>
+<li>ignore: kernel never tells process about it</li>
+<li>terminate: &#8220;abnormal&#8221; (non <code>exit</code>) termination</li>
+<li>core dump and terminate: core dump is image of virtual memory</li>
+<li>stop execution (suspend)</li>
+<li>resume execution</li>
+</ul>
+
+
+<p>I guess the thing I&#8217;ve learned here is that by setting signal masks,
+you&#8217;re telling the kernel ahead of time what should happen when signals
+are sent to this process, rather than setting some process-level
+handlers that server as callbacks when these signals arrive;
+particularly ignore &#8211; I thought it&#8217;d still make it to some low level
+library in the process, but sounds like it&#8217;s rather just the kernel
+knowing ahead of time not to even send it.</p>
+
+<p>You can&#8217;t tell a signal that doesn&#8217;t by default terminate/core dump to
+terminate/core dump, but you can install a signal handler and then call
+<code>abort()</code> or whatever to send yourself a signal that <em>will</em> cause such a
+thing to happen.</p>
+
+<p>On Linux you can look up a process&#8217;s signal mask via <code>/proc/PID/status</code>.
+You can also use <code>ps -p $$ -o sigmask,sig</code> to get info about signal
+masks.</p>
+
+<p><code>SEGV</code> means segmentation violation.</p>
+
+<p><code>SIGBUS</code> is like <code>SIGSEGV</code> but in very particular situations, such as
+reading past the end of a memory mapped file. BUS is hipster SEGV.</p>
+
+<p>Send signals with <code>kill</code> (whose name is a hangover from a time in which
+most if not all signals terminated a process). Different <code>pid</code> values do
+different things:</p>
+
+<ul>
+<li>positive: send signal to pid</li>
+<li><code>0</code>: send signal to processing group of calling process, including
+calling process</li>
+<li><code>&lt; -1</code>: send signal to process group dilineated by the absolute value of
+the supplied pid</li>
+<li><code>-1</code>: send to all processes you have permission to send to, excluding
+<code>init</code>/<code>launchd</code> (pid 1) and the calling process. AKA broadcast
+signals.</li>
+</ul>
+
+
+<p><code>init</code>/<code>launchd</code> can only be sent signals for which it has signal
+handlers, to prevent accidental killing of this precious process.</p>
+
+<p><code>CAP_KILL</code> is the privilege that allows a process to send a signal to
+whatever.</p>
+
+<p><code>SIG_CONT</code> is special in that it can be sent by unprivileged processes
+to any process in the same session to allow for job-control shells to
+restart stopped jobs that have changed their user IDs.</p>
+
+<p>Null signal 0 can be used to test if a process exists and we can send a
+signal to it. Of course you might troll yourself given that pids are
+recycled.</p>
+
+<p>Plain ol (non-realtime) signals don&#8217;t queue; they just internally set a
+bit in the kernel and fire next time that process runs. This is why
+multiple signals fired very quickly might get coalesced into one</p>
+
+<h2>How to check if process is still running</h2>
+
+<ul>
+<li>(for child processes) <code>wait</code></li>
+<li>semaphores and exclusive file locks; if you know a process locks a
+file, and you can acquire the lock or semaphore, you know it must be
+dead. I&#8217;m guessing pidfiles work this way?</li>
+<li><code>stat</code> <code>/proc/PID</code>.</li>
+<li>IPC sockets go dead, etc</li>
+</ul>
+
+
+<h2>async-signal-safe</h2>
+
+<p>A function is async-signal-safe if</p>
+
+<ol>
+<li>it&#8217;s reentrant</li>
+<li>it can&#8217;t be interrupted by signal handler</li>
+</ol>
+
+
+<p>Signal handlers should ideally only call async-signal-safe functions.
+Note that if you have a signal handler installed for multiple signals,
+or if you have <code>SA_NODEFER</code>, a handler function might get simultaneously
+and might not be reentrant relative to itself if it mucks with globals,
+even if the main app code doesn&#8217;t touch those globals.</p>
+
+<p>In C-land (and Java) you can use the volatile keyword to prevent
+variables from living in registers, or at least guaranteeing that a
+write to a variable goes all the way to memory, which is an important
+guarantee for when threads share and write to a global variable.</p>
+
+<p>In JRuby, the Atomic gem is useful as a lock-free test-and-set way of
+performing an update to a value, and detecting/retrying if someone else
+interrupted your operation.</p>
+
+<p>http://moonbase.rydia.net/mental/blog/programming/atomic-operations-in-ruby.html</p>
+
+<p>Parallelism is moronically hard.</p>
+
+<h2>Signal handler recovery</h2>
+
+<p>You can do <code>setjmp</code> and <code>longjmp</code>&#8230; cray crqy.</p>
+
+<p>When the kernel runs a handler, it adds a bit to the <code>sa_mask</code> and then
+removes it when handler returns, so if you <code>longjmp</code>, you need to make
+sure to unset it. (Presumably NODEFER prevents this bit from being set,
+allowing the handler to be called multiple times?)</p>
+
+<h2>Signal Stack</h2>
+
+<p>Processes have a signal stack separate from the regular stack for
+running signal handlers. You can use <code>sigaltstack</code> to change it to some
+preallocated region, useful for when you want to catch SIGSEGV on a
+stack overflow (which means there&#8217;s no more room on the process stack
+for a signal frame/stack).</p>
+
+<h2>Interrupted syscalls</h2>
+
+<p>Blocking reads are syscalls, and if a signal hits an app during such a
+syscall, when the signal handler returns and normal process flow
+continues, that syscall will yield an <code>EINTR</code>. In Ruby this results in a
+<code>Interrupt &lt; SignalException &lt; Exception</code> being raised. So you have to
+jump through some hoops, put things in loops, to handle/ignore <code>EINTR</code>
+on blocking syscalls. Orrr you can use <code>SA_RESTART</code> when establishing
+signal handlers w <code>sigaction</code> so that the kernel automatically restarts
+interrupted syscalls post signal handler.</p>
+
+<p>Just realized something: on Ruby, if you don&#8217;t trap a (non-terminating)
+signal handle, it&#8217;ll fire as an exception that you can caught. That&#8217;s
+crazy. This must mean Ruby internally traps all trappable signals and
+then checks them against any registered trap handlers in Rubyland.</p>
+
+<h2>Framework blackboxing</h2>
+
+<p>Exceptions in blackboxed frameworks don&#8217;t pause. So you can add
+blackboxed frameworks in Chrome inspector options to ignore a framework
+that keeps throwing shit. Probably other thins too; TODO: research!</p>
+
+<h2>Cryptonomicomicon</h2>
+
+<p>Page 17.</p>
+
+<p>lambent: glowing, gleaming, or flickering with a soft radiance</p>
+
+<p>gnomon: the projecting piece on a sundial that shows the time by the
+position of its shadow.</p>
+
+<h2>Why <code>sysctl</code>?</h2>
+
+<p>In my Linux learnings I was curious as to why some settings seemed to be
+stored in files while others seemed to be stored via separate utilities
+like <code>sysctl</code>. Turns out <code>sysctl</code> is just a wrapper around <code>/proc/sys</code>,
+and the setting variable names e.g. <code>a.b.c.d</code> would map to
+<code>/proc/sys/a/b/c/d</code> and the setting would be the contents of that file.</p>
+
+<p>So as far as global structures go, I know about:</p>
+
+<ul>
+<li>Environment variables</li>
+<li>Shell variables (basically non-exported env vars, don&#8217;t get shared
+with child processes).</li>
+<li>Shell settings (e.g. ulimit, a per-shell set of defaults used when
+invoking child processes <em>from that shell</em>; it&#8217;s not like you&#8217;re
+setting system-wide settings when you set <code>ulimit</code>)</li>
+<li><code>procfs</code></li>
+<li>Probably lots more file based stuff I&#8217;m not thinking of. If it&#8217;s
+really system-wide global stuff, it must live in a file somewhere,
+right? Everything is a file?</li>
+</ul>
+
+
+<h2><code>TASK_UNINTERRUPTIBLE</code></h2>
+
+<p>A risky process state, usually for operations that are quick to
+complete, like waiting for a syscall to finish flushing data to disk,
+but if there&#8217;s some issue, NFS or kernel bug, it might result in a hung
+task that cannot be killed without a system restart. Another state,
+<code>TASK_KILLABLE</code>, was added to prevent this, and it was first applied to
+hung NFS.</p>
+
+<h2>Hardware signals</h2>
+
+<p>Linux force-delivers hardware signals even if they&#8217;re set to ignore.
+Returning from a signal handler means undefined behavior because likely
+the machine instruction that caused the interrupt is going to be
+retried, likely causing an infinite loop. You need to <code>_exit</code> (because
+<code>exit</code> flushes stdio buffers which might be locked and cause problems,
+not to mention that <code>exit</code> fires <code>onexit</code> hooks) or do a <code>siglongjmp</code> to
+guarantee that you&#8217;re skipping over the broke ass machine instruction.</p>
+
+<h2>Timers</h2>
+
+<p>3 types of timers per process: real (wall clock), virtual (user CPU),
+and profile (user+kernel).</p>
+
+<p>You can set timers on read operations by omitting <code>SA_RESTART</code> from the
+<code>SIGALRM</code> registration.</p>
+
+<h2><code>sleep</code></h2>
+
+<p>This could be implemented otherwise with <code>sigsuspend()</code> (which allows
+you to specify a temporary signal mask and block until a signal arrives
+to wake it up).</p>
+
+<p>You can use <code>sleep</code>, or <code>nanosleep</code>. <code>nanosleep</code> is limited by
+resolution of software clock which uses units of time called jiffies&#8230;?
+Jiffies are the amount of time the kernel lets a process execute, in HZ.
+For a long time it was 100 HZ. So a jiffy was 1% of a second, or 10ms.
+That seems crazy big! Maybe not? But if video games wanna run at 60 fps,
+and they have to share the CPU with other things, they&#8217;re gonna need
+larger jiffy. Because if the video game is alternating with only a
+single other process (and in real life it should be many other
+processes), then it couldn&#8217;t achieve more than 50 fps. Soooo sounds like
+there&#8217;s something I don&#8217;t understand. The Jiffies did get smaller.</p>
+
+<h2>SSLMate</h2>
+
+<p>Buy SSL certs from your terminal. Why the fuck not?</p>
+
+<p>https://sslmate.com/</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-10T10:24:00-04:00" pubdate data-updated="true">Oct 10<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/10/10/faily-burnhole/';
+        var disqus_url = 'http://machty.github.com/blog/2014/10/10/faily-burnhole/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

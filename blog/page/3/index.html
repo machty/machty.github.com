@@ -112,6 +112,462 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/07/18/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Cookies</h2>
+
+<p>What ends up in <code>document.cookie</code>?</p>
+
+<p>Test: kill a previous localhost:5000 server, start a server for a
+separate project. Reload the page. Request headers sent include
+a transient cookie from the previous server. I bet it was due to
+Turbolinks. I was right!</p>
+
+<p>From http://tools.ietf.org/html/rfc6265#section-4.1.1</p>
+
+<blockquote><p> Origin servers MAY send a Set-Cookie response header with any
+ response.  User agents MAY ignore Set-Cookie headers contained in
+ responses with 100-level status codes but MUST process Set-Cookie
+ headers contained in other responses (including responses with 400-
+ and 500-level status codes).  An origin server can include multiple
+ Set-Cookie header fields in a single response.  The presence of a
+ Cookie or a Set-Cookie header field does not preclude HTTP caches
+ from storing and reusing a response.</p></blockquote>
+
+<p>So you can send multiple headers with the same key. Makes sense, since
+comma separation will conflict with the UTC date (e.g. <code>Aug 12, 2014</code>).</p>
+
+<p>So how do you set multiple cookies in Rack?</p>
+
+<p>Interesting: https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L266</p>
+
+<p>Anyway, split cookies with newlines and Rack will cause this to send two
+<code>Set-Cookie</code> headers, which is totally fine.</p>
+
+<p>You can also use <code>set_cookie</code> on <code>Rack::Response</code> if you&#8217;re into that
+sort of thing..</p>
+
+<p>I psyched myself out thinking cookies were overwriting each other by doing:</p>
+
+<pre><code>"Set-Cookie" =&gt; "foo\nbar\nbaz"
+</code></pre>
+
+<p><code>document.cookie</code> was only revealing <code>baz</code>. But, I&#8217;m a dumb: cookies
+need to be key-value pairs, which fixed it.</p>
+
+<p>You can use <code>HttpOnly</code> to prevent JS (and other APIs?) access to the
+cookie sent by the server. Makes sense; less likely that&#8217;ll break
+something.</p>
+
+<p>Getting <code>document.cookie</code> returns all the cookies available to JS.
+Setting it will only set the cookie you provide.</p>
+
+<blockquote><p>Notice that servers can delete cookies by sending the user agent a
+new cookie with an Expires attribute with a value in the past.</p></blockquote>
+
+<h2>JavaScript set focus</h2>
+
+<p><code>focus()</code> is a method on input elements. So is <code>blur()</code>.</p>
+
+<p><code>document.activeElement</code> in modern browsers points to the focused
+element, which might also include scroll windows.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/document.activeElement</p>
+
+<p>In older browsers, to <code>blur</code> the active element, you&#8217;d have to know what
+that element was; there was no way to query. Might be wrong about this.</p>
+
+<h2>React Nested Router</h2>
+
+<p>http://www.youtube.com/watch?v=P6xTa3RRzfA</p>
+
+<ul>
+<li>State is just data</li>
+<li>Your route is data, e.g. you could render a top-level App component
+and tell it what its route is, and render everything a la React,
+pretend like you&#8217;re redrawing the whole page.</li>
+<li>Rather than switch-statement-based routing, the <code>activeRoute</code> just
+gets passed in via <code>props</code> like any other property
+
+<ul>
+<li><code>router.match</code> handlers will create all the routes, and pass in a
+single <code>activeRoute</code>; every route segment along the way just knows
+about with its activeRoute child is, if one exists.</li>
+<li>e.g. <code>contact/profile</code>, app.activeRoute = contact,
+contact.activeRoute = profile</li>
+</ul>
+</li>
+<li>API
+
+<ul>
+<li>Route component
+
+<ul>
+<li>handler = a React Class</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Differences w Ember
+
+<ul>
+<li>No auto-gen &#8216;index&#8217; routes</li>
+<li>paths don&#8217;t inherit parent paths
+
+<ul>
+<li>this means if you&#8217;re &#8220;overwriting&#8221; a parent dynamic segment, the
+dynamic segment must appear <em>somewhere</em> in the child route so you
+can actually load that data.
+
+<ul>
+<li>AH, the router will detect when children omit ids that their
+parents have declared. That&#8217;s nice.</li>
+<li>also yells at you if you use the same path in two places.</li>
+</ul>
+</li>
+<li>nice that it lets you have <code>/profile</code> vs <code>/user</code></li>
+</ul>
+</li>
+<li>Ember is less typing, but
+
+<ul>
+<li>React makes it easier to share handlers</li>
+<li>Overwriting URL is nice when you need it, error checking is nice</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>So each non leaf handler gets <code>activeRoute</code>, all handlers get all
+<code>params</code>.</li>
+<li>Refactorability/decoupling:
+
+<ul>
+<li>Because route names and paths are fully specified and all params are provided to
+each handler, changing the nesting of a route means you don&#8217;t have
+to rewrite all your link-tos from &#8220;wat.foo&#8221; to &#8220;foo&#8221;. Then again
+if you&#8217;re using resources you don&#8217;t have to do that either.</li>
+</ul>
+</li>
+<li>Question: what about other <code>props</code> you&#8217;d want to pass into a
+component?
+
+<ul>
+<li>Answer: Route components aren&#8217;t concerned with props other than how
+to be a route handler.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://jsbin.com/vukacule/6/edit</p>
+
+<p>It is really cool that you can switch between rendering a route with App
+as a handler vs just rendering App. The difference is that, when
+route-driven, it gets passed props.</p>
+
+<p>The <code>Route</code> components you use are obviously stateless; all state lives
+on the Handlers.</p>
+
+<p>Ah, in React <code>` syntax just means</code>{blah: &#8220;wat&#8221;}` inside
+the normal single-curly.</p>
+
+<p>How do Links work? They call transitionTo and there&#8217;s a single URLStore
+singleton.</p>
+
+<h2>TLS Replay?</h2>
+
+<p>I had it in my head that man-in-the-middle wasn&#8217;t a problem for TLS but
+maybe they could replay the messages? Turns out I am wrong; TLS includes
+a sequence mechanism.</p>
+
+<p>That being said, your app might send repeat messages, which demands its
+own double checking / application-level sequencing or some other
+prevention mechanism.</p>
+
+<h2>chroot</h2>
+
+<p>http://en.wikipedia.org/wiki/Chroot</p>
+
+<p>Learned about this when speculating w Ember Core about how the front
+page Rust evaluator works at http://www.rust-lang.org/</p>
+
+<p>It runs a program with the assumption that <code>/</code> is somewhere else, and it
+can&#8217;t access it.</p>
+
+<p>Change</p>
+
+<h2>process.nextTick</h2>
+
+<p><code>process</code> doesn&#8217;t exist on the browser, so therefore neither does
+<code>nextTick</code>, but you can hack it if you&#8217;re on a browser that has a native
+<code>Promise</code> object, since the <a href="http://promisesaplus.com/">spec</a> mentions
+that resolution callbacks must happen when the execution context
+consists only of platform code.</p>
+
+<blockquote><p>onFulfilled or onRejected must not be called until the execution
+context stack contains only platform code. [3.1].</p></blockquote>
+
+<p>So here&#8217;s how you could write nextTick, note that there&#8217;s no need to</p>
+
+<pre><code>var p = Promise.resolve();
+function nextTick(cb) {
+  p.then(cb);
+}
+</code></pre>
+
+<h2>Visibility API</h2>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API">mdn</a></p>
+
+<p>e.g.</p>
+
+<ul>
+<li>pause video when you tab-away</li>
+<li>stop requestAnimationFrame</li>
+</ul>
+
+
+<h2>Closing over <code>let i</code></h2>
+
+<pre><code>var fns = [];
+for (var i = 0; i &lt; 10; ++i) {
+  fns.push(function() {
+    console.log(i);
+  });
+}
+</code></pre>
+
+<p>The above code has the gotcha that by the time the <code>fns</code> functions run,
+they&#8217;ll all print out <code>10</code>, rather than the value of <code>i</code> when the
+closing-over function was created. This is part of the reason why jshint
+will yell at you for creating functions in a loop, e.g.</p>
+
+<pre><code>var fns = [];
+for (var i = 0; i &lt; 10; ++i) {
+  fns.push(makeCallback(i));
+}
+
+function makeCallback(num) {
+  return function() {
+    console.log(num);
+  }
+}
+</code></pre>
+
+<p>Then <code>i</code> will be uniquely preserved for each callback.</p>
+
+<p>The es6 <code>let</code> keyword gives you block scope, which includes everything
+declared within the for loop. If you just use <code>let</code> in the original
+code, you can do</p>
+
+<pre><code>var fns = [];
+for (let i = 0; i &lt; 10; ++i) {
+  fns.push(function() {
+    console.log(i);
+  });
+}
+</code></pre>
+
+<p><code>i</code> doesn&#8217;t get hoisted; rather, each iteration gets its own <code>i</code> value
+that gets closed over.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-18T03:50:00-04:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/16/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>WeakMap</h2>
+
+<p>Use objects as keys. If you lose access to a key, it and its value will
+eventually be removed by GC because references to keys are weak. This
+also means WeakMaps are non enumerable since GC is non-deterministic and
+a key that might exist pre GC might not exist after.</p>
+
+<h2>ES6 Symbols</h2>
+
+<p>They&#8217;re nothing like Ruby symbols.</p>
+
+<p>They&#8217;re used to create unique, non-enumerable, keys that can&#8217;t be
+determined publicly unless the symbol is exported. So you could prevent
+tampering with a player&#8217;s score by storing the score on the player using
+an unshared symbol as the key:</p>
+
+<p>http://tc39wiki.calculist.org/es6/symbols/</p>
+
+<h2>ES6 === Harmony === ES.next</h2>
+
+<p>They&#8217;re all the same thing.</p>
+
+<h2>JS 1.7 vs ES6, etc</h2>
+
+<p><a href="http://ejohn.org/blog/versions-of-javascript/">jeresig clears this up a bit</a></p>
+
+<p>All modern browsers support ECMAScript; JavaScript is a variant of it
+that Mozilla&#8217;s largely been adding features to. ES3 === JS 1.5.</p>
+
+<p>So I see <code>let</code> was added to JavaScript 1.7, so why is it now being
+described as a new upcoming feature of ES6? Ah, because all browsers
+track ECMAScript standards, even if they call their enhanced language in
+the browser something else. Mozilla has been blazing ahead and trying
+new shit, but other browsers won&#8217;t pick it up until it&#8217;s actually
+standardized into ECMAScript.</p>
+
+<p>Why would Microsoft follow ECMAScript? Well, for starters, it delivered
+JScript to Ecma back in the day for standardization.</p>
+
+<blockquote><p>The name &#8220;ECMAScript&#8221; was a compromise between the organizations involved in standardizing the language, especially Netscape and Microsoft, whose disputes dominated the early standards sessions.</p></blockquote>
+
+<p>Interesting, and:</p>
+
+<blockquote><p>While both JavaScript and JScript aim to be compatible with ECMAScript, they also provide additional features not described in the ECMA specifications</p></blockquote>
+
+<p>Also, some reason I thought TC39 was part of Mozilla. I see that I am
+obviously incorrect: http://www.ecma-international.org/memento/TC39.htm</p>
+
+<p>It&#8217;s Ecma-TC39. The things I don&#8217;t know.</p>
+
+<p>W3C Tag, Ecma-TC39. W3C Tag, Ecma-TC39.</p>
+
+<h2><code>let</code></h2>
+
+<p><code>let</code> behaves like C++ declarations; the obj is only available in the
+curlies, or in for loops, or whatever, and there&#8217;s no hoisting. Outside
+of the block, the variable is undefined.</p>
+
+<h2>Cloudfront TTL</h2>
+
+<p>TTL lets you specify a min time before CF checks the origin to see if it
+has a new version of the file/response. You still need your origin
+server&#8217;s Cache-Control headers setup correctly.</p>
+
+<p><a href="http://stackoverflow.com/questions/10621099/what-is-a-ttl-0-in-cloudfront-useful-for">TTL can be 0</a>.
+Why? TTL 0 means that it delegates Cache-Control entirely to the origin.
+This means CF will always make a GET request w <code>If-Modified-Since</code>
+header to let the server return <code>304 Not Modified</code>.</p>
+
+<h2>Drag and Drop</h2>
+
+<p>Draggable elements need to be marked as <code>draggable="true"</code>.</p>
+
+<p>Then listen to the <code>ondragstart</code> event, e.g.
+<code>ondragstart="drag(event)"</code>.</p>
+
+<p>And then say what data is associated with the dragged el&#8230;</p>
+
+<pre><code>ev.dataTransfer.setData("Text", ev.target.id);
+</code></pre>
+
+<p>This seems strange.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer</p>
+
+<p>It really is a class associated only w drag and drop.</p>
+
+<p>Should probably be reading this rather than fucking w3schools. Why do I
+still do that?
+https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop</p>
+
+<p>Ah I get it, you use dataTransfer as part of the mechanism for
+dynamically determining drop targets. You have to prevent bubbling
+(return false or preventDefault) on droppable targets, and in that fn
+they have the option of looking up the data transfer to see if they want
+to accept the data from that drag drop.</p>
+
+<p>You can also configure drag drag visual details to indicate copying,
+moving, etc. LOL such drag and drop.</p>
+
+<p>Oof apparently it&#8217;s a fucking disaster: http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html</p>
+
+<p>Criticisms:</p>
+
+<ul>
+<li>7 fucking events, such API surface</li>
+<li>&#8220;For the drop event to fire at all, you have to cancel the defaults of both the dragover and the dragenter event.&#8221;</li>
+</ul>
+
+
+<h2>Cordova events: sticky != buffered</h2>
+
+<p>Sticky events (e.g. deviceready) just mean that once fired, they stay in
+a fired state. This means you can&#8217;t have multiple events fire if it&#8217;s a
+sticky event. I was originally thinking sticky meant all the events were
+cached until the first handler was registered.</p>
+
+<p>Ended up making this: https://gist.github.com/machty/e1cc485060f2951aeb6c</p>
+
+<h2>Why <code>-print0</code> in <code>find</code>?</h2>
+
+<p>Often you pipe the results of <code>find</code> into <code>xargs</code> to pass the results of
+a <code>find</code> so that some utility can operate on each file found. GOOD
+ENGRISH, MATCHNEER.</p>
+
+<p>But since <code>xargs</code> splits based on whitespace by default, this will break
+for files with newlines or or spaces in them, so <code>-print0</code> separates
+files w null bytes, and <code>-0</code> tells xargs to split via null bytes as
+well. Win win win. No difference if you have no files with spaces in
+them.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-16T00:40:00-04:00" pubdate data-updated="true">Jul 16<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/07/15/forgotten-things/">
 		
 			Forgotten Things</a>
@@ -1079,226 +1535,6 @@ Or something worth talking about.</p>
 	<a class='category' href='/blog/categories/social-media/'>social media</a>
 
 </div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/06/20/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Push Notifications</h2>
-
-<p>Apple uses APNS (Apple Push Notification Service) and Android uses
-GCM (Google Cloud Message). Compare/contrast:</p>
-
-<p>Apple:
-- Max payload size: 256 bytes
-- When the app is inactive:
-  - Read <code>aps</code> hash:</p>
-
-<pre><code>- Display `alert`
-- Play `sound`
-- Update app's `badge` number
-</code></pre>
-
-<p>Android
-- Max payload size: 4096 bytes
-- Has no <code>badge</code> option
-- Supports <code>collapse_key</code> to collapse identical messages, like &#8220;New
-  Mail&#8221; messages, which only need to be responded to once, and require
-  only one server fetch.</p>
-
-<p>About payload size: this includes all the JSON padding. The smallest
-message is an empty message, represented by the following payload:</p>
-
-<pre><code>{"aps":{"alert":""}}
-</code></pre>
-
-<p>This is 20 chars/bytes, meaning you have 236 bytes left for a message.
-But push notification payloads often include a badge number, and an
-alert to play.</p>
-
-<p>Source: <a href="http://stackoverflow.com/a/6308462/914123">this lovely SO</a></p>
-
-<p><a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html">From the docs</a>:</p>
-
-<blockquote><p>If the target application isn’t running when the notification
-arrives, the alert message, sound, or badge value is played or
-shown. If the application is running, the system delivers the
-notification to the application delegate as an NSDictionary
-object. The dictionary contains the corresponding Cocoa
-property-list objects (plus NSNull).</p></blockquote>
-
-<h2>DAS: Boundaries</h2>
-
-<p>https://www.destroyallsoftware.com/talks/boundaries</p>
-
-<p>Integration tests a scam because:
-- if 50 conditionals in your app, 2<sup>50</sup> paths, and no way to
-- as code grows, time of each test grows (due to more setup, DB stuff,
-  etc)</p>
-
-<h2><code>after_commit</code></h2>
-
-<p>This is a hook available within <code>ActiveRecord::Base</code> subclasses
-that let you run some code post-transaction. I was confused by this
-because a lot of the examples made it seem like you could just
-run a method called <code>after_commit</code> in controller code or something,
-but nay.</p>
-
-<p>Controller code isn&#8217;t run in a transaction; transactions are only
-automatic within <code>.save</code>.</p>
-
-<h2>Sidekiq serializers params via JSON.dump</h2>
-
-<p>This answers my question as to whether symbolized keys are preserved
-when passing hash args to a Sidekiq worker: JSON.dump turns string
-keys into symbols.</p>
-
-<h2>Difference between <code>Fiber#resume</code> and <code>transfer</code></h2>
-
-<p>Both will transfer control to the fiber you call it on; the difference
-is that if that new fiber calls yield, it</p>
-
-<pre><code>f0 
-  f1.resume
-    Fiber.yield
-</code></pre>
-
-<p>FUCK! i don&#8217;t know. TODO come back to this.</p>
-
-<p>Followup: transfer transfers control to another Fiber. The transfer-er
-doesn&#8217;t necessarily expect to get returned to, so if the transfer-ee
-yields, it&#8217;ll yield the value back to whoever spawned the transfer-er,
-rather than return control back to the transfer-er. It&#8217;s mega fucking
-confusing.</p>
-
-<p>Also, you have to <code>require 'fiber'</code> to even use this shit.</p>
-
-<h2>~~2.5 in js</h2>
-
-<pre><code>~~2.5  // 2
-~~2    //-3
-~~-4.2 // 4
-</code></pre>
-
-<p>Removes everything to the right of the decimal point, so it&#8217;s like
-Math.floor except Math.floor doesn&#8217;t remove stuff to the right of the
-decimal point for negative numbers.</p>
-
-<h2><code>void</code> operator</h2>
-
-<p><code>void 0</code> or <code>void(0)</code> evaluates the expression and then returns
-undefined. So I could do <code>void (anyNumberOfBullshits())</code> and it&#8217;d be
-undefined. Compared to just writing undefined, it:</p>
-
-<ul>
-<li>works even if <code>undefined</code> (a variable) has been redefined</li>
-<li>is shorter than writing <code>undefined</code></li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-20T10:44:00-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/06/03/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h3><code>&lt;base&gt;</code> tag</h3>
-
-<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base">MDN</a>:</p>
-
-<blockquote><p>The HTML Base Element (<code>&lt;base&gt;</code>) specifies the base URL to use for
-all relative URLs contained within a document. There is maximum
-one <code>&lt;base&gt;</code> element in a document.</p></blockquote>
-
-<p>You can also specify the target for all links in the base tag. Crazy?</p>
-
-<p>http://jsbin.com/tedik/1/edit</p>
-
-<p>Note that it also supports values like &#8220;../&#8221;, which is how I got my
-ember-cli tests.html to work when I got rid of the base url config.</p>
-
-<h3>bootleg</h3>
-
-<blockquote><p>(esp. of liquor, computer software, or recordings) made,
-distributed, or sold illegally: bootleg cassettes | bootleg whiskey.</p></blockquote>
-
-<h3>Ember proto CPs</h3>
-
-<p>You can get the proto of an Ember class via <code>Klass.proto()</code> and
-you can even invoke its CPs, but where are they cached? Answer: on the
-meta of the prototype, and invoking the CP on an instance of that class
-will not reuse that cache but rather use its own instance cache.</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5351/edit</p>
-
-<p>Later realization: <em>obviously</em> it had to work this way. What, would all
-instances just magically share the proto cached CP value? That&#8217;s
-idiotic.</p>
-
-<h3>CrossWalk</h3>
-
-<p>Like Cordova but you get your own browser runtime, so no platform
-browser discrepancies.</p>
-
-<p>https://crosswalk-project.org/#documentation/about</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T11:57:00-04:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time></div>
-	
 
 
 	
