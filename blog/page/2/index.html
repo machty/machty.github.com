@@ -112,6 +112,164 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/08/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Why can&#8217;t React render() return multiple elements?</h2>
+
+<p>you can&#8217;t do</p>
+
+<pre><code>return &lt;div/&gt;&lt;div/&gt;
+</code></pre>
+
+<p>Pete Hunt tells me it&#8217;s because of how <code>ref</code>s work; it&#8217;s a common
+pattern to do <code>this.refs.x.getDOMNode()</code>, but if the component returns
+multiple DOM nodes, which one do you return?</p>
+
+<p>It&#8217;s an admitted shortcoming but not a major major push to fix any time
+soon.</p>
+
+<h2>Ruby Fixnum vs Bignum</h2>
+
+<pre><code>2.0.0-p353 :004 &gt; (100).class
+ =&gt; Fixnum
+2.0.0-p353 :005 &gt; (100234234234234234234).class
+ =&gt; Bignum
+</code></pre>
+
+<h2>Postgres indexing</h2>
+
+<p>I need to optimize. Most of the queries in my app are very specific
+&#8220;SELECT WHERE bleh = wat, lol = yeah, foo = bar&#8221;. By default Rails
+creates a btree index, which handles many common indexing use cases, but
+there&#8217;s also a &#8220;hash&#8221; index, which Postgres only considers for usage for
+<code>bleh = bleh</code> queries (you can&#8217;t use it for ordering, sorting,
+whatever), so it seemed ideal for me:</p>
+
+<blockquote><p>Hash indexes can only handle simple equality comparisons. The query planner will consider using a hash index whenever an indexed column is involved in a comparison using the = operator.</p></blockquote>
+
+<p>But then I&#8217;d like it to match multiple columns, not just a single one,
+so I&#8217;d like to consider a multi-column index, but then:</p>
+
+<blockquote><p>Currently, only the B-tree, GiST and GIN index types support multicolumn indexes. Up to 32 columns can be specified. (This limit can be altered when building PostgreSQL; see the file pg_config_manual.h.)</p></blockquote>
+
+<p>So I guess Hash is out of the question. So the final thing I need to
+figure out is: does it make sense for me to use a multi-column index if
+I have three columns that need to be <code>=</code> matched?</p>
+
+<p>Partial indexes: http://www.postgresql.org/docs/8.2/static/indexes-partial.html</p>
+
+<p>Useful for when you&#8217;d like to exclude common values from consideration
+in an index (because indexes lose value the more duplicates there are in
+a database).</p>
+
+<h2>V8 optimizes based on AST size</h2>
+
+<p>&#8230;and comments are part of the AST:</p>
+
+<p>https://github.com/broccolijs/broccoli-kitchen-sink-helpers/commit/092a680f1ff8fe2d54419dd57fa9ba8a81f6f297</p>
+
+<h2>General Theory of Reactivity</h2>
+
+<p>https://github.com/kriskowal/gtor</p>
+
+<p>Reactivity: reacting to external stimuli and propagating events.</p>
+
+<ul>
+<li>(functional) reactive programming</li>
+<li>bindings</li>
+<li><p>operational transform</p></li>
+<li><p>Spatial Singular is a value, e.g. 5</p></li>
+<li>Spatial Plural is an enumberable/iterable of values</li>
+<li>Temporal Singular is an eventual value, e.g. a Promise</li>
+<li>Temporal Plural is eventual values, e.g. Observable of values</li>
+</ul>
+
+
+<p>But this glazes over many particulars, and things like Rx boil too much
+into a single Observable type that can perform any role.</p>
+
+<h3>Value</h3>
+
+<ul>
+<li>Singular</li>
+<li>Spatial</li>
+<li>Accessible</li>
+<li>Modifiable</li>
+<li>Composed of a getter and a setter</li>
+<li>Data flows from setter to getter</li>
+</ul>
+
+
+<p>Every reactive primitive features getter/setter, producer/consumer, or
+writer/reader. See http://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2014/Keynote-Duality</p>
+
+<p>Arrays are the above, but plural. Generators are the
+producing/writing/setting side, iterators are the read/get/consume.</p>
+
+<p>Promises are singular and temporal. Promises are getters, and
+corresponding setter is a resolver. Together, they&#8217;re a kind of
+deferred.</p>
+
+<p>Streams are a getter/setter pair of temporal plurals. Producer is a
+writer and consumer is a reader. Reader is an async iterator and writer
+is an async generator.</p>
+
+<p>Remember that a value encapsulates a getter and setter&#8230; values are:
+Deferred (promise + resolver, singular, temporal), Stream (reader +
+writer, plural, temporal), Array (iterator + generator, spatial,
+plural), and value (getter + setter, spatial, singular).</p>
+
+<p>Promises (singular + temporal) model dependency. The API/experience of
+multiple resolvers is the same regardless of who wins the race, and same
+w consumers.</p>
+
+<p>Because consumers cannot interfere with another consumer, aborting
+promises is not possible; promise is only the result, not the work
+leading to that result.</p>
+
+<p>A task, similar to promise, but is unicast.</p>
+
+<p>Unicast: http://en.wikipedia.org/wiki/Unicast - sending messages to a
+  single destination</p>
+
+<p>Broadcast: multiple possible destinations (or none)</p>
+
+<p>Because tasks are unicast, consumers can&#8217;t clobber each other (because
+there&#8217;s only one), hence they are cancellable. Can be explicitly forked
+to create a task that depends on the same result</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-28T13:10:00-04:00" pubdate data-updated="true">Aug 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/08/22/daily-journal/">
 		
 			Daily Journal</a>
@@ -2221,296 +2379,6 @@ find C++.</li>
 
 
 <time datetime="2014-07-26T15:10:00-04:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/19/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Crank</h2>
-
-<p>Meth.</p>
-
-<p>An eccentric person, esp. one who is obsessed by a particular subject or
-theory: when he first started to air his views, they labeled him a
-crank | [ as modifier ] : I am used to getting crank calls from
-conspiracy theorists.</p>
-
-<h2>Roko&#8217;s modern basilisk</h2>
-
-<p>It&#8217;s happening.</p>
-
-<h2>Transactional UIs</h2>
-
-<p>People build forms. Ember gives you sweet syntax sugar for 2wb.
-Not for transactional UI, anything that needs a buffer.</p>
-
-<p>Old mindset: if you need 1wb, just&#8230; don&#8217;t set on the other side of a
-2wb.</p>
-
-<p>TODO: ask kris more about the async/sync cocoa observer binding
-limitations.</p>
-
-<ul>
-<li>Most observers just do something and stop.</li>
-<li>And they mostly want to know the last thing they cared about.</li>
-</ul>
-
-
-<p>Bubbling doesn&#8217;t describe actions; actions go wherever. Bubbling only in
-route hierarchy.</p>
-
-<p>Services:</p>
-
-<ul>
-<li>session/user</li>
-<li>timer</li>
-<li>websocket</li>
-<li>analytics</li>
-</ul>
-
-
-<p>Idea: components provide services to the components the render. They
-have a ServiceCertificate</p>
-
-<p>Goal:</p>
-
-<ul>
-<li>Try and associate actions with objects.</li>
-<li><code>actions</code> themselves can just be passed into the <code>actions</code></li>
-</ul>
-
-
-<h2>Non-dynamic routes</h2>
-
-<pre><code>resolveEntry: function(params, model, transition) {
-  return model || this.store.find(params.id);
-}
-
-resolveEntry: function(params, model, transition) {
-  return model || this.store.find(params.id);
-}
-</code></pre>
-
-<p>Initializers vs <code>applicationRoute#beforeModel</code>.</p>
-
-<p>retcon for how to use controllers</p>
-
-<p>asop to data binding</p>
-
-<p>HTMLbars knows what parts of the template are dynamic vs static.</p>
-
-<p>In React, if you have a conditional</p>
-
-<h2>Skunkworks project</h2>
-
-<blockquote><p>A skunkworks project is a project developed by a small and loosely
-structured group of people who research and develop a project
-primarily for the sake of radical innovation.[1] The terms
-originated with Lockheed&#8217;s World War II Skunk Works project.</p></blockquote>
-
-<p>http://en.wikipedia.org/wiki/Skunk_Works</p>
-
-<blockquote><p>The designation &#8220;skunk works&#8221;, or &#8220;skunkworks&#8221;, is widely used
-in business, engineering, and technical fields to describe a
-group within an organization given a high degree of autonomy
-and unhampered by bureaucracy, tasked with working on advanced
-or secret projects.</p></blockquote>
-
-<p>Lockheed Martin&#8217;s Skunk Works project made SR-71.</p>
-
-<h2>Project Svelte</h2>
-
-<p>http://www.trustedreviews.com/opinions/android-4-4-kitkat-s-project-svelte-what-it-is-and-why-you-should-care</p>
-
-<blockquote><p>‘dogfooding’ – that is making its employees use and live with their own projects</p></blockquote>
-
-<p>They dogfooded their employees by forcing them to dev on handicapped
-phones. Android 4.4 was the result, apparently it was way more
-performant.</p>
-
-<h2>RACK_ENV vs RAILS_ENV</h2>
-
-<p><code>Rails.env</code> is decided by <code>RAILS_ENV || RACK_ENV || "development"</code>. It&#8217;s
-common to set <code>RACK_ENV</code> which will also set <code>RAILS_ENV</code>, but if you
-have any rack middleware that behaves differently in different
-environments, you might screw yourself if you&#8217;re using <code>RAILS_ENV</code>.</p>
-
-<h2>wythoughts on blocks</h2>
-
-<p>The reason <code>|i|</code> is ok is for the same reason you can&#8217;t do the following
-in Ruby:</p>
-
-<pre><code>a = { |it| wat }
-</code></pre>
-
-<p>You have to do</p>
-
-<pre><code>a = proc { |it| wat }
-</code></pre>
-
-<p>Case in point you need an fn to save a block.</p>
-
-<h2>mythoughts on mutability</h2>
-
-<p>Can/should we swap POJOs when an observed property changes? Is there any
-value to</p>
-
-<pre><code>var pojo = {
-  a: {
-    b: 123
-  }
-};
-
-var a = pojo.a;
-Ember.set(pojo, 'a.b'
-</code></pre>
-
-<h2>ASI: automatic semicolon insertion</h2>
-
-<p>Nuff said.</p>
-
-<h2>old browser disagreements on ws</h2>
-
-<pre><code>[ text ws text]
-</code></pre>
-
-<p>cloneNode produces:</p>
-
-<ul>
-<li>ie8: 1 node</li>
-<li>ie9: 2 nodes</li>
-<li>else: 3 nodes</li>
-</ul>
-
-
-<h2>NoScope</h2>
-
-<p>http://www.thecssninja.com/javascript/noscope</p>
-
-<p>tldr NoScope is an old IE categorization of nodes, and NoScope dictates
-that innerHTML and cloneNode will strip these els.</p>
-
-<h2>Ropes: DAG of string implementation for FF/Chrome</h2>
-
-<p>http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=181EEF66EB411F4277C009A1D492CF75?doi=10.1.1.14.9450&amp;rep=rep1&amp;type=pdf</p>
-
-<p>Look into this more. Too lazy to read / comment.</p>
-
-<p>How to force Chrome to not use a rope:</p>
-
-<ul>
-<li>Less than 12 chars</li>
-</ul>
-
-
-<p>What does it mean to intern strings?</p>
-
-<h2>CSP: Content Security Policy</h2>
-
-<p>http://www.html5rocks.com/en/tutorials/security/content-security-policy/</p>
-
-<h2>String interning</h2>
-
-<pre><code>String.prototype.intern = (function() {
-   "use strict";
-   var o = {"- ": 0};
-   delete o["- "];
-   return function() {
-       var str = this;
-       o[str] = true;
-       var ret = Object.keys(o)[0];
-       delete o[str];
-       return ret;
-       try {} finally {}
-   };
-})();
-</code></pre>
-
-<h2>Component pinning</h2>
-
-<p>Associating the re-render with the pre-existing fragment.</p>
-
-<h2>localStorage on iOS Cordova webviews</h2>
-
-<ol>
-<li>Run dev, set <code>localStorage.wat = "lol"</code></li>
-<li>Stop and re-run the app, and <code>localStorage.wat</code> still is &#8220;lol&#8221;</li>
-<li>Delete the app, re-install, still dev, <code>localStorage.wat</code> is undefined</li>
-</ol>
-
-
-<p>I don&#8217;t even have to check&#8230; your app can&#8217;t run in both dev and prod.
-You can&#8217;t share userSessions across dev and prod apps. Then again, our
-servers could maintain keys for both APNS and APNS_SANDBOX.</p>
-
-<h2>GCM project number vs project ID</h2>
-
-<p>https://developers.google.com/compute/docs/faq#whatisthedifference</p>
-
-<p>You pick project ID, they pick project number. Project number is the
-Sender ID you use for GCM.</p>
-
-<h2>Pointer comparisons for such perf</h2>
-
-<pre><code>if (wat === false) {
-}
-</code></pre>
-
-<p><code>false</code> can be implemented to just refer to a unique memory location,
-such that all browsers need to comparison in the above code is <code>wat</code>&#8217;s
-memory address against <code>false</code>&#8217;s.</p>
-
-<p>Same goes with</p>
-
-<pre><code>if (wat === undefined) {
-}
-</code></pre>
-
-<p>just that the presence of <code>foo</code> in <code>cache.foo</code> is ambiguous without
-testing <code>foo in cache</code>; might be easier to do <code>cache.foo = UNDEFINED</code>
-where</p>
-
-<pre><code>function UNDEFINED() {}
-</code></pre>
-
-<p>Sentinel as fuck.</p>
-
-<h2>PushPlugin</h2>
-
-<p>Only starts firing PNs after <code>register</code>. We need a user session to
-register, right? Seems weird we can&#8217;t query it for information before
-immediately registering&#8230; either way, works fine for us, at least we
-killed Zalgo.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-19T11:30:00-04:00" pubdate data-updated="true">Jul 19<span>th</span>, 2014</time></div>
 	
 
 

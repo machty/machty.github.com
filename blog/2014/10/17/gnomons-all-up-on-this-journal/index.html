@@ -1,0 +1,2460 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Gnomons all up on this journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Gnomons All Up on This Journal</h2>
+	<div class="entry-content"><h2>timerfd</h2>
+
+<p>Just like any other api that inverts signal-handling API into something
+file handle-y, Linux has such an API for expiring timers, which means
+you can use these file handles w functions like <code>select</code>, <code>poll</code>, and
+<code>epoll</code>.</p>
+
+<h2>CLOEXEC reminder</h2>
+
+<p>I&#8217;ve already kinda learned this but I FORGET. The CLOEXEC flag is
+something that appears in <code>open</code> and other APIs that create a file
+handle; it means that if <code>exec</code> is ever called on a process with a
+CLOEXEC handle, the handle will close rather than leak to a process that
+can&#8217;t even really access that file handle.</p>
+
+<h2>spawn = fork + exec</h2>
+
+<p>Allows for greater degree of flexibility in what happens between those
+two steps. Node only has spawn because it&#8217;s trying to be cross platform.
+There&#8217;s no fork. There&#8217;s no spoon.</p>
+
+<p><code>posix_spawn</code> exists to more directly spawn a process when <code>fork</code> is not
+supported.</p>
+
+<h2>Embedded System</h2>
+
+<p>http://en.wikipedia.org/wiki/Embedded_system</p>
+
+<p>Usually means you&#8217;re running software on some piece of hardware with a
+dedicated purpose, limited resources, and real-time requirements. It&#8217;s a
+computer system embedded into some larger mechanical whole.</p>
+
+<h2>fork</h2>
+
+<p>No guarantee of where parent or child is scheduled to run so don&#8217;t run
+into conditions.</p>
+
+<p><code>fork</code>ing can be wasteful especially if immediately <code>exec</code>ing, cept for
+the fact that</p>
+
+<ul>
+<li>program text is marked read only and often shares the same page
+mapping as parent</li>
+<li>copy-on-write</li>
+</ul>
+
+
+<p>You can execute code in a single-purpose forked child process without
+changing the resource/memory footprint of the parent. Useful if the code
+in question is unspeakably/unstoppably leaky or prone to memory fragmentation.</p>
+
+<p>Mmm mmm mmm using pipes.</p>
+
+<pre><code>r,w = IO.pipe
+
+if fork
+  w.close
+  answer = r.read
+  Process.wait
+  puts $?.exitstatus
+  puts answer
+else
+  r.close
+  w.write("SOME BULLSHIT")
+  exit(123)
+end
+</code></pre>
+
+<p>Useful for when the single byte/octet return code (<code>$?.exitstatus</code>)
+won&#8217;t cut it. Insane Posse Clown.</p>
+
+<p>BSD used to have a shit wasteful fork back in the day, then added vfork,
+and then everyone else made efficient COW <code>fork</code>s, but still most people
+provide an implementation of vfork which:</p>
+
+<ul>
+<li>performs zero duplication, even of VM pages (which all forks due, even
+if no writes have happened yet under a COW system). Parent memory
+shared until <code>exec</code> or <code>_exit</code>.</li>
+<li>Parent execution suspended til then</li>
+</ul>
+
+
+<p>This is risky as fuck because:</p>
+
+<ul>
+<li>simply returning from a function will impact parent process&#8217;s memory.
+It&#8217;s almost like a step-through longjmp, cept, no this totally breaks.
+It&#8217;s not like the parent will pick up from wherever the child process
+leaves off; the process counters are different between processes, so
+if you return from a function in a child, you&#8217;ll fuck with the stack
+frame, probably cause some SEGVs, and bite the big one.</li>
+</ul>
+
+
+<p>You can on the other handle futz with file handles in this time
+(apparently these are duplicated? just not VM pages?)</p>
+
+<pre><code>vfork -- spawn new process in a virtual memory efficient way
+</code></pre>
+
+<p><code>_exit</code> must be used because <code>exit</code> would flush stdio and thus fuck the
+parent.</p>
+
+<p>But don&#8217;t use vfork. It sucks. It&#8217;s obsolete. It&#8217;s not even in SUSv4.
+It&#8217;s garbage shit-kicker nonsense. <code>fork</code> is pretty much just as fast
+when COW exists.</p>
+
+<p>You can actually control whether parent or child runs first via
+<code>proc/sys/kernel/sched_child_runs_first</code> (or the sysctl equiv).</p>
+
+<p>The argument for parent-first is that the TLB cache is warm with parent
+stuff, so memory lookups are faster yadda yadaa I can&#8217;t imagine this
+actually makes a difference unless you&#8217;re forking like a motherforker.</p>
+
+<p>Hehehehe:</p>
+
+<pre><code>3.times { fork }
+puts "wat"
+</code></pre>
+
+<p>Results in</p>
+
+<pre><code>wat
+wat
+wat
+wat
+wat
+wat
+wat
+wat
+</code></pre>
+
+<p><code>atexit</code> handlers are shared w <code>fork</code>.</p>
+
+<h2>Process rehash, new learnings</h2>
+
+<p>Even if a parent kills a child, it has to wait or else it remains a
+zombie.</p>
+
+<p>There&#8217;s no such thing as a zombie orphan; well actually there are
+transient zombie orphans; <code>init</code> will adopt them and immediately <code>wait</code>
+on them, and then they&#8217;ll be collected.</p>
+
+<p>Prediction: it gets messy to call <code>wait</code> in a SIGCHLD handler since
+signals might coalesce; two SIGCHLDs might coalesce into one, and the
+foolish programmer might only wait once. I bet if I looked at unicorn
+I&#8217;d find a loop.</p>
+
+<h2>KGIO</h2>
+
+<p>http://bogomips.org/kgio/</p>
+
+<p>Ruby gem w C extensions for Kinder, Gentler IO.</p>
+
+<ul>
+<li>Avoids expensive EAGAIN / EINPROGRESS exceptions
+
+<ul>
+<li>EAGAIN: non-blocking IO when there&#8217;s no data, so try <em>again</em> later</li>
+<li>EINPROGRESS: (less common), similar to EAGAIN but distinguished for
+things like <code>connect</code> in mid 3-way handshake</li>
+</ul>
+</li>
+<li>other niceties</li>
+</ul>
+
+
+<p>Used in Unicorn and related Rainbows!. Can&#8217;t use in JRuby obviously but
+then again no forking server model is supported in JRuby.</p>
+
+<h2>JRuby Servers</h2>
+
+<p>https://github.com/jruby/jruby/wiki/Servers</p>
+
+<p>Can&#8217;t use unicorn but you can use things like Puma, or Trinidad, which
+wraps rack/rails within a Tomcat container. So many things I do not
+know!</p>
+
+<h2>Isomorphic Code</h2>
+
+<p>Can run on server or client. Not sure of the roots, but sounds like it
+started in 2011, at least as way of describing JS code that runs between
+both? React-router is &#8220;isomorphic&#8221;.</p>
+
+<h2>ELF format</h2>
+
+<p>Executable and Linking Format.</p>
+
+<h2>Built-ins</h2>
+
+<p>Sometimes no forking occurs because it&#8217;s quick and efficient, or because
+there are desirable side effects that should make it into the current
+shell process. Like <code>cd</code> (can&#8217;t change the cwd of the current process
+if you&#8217;re forking). Or <code>export</code>.</p>
+
+<h2>Why keep fd&#8217;s open on <code>exec</code>?</h2>
+
+<p>If you&#8217;re exec&#8217;ing, shouldn&#8217;t you lose access to file handles? Not
+necessarily; stream redirection via the shell is a good example where
+you preserve what 0 1 2 point to.</p>
+
+<h2>Auto-reap zombie child processes</h2>
+
+<p>If you set the signal mask to ignore <code>SIG_CHLD</code>, potential zombie child
+processes will be automatically reaped. So no need to <code>wait</code> in that
+case.</p>
+
+<p>Also, it&#8217;s implementation-defined (according to SUS) whether <code>exec</code>
+resets the <code>SIG_CHLD</code> disposition after an exec (Linux preserves,
+Solaris resets to default, etc).</p>
+
+<h2><code>exec</code> clears sig handlers</h2>
+
+<p>Of course, since sig handlers live in the text and text is replaced, so
+must handled signals be reset. Everything else about signals is
+preserved (cept that <code>SIG_CHLD</code> ignores may not
+get reset to <code>DFL</code> depending on the implementation), but since most
+processes expect to start with a clean slate, if you didn&#8217;t write the
+process, you should reset everything yourself before an exec.</p>
+
+<h2><code>system</code></h2>
+
+<p>Runs a shell command, with all the processing/substitutions of the
+command string that you would expect.</p>
+
+<p>Inefficient; fork+execs twice, one for the shell, and one for the
+process you intend to run.</p>
+
+<p>set-user-id and set-group-id programs should never use <code>system</code>
+since it opens the door to setting weird ENV vars to get unintended
+programs to run, and they&#8217;ll inherit the effective user id. The
+canonical example is setting IFS to <code>a</code>, and then <code>shar</code> runs and is
+interpreted as <code>sh r</code>, and <code>r</code> is some script/executable that is no
+running with admin privileges to do whatever it wants. Evil shit!</p>
+
+<p>Note that modern shells reset IFS now as a rule.</p>
+
+<h2><code>clone</code></h2>
+
+<p>A Linux-specific sister of <code>fork</code>; it creates a new process, but starts
+at the beginning of a provided function called w a provided arg. The
+child process terminates if this function returns (or the exit variants
+are called).</p>
+
+<ul>
+<li>you can specify termination signal (rather than always CHLD)</li>
+<li>flags let you meticulously control a variety of info about what is
+actually shared with the new child process: file handles, signal
+dispositions, etc.</li>
+</ul>
+
+
+<p>So basically it&#8217;s threads&#8230; but separate processes? Is there a name for
+these kinds of threads? LinuxThreads I guess.</p>
+
+<p>Threads/processes are just kernel scheduling entities with differing
+degrees of shared attributes. Processes are just, like, organizational
+distinctions. Schedule wise, the scheduler doesn&#8217;t care whether it&#8217;s a
+thread or a process. Blueskying of course.</p>
+
+<h2>Mode 7</h2>
+
+<p>http://en.wikipedia.org/wiki/Mode_7</p>
+
+<p>The special background layer mode that enabled perspective-y effects, as
+well as zooming and other cool things. F-zero relied on it, the map in
+Link to Past relied on it. Any zoomy crazy shit that wasn&#8217;t a sprite
+relied on it.</p>
+
+<h2>Dyson Sphere</h2>
+
+<p>Shell around the sun.</p>
+
+<p>http://www.islandone.org/LEOBiblio/SETI1.HTM</p>
+
+<p>Other lifeforms smashed apart their planets to build a dyson sphere to
+capture energy, support population growth.</p>
+
+<p>We could knock apart Jupiter, use its mass to create a sphere around sun
+with a diameter twice that of Earth&#8217;s orbit. The shell would be 10 feet
+thick, and make&#8230; something&#8230; habitable?</p>
+
+<h2>Fermi Paradox</h2>
+
+<p>http://waitbutwhy.com/2014/05/fermi-paradox.html</p>
+
+<p>http://en.wikipedia.org/wiki/Fermi_paradox</p>
+
+<p>The apparent contradiction between the high probability of alien life
+and the fact that no one has contacted us yet.</p>
+
+<p>Explanation 1: They don&#8217;t exist</p>
+
+<p>Possibly due to a Great Filter; at some point in development, something
+wipes them out, or there&#8217;s some point of evolution that&#8217;s reaaaally
+really hard to get beyond that filters out people who made it beyond the
+previous step.</p>
+
+<p>So where does that leave <em>us</em>?</p>
+
+<p>We&#8217;re</p>
+
+<ul>
+<li><p>rare</p>
+
+<ul>
+<li>other rare survivors might be reaaaally far away</li>
+<li>the filter is behind us</li>
+</ul>
+</li>
+<li><p>first: no one else to communicate with yet</p></li>
+<li>fucked: we&#8217;re about to hit our wall like everyone else has</li>
+</ul>
+
+
+<p>Ah I love the potentialy reason for why intelligent life wouldn&#8217;t
+broadcast data: there are potential harmful civilizations that would
+destroy anyone they could find, and most advanced civilizations are
+smart enough not to give away their locations to these fuckers. That&#8217;s
+why we only have SETI today, and not METI (messaging to ETs), which most
+scientists agree is a profoundly unwise idea.</p>
+
+<p>Eesh, or there&#8217;s only one superpredator species, like humans on Earth,
+that would wipe out another species before it got too intelligent.
+Nipping the universe in the bud. Fuuuck that.</p>
+
+<p>Or we&#8217;re not using the right technologies to communicate, or even if we
+did, other minds might work much faster or slower than ours; it could
+take years for them to say hello. Hahaha.</p>
+
+<p>Or we are receiving communications but the gov is hiding it.</p>
+
+<p>Or other civilizations see us, but we&#8217;re a look-don&#8217;t-touch zoo.</p>
+
+<p>Or the higher civilizations are here, but we couldn&#8217;t begin to
+understand them, they&#8217;re just so advanced.</p>
+
+<p>Or we&#8217;re just so fundamentally incorrect about reality.</p>
+
+<p>Types of civilization</p>
+
+<ul>
+<li>I: ability to use all the energy on the planet (Sagan says we&#8217;re a
+0.7; just under the legal limit)</li>
+<li>II: ability to harness all power of a star (e.g. Dyson sphere)</li>
+<li>III: ability to harness all power of a whole galaxy</li>
+</ul>
+
+
+<p>http://waitbutwhy.com/ seems pretty awesome in general. Three thumbs up.</p>
+
+<h2>fork v vfork</h2>
+
+<p>I&#8217;ve already written about this but followup: vfork is faster, but
+considering how slow the followup <code>exec</code> is, this is probably
+neglibibilgigible.</p>
+
+<h2><code>time</code> and forking</h2>
+
+<p>Are child process CPU times included?</p>
+
+<pre><code>N = 20000000
+
+def slow_thing
+  inc = N / 5
+  N.times do |i|
+    puts "." if i % inc == 0
+  end
+end
+
+do_fork = true
+if do_fork
+  fork do
+    slow_thing
+  end
+
+  Process.wait
+else
+  slow_thing
+end
+</code></pre>
+
+<p>With forking:</p>
+
+<pre><code>real    0m1.565s
+user    0m1.544s
+sys     0m0.013s
+</code></pre>
+
+<p>Without forking:</p>
+
+<pre><code>real    0m1.480s
+user    0m1.464s
+sys     0m0.011s
+</code></pre>
+
+<p>Seems that yes they are (there&#8217;s no difference with the above).
+Actually, quick aside: it seems that <code>time</code> is a bash builtin. Not sure
+why, but if I use <code>/usr/bin/time</code> as well, not much changes</p>
+
+<pre><code>1.42 real         1.41 user         0.00 sys
+1.49 real         1.47 user         0.01 sys
+</code></pre>
+
+<p>Ah, <code>time</code> will add together all forked processes. And apparently if you
+have two active processes, you might wind up with a CPU time greater
+than real time. LET US FIND THE FUCK OUT.</p>
+
+<pre><code>N = 20000000
+
+def slow_thing
+  inc = N / 5
+  N.times do |i|
+    puts "." if i % inc == 0
+  end
+end
+
+num_forks = 2
+
+num_forks.times do
+  fork do
+    slow_thing
+  end
+end
+
+num_forks.times { Process.wait }
+</code></pre>
+
+<p>BOO YA</p>
+
+<pre><code>real    0m1.636s
+user    0m3.199s
+sys     0m0.021s
+</code></pre>
+
+<p>How awesome is it when things start clickin.</p>
+
+<p>So how does time actually do it?</p>
+
+<h2>curl + tar</h2>
+
+<pre><code>curl http://mirror.anl.gov/pub/gnu/time/time-1.7.tar.gz | tar -x
+</code></pre>
+
+<p>I guess you&#8217;re also supposed to use <code>-z</code> as well, but in my manpages:</p>
+
+<pre><code> -z      (c mode only) Compress the resulting archive with gzip(1).  In extract
+         or list modes, this option is ignored.  _Note that, unlike other tar
+         implementations, this implementation recognizes gzip compression auto-
+         matically when reading archives._
+</code></pre>
+
+<p>That&#8217;s so nice of them. And ridiculous that it wouldn&#8217;t always work that
+way. Maybe not.</p>
+
+<h2>Threads</h2>
+
+<p>Every process has at least one thread.</p>
+
+<p>Concurrency via processes has some limitations:</p>
+
+<ul>
+<li>nothing is shared so communication is limited to IPC, pipes and what
+not</li>
+<li>expensive due to page table duplication and file descriptor table dups
+and all the things that happen during <code>fork</code></li>
+</ul>
+
+
+<p>Most process attributes are shared between threads. Here&#8217;s some stuff
+that&#8217;s not:</p>
+
+<ul>
+<li>thread ID</li>
+<li>signal mask</li>
+<li>thread-specific data</li>
+<li>alternate signal stack</li>
+<li><code>errno</code></li>
+<li>floating-point env</li>
+<li>scheduling priority/policy</li>
+<li>CPU affinity</li>
+<li>capabilities</li>
+<li>stack</li>
+</ul>
+
+
+<p>Of course you could share stack vars between threads but this runs the
+risk of data invalidation once a function returns etc etc etc.</p>
+
+<p>How does errno work if it&#8217;s a variable? Trick question, it&#8217;s a macro
+that evals to an lvalue (so you can still manually set it yourself).</p>
+
+<p><code>join</code> is like <code>wait</code>, it seems to free up that thread, and you wouldn&#8217;t
+want to call it twice, lest terrible things happen. You must detach or
+join. (Seems like the equiv in processland for detach is to set
+<code>SIG_CHLD</code> to ignore).</p>
+
+<p>Unlike processes, threads are created as peers. If A spawns B spawns C,
+then A can join C. They&#8217;re all siblings in the same process cult.
+There&#8217;s no concept of generic <code>Process.wait</code> to join with any ol thread.
+This makes sense since some lib function could spawn a thread and you
+might clobber its operation and steal its return value.</p>
+
+<p>Once you detach a thread, you can&#8217;t join it. Again keep in mind that
+threads can&#8217;t escape the fact that they live in a process; if the
+process dies, so do the threads.</p>
+
+<p>Threads can&#8217;t use the full virtual memory address space; they have to
+share with all the other threads. Probably not a big deal unless you&#8217;re
+doing insane shit, but still.</p>
+
+<p>Mutexes in Linux are implemented in user spaces using futexes (fast user
+space mutexes). They only cause system calls when multiple threads lock.</p>
+
+<h2>Pitchblende</h2>
+
+<p>Old school word for Uraninite. Basically ore ready for uranium
+processing.</p>
+
+<h2>Javascryptonomicomicon</h2>
+
+<p>http://matasano.com/articles/javascript-cryptography/</p>
+
+<h2>ffs ssl</h2>
+
+<p>http://wingolog.org/archives/2014/10/17/ffs-ssl</p>
+
+<blockquote><p>WTF their price is 49 dollars for a stupid certificate? Your domain name was only 10 dollars, and domain name resolution is an actual ongoing service, unlike certificate issuance that just happens one time.</p></blockquote>
+
+<p>Hmm clearly I need to better understand how this all works&#8230; being a
+CA, root or no, definitely requires constant service</p>
+
+<p>Wow this is sneaky: http://thejh.net/misc/website-terminal-copy-paste</p>
+
+<p>Never copy and paste secure stuff from a webpage. I&#8217;m so sad.</p>
+
+<p>Lol &#8220;Well now I have to live with this confidence-inspiring dialog,
+because I left off the organization&#8221;</p>
+
+<p>TIL Organization is the name you choose that you want to pop up when
+inspecting certifications.</p>
+
+<p>Wow, googlebot still doesn&#8217;t use TLS 1.2.</p>
+
+<h2>Condition variables</h2>
+
+<p>Didn&#8217;t I write about this already? So forgetful!</p>
+
+<pre><code>Loop
+  Lock around shared structure
+    If shared structure "empty"/unusable, wait on condition variable
+
+
+(other thread):
+Lock around shared structure
+  Put data into it
+  Signal Condition variable
+</code></pre>
+
+<p>If you didn&#8217;t do this, you&#8217;d have some wasteful CPU-hog loop that
+constantly locked and unlocked the mutex to check if the shared
+structure had data ready.</p>
+
+<ul>
+<li>Always re-check the condvar predicate; some other thread might have
+invalidated it in the meantime.</li>
+<li>Also, a looseness of predicates lends to some flexibility; a producer
+doesn&#8217;t need to know the exactly logic that consumer cond var depends
+on; producer can just say &#8220;hey interested people, this shared
+structure changed, so chiggity check yourselves&#8221;</li>
+<li>Some implementations, particularly multi-core, might wake up a cond
+var for fucks sake (explicitly allowed by SUSv3</li>
+</ul>
+
+
+<h2>Reentrant revisited</h2>
+
+<p>We already knew thread-safe functions aren&#8217;t necessarily reentrant (e.g.
+a signal handler that locks a mutex might be reentered and deadlock the
+same mutex on the same thread). A reentrant function is one that doesn&#8217;t
+access globals, mutexes included (what if a shared structure, possibly a
+mutex is passed on to the function? Deadlock could still occur&#8230; I
+guess the answer is that a function might be itself reentrant, but a
+caller might not be reentrant so the chain of calls it makes with
+whatever global data it&#8217;s using isn&#8217;t going to be reentrant).</p>
+
+<p>Not every function can be reentrant. malloc can&#8217;t be: it <em>must</em> access
+global data. A <code>_r</code> suffix implies reentrancy.</p>
+
+<h2><code>pthread_once</code></h2>
+
+<p>The pthreads library provides facilities for ensuring that some kind of
+initialization (that occurs in the function you provide it) only happens
+once.</p>
+
+<h2>Thread-specific data</h2>
+
+<p>I guess it&#8217;s a thread-local storage, but TLS is an overlay API that&#8217;s
+friendlier to program in. In C at least you use the <code>__thread</code> keyword
+when declaring a variable and voila you get everything for freeee.</p>
+
+<h2>Thread cancellation</h2>
+
+<p>Threads can be cancelled at cancellation points, SUS-specified
+lib/syscall functions, or if you&#8217;re a moron (or you have a 0.001% use
+case) you can set cancelability to be async, which means it might
+interrupt at any ol machine instruction.</p>
+
+<h2>ncurses</h2>
+
+<p>New curses. Used for writing terminal apps. Cross-terminal. Optimizes
+refreshes for our remotely connected friends.</p>
+
+<h2>Thread stacks</h2>
+
+<p>Main thread has mucho size, thread stacks are smaller but configurable
+in size.</p>
+
+<h2>Signals and threads</h2>
+
+<p>Horrible combination, avoid when possible. Reason being: signals existed
+long before threads and never expected to integrate with them.</p>
+
+<ul>
+<li>signal dispositions are process wide (you can&#8217;t have one thread ignore
+a signal and another use a specific handler, etc)</li>
+<li>signals might be directed to thread or process. Thread directed if
+
+<ul>
+<li>signal is result of hardware instruction (SEGV, etc&#8230; same
+reason that signals are sometimes synchronous)</li>
+<li>SIGPIPE</li>
+<li><code>pthread_kill</code> or <code>pthread_sigqueue</code></li>
+</ul>
+</li>
+<li>all others are process wide</li>
+<li>kernel selects arbitrary thread to handle signal (as opposed to
+multiple threads handling a single sig)</li>
+</ul>
+
+
+<p>Shit. What the fuck is a difference between signal disposition and
+signal mask?</p>
+
+<p>Disposition: per-process structure that controls whether a signal
+is a) is ignored, b) runs a custom handler, or c) invokes the default
+action.</p>
+
+<p>Mask: data structure that knows when signals are temporarily blocked,
+the idea being that they should be later unblocked and the signal will
+fire.</p>
+
+<p>OK so dispositions are process-wide, but masks are thread-local; so as
+one time slice begins, the kernel will look up the mask for that thread
+and decide whether a pending signal should fire upon it, and if not,
+wait til later. You might have some threads that block all signal
+handlers.</p>
+
+<p>Ahhhhhhh SO FUCKING FORGETFUL. Didn&#8217;t I just cover this a few days ago?
+Basically I tried writign a ruby program to set the mask, but you don&#8217;t
+have access to the mask in Ruby because Ruby uses it internally and is
+trying to layer a nice signal API on top of it. I was trying to set up
+something where a main thread had a custom handler but all the threads
+it spawned blocked SIGINT so that it must be handled by the main thread.</p>
+
+<p>But if I weren&#8217;t too lazy to write the test in C:</p>
+
+<blockquote><p>By manipulating the per-thread signal masks, an application can control which thread(s) may handle a signal that is directed to the whole process.</p></blockquote>
+
+<p>I mostly just wanna know how the kernel selects the thread to wake up.
+Does it just loop through each of the sleeping threads and find the one
+whose signal mask will allow it?</p>
+
+<p>None of the pthread lib has async-signal-safe functions, so what&#8217;s
+recommended:</p>
+
+<ul>
+<li>main thread blocks everything, all spawned threads inherit signal mask</li>
+<li>single thread deblocks and is responsible for dispatching signals.</li>
+</ul>
+
+
+<p>Reminder: difference b/w reentrant and async-signal-safe:
+async-signal-safe is a function you can call in a signal handler because
+it as either a) reentrant or b) not interruptible by a signal handler.</p>
+
+<p>So why &#8220;async&#8221;-signal-safe? There are sync signals and async signals
+depending on whether hardware issued the signal, whether it&#8217;s a signal
+sent to yourself, etc. I think the answer is that async-signal-safe is a
+concept that exists even outside of the context of a currently running
+signal handler. In other words, if you know <code>foo</code> is NOT async signal
+safe, it means <code>foo</code> might be interrupted by an async signal, and if
+itself were called, hell might break loose.</p>
+
+<p>So that&#8217;s a useful concept on its own, but when applied to what you&#8217;re
+allowed to call within a signal handler, the rule is &#8220;don&#8217;t call non
+async-signal-safe functions&#8221; because, within a handler or no, you might
+be interrupted by <em>another</em> signal handler and fuck yourself.</p>
+
+<p>So you should always write signal handlers that are themselves reentrant
+and only call async-signal-safe functions.</p>
+
+<p>Remember, these async-signal-safe functions might not be reentrant on
+their own, but because they block signal handlers from interrupting
+them, they are async-signal-safe.</p>
+
+<p><code>exec</code> wipes out all other threads entirely. Gone. No termination /
+cancel handlers called.</p>
+
+<p><code>fork</code> kills all other threads than the caller, but mutexes and
+conditional variables live on in whatever state. (What about
+<code>thread_t</code>s? Probably persist but point to dead threads?). Memory leaks
+can happen since the killed threads don&#8217;t have an opportunity to clean
+up after themselves.</p>
+
+<p>LOVE.</p>
+
+<p>But you can defined atfork handlers. Otherwise you probably shouldn&#8217;t
+fork unless you&#8217;re also <code>exec</code>-ing.</p>
+
+<h2>NPTL</h2>
+
+<p>Native POSIX Threading Lib</p>
+
+<p>The software feature in linux kernel that enabled POSIX-compliant
+threads. Red Hat 9 added it first, either as a kernel module or patch to
+the OSS kernel.</p>
+
+<h2>Social Engineering</h2>
+
+<pre><code>http://en.wikipedia.org/wiki/Social_engineering_(security)
+</code></pre>
+
+<p>It just means sneakily manipulating people into giving away their shit.
+Phishing and what not.</p>
+
+<h2>M:N</h2>
+
+<p>aka number of threads map to number of Kernel Scheduling Entities
+(processes, threads, etc, schedulable executable things).</p>
+
+<h3>M:1</h3>
+
+<p>Multiple threads to a single KSE. User-level threads aka green threads.
+Kernel doesn&#8217;t know about these threads.  Fast context switching, but</p>
+
+<ul>
+<li>other slow syscalls block all other threads, e.g. <code>read</code>, since
+control is passed from user-spacing threading lib to kernel</li>
+<li>kernel can&#8217;t schedule, which means no multi-processor green threads.</li>
+</ul>
+
+
+<p>I&#8217;m guessing the way scheduling worked was to set interval timers and
+pre-empty threads. Seems correct.</p>
+
+<h3>1:1</h3>
+
+<p>Kernel-level threads. Pthreads.</p>
+
+<p>Thread creation, context switching, etc, are slower since it requires a
+syscall, but it means the kernel can efficiently schedule, put them on
+separate cores.</p>
+
+<h3>M:N</h3>
+
+<p>Some kernel, some green.</p>
+
+<p>Keep in mind that this whole <code>M:N</code> nomenclature also applies to
+processes vs threads. err, does it? Processes and green threads? I could
+be bullsharting right now.</p>
+
+<p>M:N is complex, perhaps not worth it. It was originally the suggested
+implementation for NPTL.</p>
+
+<h2>Process Group / Session</h2>
+
+<ul>
+<li>Process group
+
+<ul>
+<li>Process group leader
+
+<ul>
+<li>Process that creates the group, whose PID becomes the process group
+ID</li>
+</ul>
+</li>
+<li>New process inherits its parent&#8217;s pgid</li>
+<li>Lifetime: from process group creation to when last process leaves
+group id</li>
+<li>premature question: can a new process take the id of a now-dead
+process that used to be pg leader?</li>
+<li>processes can leave by terminating or joining another group</li>
+<li>pg leader can leave before others, no biggie.</li>
+</ul>
+</li>
+<li>Session
+
+<ul>
+<li>collection of PGs</li>
+<li>Session leader
+
+<ul>
+<li>Process that creates the session, whose PID becomes the session ID</li>
+</ul>
+</li>
+<li>New process inherits its parent&#8217;s pgid</li>
+<li>all processes in session share terminal</li>
+</ul>
+</li>
+</ul>
+
+
+<p>SIGHUP is sent to PG leader when terminal disconnects.</p>
+
+<p>Login:</p>
+
+<ul>
+<li>Shell becomes session leader AND process group leader
+
+<ul>
+<li>every command it runs, it makes it process group leader (but shell
+remains session leader)</li>
+<li>any command forks have same process group id (the command&#8217;s pid),
+and session id is shell.</li>
+<li>shell can create many process groups (commands) and can foreground
+one and the rest are background</li>
+</ul>
+</li>
+</ul>
+
+
+<p>You can only change process group of yourself or your children, else
+ESRCH. You can only move a process between groups within the same
+session. You can&#8217;t change the process group of the session leader.
+You can&#8217;t child the process group of a child if it&#8217;s already called
+<code>exec</code> (you might confuse the poor child); I guess this means shells
+will fork and then the parent will call setpgid on the child&#8230;? Why
+doesn&#8217;t the child just do it itself?</p>
+
+<p>Answer (and I love this book for this shit: go buy the Linux Programming
+Interface right now): the parent process needs to be able to send job
+control signals to the newly created child (to the new process group
+ID it&#8217;ll have), and the child needs to set the new pgid before it
+<code>exec</code>s or else all is lost, so how do you guarantee that the new process
+group on the child has been set before either the parent or child
+proceed? Answer: do it on both and ignore errors on the parent.</p>
+
+<p><code>setsid</code> establishes a process as group and session leader and
+disconnects it from any controlling terminal. You can&#8217;t <code>setsid</code> if
+you&#8217;re process group leader (EPERM), so you need to <code>fork</code> first to get around
+that. This restriction is in place because any other process group
+children will still have a pgid that points to this same process group
+leader process even if it has a new session id; the only way to ensure
+the numbers don&#8217;t point to the same place is to distribute new numbers,
+e.g. new process ids, e.g by forking.</p>
+
+<pre><code>if fork
+  Process.wait
+  puts "done"
+else
+  # if you hadn't forked, setsid would fail because
+  # this process would be PG leader
+  Process.setsid
+  puts gets
+end
+</code></pre>
+
+<p>The above code doesn&#8217;t error out like I thought it would&#8230; it still has
+access to the terminal, but, it, umm, couldn&#8217;t open the terminal if it
+wanted to?</p>
+
+<p>When session leader opens a controlling terminal, it becomes the
+controlling process for a terminal. They are LINKED. If a process
+has a controlling terminal, it can open special file <code>/dev/tty</code>.</p>
+
+<p>Ah ok so to make the above snippet break, I should have actually done</p>
+
+<pre><code>fork do
+  Process.setsid
+  File.open('/dev/tty')
+end
+Process.wait
+</code></pre>
+
+<p>which yields</p>
+
+<pre><code>setsid.rb:3:in `initialize': Device not configured - /dev/tty (Errno::ENXIO)
+</code></pre>
+
+<p>You open <code>/dev/tty</code> if the shell (or someone else) already redirected
+your output (by <code>dup2</code>ing 0 1 2 file descriptors) and you want to get
+back in touch with your <code>tty</code>. Call your <code>tty</code>. She&#8217;s your controlling
+terminal.</p>
+
+<p>AH HA this is how you can take a program with redirected input and get,
+say, the users password from the terminal. Fuckin badass. Let&#8217;s try it.</p>
+
+<pre><code>$ echo "wat" | ruby getpass.rb
+here's some stuff from stdin
+wat
+now type something in: borflex
+You wrote borflex
+</code></pre>
+
+<p>So many cool shits!</p>
+
+<p>Note that you can also open <code>/dev/tty</code> without it becoming the
+controlling terminal.</p>
+
+<p>TTY captures special characters, converts into signals sent to members
+of the foreground process group.</p>
+
+<p>This demonstrates how a signal is delivered to literally everyone in the
+foreground process group (5 &#8220;omg&#8221;s are printed).</p>
+
+<pre><code>N = 5
+N.times do
+  fork do
+    trap(:INT) do
+      puts "omg\n"
+      exit
+    end
+    sleep
+  end
+end
+
+trap(:INT) do
+  puts "main\n"
+end
+
+N.times do
+  Process.wait
+end
+</code></pre>
+
+<p>It&#8217;s possible for no one to be the foreground process, but rare, and not
+when there&#8217;s a shell that&#8217;s monitoring for foreground process to quit
+(via wait or some other signal handle).</p>
+
+<p><code>tcgetpgrp</code> gets the foreground process group of a provided terminal fd.
+<code>bash</code> and other shells make use of this when passing the terminal
+around to child processes.</p>
+
+<h2>SIGHUP</h2>
+
+<p>This is sent when terminal connection is severed (also sends SIGCONT to
+make sure the process is alive). Happens when:</p>
+
+<ul>
+<li>terminal driver detects disconnect of one form or another</li>
+<li>the last pseudoterminal file handle has been closed (i don&#8217;t
+understand this)</li>
+</ul>
+
+
+<p>You can ignore / handle SIGHUP but future reads yield EOF. (What about
+output? Same thang?).</p>
+
+<p>SIGHUP is often used to tell a daemon process to reload a config file.
+Why SIGHUP? Because daemons have no controlling terminal so the single
+is otherwise useless; why not put it to work in some useful way? nginx
+and others do this.</p>
+
+<p>When terminal disconnects, the controlling process (the shell) gets a
+SIGHUP. Shells will terminate, but before doing that they&#8217;ll send a
+SIGHUP to each of the process groups.</p>
+
+<p><code>nohup</code> just forks, sets disposition to ignore HUP, and then <code>exec</code>s.
+Easy peasy.</p>
+
+<p>Note that shells won&#8217;t send SIGHUP to any process groups it didn&#8217;t
+create.</p>
+
+<pre><code>echo $$
+</code></pre>
+
+<p>This is like the thing that trolled me before w <code>ruby -e</code>&#8230; <code>$$</code> in a
+shell command is the shell&#8217;s pid.</p>
+
+<p>Background tasks don&#8217;t get sighup&#8217;d when you exit a terminal. SIGHUP
+only gets sent to foreground processes. That seems cray cray.</p>
+
+<h2>$$ in Ruby</h2>
+
+<p>Everywhere I look it says it is the id of the running process. As in,
+you know, the pid. But if I do</p>
+
+<pre><code>ruby -e "puts Process.pid; puts $$"
+</code></pre>
+
+<p>I get two different numbers.</p>
+
+<p>You know why?</p>
+
+<p>Because, of course, <code>$$</code> means something to shells! Before the command
+even runs, <code>$$</code> will be substituted with the pid of the shell! If I
+change double quotes to single quotes, I get the same numbers, of
+course!</p>
+
+<pre><code>ruby -e 'puts Process.pid; puts $$'
+</code></pre>
+
+<p>This is why I started going crazy and thinking that the internet was
+just wrong and that <code>$$</code> means the session id. Wrong!</p>
+
+<h2>terminfo / termcap</h2>
+
+<p>These are packages that some programs like vi and less make use of for
+gracefully switching in and out of screen-controlling modes; vi and less
+take over the screen but when you quit, you see the terminal lines from
+before you ran them. This uses terminfo, which is a terminal database
+which provides facilities such as that.</p>
+
+<h2>sigtstp</h2>
+
+<p>You can catch a suspend ^Z via sigtstp and then signal sigstop to
+actually stop the process, but any parent processes listening in will
+think you were stopped by sigstop rather than sigtstp, so you can do the
+more complicated thing of setting disposition to default, unblocking,
+raising tstp (so that it suspends this time), and then resetting the
+mask upon reentry.</p>
+
+<h2><code>init</code> and <code>wait</code></h2>
+
+<p>I originally thought that <code>init</code> would <code>wait</code> on every orphan it
+inherited, but of course, <code>wait</code> is blocking if nothing&#8217;s actually
+terminated, so I think <code>init</code> actually checks the status of the
+process and <code>wait</code>s only if it&#8217;s terminated. But if it inherits a
+stopped process group, it won&#8217;t call wait. So you might have stopped
+process groups that live on forever and no one ever terminates them.</p>
+
+<p>Hence, upon orphaning, the kernel sends SIGHUP + SIGCONT to any
+orphaning process groups that have at least one stopped process, and
+these signals are sent to everyone. Of course, at some later
+post-orphaning time, these orphaned processes might be stopped and would
+need <em>something</em> to come along and resume or terminate them.</p>
+
+<h2>nice values</h2>
+
+<p>You can give processes (specific pids, groups&#8217;, users&#8217;) varying nice
+values from -20 to 19, give or take. Lower means higher priority, high
+means lower.</p>
+
+<h2>The Complexity Balloon and other yehudaisms</h2>
+
+<blockquote><p>&#8220;you can only squeeze the complexity ballooon&#8221;
+- Yehuda Katz</p></blockquote>
+
+<p>On XMLHttpRequest capitalization:</p>
+
+<pre><code>btw: the rule for XHR is:
+First acronym all caps
+subsequent acronyms title-case
+old Java rule
+</code></pre>
+
+<h2>Security book recommendations</h2>
+
+<p>The art of software security assessment</p>
+
+<p>The grey hat hackers handbook</p>
+
+<h2>Scheduling</h2>
+
+<p>CPUs have their own run queues, with items with different priorities.
+Processes can be scheduled with RR or FIFO real-time policy.</p>
+
+<p><code>RR</code> is round robin. Equal priority processes get a time slice and then
+get thrown in back of queue at the end. They can be pre-empted by higher
+order shits. How?</p>
+
+<ul>
+<li>higher order process blocked on syscall becomes unblocked (io
+available, etc)</li>
+<li>another process raised to higher level</li>
+<li>current process raised to lower value than some other process</li>
+</ul>
+
+
+<p><code>RR</code> similar to standard RR <code>SCHED_OTHER</code>, difference being in the
+strictness of the weighting algorithm. <code>SCHED_OTHER</code> uses nice values,
+but a lower nice value than another isn&#8217;t a strict determiner of
+scheduling order, but rather a weighted suggestion, where as <code>RR</code> is
+brutal deterministic.</p>
+
+<p>In <code>FIFO</code> there&#8217;s no timeslice. You have it til you&#8217;re preempted or give
+up control.</p>
+
+<p>You can lock up a system with <code>RR</code> or <code>FIFO</code>. To prevent:</p>
+
+<ul>
+<li>set low CPU limit, which causes default-terminating <code>SIGXCPU</code> to fire.</li>
+<li>use <code>alarm()</code></li>
+<li>use high priority watchdog process to watch others, adjust their
+priorities.</li>
+</ul>
+
+
+<p>CPU Affinity just means the tendency for a process/thread/kernel
+scheduling unit to run on the same CPU; switching CPUs involves a slow
+context switch, cache invalidation, etc.</p>
+
+<h2>Daemonizing</h2>
+
+<ul>
+<li>long-running, often started at boot</li>
+<li>has no controlling terminal (hence never receives INT, TSTP, HUP,
+etc); its excluded from job-control signals</li>
+</ul>
+
+
+<p>some examples</p>
+
+<ul>
+<li>cron</li>
+<li>sshd: the ssh server that&#8217;s open for remote logins.</li>
+<li>httpd: http server
+
+<ul>
+<li>ah so TCP isn&#8217;t a daemon, it&#8217;s a kernel-level IO protocol, but httpd
+is a server. It&#8217;s apache, duerp.</li>
+</ul>
+</li>
+<li>inetd: superserver daemon&#8230;? sounds like this doesn&#8217;t exist on mac.</li>
+</ul>
+
+
+<p>Some daemons run as kernel threads, w names bracketed.</p>
+
+<p>To daemonize:</p>
+
+<ul>
+<li>fork: child process lives, master terminates.
+
+<ul>
+<li>returns control to terminal</li>
+<li>child process lives on, and is no longer process group leader (it
+inherits parent pgid which doesn&#8217;t match its new pid, so it can&#8217;t be
+leader). this is needed for setsid (remember that setsid can&#8217;t be
+called with process group leader, because other children processes
+might be in that process group with a pgid pointing to a process
+that lives in a different session, but process group members must
+all live within the same session as a rule)</li>
+</ul>
+</li>
+<li>setsid
+
+<ul>
+<li>become session leader
+
+<ul>
+<li>frees you from connected terminal</li>
+<li>allows you to connect to another terminal (but&#8230; see below)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>fork again
+
+<ul>
+<li>this prevents any future terminals you connect to from becoming
+controlling terminal (TODO: why/when would a daemon connect to a
+terminal?)</li>
+<li>you don&#8217;t have to do this if you don&#8217;t open another terminal, or you
+open terminals with <code>O_NOCTTY</code></li>
+</ul>
+</li>
+<li>Clear umask (remember that umasks negate certain permissions on create
+files&#8230; right? TODO: review this shit)</li>
+<li>Change cwd to <code>/</code> so that in case the process was started with a cwd
+on another file system that doesn&#8217;t contain <code>/</code>, that fs can be
+unmounted
+
+<ul>
+<li>remember you can&#8217;t unmount &#8220;busy&#8221; FSs
+
+<ul>
+<li>files are open on it</li>
+<li>processes have CWDs on it (how does it know? loop through the
+processes?)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Close all file descriptors, 0, 1, 2, for similar busy FD unmount
+reasons, also because you might get some TTOUs if you try and read
+from stdin.</li>
+<li><code>dup2</code> them to point to <code>/dev/null</code> so that lib functions and other
+things don&#8217;t unexpectedly file, or you don&#8217;t open another file in
+their place but some lib function things they&#8217;re std IO and then write
+shit to them
+
+<ul>
+<li>reading dev null yields EOF. PRETTY EFFIN HANDY</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Daemon shutdown consists of SIGTERM and a 5-second-layer SIGKILL if it
+doesn&#8217;t clean up and shut down in that time (all processes concurrently
+have 5 seconds to shutdown, not 5 seconds of CPU each; all SIGTERMS send
+out at same time).</p>
+
+<p>Memory leaks and fd leaks are a bigger deal for daemons since they&#8217;re so
+long-lived.</p>
+
+<p>Care must be taken to prevent multiple identical daemons from running;
+Pidfiles help.</p>
+
+<p>Logfiles can&#8217;t grow forever, and manually deleting a file if the daemon
+doesn&#8217;t let go of it won&#8217;t prevent the resources from being freed until
+the last handle is closed to the file. <code>logrotate()</code> can be used to aid
+in this.</p>
+
+<p>HUP is unused since daemons don&#8217;t have controlling terminals so people
+classically use it to re-initialize or reload conf files.</p>
+
+<p>Btw you can open other people&#8217;s TTYs. And it means you can write to
+their screens.</p>
+
+<p><code>syslog</code> and <code>syslogd</code> is a useful utility to global logging; write to
+syslog unix domain datagram socket and blah dee blah dee blah it&#8217;ll
+funnel out to wherever based on a shared conf FILE!</p>
+
+<h2>Security</h2>
+
+<p>Privilege via</p>
+
+<ul>
+<li>root started it</li>
+<li>set-user-id or set-group-id + owned by root</li>
+</ul>
+
+
+<p>Guidelines:</p>
+
+<ul>
+<li>don&#8217;t use set-user/group-id unless you really need it; better to
+use a child process
+
+<ul>
+<li>or if you need it, don&#8217;t give it root</li>
+</ul>
+</li>
+<li>e.g. a process currently with set-user-id that allows unprivileged
+users to write to a file they don&#8217;t have access to: much better to
+set-group-id to a group specific to this process, and set group of
+that file to that group. group. group. group.</li>
+<li>if you&#8217;re set-user-id, only operate in that mode when you need it.</li>
+<li>real id is whoever started the program</li>
+<li>basically, shit is really hard and you should refer to this book every
+time you need a refresher because this stuff megasucks.</li>
+<li>don&#8217;t exec shells or other interpreters when you have privileges. Way
+way way too open to abuse.</li>
+<li>close file handlers; they&#8217;re just integers, not hard to reuse. recall
+CLOEXEC</li>
+</ul>
+
+
+<h2>Clear out your memory</h2>
+
+<p>Why? Because it might be paged out to a swap area that privileged
+programs can read. So that seems pretty iScare. If that&#8217;s visible, why
+not fuckin, fuckin, fuckin memory, man, why can&#8217;t you like open another
+process and look at its memory maaaan, even without it having been paged
+first.</p>
+
+<p>Actually you can if you&#8217;re not careful. You can create special device
+files that have direct access to RAM. That&#8217;s so fucking crazy. So even
+<code>chroot</code> can&#8217;t even save you if you have a set-user-id-root program.
+Crazy crazy crazy.</p>
+
+<p>Also if you have a leftover open file handle to <code>/</code> then you can
+<code>fchdir</code> into it and <code>chroot(".")</code> chroot back into that shiot.</p>
+
+<h2>Use capabilities</h2>
+
+<p>UNIX privileges are all-or-nothing; Linux adds the notion of
+capabilities. Use em. They&#8217;re granular n shit.</p>
+
+<h2>Use virtual kernels</h2>
+
+<p>Totally isolated. They have no concept of the raw kernel. Can&#8217;t access
+it. Can&#8217;t do shiot.</p>
+
+<p>BSD <code>jail()</code> addresses lots of this stuff. SO MANY FUCKING LOOP HOLES OH
+MY GOD.</p>
+
+<h2>Time of check, time of use</h2>
+
+<p><code>access()</code> lets you query access of user to file. If you&#8217;re
+set-id-to-root and you check if some unprivileged user has access to
+something, maybe a symlink, and then in between that check and whatever
+you end up destructively doing, the symlink is swapped to elsewhere,
+then you might clobber some shittles. Malicious user could go nutso and
+fire off a bunch of <code>SIGSTOP</code>s and change runtime environment to fuck
+with a privileged program.</p>
+
+<h2>Bounds checking</h2>
+
+<p>strcpy babeh</p>
+
+<p>Linux now has stack address randomization which randomizes the location
+of the stack in an 8 MB range in VM. Seems cool. That&#8217;s why if you print
+the pointer of a var int main in a test C program, it&#8217;s different each
+run. This feels similar to stretches in bcrypt and any other security
+measure that makes certain operations slower to counteract brute force
+attackers.</p>
+
+<h2>DoS denial of service</h2>
+
+<p>Local variants include fork bombing.</p>
+
+<p>Remote DoS more common, combat w:</p>
+
+<ul>
+<li>load throttling, dropping requests when overloaded</li>
+<li>timeouts</li>
+<li>(throttled) logging of overloads</li>
+<li>don&#8217;t crash from unexpected loads</li>
+<li>avoid algorithmic complexity attacks wherein a structure known to
+handle a particular series of input might get fucked and consume lots
+of resources. Not insecure, necessarily, but might fuck the fuck.</li>
+</ul>
+
+
+<h2>Shared libs</h2>
+
+<p>Compile w <code>-g</code> nowadays since RAM and disk are cheap. Apparently this
+info doesn&#8217;t affect performance?</p>
+
+<p>A shared lib is a <code>.a</code> file composed of <code>.o</code> files, constructed with
+<code>ar</code>, as in &#8220;library archives&#8221;.</p>
+
+<pre><code>$ ar tv /usr/lib/liby.a
+rw-r--r--       0/0            40 Aug 24 21:45 2013 __.SYMDEF SORTED
+rw-r--r--       0/0           920 Aug 24 21:45 2013 main.o
+rw-r--r--       0/0           912 Aug 24 21:45 2013 yyerror.o
+</code></pre>
+
+<p>Variants of <code>gcc</code> and static libs</p>
+
+<pre><code># generate wat.o
+gcc -c wat.c
+
+# generate a.out with wat.o lib
+gcc lol.c wat.o otherlibarchive.a
+
+# search standard lib directories (like /usr/lib)
+# looks for /usr/lib/libwoot.a
+gcc -c wat.c -lwoot
+
+# Search a non-standard directory
+gcc -c wat.c -lwoot -L/borflex/snaggletooth
+</code></pre>
+
+<p>All of the .a archive and .o object files is added to executable size.
+Seems bad. Also when the processes are run, VM is increased by that
+much, even though it&#8217;s all redundant read-only text shit.</p>
+
+<p>Ah. Static libs. vs Shared libs. Shared libs are fuckin, fuckin,
+dynamic, maaaan.</p>
+
+<p>Ah note that static and global variables obviously aren&#8217;t shared between
+shared libs; each process gets a copy.</p>
+
+<p>Pros:</p>
+
+<ul>
+<li>Large shared libs between small processes mean quicker process startup
+time (though the first time the shared lib is loaded into VM is
+obviously slow)</li>
+<li>With some limitations, you can swap out libs without relinking</li>
+</ul>
+
+
+<p>Cons:</p>
+
+<ul>
+<li>complexity</li>
+<li>shared libs must use position-independent code
+
+<ul>
+<li>PIC is a way of compiling shared libs so that the location of
+functions, statics, globals, string constants, etc, can vary, and I
+don&#8217;t understand it.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Modern shared lib linking format is ELF: Executable and Linking Format.</p>
+
+<p><code>.so</code> is shared object, shared lib, as opposed to just <code>.o</code>.</p>
+
+<p><code>ar</code> lets you add/remove <code>.o</code>s from library archives, but not so with
+<code>.so</code>s.</p>
+
+<p>You can use <code>nm</code> (name list util, i.e. symbol table util) to list
+symbols.</p>
+
+<p>Interesting, so given the following <code>wat.c</code>:</p>
+
+<pre><code>int WAT;
+</code></pre>
+
+<p>I see <code>_WAT</code> appear in the symbol table:</p>
+
+<pre><code>$ gcc -c wat.c &amp;&amp; nm wat.o
+0000000000000004 C _WAT
+</code></pre>
+
+<p>Note that it wouldn&#8217;t appear if I&#8217;d made it <code>static</code> or <code>extern</code>. Shit
+is cool.</p>
+
+<p>So PIC adds a global offset table to help the dynamic linking describe
+where shit is.</p>
+
+<p>Hmm what if I use <code>g++</code> on a cpp file?</p>
+
+<pre><code>$ g++ -c wat.cpp &amp;&amp; nm wat.o
+0000000000000000 S _WAT
+</code></pre>
+
+<p>What&#8217;s the difference b/w S and C? C apparently means &#8220;common&#8221; symbol,
+and S means a generic &#8220;none of the above&#8221; in the <code>man nm</code>.</p>
+
+<p>You can take a dynamic/shared lib and compile statically though, if you
+want it:</p>
+
+<ul>
+<li>less complexity</li>
+<li>safer against .so upgrades</li>
+</ul>
+
+
+<p>So what&#8217;s the difference between a .so and a .dylib? Is that a mac
+thing?</p>
+
+<h2>Dynamically loaded libraries</h2>
+
+<p>Deferred loading whenever some plugin is loaded. As in your code does
+it. Seems pretty rad. Use <code>dlopen</code>. Search a function by name, invoke
+it.</p>
+
+<p>You can use env var <code>LD_DEBUG</code> to print out some shit.</p>
+
+<h2>IPC</h2>
+
+<ul>
+<li>byte streams: pipes, fifos, datagram sockets</li>
+<li>message: message queues; can&#8217;t read them part way, all or nothing</li>
+<li>pseudoterminals</li>
+</ul>
+
+
+<p>Different from shared mem:</p>
+
+<ul>
+<li>reads are destructive for byte streams (but yes in some cases you can
+seek, multicast/broadcast)</li>
+</ul>
+
+
+<p>MQ (POSIX or SystemV) messages have priorities, and deliver in different
+order.</p>
+
+<p>Ah now it&#8217;s coming back to me:</p>
+
+<ul>
+<li>UNIX domain sockets
+
+<ul>
+<li>ruby: <code>Socket.pair</code></li>
+<li>datagram (no need to worry about byte streams/delimiters)</li>
+</ul>
+</li>
+<li>Pipe
+
+<ul>
+<li>ruby: <code>IO.pipe</code></li>
+<li>stream</li>
+<li>flow control handled by kernel</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Pipes and FIFOs</h2>
+
+<p>Pipes are old as SHIT. Oldest method of IPC, since 3rd edition of UNIX
+in early 1970s.</p>
+
+<p>THAT&#8217;s what that dude meant. Pipes vs Sockets. We use pipes, not
+sockets.</p>
+
+<p>Pipes are constrained to related processes, FIFOs can talk between all
+processes.</p>
+
+<p>Pipes are unidirectional.</p>
+
+<p>Can&#8217;t reorder data, can&#8217;t random access w lseek.</p>
+
+<p>Writes up to <code>PIPE_BUF</code> are atomic, Linux has <code>PIPE_BUF</code> at 4096. If
+larger, kernel might break into pieces. This means that if you have two
+processes writing more than <code>PIPE_BUF</code>, the final stream might be
+interleaved with both messages (both processes will still be blocked on
+<code>write</code> until everything is flushed out).</p>
+
+<p>Partial writes can occur if a write larger than <code>PIPE_BUF</code> is
+interrupted by a signal handler, and call comes back with the number of
+bytes written. Pretty cool. Makes sense.</p>
+
+<p>Writes will block if kernel buffer is full.</p>
+
+<p>Pipes only work b/w related processes, which mean they must have a
+common fork ancestor. Apparently there&#8217;s another way to pass file
+descriptors. But I guess it&#8217;d need translating? Because there are
+descriptors and open file descriptions, and the descriptor ints are
+different between shits.</p>
+
+<p>SIGPIPE is ignored by default, but when you write to broken pipe you get
+SIGPIPE and EPIPE. Such pipe.</p>
+
+<p><code>popen</code> runs a shell command, letting you establish a single pipe,
+either r or w.</p>
+
+<p>FIFOs are like pipes except that they&#8217;re special files in th file
+system. Opening a read-only FIFO blocks until someone writes, and vice
+versa.</p>
+
+<p><code>tee(1)</code> writes to stdio AND some other file, which could be a fifo. So
+you can split a stream and send it to other things. Pretty cool.</p>
+
+<p>UNRELATED: <code>bash -c "sleep 5"</code> execs sleep 5; it doesn&#8217;t create a bash
+process and then fork again, it just straight up execs. Whereas when
+you&#8217;re running interactive bash, all commands are forked and then
+exec&#8217;d.</p>
+
+<p>Trick with IPC w servers is that there needs to be some known file name,
+which opens the door to exploitation if you&#8217;re not careful.
+FIFOs (and pipes) are byte streams (rather than unix domain datagram
+sockets) so you have to</p>
+
+<ol>
+<li>Use some EOM delimiter</li>
+<li>Message length header</li>
+<li>Fixed message size</li>
+</ol>
+
+
+<p>and on top of all of that everything needs to be less than the pipe
+buffer size constant or else kernel might interleave messages.</p>
+
+<p>Pipes provide synchronization by e.g. opening a pipe, forking, having
+the parent blocked on a <code>read()</code> until child processes have all done
+their shit and closed their end of the pipe.</p>
+
+<p><code>popen</code> has the same considerations as <code>system</code>.</p>
+
+<h2>System V</h2>
+
+<p>http://en.wikipedia.org/wiki/UNIX_System_V</p>
+
+<p>One of first commercial versions of UNIX, from 1983. Today&#8217;s descendants
+are AIX, Solaris, and HP-UX.</p>
+
+<p>System V IPC</p>
+
+<ul>
+<li>MQs
+
+<ul>
+<li>delivered in order, but each message has type, so can be selected
+out of order</li>
+</ul>
+</li>
+<li>Semaphores
+
+<ul>
+<li>kernel forbids it from going below 0, sync technique</li>
+</ul>
+</li>
+<li>Shared mem</li>
+</ul>
+
+
+<p>w System V IPC you create objects (like files but unlike files). Objects
+have ids, but unlike fd&#8217;s, these are system wide.</p>
+
+<p>Semaphores don&#8217;t error when you subtract below zero; rather the kernel
+will block if you try and subtract, and it&#8217;ll come back alive when
+someone increments.</p>
+
+<h2>Considered Harmful</h2>
+
+<p>http://en.wikipedia.org/wiki/Considered_harmful</p>
+
+<p>Popular phrase originating from &#8220;Go To Statement Considered Harmful&#8221;, a
+Djikstra thing.</p>
+
+<h2>mmap</h2>
+
+<p>Memory mapping can either use</p>
+
+<ul>
+<li>real files</li>
+<li>anonymous zero-d out files</li>
+</ul>
+
+
+<p>Both are shareable between processes. By:</p>
+
+<ul>
+<li>mmapping to the same region of the same file</li>
+<li>forking with a previously established handle to a</li>
+</ul>
+
+
+<p>Mapping to same file can be configured:</p>
+
+<ul>
+<li>private: writes don&#8217;t go through to file, so process changes to the
+mapping are isolated from each other. Implemented by copy-on-write.</li>
+<li>shared: durp</li>
+</ul>
+
+
+<h2>dev zero</h2>
+
+<p><code>/dev/zero</code> gives you null bytes. Forever!</p>
+
+<h2>dev urandom</h2>
+
+<p>Write seeds, read values.</p>
+
+<p>This isn&#8217;t perfect but kinda works:</p>
+
+<pre><code>ruby -e 'puts File.open("/dev/urandom").gets(4).unpack("l")'
+</code></pre>
+
+<p>Extra credit if you can figure out what that ain&#8217;t right</p>
+
+<h2>Get off the aaaaaaair I&#8217;m in the STEREO</h2>
+
+<p><code>mmap</code> can overcommit swap space due to lazy committal. Useful for
+implementing things like sparse arrays (a large array might only access
+bits and pieces, and if separate by a page.</p>
+
+<pre><code>$ getconf PAGESIZE
+4096
+</code></pre>
+
+<p>Daatz cool. So if you have a bajillion thingeroo and it&#8217;s allocated on a
+shit, then woooop there it is.</p>
+
+<p>Overcommitals can ran the system out of memory at which point the kernel
+starts killin&#8217; shit. The kernel code that does this is the OOM
+Out-of-Memory killer.</p>
+
+<p>OOM kills with <code>SIGKILL</code>, you can look at your score with a special file
+in procfs.</p>
+
+<h2>dscacheutil</h2>
+
+<p>Directory Service Cache Utility. Supercedes <code>lookupd</code>.</p>
+
+<h2>VM operations</h2>
+
+<ul>
+<li>protect: set read/write protections on a VM page
+
+<ul>
+<li>applies to mmapped files, etc</li>
+</ul>
+</li>
+<li>mlock and mlockall: keep memory in RAM; useful since an attack vector
+would be to consume lots of RAM, forcing some processes to write to
+disk, and then reading from the swap space.
+
+<ul>
+<li>then again, suspend mode in laptops/desktops copied ram to disk, so
+you&#8217;re effed.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>traceroute UDP vs ICMP</h2>
+
+<p>This doesn&#8217;t work</p>
+
+<pre><code>traceroute machty.com
+</code></pre>
+
+<p>This does</p>
+
+<pre><code>traceroute -I machty.com
+</code></pre>
+
+<p>because it uses ICMP ECHO rather than a UDP packet (which I guess gets
+dropped somewhere along the way? tis a Rackspace github pages HTTP
+server so UDP wouldn&#8217;t make sense anyway), and ICMP ECHOs I guess are
+considered more sensible and friendly?</p>
+
+<p>I realized this was the issue since <code>ping machty.com</code>, which uses ICMP
+ECHO, works just fine.</p>
+
+<h2>Power of Attorney</h2>
+
+<p>Written authorized permission for one person to act on behalf of
+another, even if the other disagrees. Relevant in the legal sense, as
+well as health care decisions up to and including terminating care and
+life support.</p>
+
+<h2>Darwin, Mach, OS X</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Darwin_(operating_system">Darwin wiki</a>)</p>
+
+<p>Darwin is an an open source operating system released by Apple in 2000</p>
+
+<ul>
+<li>Composed of NeXSTEP, BSD, other freeware</li>
+<li>Largely compatible with POSIX but not certified.</li>
+<li>SUSv3-compatible</li>
+<li>Kernel is XNU
+
+<ul>
+<li>&#8220;X is Not Unix&#8221; - stupidest naming scheme ever</li>
+<li>Hybrid kernel
+
+<ul>
+<li>Combo of micro and monolithic: http://en.wikipedia.org/wiki/Hybrid_kernel</li>
+<li>Micro kernels are often &lt; 10,000 lines of code, do the bare
+minimum, put more things into user space (or at least a higher
+privilege ring)</li>
+<li>Linus thinks hybrid is just monolithic and that it&#8217;s all just
+marketing</li>
+</ul>
+</li>
+<li>Combo of Mach (microkernel) + aspects of BSD (monolithic kernel)</li>
+</ul>
+</li>
+<li>Closed source Cocoa et al frameworks are missing, so it can&#8217;t run mac
+applications</li>
+</ul>
+
+
+<p>http://en.wikipedia.org/wiki/Microkernel</p>
+
+<p>So I guess OS X is Darwin + Cocoa and a bunch of other layers.</p>
+
+<h2>POSIX IPC</h2>
+
+<ul>
+<li>Simular to System V</li>
+<li>API closer to classic UNIX everything-is-a-file abstraction</li>
+<li>Simpler API in general</li>
+</ul>
+
+
+<h2>Semaphores: portable?</h2>
+
+<p>Does anyone use operating system semaphores in open source? I mostly see
+sockets and forking and what not for IPC in server code; does anyone
+use semaphores?</p>
+
+<p>Answer: yes, libuv does (the async IO lib that Node uses). I&#8217;m sure
+plenty of other people do too.</p>
+
+<h2>Node copies in all dependencies</h2>
+
+<p>The Node repo doesn&#8217;t use submodules or anything like that; literally
+the entire codebase of a dependency, whether v8 or libuv, is copied into
+the <code>/deps</code> folder.</p>
+
+<h2>WATCHLISTS</h2>
+
+<p>Something to Chromium devs use that mark certain portions of code as of
+interest to some reviewer, presumably to prevent undesirables from
+getting into the system.</p>
+
+<p>https://github.com/joyent/node/blob/master/deps/v8/WATCHLISTS</p>
+
+<h2>File locking</h2>
+
+<p>Used for synchronization. Could use semaphores but the kernel already
+has file locking so why not use that for files?</p>
+
+<p>stdio lib might cause issues with buffers and locks, so either follow
+some rules about immediately flushing, or just skip stdio and use <code>read</code>
+and <code>write</code>, or disable the buffering.</p>
+
+<p>Locks apply to open file descriptions (in the shared open file table in
+the kernel), not descriptors, so if you dup the descriptor and
+explicitly unlock it, it applies to all duplicates (it doesn&#8217;t maintain
+a count or anything).</p>
+
+<p>You can only hold a lock associated with an fd. So if all fds are
+closed, the lock is unlocked.</p>
+
+<p>If you fork a lock, then it only takes one unlock (parent or child) to
+release the lock. Wacky shiznittletons. But this lends to the pattern of
+&#8220;parent establishes lock, forks, and closes file descriptor so that only
+the child has the lock and open fd&#8221;.</p>
+
+<p>Locks are preserved across exec unless close-on-exec on the fd and the
+fd was the last one associated with the description.</p>
+
+<p><code>flock()</code> downsides:</p>
+
+<ul>
+<li>only whole files lockable, hamper concurrency if processes would be
+otherwise able to write to the same file in separate sections</li>
+<li>can only place advisory locks.
+
+<ul>
+<li>advisory locks mean the kernel doesn&#8217;t actually help prevent
+reads/writes; processes could ignore advisory locks and perform IO
+anyway. Mandatory locks on the other hand&#8230;</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Record locking with fcntl</h2>
+
+<p><code>fcntl</code> allows record-locking: locking anywhere from a byte to whole
+file. &#8220;record-locking&#8221; might be the wrong word since files are just byte
+streams with no concept of &#8220;records&#8221; beyond what their consuming
+processes decide.</p>
+
+<p><code>fcntl</code> just stands for &#8220;file control&#8221;. I get it confused with <code>ioctl</code>.
+<code>fcntl</code> is control over descriptors in a process. Basically <code>fcntl</code>
+behaves almost like a kernel sys call in that it&#8217;s just setting an
+integer of the command you want to perform followed by varying numbers
+of arguments based on the command. So you can do arbtrary, extensible
+stuff that might not already be neatly contained within some other
+single purpose wrapper fn.</p>
+
+<p>SUSv3 requires record locking for regular files and permits record
+locking for other file types even if it doesn&#8217;t really make sense.</p>
+
+<p>Write locks are exclusive (to both read and write locks). Read locks
+are not (they can be shared). Nothing new here.</p>
+
+<p><code>fcntl</code> locking works by passing <code>flock</code> structure. You can lock
+relative to current file pointer.</p>
+
+<p><code>BADF</code> if you try and read/write lock a file on a file not open for
+reading/writing.</p>
+
+<p><code>len</code> of 0 means lock from whence onward (even if bytes are added to the
+file).</p>
+
+<ul>
+<li>Unlocking always immediately succeeds.</li>
+<li>different sections can be locked with different types</li>
+<li>locks can be split by e.g. placing a write lock in the middle of a
+larger range of read locks (3 locked regions are produced)</li>
+</ul>
+
+
+<p>The kernel prevents deadlocks between processes. (Similar rules apply
+with thread mutexes). Chooses one of the processes and unblocks fcntl
+with errno <code>EDEADLK</code>. Even circular deadlocks are detected. Pretty cool.</p>
+
+<p>fcntl locking semantics:</p>
+
+<ul>
+<li>locks not inherited cross fork()</li>
+<li>locks are inherited</li>
+<li>threads share record locks</li>
+<li>Record locks are pid+inodenum, so, weirdly, if you close an fd, all of
+its locks are released, even if they came from other fds. Kind of
+crazy? (This is architectural weak sauce; should have been file
+handler rather than inode, but it&#8217;s now standardized).</li>
+</ul>
+
+
+<h2>Mandatory Locking</h2>
+
+<p>File system must be mounted with mandatory locking enabled. And it must
+be enabled on a per-file basis by enabling set-group-id and disabling
+group execute permission. This yields a capital S in <code>ls -l</code> if you&#8217;ve
+done it right.</p>
+
+<ul>
+<li>most file systems support it, cept for things like VFAT which don&#8217;t
+have the required permission bits</li>
+<li>locked file can still be deleted</li>
+<li>privileges processes can&#8217;t override a mandatory lock. A malicious user
+holding on to a well known public file is a form of DOS attack.</li>
+<li>mandatory locks has performance hit against IO</li>
+</ul>
+
+
+<p>Probably best avoided?</p>
+
+<p>tmpfs <code>/proc/locks</code> is useful.</p>
+
+<h2>Pidfile</h2>
+
+<p>Create a file and place write lock on it. Any other instances will try
+and do the same thing, fail, and terminate under the assumption that a
+running process already has a lock on it. Alternate approaches for
+networked apps use bound ports to make this same decision.</p>
+
+<p>Often such things live in <code>/var/run</code>. Conventional to write pid to file
+and use extension <code>.pid</code>.</p>
+
+<p>You can CLOEXEC a pidfile since some servers reinitialize themselves by
+<code>exec</code>ing themselves. Seems crazy?</p>
+
+<h2>Sockets</h2>
+
+<ul>
+<li>exist in communication domain
+
+<ul>
+<li>determines how socket is identified (form of &#8220;address&#8221;)</li>
+<li>range of communication (intra-computer, internet, etc)</li>
+</ul>
+</li>
+<li>Multiple domains of sockets
+
+<ul>
+<li>UNIX domain: <code>AF_UNIX</code>. Communication b/w processes on same host
+(all within the kernel)</li>
+<li>IP (v4 and v6)</li>
+</ul>
+</li>
+</ul>
+
+
+<p><code>PF_UNIX</code> vs <code>AF_UNIX</code> constants: Protocol Family vs Address Family:
+often synonomous, but different due to intent to support protocols
+having multiple families of addresses, but this hasn&#8217;t happened.</p>
+
+<p>Every socket impl can be stream or datagram oriented.</p>
+
+<p>Stream socket
+- &#8220;reliable&#8221;&#8230;? UNIX Domain streaming sockets? Curious to know what the overlap is with TCP.
+- bi-directional, as if a pair of pipes had been established.</p>
+
+<h3>socket()</h3>
+
+<p>Create a socket with</p>
+
+<ul>
+<li>domain: UNIX, IPv4, IPv6</li>
+<li>type: STREAM vs DATAGRAM</li>
+<li>protocol (usually 0 unless you&#8217;re doing funky things with raw sockets</li>
+</ul>
+
+
+<h3>bind()</h3>
+
+<ul>
+<li>Binds to an address / port</li>
+<li>is actually <em>optional</em>: if you don&#8217;t call <code>bind()</code> you&#8217;ll use an
+ephemeral port chosen by the kernel. Though this means you&#8217;d need to
+use some other mechanism for publishing.</li>
+</ul>
+
+
+<h3>stream sockets</h3>
+
+<ul>
+<li>socket() creates</li>
+<li>server
+
+<ul>
+<li>bind()s to a specific port/address</li>
+<li>listen()s, signalling the kernel that it&#8217;s ready to accept</li>
+<li>accept()s to actually process a connection</li>
+</ul>
+</li>
+<li>clients connects()</li>
+<li>both can send(), recv(), write(), read(), etc</li>
+</ul>
+
+
+<p>Stream sockets can be active or passive</p>
+
+<ul>
+<li>active: can be used in a connect() call
+
+<ul>
+<li>usually clients</li>
+</ul>
+</li>
+<li>passive: has been marked to <code>listen()</code> for connections
+
+<ul>
+<li>usually servers</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>listen(int sockfd, int backlog)</h3>
+
+<p>Tell the kernel to start listening for connections. <code>backlog</code> is the
+number of connections you&#8217;re willing to have in a pending state before
+<code>accept()</code> is called.</p>
+
+<h3>accept()</h3>
+
+<p>Blocks til connection arrives.</p>
+
+<ul>
+<li>creates a <em>new</em> socket, the one that you can actually perform IO on
+that makes it to the peer socket.
+
+<ul>
+<li>so why are they both called sockets? one that&#8217;s used for a
+establishing connections, and another that&#8217;s used within an
+established connection?</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>connect()</h3>
+
+<ul>
+<li>if it fails, close socket, create a new one, try again</li>
+</ul>
+
+
+<h3>Stream socket IO</h3>
+
+<p>Sockets are bi-directional, which means kernel must internally maintain
+two buffers, one for each direction.</p>
+
+<p>Writing into already-closed UNIX domain socket yields SIGPIPE/EPIPE.</p>
+
+<p>For UNIX-domain sockets, if a <code>close</code> fails to propagate or some other
+shit goes down (eg a crash), then we have no way of knowing; should
+build some sort of ACK into the system (or just use TCP?).</p>
+
+<p>(then again with TCP, what&#8217;s the API for knowing that a specific write
+failed? Usually you write and then move on, right? Or do all write&#8217;s
+block? Seems weird brah)</p>
+
+<h3>Datagram flow</h3>
+
+<ul>
+<li>create socket w socket()</li>
+<li>bind() to known address</li>
+<li>sendto() to send a datagram</li>
+<li>recvfrom() to recv (the from implies that the source address will be
+included in the thing)</li>
+<li>close() when socket no longer needed</li>
+</ul>
+
+
+<p><code>recvfrom</code> takes a length, returns a single datagram, silently truncating
+if less than <code>length</code>. <code>recvmsg</code> is a variant that sets <code>MSG_TRUNC</code> if
+truncation occurred.</p>
+
+<h3>Datagram <code>connect()</code></h3>
+
+<p>Seemingly at oods with the known properties of datagram sockets, you can
+actually use <code>connect</code> w dgram socks to yield a &#8220;connected datagram
+socket&#8221;. This does a few things:</p>
+
+<ul>
+<li>allows you to use <code>write</code> and <code>read</code> (rather than having to pass the
+address in to <code>sendto</code> and <code>recvfrom</code> all the live long day)</li>
+<li>only messages from the socket peer can be <code>read</code></li>
+</ul>
+
+
+<h2>UNIX Domain Sockets</h2>
+
+<p>For bidirectionality you always have to create a pair.</p>
+
+<p>You can create a UNIX domain socket via other means by providing a file
+name. You must have permissions to create this thing, and it&#8217;s a special
+file of <code>stat</code> time <code>IFSOCK</code></p>
+
+<p>Let&#8217;s do some ruby</p>
+
+<pre><code>require 'socket'
+socket = Socket.new(:UNIX, :DGRAM)
+
+# recall that pack_sockaddr_in refers to internet, `un` refers to UNIX
+# address becomes a null-packed string. The Ruby socket lib is
+# actually pretty low level when it comes to this shit.
+address = Socket.pack_sockaddr_un('./wat.unix.socket') 
+
+# this will actually create a special file in the directory
+socket.bind(address)
+</code></pre>
+
+<p>Verify it&#8217;s a special file (lf -F puts <code>/</code> at the end of directories and
+<code>=</code> at the end of sockets). Recall that this requires directory search
+permissions since it needs to read the contents of the inode rather than
+just the name of the files.</p>
+
+<pre><code>$ ls -F ./wat.unix.socket
+./wat.unix.socket=
+</code></pre>
+
+<p>Note the starting &#8220;s&#8221;:</p>
+
+<pre><code>$ ls -l ./wat.unix.socket
+srwxr-xr-x  1 machty  staff  0 Oct 26 17:57 ./wat.unix.socket
+</code></pre>
+
+<p>Also you can&#8217;t open a socket like a normal file:</p>
+
+<pre><code>f = File.open('./wat.unix.socket')
+Errno::EOPNOTSUPP: Operation not supported on socket - ./wat.unix.socket
+</code></pre>
+
+<p>Note that if you tried to bind to this socket again, you&#8217;d get
+EADDRINUSE. This is interesting since you always see this error in the
+context of IP address/port collisions, but in this case it&#8217;s a file
+pathname; that&#8217;s because address is a generic concept, the specifics of
+which are dependent on which socket domain you&#8217;re using</p>
+
+<ul>
+<li>IPv4/IPv6 addresses are IP addresses</li>
+<li>UNIX is pathnames</li>
+</ul>
+
+
+<p>Both are packed into that address struct so that sys calls can
+use/expect the same struct blob.</p>
+
+<p>STREAM sockets have active and passive. <code>passive</code> has had <code>listen()</code>
+called on it.</p>
+
+<p>I still am unclear about whether sockets are bi-directional. I think
+they are. But I don&#8217;t understand how to stop blocking on <code>read()</code>. Like,
+does it block until the buffer is full? I&#8217;ll figure it out later.</p>
+
+<p>Datagrams are supposed to be unreliable, possibly delivered twice, etc,
+but UNIX domain datagrams are reliable since it&#8217;s just the kernel
+delivering shit (it&#8217;s only difficult to guarantee reliability over a
+network). So UNIX domain datagrams are delivered in order and not
+duplicated.</p>
+
+<p>Linux allows large datagrams, but some UNIX buffers might only be 2048,
+so if you&#8217;re going for portable, go for small.</p>
+
+<p>AHHH fucking dummy, I was using the wrong ruby method. <code>IO#read</code> reads
+until you&#8217;ve filled a buffer (or EOF). What you want is <code>read_nonblock</code>.
+&#8220;But why do you still need to pass a max len&#8230; this is ruby it can
+handle whatever&#8221; I don&#8217;t know, probably because it ultimately translates
+to a syscall which needs the length? Yes I think I&#8217;m right about this
+after consulting <code>io.c</code> in MRI.</p>
+
+<h2>Socket pairs</h2>
+
+<p><code>socketpair()</code> or <code>Socket.pair</code> returns a pair of connected sockets.
+Communication is bi-directional. Benefits over manually creating this
+pair include not having to have a public address. Useful for forky IPC.
+Very similar to pipe approach to fork IPC cept that pipes are
+unidirectional.</p>
+
+<pre><code>require 'socket.rb'
+a,b = Socket.pair(:UNIX, :DGRAM)
+
+a.write("bullshit\n")
+puts b.read_nonblock(100)
+b.write("horseass\n")
+puts a.read_nonblock(100)
+</code></pre>
+
+<p>Note that this example works also if we used <code>:STREAM</code>.</p>
+
+<h2>Internet domain sockets</h2>
+
+<p>Unlike UNIX domain datagram, internet domain datagrams (implemented on
+UDP) are</p>
+
+<ul>
+<li>Unreliable, might be delivered twice or not at all.</li>
+<li>Sending doesn&#8217;t block if client buffer full, just dropped silently.</li>
+</ul>
+
+
+<p>Network byte order is big-endian.</p>
+
+<p>Marshalling is tricky, dealing with endianness and what not. Converting
+to text is often the easiest way to make sense of things, can debug w
+<code>telnet</code>, etc.</p>
+
+<p>Clients generally don&#8217;t <code>bind()</code> when making connections / sending
+datagrams, in which case the kernel provides an ephemeral port.</p>
+
+<h2>DNS</h2>
+
+<p>Types of requests:</p>
+
+<ul>
+<li>recursive: server handles entire task of resolution, including talking
+with other DNS servers. I believe though that once you&#8217;ve made the
+request, the server can make an iterative approach</li>
+<li>iterative: ask <code>.</code> for <code>com.</code>, <code>com.</code> NS for <code>machty.com.</code>,
+<code>machty.com.</code> NS for <code>www.machty.com.</code>.</li>
+</ul>
+
+
+<p>There&#8217;s a local DNS server (<code>named</code> for Linux) that you can ask for
+names, and it&#8217;ll do iterative. You ask it for recursive and it does
+iterative.</p>
+
+<p>Root name servers found via <code>dig . NS</code>, e.g. &#8220;gimme all the Name Server
+entries for the root domain <code>.</code>.</p>
+
+<p><code>/etc/resolv.conf</code> configures the DNS resolver, defines how partial
+domain names are resolved (they get concatted with the <code>domain</code> entry in
+<code>resolve.conf</code>.</p>
+
+<pre><code># assuming `domain home`
+ssh machty # machty.home
+ssh machty.home
+</code></pre>
+
+<p>Both work. But this is just a local DNS nicety, not the distributed DNS
+whitchajigger.</p>
+
+<h2>TLDs</h2>
+
+<p>First layer of nodes immediately under the root <code>.</code> node. Two types:</p>
+
+<ul>
+<li>generic: com, edu, net, org:</li>
+<li>country: co, de:</li>
+</ul>
+
+
+<h2>ports</h2>
+
+<p><code>/etc/services</code> maintains known port names.</p>
+
+<h2>C Standard Library</h2>
+
+<p>I was confused for a moment about where <code>write()</code> and <code>read()</code> and these
+low level syscall wrappers lived&#8230; were they considered part of the C
+standard library? Or were they in some bare-bones thing in some other
+category of code that operating systems provided?</p>
+
+<p>Naw, it&#8217;s all C Standard Library. It&#8217;s just that (I think) <code>write</code> and
+<code>read</code> are so low level as to not be considered part of <code>stdio</code>, the IO
+subset of the C standard lib.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-17T17:52:00-04:00" pubdate data-updated="true">Oct 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/10/17/gnomons-all-up-on-this-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/10/17/gnomons-all-up-on-this-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
