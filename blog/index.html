@@ -2362,6 +2362,150 @@ whitchajigger.</p>
 
 <p><code>/etc/services</code> maintains known port names.</p>
 
+<h2>getsockname</h2>
+
+<p>This is useful when you&#8217;re using ephemeral ports (listen without
+bind).</p>
+
+<pre><code>require 'socket'
+s = Socket.net(:INET, :STREAM)
+s.listen(5)
+s.puts s.local_address.ip_port
+</code></pre>
+
+<p><code>local_address</code> is a wrapper around <code>s.getsockname</code>, which is some null
+padded garbage. For UNIX domain sockets it&#8217;ll contain the file pathname.</p>
+
+<p>This is the difference between sockets bound at 127.0.0.1:45454 and
+0.0.0.0:45455, which shows that both the local ip and port are
+represented in getsockname.</p>
+
+<pre><code>=&gt; "\x10\x02\xB1\x8E\x7F\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+=&gt; "\x10\x02\xB1\x8F\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+</code></pre>
+
+<h2>UDP ephemeral port server</h2>
+
+<p>So, <code>listen()</code> on a STREAM server will implicitly perform an ephemeral
+port bind if you haven&#8217;t explicitly called <code>bind()</code> already; is it
+possible to make an ephemeral UDP server, wherein the port is
+ephemerally decided by the kernel? Well, yes, but you have to call bind;
+the trick is to call it with port 0 to signify the kernel should pick
+one for you. Why would you do this? I don&#8217;t know; probably if you wanted
+some anonymous service that no attacker could guess the port of ahead of
+time? But you&#8217;d still need to advertise your port somehow.</p>
+
+<h2>UNIX v internet domain sockets</h2>
+
+<ul>
+<li>UNIX faster on some implementations</li>
+<li>UNIX DGRAM delivery is reliable</li>
+<li>UNIX lets you use file permissions for authentication</li>
+<li>UNIX lets you pass open file descriptors when forking, etc</li>
+</ul>
+
+
+<p>But often internet sockets are the way to go since they work locally and
+remotely.</p>
+
+<h2>Load-balancing with DNS</h2>
+
+<p>If you provide multiple IPs to the same DNS record, you get round-robin
+resolution, babeh.</p>
+
+<h2>inetd; inet daemon</h2>
+
+<p>If you have infrequently used daemons that would hog a process table
+entry and resources, why not give their sockets to inetd and inetd will
+spin up your servers when they need them.</p>
+
+<ul>
+<li>number of processes reduced</li>
+<li>inetd does the server-y stuff that its clients would otherwise have to
+write.</li>
+</ul>
+
+
+<p>aka internet superserver.</p>
+
+<h2>Who responds to ICMP messages?</h2>
+
+<p>Just routers/gateways. Not apps, unless you&#8217;re opening raw sockets n shit.</p>
+
+<p>For instance you can&#8217;t spin up a rails server on localhost:3000 and
+expect <code>ping localhost:3000</code> to work, because it&#8217;s only listening to
+TCP/UDP sockets. AHHHH I am saying so much ignorance: here&#8217;s the truth:</p>
+
+<p>ICMP has no concept of port. Port is TCP/UDP concept. ALWAYS REMEMBER
+THAT. ICMP is IP-only. Whatever responds to / notices an incoming ICMP
+request must only have an IP address, and not expect to use a port in
+any way. So gateways/hosts/routers will respond to ICMP. You can ping
+your router. You can ping gateways. You can traceroute all the way to a
+website. And you can ping localhost, because loopback is a gateway.</p>
+
+<p>So how can you write a program that listens for ICMP requests? You need
+a raw socket, which requires sudo:</p>
+
+<pre><code>require 'socket'
+require 'base64'
+
+rsock = Socket.new(:INET, :RAW)
+
+loop do
+  s = rsock.recv(1024)
+  enc = Base64.encode64(s)
+  puts enc
+end
+</code></pre>
+
+<p>Again, no concept of port; there&#8217;s no <code>bind</code> here nor does the kernel
+assign an ephemeral port; it&#8217;s all raw sockets babeh.</p>
+
+<p>From <code>ping(8)</code>:</p>
+
+<pre><code>The ping utility uses the ICMP protocol's mandatory ECHO_REQUEST datagram to
+elicit an ICMP ECHO_RESPONSE from a host or gateway.
+</code></pre>
+
+<p>So <code>ping</code> pings gateways/hosts, not servers.</p>
+
+<h2>ECONNREFUSED</h2>
+
+<p>This is caused by ICMP, if it decides it wants to send anything. Shit
+gets dropped.</p>
+
+<h2>MTU: Maximum Transmission Unit</h2>
+
+<p>This is what causes IP packets to be sliced and diced.</p>
+
+<p>http://en.wikipedia.org/wiki/Maximum_transmission_unit</p>
+
+<p>The min MTU between two endpoints is the path MTU. The minimum allowable
+MTU is well-defined, I forget what it is, but I think there&#8217;s one
+guaranteed by IP.</p>
+
+<p>You can find the path MTU (per TCP/UDP RFC) by setting do not fragment
+flag and seeing if ICMP sends back a failure due to datagram size. That
+said, lots of gateways silently drop ICMP to prevent DoS:</p>
+
+<pre><code>http://en.wikipedia.org/wiki/Black_hole_(networking)
+</code></pre>
+
+<p>People might black hole to prevent pings; you can still send well formed
+TCP/UDP requests but it won&#8217;t respond to ICMP <code>ECHO_REQUEST</code>s or
+anything like that.</p>
+
+<h2>Packet-switching</h2>
+
+<blockquote><p>Packet switching is a digital networking communications method that groups all transmitted data – regardless of content, type, or structure – into suitably sized blocks, called packets.</p></blockquote>
+
+<p>Switching I believe is how two endpoints of a physical link decide how
+to send data between each other; they could either do circuit switching
+and have a dedicated connection until the connection was over,
+or you can packet switch, whereby you
+break the communication into small packets that send all at once (and IP
+might slice them to fit the link&#8217;s MTU).</p>
+
 <h2>C Standard Library</h2>
 
 <p>I was confused for a moment about where <code>write()</code> and <code>read()</code> and these
