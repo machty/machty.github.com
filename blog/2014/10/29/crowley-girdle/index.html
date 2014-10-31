@@ -1,0 +1,358 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Crowley Girdle  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Crowley Girdle</h2>
+	<div class="entry-content"><h2>Partial reads/writes for sockets?</h2>
+
+<p>Why/how?</p>
+
+<ul>
+<li>reads: fewer bytes in the socket buffer than requested</li>
+<li>writes: insufficient buffer space to transfer all requested bytes and
+
+<ul>
+<li>interrupt by signal handler (not just a signal, but a
+custom-specified signal handler)</li>
+<li>NONBLOCK enabled and only some of the bytes could be transferred</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So it seems that <code>write</code>s just put data into the buffer, rather than
+guarantee some transmission. How do you block to make sure all data was
+received by the server?</p>
+
+<ul>
+<li>UDP: you can&#8217;t, since delivery is unreliable and there&#8217;s no concept of
+ack</li>
+<li>TCP: you <em>could</em> I guess, but at that point you&#8217;d probably want some
+kind of application layer ack</li>
+</ul>
+
+
+<p>Blocking reads/writes only (and immediately) return 0 bytes if EOF.
+Non-blocking would fire EAGAIN (or WOULDBLOCK for synack).</p>
+
+<h2>What interrupts a blocking call?</h2>
+
+<p>Signal handlers. And only signal handlers.</p>
+
+<p>This article does a great job explaining why EINTR fires:
+http://250bpm.com/blog:12</p>
+
+<p>Basically, if you CTRL-C (or any other interrupt), you can&#8217;t just have
+the kernel start you off back on the same syscall that was blocking, or
+else you&#8217;ll have no opportunity to respond to a handled interrupt, e.g.
+setting a flag in a signal handler that tells the world it&#8217;s quitting.</p>
+
+<p>Also note that yielding the CPU (by way of a blocking sys call) is <em>not</em>
+considered an &#8220;interrupt&#8221;; durr, if that were the case, then every
+syscall would self-interrupt. This sounds obvious now but this shit is
+complicated!</p>
+
+<h2>Shutdown</h2>
+
+<p><code>close</code> closes both sides of socket, shutdown only does half.</p>
+
+<ul>
+<li>shutdown read: future reads become eof. Called on UNIX domain socket,
+EPIPE and SIGPIPE will happen if the peer continues to write.</li>
+<li>shutdown write: Future writes yield SIG/EPIPE. Starts signalling EOF
+to reading peer.</li>
+</ul>
+
+
+<p>Shutdown operates on the file description, closing all other descriptors
+pointing to the same description. <code>shutdown</code> doesn&#8217;t touch the
+descriptor; you still need to close it.</p>
+
+<h2>recv and send</h2>
+
+<p>Basically socket-specific <code>read</code> and <code>write</code>.</p>
+
+<p>Basically allows granularity of read behavior; you can non-block a
+read/write rather than performing an ioctl first.</p>
+
+<ul>
+<li>DONTWAIT; fire EAGAIN if nothing there (only differs</li>
+</ul>
+
+
+<h2>Giant Ruby IO impedance mismatch</h2>
+
+<p>This has been plaguing me since the beginning of time, particularly as I
+tried to apply examples to Ruby code: Ruby&#8217;s default IO methods don&#8217;t
+map to the same-named syscalls.</p>
+
+<p>Ruby -> C/syscall</p>
+
+<ul>
+<li>IO#read -> fread(n): uses internal C buffer, doesn&#8217;t return less than n
+unless EOF</li>
+<li>IO#readp -> read(n): no buffers used, only read what&#8217;s there</li>
+<li>IO#read_nonblock -> read with <code>NON_BLOCK</code> set</li>
+</ul>
+
+
+<p><code>read_nonblock</code> is like <code>read_partial</code> with nonblock.</p>
+
+<p>SO MORAL OF THE STORY if you&#8217;re reading C code with <code>read()</code> and want
+the equivalent Ruby, use <code>readpartial</code>.</p>
+
+<h2>sendfile</h2>
+
+<p>Takes the shortcut between disk file and peer socket, rather than having
+to buffer in user space first. Whatever fd you pass to it must be
+<code>mmap</code>-able, which usually just means regular files on disk.</p>
+
+<p>Not-unlike the Apache x-sendfile optimization (or nginx x-accel) wherein
+rather than having the application logic handle the slow
+buffering/serving of a file, let nginx or apache do it for you.
+Restrictions obviously apply but whatevs.</p>
+
+<h2>shutdown rd w TCP</h2>
+
+<p>Calling <code>shutdown()</code> on the read side of a TCP socket doesn&#8217;t make a ton
+of sense since there&#8217;s no good way to essentially signal an EPIPE on the
+sending peer. So don&#8217;t do it, it&#8217;s unreliable.</p>
+
+<h2><code>TIME_WAIT</code></h2>
+
+<p>This is the period of time after an active close that&#8217;s been acked by
+the peer; you chill out in this state for a little bit to make sure that
+any re-transmitted duplicate packets are received and dropped.</p>
+
+<p>This period of time can be like, 30 seconds to 2 minutes depending on
+the implementation. Cray cray. I guess this is why you can&#8217;t bind to a
+port immediately after killing the process that was using it.</p>
+
+<p><code>TIME_WAIT</code> is useful for:</p>
+
+<ul>
+<li>reliable connection termination</li>
+<li>allowing enough time for duplicated packets from an old connection to
+not confuse a new connection</li>
+</ul>
+
+
+<p>It allows enough time to send acks and fins and what not.</p>
+
+<p>Noobs try and disable it, as if they don&#8217;t need it, but they probably
+do. <code>TIME_WAIT</code> ensures reliability of future connections. You can use
+<code>SO_REUSEADDR</code> though, coming soon.</p>
+
+<h2>netstat</h2>
+
+<p>Tells you inet and unix socket information. Including send and receive
+queue bytes. I just got Arq so that has a full sendQ for obvious
+reasons.</p>
+
+<p>It&#8217;s probably rare that both Send-Q and Recv-Q would be large; it means
+a program is sending lots of shit (and the server can&#8217;t transmit it fast
+enough) and the program isn&#8217;t reading lots of things out of the buffer.</p>
+
+<p><code>*:*</code> means bound.</p>
+
+<p>Get stats via <code>-s</code>. Stats for tcp <code>-sp tcp</code>.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-29T23:46:00-04:00" pubdate data-updated="true">Oct 29<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/10/29/crowley-girdle/';
+        var disqus_url = 'http://machty.github.com/blog/2014/10/29/crowley-girdle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

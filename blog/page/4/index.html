@@ -112,6 +112,114 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/06/29/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>DAS thangs</h2>
+
+<p>Ctrl-Z suspends a task, but you can resume a task via <code>%1</code> or <code>%2</code>, etc,
+referencing the number next to the job as displayed in <code>jobs</code>:</p>
+
+<pre><code>[1]- suspended bleh
+[2]+ suspended lol
+[3]  suspended lol
+</code></pre>
+
+<p>You can also do <code>%-</code> and <code>%+</code>.</p>
+
+<h3>Inline loops</h3>
+
+<pre><code>while true; do echo "wat"; sleep 1; done
+</code></pre>
+
+<p>ctrl-z to suspend, <code>bg</code> to convert a suspended job to a background job.</p>
+
+<p>Open the output of a command in <code>vim</code>: <code>echo woot | view -</code></p>
+
+<ul>
+<li><code>view</code> is a <code>vim -R</code> alias that opens in read-only mode</li>
+<li><code>-</code> option reads the file from stdin</li>
+</ul>
+
+
+<p>The man page for <code>vim</code> / <code>view</code> mentions that commands are read from
+stderror. So how would we run a command that reads input from stdin and
+commands from stderr? TODO: this.</p>
+
+<pre><code>machty.github.com :: &lt;(echo "wat")
+-bash: /dev/fd/63: Permission denied
+machty.github.com :: echo &lt;(echo "wat")
+/dev/fd/63
+</code></pre>
+
+<p><code>&lt;()</code> will run a command and put its output in a file descriptor which
+is file-like enough to work as an input to most commands. Gary&#8217;s example
+is the &#8220;diff of diffs&#8221;, which is mostly useful to see if two branches
+(e.g. one rebased and the other not) have the same content.</p>
+
+<pre><code>diff -u &lt;(git diff master~5..master~1) &lt;(git diff master~4..master)
+</code></pre>
+
+<p>Can diff google com and fr, e.g.</p>
+
+<pre><code>diff &lt;(curl www.google.com | tidy) &lt;(curl www.google.fr | tidy) | view -
+</code></pre>
+
+<p>This is stupidly cool. Another use case is diffing localhost w deployed
+site.</p>
+
+<h2>subterfuge</h2>
+
+<p>I thought this word was a synonym for &#8220;plasma&#8221;, as in the liquid-y
+filler part of blood that&#8217;s revealed when you spin blood in a
+centrifuge. I think the centrifuge&#8217;s involvement in that tripped me up.</p>
+
+<p>http://www.merriam-webster.com/dictionary/subterfuge</p>
+
+<p>It actually just means</p>
+
+<ul>
+<li>deceit used in order to achieve one&#8217;s goal</li>
+</ul>
+
+
+<h2>Cordova My Mac 64-bit</h2>
+
+<p>This was the only thing showing up after I changed the project name in
+config.xml away from what I&#8217;d had it as when I first generated the iOS
+platform. Remember this crap; I&#8217;m sure I&#8217;ll have to fight it again.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-29T19:29:00-04:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/06/29/social-media-triggers/">
 		
 			Social Media Triggers</a>
@@ -2019,57 +2127,6 @@ end
 
 <time datetime="2014-05-24T07:56:00-04:00" pubdate data-updated="true">May 24<span>th</span>, 2014</time></div>
 	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/22/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Array Computed / Reduce Computed</h2>
-
-<p>The difference between reduce computed properties and array computed
-properties in Ember is that reduce computed properties will boil down
-the contents of an array to <em>some value</em> using one-at-a-time semantics;
-Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
-
-<p>So you can&#8217;t write a &#8220;sum&#8221; Array Computed; you&#8217;d just use reduce
-computed for that. And you <em>could</em> write your own hand-crafted &#8220;filter&#8221;
-reduced CP, but why not use the Array Computed API for that?</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-22T14:08:00-04:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
-
-</div>
 
 
 	

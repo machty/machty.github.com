@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-10-29T23:45:06-04:00</updated>
+  <updated>2014-10-31T06:44:01-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,167 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Crowley Girdle]]></title>
+    <link href="http://machty.github.com/blog/2014/10/29/crowley-girdle/"/>
+    <updated>2014-10-29T23:46:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/10/29/crowley-girdle</id>
+    <content type="html"><![CDATA[<h2>Partial reads/writes for sockets?</h2>
+
+<p>Why/how?</p>
+
+<ul>
+<li>reads: fewer bytes in the socket buffer than requested</li>
+<li>writes: insufficient buffer space to transfer all requested bytes and
+
+<ul>
+<li>interrupt by signal handler (not just a signal, but a
+custom-specified signal handler)</li>
+<li>NONBLOCK enabled and only some of the bytes could be transferred</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So it seems that <code>write</code>s just put data into the buffer, rather than
+guarantee some transmission. How do you block to make sure all data was
+received by the server?</p>
+
+<ul>
+<li>UDP: you can&#8217;t, since delivery is unreliable and there&#8217;s no concept of
+ack</li>
+<li>TCP: you <em>could</em> I guess, but at that point you&#8217;d probably want some
+kind of application layer ack</li>
+</ul>
+
+
+<p>Blocking reads/writes only (and immediately) return 0 bytes if EOF.
+Non-blocking would fire EAGAIN (or WOULDBLOCK for synack).</p>
+
+<h2>What interrupts a blocking call?</h2>
+
+<p>Signal handlers. And only signal handlers.</p>
+
+<p>This article does a great job explaining why EINTR fires:
+http://250bpm.com/blog:12</p>
+
+<p>Basically, if you CTRL-C (or any other interrupt), you can&#8217;t just have
+the kernel start you off back on the same syscall that was blocking, or
+else you&#8217;ll have no opportunity to respond to a handled interrupt, e.g.
+setting a flag in a signal handler that tells the world it&#8217;s quitting.</p>
+
+<p>Also note that yielding the CPU (by way of a blocking sys call) is <em>not</em>
+considered an &#8220;interrupt&#8221;; durr, if that were the case, then every
+syscall would self-interrupt. This sounds obvious now but this shit is
+complicated!</p>
+
+<h2>Shutdown</h2>
+
+<p><code>close</code> closes both sides of socket, shutdown only does half.</p>
+
+<ul>
+<li>shutdown read: future reads become eof. Called on UNIX domain socket,
+EPIPE and SIGPIPE will happen if the peer continues to write.</li>
+<li>shutdown write: Future writes yield SIG/EPIPE. Starts signalling EOF
+to reading peer.</li>
+</ul>
+
+
+<p>Shutdown operates on the file description, closing all other descriptors
+pointing to the same description. <code>shutdown</code> doesn&#8217;t touch the
+descriptor; you still need to close it.</p>
+
+<h2>recv and send</h2>
+
+<p>Basically socket-specific <code>read</code> and <code>write</code>.</p>
+
+<p>Basically allows granularity of read behavior; you can non-block a
+read/write rather than performing an ioctl first.</p>
+
+<ul>
+<li>DONTWAIT; fire EAGAIN if nothing there (only differs</li>
+</ul>
+
+
+<h2>Giant Ruby IO impedance mismatch</h2>
+
+<p>This has been plaguing me since the beginning of time, particularly as I
+tried to apply examples to Ruby code: Ruby&#8217;s default IO methods don&#8217;t
+map to the same-named syscalls.</p>
+
+<p>Ruby -> C/syscall</p>
+
+<ul>
+<li>IO#read -> fread(n): uses internal C buffer, doesn&#8217;t return less than n
+unless EOF</li>
+<li>IO#readp -> read(n): no buffers used, only read what&#8217;s there</li>
+<li>IO#read_nonblock -> read with <code>NON_BLOCK</code> set</li>
+</ul>
+
+
+<p><code>read_nonblock</code> is like <code>read_partial</code> with nonblock.</p>
+
+<p>SO MORAL OF THE STORY if you&#8217;re reading C code with <code>read()</code> and want
+the equivalent Ruby, use <code>readpartial</code>.</p>
+
+<h2>sendfile</h2>
+
+<p>Takes the shortcut between disk file and peer socket, rather than having
+to buffer in user space first. Whatever fd you pass to it must be
+<code>mmap</code>-able, which usually just means regular files on disk.</p>
+
+<p>Not-unlike the Apache x-sendfile optimization (or nginx x-accel) wherein
+rather than having the application logic handle the slow
+buffering/serving of a file, let nginx or apache do it for you.
+Restrictions obviously apply but whatevs.</p>
+
+<h2>shutdown rd w TCP</h2>
+
+<p>Calling <code>shutdown()</code> on the read side of a TCP socket doesn&#8217;t make a ton
+of sense since there&#8217;s no good way to essentially signal an EPIPE on the
+sending peer. So don&#8217;t do it, it&#8217;s unreliable.</p>
+
+<h2><code>TIME_WAIT</code></h2>
+
+<p>This is the period of time after an active close that&#8217;s been acked by
+the peer; you chill out in this state for a little bit to make sure that
+any re-transmitted duplicate packets are received and dropped.</p>
+
+<p>This period of time can be like, 30 seconds to 2 minutes depending on
+the implementation. Cray cray. I guess this is why you can&#8217;t bind to a
+port immediately after killing the process that was using it.</p>
+
+<p><code>TIME_WAIT</code> is useful for:</p>
+
+<ul>
+<li>reliable connection termination</li>
+<li>allowing enough time for duplicated packets from an old connection to
+not confuse a new connection</li>
+</ul>
+
+
+<p>It allows enough time to send acks and fins and what not.</p>
+
+<p>Noobs try and disable it, as if they don&#8217;t need it, but they probably
+do. <code>TIME_WAIT</code> ensures reliability of future connections. You can use
+<code>SO_REUSEADDR</code> though, coming soon.</p>
+
+<h2>netstat</h2>
+
+<p>Tells you inet and unix socket information. Including send and receive
+queue bytes. I just got Arq so that has a full sendQ for obvious
+reasons.</p>
+
+<p>It&#8217;s probably rare that both Send-Q and Recv-Q would be large; it means
+a program is sending lots of shit (and the server can&#8217;t transmit it fast
+enough) and the program isn&#8217;t reading lots of things out of the buffer.</p>
+
+<p><code>*:*</code> means bound.</p>
+
+<p>Get stats via <code>-s</code>. Stats for tcp <code>-sp tcp</code>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gnomons all up on this journal]]></title>
@@ -8498,967 +8659,6 @@ not thread safe, but process-safe? syscall-safe?</p>
 
 
 <p>I have no fucking IDEA MY BRAIN IS DEAD.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/26/daily-journal/"/>
-    <updated>2014-07-26T15:10:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/26/daily-journal</id>
-    <content type="html"><![CDATA[<h2>top</h2>
-
-<blockquote><p>display and update sorted information about processes</p></blockquote>
-
-<p><code>top</code> will display a sampled, updating list of processes, ordered by pid
-by default. Order by cpu:</p>
-
-<pre><code>top -o cpu
-</code></pre>
-
-<p>Filter by a pid</p>
-
-<pre><code>top -pid 12345
-</code></pre>
-
-<p>Show a single sample of the pid and thread number for a given pid</p>
-
-<pre><code>top -l1 -pid 1234 -stats pid,th
-</code></pre>
-
-<h2>Spawn 50 ruby threads&#8230;</h2>
-
-<p>and you wind up w 52: <code>Thread.main</code> + the 50 you created + Ruby
-housekeeping thread (listening for OS signals and piping them
-synchronously to main thread).</p>
-
-<p>Ruby creates legit OS threads, vs <code>_____</code> threads, whatever the
-terminology is for threads that live entirely in the code.</p>
-
-<h2>Thread#join</h2>
-
-<p>Yes, you have to call it on a spawned thread so that the main thread
-will wait on it before prematurely exiting. But did you know that
-exceptions thrown in a spawned thread get re-raised on the main thread
-if you do <code>.join</code>?</p>
-
-<p><code>Thread#value</code> joins and returns the last value of the thread.</p>
-
-<p><code>Thread#status</code> returns status for live, dead, erroed, dying threads.</p>
-
-<p><code>Thread.stop</code> puts the thread to sleep and it won&#8217;t wake up until
-someone calls <code>wakeup</code> on it</p>
-
-<p><code>Thread.pass</code> hints the OS to schedule another thread, but this may be
-ignored by the scheduler.</p>
-
-<p><code>Thread#raise</code> lets you externally fire exceptions within another thread
-but should not be used because <code>ensure</code> is busted. <code>Thread#kill</code> does
-what you expect but should also be aborted for the same reasons.</p>
-
-<p>Multiple threads mean concurrency; they <em>might</em> mean parallelism. One
-CPU switching b/w threads means concurrency but not parallelism;
-multiple cores means paralleilism if they&#8217;re both executing.</p>
-
-<p>Code can&#8217;t be parallel, only concurrent. The executation of concurrent
-code can be parallel if the scheduler so chooses.</p>
-
-<h2>golang concurrency vs parallelism</h2>
-
-<p>http://concur.rspace.googlecode.com/hg/talk/concur.html#slide-2</p>
-
-<p>Concurrency is defined as:</p>
-
-<blockquote><p>Programming as the composition of independently executing processes</p></blockquote>
-
-<p>not Linux processes, but rather the famously harder to define Process.</p>
-
-<p>Parallelism is</p>
-
-<blockquote><p>Programming as the simultaneous execution of (possibly related) computations.</p>
-
-<p>Concurrency provides a way to structure a solution to solve a problem that may (but not necessarily) be parallelizable</p></blockquote>
-
-<p>Concurrency facilitates but doesn&#8217;t guarantee parallelism.</p>
-
-<p>Goroutines aren&#8217;t threads; they&#8217;re similar but cheaper, won&#8217;t block
-other goroutines, and multiplexed onto OS threads as necessary.</p>
-
-<p>Synchronize via channels. I guess this is like Ruby Queue? Sounds like
-you&#8217;d never do someGoroutine.value but rather use the channel primitive.</p>
-
-<h2>ruby concurrency and you</h2>
-
-<p>https://blog.engineyard.com/2011/ruby-concurrency-and-you</p>
-
-<p>Green threads</p>
-
-<ul>
-<li>scheduled by VM, rather than underlying OS</li>
-<li>pre 1.9 Ruby was this way (MRI)</li>
-<li>managed in user space rather than kernel space</li>
-</ul>
-
-
-<p>Test: if i run Ruby 1.8.7 and do a top of new threads, I would expect
-the thread count to be only whatever I started with.</p>
-
-<p>BEHOLD, on 1.8.7:</p>
-
-<pre><code>PID    #TH
-84752  1
-</code></pre>
-
-<p>So old ruby didn&#8217;t even spawn another thread for housekeeping&#8230; I guess
-maybe it wasn&#8217;t necessary because it didn&#8217;t have to coordinate the
-signals landing at any random currently-active thread? Pretty cool.</p>
-
-<p>I guess green threads are easy to implement in any interpreted language:
-in the main loop of the interpreter you can just check if 100ms has gone
-by and then move to another other known threads.</p>
-
-<p>Early Java had green threads&#8230; I don&#8217;t know enough about Java to
-comment here.</p>
-
-<p>Ruby &lt;1.9 was smart enough to know when one of these threads was blocked
-on external data so that it could &#8220;sleep&#8221; until the data arrived:</p>
-
-<blockquote><p>MRI 1.8.7 is quite smart, and knows that when a Thread is waiting for some external event (such as a browser to send an HTTP request), the Thread can be put to sleep and be woken up when data is detected.</p></blockquote>
-
-<p>1.9 uses native threads, but there&#8217;s still a GIL because the non-Ruby
-parts of MRI 1.9 aren&#8217;t thread-safe.</p>
-
-<p>MRI 1.9 uses the same technique as MRI 1.8 to improve the situation,
-namely the GIL is released if a Thread is waiting on an external
-event (normally IO) which improves responsiveness.</p>
-
-<p>Great read:</p>
-
-<p>http://yehudakatz.com/2010/08/14/threads-in-ruby-enough-already/</p>
-
-<p>Threads are hard, but requests are an extremely clean concurrency
-primitive: controllers and the models loaded and views rendered, etc.,
-are not shared between threads that are processing requests. It&#8217;s only
-if you start using global state that problems arise, but why are you
-doing that?</p>
-
-<p>Why the Ruby/Rails thread FUD?</p>
-
-<ul>
-<li>Early Rails wasn&#8217;t threadsafe; essentially a mutex around each request</li>
-<li>Mongrel explicitly mutexed around its Rails adapter, so even when
-<code>threadsafe!</code> was added, you&#8217;d still have zero concurrency in mongrel.</li>
-</ul>
-
-
-<blockquote><p>For safety, Ruby does not allow a context switch while in C code unless the C code explicitly tells the VM that it’s ok to do so.</p></blockquote>
-
-<p>And mysql was poorly written in this case. So mysql would block.</p>
-
-<blockquote><p>A lot of people talk about the GIL (global interpreter lock) in Ruby 1.9 as a death knell for concurrency. For the uninitiated, the GIL disallows multiple CPU cores from running Ruby code simultaneously. That does mean that you’ll need one Ruby process (or thereabouts) per CPU core, but it also means that if your multithreaded code is running correctly, you should need only one process per CPU core. I’ve heard tales of six or more processes per core. Since it’s possible to fully utilize a CPU with a single process (even in Ruby 1.8), these applications could get a 4-6x improvement in RAM usage (depending on context-switching overhead) by switching to threadsafe mode and using modern drivers for blocking operations.</p></blockquote>
-
-<p>Node vs Ruby Threading:</p>
-
-<p>Yehuda: &#8220;the main difference is that a callback is smaller in size than a stack&#8221;</p>
-
-<p>In other words, the context switch that happens when switching threads
-includes copying over an entire stack of the thread you&#8217;re resuming and
-some other details I don&#8217;t know of off the top of my head. But with
-callbacks, the callbacks have no stack (is this true in Rubyland? maybe
-there&#8217;s stack trace information but probably no stack. The only stack
-starts from where the callback/block was created, and the same is true w
-threads, but the point is that in a thread-per-request model, the stack
-goes all the way up to when the request was first received, which can be
-a pretty tall stack).</p>
-
-<p>So what about Fibers? They&#8217;re cooperative, but why is their context
-switch not a big deal? They have a stack size limit of 4kb. How can I
-test this?</p>
-
-<p>Here&#8217;s a nice article:</p>
-
-<p>http://timetobleed.com/fixing-threads-in-ruby-18-a-2-10x-performance-boost/</p>
-
-<p>Seems to suggest that the stack that needs to be copied when context
-switching includes interpreter code, which has many local vars and
-sometimes the stack is up to 4kb, which is cray cray.</p>
-
-<p>Green threads: pre-emptible userland threads. userland = not kernel
-land.</p>
-
-<p>You can hack into the thread-yielding code of old Ruby to allocate
-stacks on the heap so that all you have to do to context switch is
-change what rsp (pointer to the bottom of the stack) points to. This
-means the stack won&#8217;t grow (so you have to pick a sensible size).</p>
-
-<p>Ruby 1.9 performs way better in the benchmarks than his hacks&#8230; why?
-&#8220;Thanks. 1.9 uses pthreads which create stacks in a similar manner to
-what I did.&#8221; Awesome.</p>
-
-<p>pthreads = POSIX threads</p>
-
-<p>http://timetobleed.com/threading-models-so-many-different-ways-to-get-stuff-done/</p>
-
-<p>Threads models:</p>
-
-<h3>1:1 (native threads)</h3>
-
-<p>One kernel thread for every user thread.</p>
-
-<p>Pros</p>
-
-<ul>
-<li>execute threads on different CPUs</li>
-<li>threads don&#8217;t block each other</li>
-<li>shared memory b/w threads</li>
-</ul>
-
-
-<p>Cons</p>
-
-<ul>
-<li>Setup overhead since creating a thread requires a system call (and
-those are slow)</li>
-<li>Low upper bound on the number of threads that can be created</li>
-</ul>
-
-
-<p><code>pthread_create</code> is the fn that makes the system call to create the
-thread.</p>
-
-<h3>1:N (green threads)</h3>
-
-<p>&#8220;lightweight threads&#8221;</p>
-
-<ul>
-<li>thread creation, execution, cleanup are cheap</li>
-<li>lots of threads can be created</li>
-</ul>
-
-
-<p>Cons</p>
-
-<ul>
-<li>kernel doesn&#8217;t know about it, so no parallel execution across CPUs</li>
-<li>blocking IO can block all green threads</li>
-</ul>
-
-
-<p>Forking + threading and cross-process communication is one way around
-limitations.</p>
-
-<h3>M:N</h3>
-
-<p>Hybrid of above</p>
-
-<ul>
-<li>Multi CPUs</li>
-<li>Not all threads blocked by blocking system calls</li>
-<li>Cheap</li>
-</ul>
-
-
-<p>Cons</p>
-
-<ul>
-<li>Really really hard to synchronize userland and kernel scheduler</li>
-<li>Green threads will block within same kernel thread</li>
-<li>Difficult to maintain</li>
-</ul>
-
-
-<p>1:1 has shown itself to be more performant, but in some cases M:N might
-be the right choice.</p>
-
-<p>TODO: read this http://www.akkadia.org/drepper/nptl-design.pdf</p>
-
-<pre><code>b = nil
-
-t = Thread.new do
-  b = Fiber.new {
-    puts "FIBER"
-  }
-end
-
-while !b
-  # just wait
-end
-
-b.resume
-</code></pre>
-
-<p>This results in</p>
-
-<pre><code>fiberthread.rb:13:in `resume': fiber called across threads (FiberError)
-        from fiberthread.rb:13:in `&lt;main&gt;'
-</code></pre>
-
-<p>Of course it would.</p>
-
-<p>Use strace / dtruss to trace sys calls.</p>
-
-<p>Spinlocks are locks that, rather than sleeping, actively busy-wait until
-the lock is free. This only makes sense if the wait is expected to be
-short, otherwise it might block other threads.</p>
-
-<p>Interesting, from the wiki:</p>
-
-<blockquote><p>Most operating systems (including Solaris, Mac OS X and FreeBSD) use a hybrid approach called &#8220;adaptive mutex&#8221;. The idea is to use a spinlock when trying to access a resource locked by a currently-running thread, but to sleep if the thread is not currently running. (The latter is always the case on single-processor systems.)</p></blockquote>
-
-<p>The idea is that a lock by an active thread is likely to be finished
-soon, and since spinlocks avoid the scheduling overhead of a context
-switch, then hooray.</p>
-
-<p>Busy-waiting in general means while-looping until some condition is
-true. You can even do this in JS:</p>
-
-<pre><code>var end = +new Date() + 1000;
-while (+new Date() &lt; end) {}
-</code></pre>
-
-<p>So whether Node or EventMachine, the concept is the same: both run on
-callbacks.</p>
-
-<p>Realization: I was thinking that I could demonstrate the difference b/w
-green threads and OS threads by seeing if a while(true) in a green
-thread would yield to others, but the answer is:</p>
-
-<ul>
-<li>of course it would yield; each iteration of the while true is
-an iteration of the interpreter loop that&#8217;s running commands, so its
-timer would fire at that point.</li>
-<li>the only time it&#8217;d block is if you called out to a C extension that
-looped and didn&#8217;t yield back control.</li>
-</ul>
-
-
-<p>It seems a Fiber&#8217;s 4k stack begins at the point at which it is created.
-Hmm. So does it or does it not include interpreter stuff? Well for one
-it&#8217;s in the same thread as a requirement.</p>
-
-<p>Reasons why Fibers are faster than threads:</p>
-
-<ul>
-<li>limited 4kb stack for quick context switching</li>
-<li>no pre-emption means no aggressive/frequent context switching;
-context-switch as infrequently as you&#8217;d like.</li>
-</ul>
-
-
-<p>https://github.com/eventmachine/eventmachine/blob/master/docs/old/LIGHTWEIGHT_CONCURRENCY</p>
-
-<p>Lightweight Concurrency generally means</p>
-
-<ul>
-<li>putting thread scheduling under the control of your program</li>
-</ul>
-
-
-<blockquote><p>By &#8220;lighter,&#8221; we mean: less
-resource-intensive in one or more dimensions, usually including memory and
-CPU usage. In general, you turn to LC in the hope of improving the
-performance and scalability of your programs.</p></blockquote>
-
-<p>NOTE: race conditions can happen in concurrent environments, even if
-parallelism isn&#8217;t there, e.g. preempting</p>
-
-<p>Mac has a max 2048 thread limit.</p>
-
-<p>&#8220;IO Bound&#8221; means your program is mostly bottlenecked by IO, such that
-swapping for a faster IO would boost your program performance immensely.</p>
-
-<p>In such a case, going multi-threaded is a no-brainer rather than
-serially getting blocked on each slow thing. But if you over do it then
-you might just be wasting memory/CPU resources from thread stacks and
-context switching that it&#8217;s not justified.</p>
-
-<p>&#8220;CPU bound&#8221; means doubling CPU would mean the job would get done that
-much faster.</p>
-
-<p>Quad-core with 4 threads on CPU bound means mega-wins for Rubinius but
-obviously not GIL&#8217;d MRI. If you make it 5, then you get the
-context-switching overhead.</p>
-
-<p>Rails apps are combo of IO-bound and CPU-bound</p>
-
-<p>IO:</p>
-
-<ul>
-<li>Database</li>
-<li>Third party APIs</li>
-<li>Files read</li>
-</ul>
-
-
-<p>CPU:</p>
-
-<ul>
-<li>Rendering templates</li>
-<li>Rendering JSON</li>
-</ul>
-
-
-<p>Measure measure measure.</p>
-
-<p>This is comically incorrect:</p>
-
-<pre><code>Mutex.new.synchronize do
-  puts "LOL please never do this"
-end
-</code></pre>
-
-<p>should be</p>
-
-<pre><code>m = Mutex.new
-
-# ...create thread...
-
-m.synchronize do
-  puts "LOL please never do this"
-end
-</code></pre>
-
-<p>&#8220;critical section&#8221; refers to the part of your concurrent code that
-alters shared data.</p>
-
-<p>Memory Models describe the guarantees made to threads when
-reading-from/writing-to memory, which mostly become important to think
-about in a multi-threaded settings. The memory model describes how
-caching occurs in the registers before actually writing out to memory,
-and it describes the scope of compiler/hardware optimizations that can
-be made that lead to non-determinant order of memory operations which
-can fuck your shit unless you use <code>volatile</code> in Java or explicit mutexes
-in Ruby.  Ruby doesn&#8217;t have a memory model spec yet. Java and Go and
-others do. I guess Rust nips this in the bud w ownership.</p>
-
-<p>Mutex is a form of a memory barrier, and I think <code>volatile</code> is too.</p>
-
-<p>Livelocking is when <code>try_lock</code>s repeatedly fail, so the threads are
-still technically alive but stuck in the same loop.</p>
-
-<p>Best solution is to declare mutex grabbing in the same order via a mutex
-hierarchy.</p>
-
-<h2>Signals in ruby</h2>
-
-<p>Rubyz</p>
-
-<pre><code>Signal.trap("USR1") do
-  puts "lol handling your custom user handler"
-end
-puts Process.pid # =&gt; e.g. 12345
-</code></pre>
-
-<p>Shellz</p>
-
-<pre><code>kill -s USR1 12345
-</code></pre>
-
-<p>So many ways to kill a program:</p>
-
-<ul>
-<li>Abort: often self-initiated by <code>abort</code></li>
-</ul>
-
-
-<h2>Difference b/w seg fault and bus error</h2>
-
-<p>http://stackoverflow.com/questions/838540/bus-error-vs-segmentation-fault</p>
-
-<p>On most architectures I&#8217;ve used, the distinction is that:</p>
-
-<ul>
-<li>a SEGV is caused when you access memory you&#8217;re not meant to
-(e.g., outside of your address space).</li>
-<li>a SIGBUS is caused due to alignment issues with the CPU
-(e.g., trying to read a long from an address which isn&#8217;t a multiple of 4).</li>
-</ul>
-
-
-<h2>Signals in C</h2>
-
-<p>This is just for fun, but you can set up signal masks and signal
-handles and all that fun crap.</p>
-
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
-#include &lt;unistd.h&gt;
-
-static int gotSignal = 0;
-
-void wat(int s) {
-  printf("Got Signal %d", s);
-  gotSignal = 1;
-}
-
-int main() {
-  /* SIGUSR1 == 16 */
-  signal(SIGUSR1, &amp;wat);
-
-  pid_t pid = getpid();
-  printf("The process id is %d", pid);
-
-  // prevent signal from getting here
-  sigset_t s;
-  sigaddset(&amp;s, SIGUSR1);
-  // uncomment to block the signal from arriving
-  //sigprocmask(SIG_BLOCK, &amp;s, NULL);
-
-  while(!gotSignal) {
-    printf(".");
-    fflush(stdout);
-    sleep(1);
-  }
-
-  printf("\nDone!\n");
-}
-</code></pre>
-
-<p>and you can send it usr1 via</p>
-
-<pre><code>kill -s USR1 12345
-</code></pre>
-
-<h2>Signals in Node</h2>
-
-<pre><code>var done = false;
-
-process.on("SIGUSR1", function() {
-  done = true;
-});
-
-console.log("pid: ", process.pid);
-
-var timerId = setInterval(function() {
-  if (done) {
-    console.log("DONEZO");
-    clearInterval(timerId);
-  } else {
-    process.stdout.write(".");
-  }
-}, 500);
-</code></pre>
-
-<p>Note that SIGUSR1 is reserved by node.js to start the debugger.
-The above code will work but if the debugger&#8217;s enabled then that&#8217;ll also
-cause it to start.</p>
-
-<p>Seems that signals are often used to start a debugger, or some kind of
-debugging operation. Interesting.</p>
-
-<h2>Condition Variables</h2>
-
-<p>A provider and consumer both use the same mutex. Provider locks when
-providing an update. Consumer locks when trying to perform an operation,
-but internally does a <code>condvar.wait(mutex)</code> with the locked <code>mutex</code> to
-unlock until the <code>condvar</code> is <code>signal</code>ed by the provider.</p>
-
-<p>So why wrap the consumer in a while loop rather than an if (see page 104
-of storimer)? Because there could be multiple consumers.</p>
-
-<p><code>ConditionVariable#signal</code> wakes up a single thread, <code>ConditionVariable#broadcast</code>
-wakes up all threads.</p>
-
-<h2><code>thread_safe</code> gem</h2>
-
-<ul>
-<li>ThreadSafe::Array</li>
-<li>ThreadSafe::Hash</li>
-<li>ThreadSafe::Cache
-
-<ul>
-<li>similar to Hash, but insertion order enumeration isn&#8217;t preserved,
-which means it can be faster</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Immutable = threadsafe</h2>
-
-<p>Read more about it.</p>
-
-<h2>Globals</h2>
-
-<p>The Ruby AST is a global (is it really an AST at that point? is
-dynamically adding a method an example of modifying an AST? ASTs are for
-parsing, not so much adding/removing methods from a class obj).</p>
-
-<p>Anyway, Kaminari was bitten by this:</p>
-
-<p>https://github.com/amatsuda/kaminari/issues/214</p>
-
-<h2>Thread-locals</h2>
-
-<p>Variables that are global to everything in the current thread but hidden
-to everyone else. So you could do</p>
-
-<pre><code>Thread.current[:some_service] = SomeService.new
-</code></pre>
-
-<p>which could open a new connection. Connections are nice concurrency
-primitives, much like request objects in Rails. But if you have too many
-threads, you might hit a max connection limit, so in that case, use
-pools, lol.</p>
-
-<p>Pools let you specify max concurrency, which is likely less than the
-number of threads that might want to consume it, and then when
-requesting access to a thing in a pool, it&#8217;ll block until a slot&#8217;s
-available.</p>
-
-<p>See: https://github.com/mperham/connection_pool</p>
-
-<p>mperham is Mr Sidekiq. Mr. Concurrency in general I guess.</p>
-
-<p>Question: is a connection pool the same as a thread pool? Probably not,
-connection pool is just a resource pool that is thread-aware, but
-doesn&#8217;t constitute individual threads.</p>
-
-<h2>Rubinius Actor</h2>
-
-<p>https://github.com/rubinius/rubinius-actor</p>
-
-<p>Depends on core Rubinius class <code>Channel</code>. TODO: find out why <code>Channel</code>
-doesn&#8217;t/can&#8217;t exist in MRI.</p>
-
-<h2>Rubinius Ruby JITting</h2>
-
-<p>Talking to IRC folk: one of the major reasons for Ruby all the way down
-or at least Ruby most of the way down is that more of it can be JITted
-rather than having the hard C/C++ boundary after which no more
-optimizations can be made.</p>
-
-<p>Also, in some benchmarks b/w Rubinius and JRuby and MRI, etc., one thing
-that comes up a lot is the suggestion that the tests run for longer so
-that the JIT is primed, all the optimizations have been made, etc etc
-etc.</p>
-
-<h2>Rails Batches</h2>
-
-<p>http://api.rubyonrails.org/classes/ActiveRecord/Batches.html</p>
-
-<pre><code>Article.find_each do |a|
-  a.wat
-end
-</code></pre>
-
-<p>this internally splits DB queries into batches of 1000 so that you&#8217;re
-not instantiating potentially a billion Ruby objects for each row. In
-the end you&#8217;ll still allocate the same amount of memory but it can be
-GC&#8217;d along the way vs causing an insane spike and possibly crashing your
-server.</p>
-
-<h2>Server-sent events</h2>
-
-<p>http://tenderlovemaking.com/2012/07/30/is-it-live.html</p>
-
-<ol>
-<li>A stream obj is added to Rails request object, quacks like IO obj.
-You can write to it and close it, but it doesn&#8217;t actually stream live
-to the client; it buffers, and then flushes.</li>
-<li>With <code>ActionController::Live</code>, it&#8217;ll actually stream live.</li>
-<li>Some WebServers, like WEBrick will thwart this by buffering the
-response until it&#8217;s complete. Unicorn could work, but it&#8217;s meant for
-fast responses; anything taking longer than 30s might get terminated.
-Rainbows/Puma/Thin would work.</li>
-</ol>
-
-
-<h2>Celluloid</h2>
-
-<p>Transforms method invocations into blocking messages. Precede w <code>async</code>
-to prevent blocking (obviously still happens async);</p>
-
-<pre><code>require 'celluloid'
-
-class DoesStuff
-  include Celluloid
-
-  attr_accessor :i
-
-  def foo
-    # currently this displays
-    # one item per second.
-    # if you swap comments with
-    # the line after it'll wait
-    # until the very end to print them all
-    # at once because the each at the end
-    # will evaluate the "longest" future first
-    sleep i
-    #sleep (11 - i)
-    i
-  end
-end
-
-
-futures = []
-
-10.times do |i|
-  thing = DoesStuff.new
-  thing.i = i
-
-  futures &lt;&lt; thing.future.foo
-end
-
-
-futures.each do |f|
-  puts "Completed: #{f.value.i}"
-end
-
-sleep
-</code></pre>
-
-<p>This is interesting: https://github.com/celluloid/celluloid/wiki/Frequently-Asked-Questions#q-can-i-do-blocking-io-inside-an-actor-or-do-i-have-to-use-celluloidio</p>
-
-<p>It&#8217;s fine to have blocking IO such as waiting for a DB query to return,
-or slow HTTP response, but you shouldn&#8217;t have it waiting on
-<em>indefinite</em> IO; for that, use Celluloid::IO.</p>
-
-<p>I believe that an actor can&#8217;t be handling multiple messages at the same
-time. Wrong! That&#8217;s only if Erlang/Exclusive mode is on, and you have to
-be careful about that because it means a higher risk of deadlock:</p>
-
-<p>https://github.com/celluloid/celluloid/wiki/Exclusive</p>
-
-<p>Sidekiq doesn&#8217;t make use of return values a whole lot; rather actors are
-expected to send messages back to their &#8220;callers&#8221;.</p>
-
-<p>Accessing localvars is faster than ivars: https://github.com/puma/puma/commit/fb4e23d628ad77c7978b67625d0da0e5b41fd124</p>
-
-<h2>Compare and set (CAS)</h2>
-
-<p>aka check-and-set</p>
-
-<p>For platforms that support it, CAS is a mutex-free approach to
-thread-safety</p>
-
-<pre><code>a += 1
-</code></pre>
-
-<p>is not thread safe, but</p>
-
-<pre><code>cur = a.value
-new_value = cur + 1
-if (!a.compare_and_set(cur, new_value)) 
-  # try again
-end
-</code></pre>
-
-<p>is.</p>
-
-<p>Worth pointing out that Redis supports a form of this using WATCH.</p>
-
-<pre><code>MULTI # begin transaction
-SET foo lol
-SET bar wat
-EXEC # execute
-</code></pre>
-
-<p>so basically if you do</p>
-
-<pre><code>WATCH someval
-MULTI
-set someval lol
-EXEC
-</code></pre>
-
-<p>and someval changed after the MULTI then it will fail.</p>
-
-<p>So why use CAS over a mutex?</p>
-
-<blockquote><p>If the cost of retrying the operation is cheap, or rare, it may be much less expensive than using a lock.</p></blockquote>
-
-<p>Logic checks out.</p>
-
-<pre><code>require 'atomic'
-v = Atomic.new(0)
-v.update do |current|
-  current + 1
-end
-</code></pre>
-
-<p>This is the shorthand to the idempotent loop with CAS.</p>
-
-<p>Lockless showed mega improvements relative to locking in Rubinius but
-not JRuby for some reason.</p>
-
-<p>Hamster is the immutability gem to check out.</p>
-
-<h2>oni</h2>
-
-<p>https://github.com/olery/oni</p>
-
-<p>Uses SQS, look into it because i am such a nooblet.</p>
-
-<h2>SQS</h2>
-
-<p>Uses a visibility timeout after a consumer has started to receive a
-message in which time it is hidden from other consumers, and in this
-time it should be deleted.</p>
-
-<ul>
-<li>Supports GET/POST requests to public URLs, presuming you pass in a
-valid signature
-
-<ul>
-<li>This means you could fire requests directly to SQS rather than
-having to go to a server first&#8230; that is badass.</li>
-</ul>
-</li>
-<li>Reports of scalability problems</li>
-</ul>
-
-
-<p><a href="http://nsono.net/amazon-sqs-vs-rabbitmq/">Alternative: RabbitMQ</a></p>
-
-<ul>
-<li>SQS: consumers must poll for messages, and SQS charges by the request,
-even if the response is empty.</li>
-<li>RabbitMQ supports push</li>
-<li>is free and open source</li>
-<li>based on erlang</li>
-<li>adheres to AMQP (standard for high performance messages queues)</li>
-<li>supports durable queues (crash-recoverable, written to disk)</li>
-<li>delivered in order unless message requeued</li>
-<li>more consistent (much less likely to deliver a message twice unless
-the message actually failed)</li>
-</ul>
-
-
-<p>cons</p>
-
-<ul>
-<li>not necessarily highly available (because it&#8217;s a server that runs on
-whatever instance you wanna put it on, so you have to manage failover,
-redundancy, etc, whereas SQS is a system that handles all of that)</li>
-<li>this is configurable, but the default is for RabbitMQ to drop messages
-if there are no consumers; surprising to SQS folk.</li>
-</ul>
-
-
-<h2>Heartbeats</h2>
-
-<p>https://www.rabbitmq.com/reliability.html</p>
-
-<blockquote><p>In some types of network failure, packet loss can mean that disrupted TCP connections take some time to be detected by the operating system. AMQP offers a heartbeat feature to ensure that the application layer promptly finds out about disrupted connections (and also completely unresponsive peers). Heartbeats also defend against certain network equipment which may terminate &#8220;idle&#8221; TCP connections. In RabbitMQ versions 3.0 and higher, the broker will attempt to negotiate heartbeats by default (although the client can still veto them). Using earlier versions the client must be configured to request heartbeats.</p></blockquote>
-
-<p>Re: &#8216;Heartbeats also defend against certain network equipment which may
-terminate &#8220;idle&#8221; TCP connections.&#8217;: I bet that&#8217;s referring to NAT, which
-manages a cache of IP translations and will go inactive if nothings been
-sent to / received from an IP for a while.</p>
-
-<p>YAY I WAS RIGHT http://stackoverflow.com/questions/865987/do-i-need-to-heartbeat-to-keep-a-tcp-connection-open#comment1713801_866003</p>
-
-<p>So Heartbeats</p>
-
-<ul>
-<li>reassure you the connection is alive in some cases where the failure
-conditions aren&#8217;t otherwise detectable</li>
-<li>keep the NAT state tables warm for your IP</li>
-</ul>
-
-
-<h2>Celluloid::IO</h2>
-
-<p>https://github.com/celluloid/celluloid-io</p>
-
-<p>Provides a different class of Actor that&#8217;s heavier than normal Celluloid
-actors, but contains a high performance reactor like EventMachine or
-cool.io (todo: check out cool.io). So unlike EventMachine you can have
-multiple loops, e.g. one in each actor (resources permitting). (Also,
-does EM really force you to just have one?)</p>
-
-<h2>Autoload</h2>
-
-<p>Yes we know it&#8217;s not threadsafe in MRI. Recent JRuby versions make it
-thread safe, but just eager load your shits before spawning threads.</p>
-
-<h2>Requests as concurrency unit</h2>
-
-<p>I guess in general you should always look for the concurrency unit; that
-domain object that encapsulates all the data you need to get a job done
-so that hopefully you&#8217;re not sharing data between threads. Each request
-gets handled by its own thread.</p>
-
-<h2>Queue</h2>
-
-<p><code>Queue#pop</code> will suspend a thread until data is in the queue. Like a
-mofuggin stream.</p>
-
-<p>Queue is apparently the only thread-safe data structure that ships with
-Ruby.</p>
-
-<h2>JRuby</h2>
-
-<p>Foreign function interface</p>
-
-<p>http://en.wikipedia.org/wiki/Foreign_function_interface</p>
-
-<p>Mechanism for languages to invoke routines from other languages.</p>
-
-<p>Write your extension code in Ruby, FFI will call the write C / Java /
-whatever stuff. It won&#8217;t even be compiled. I guess it just links into
-dynamic libs?</p>
-
-<p>JRuby obviously doesn&#8217;t support C extensions, but FFI extensions will
-work.</p>
-
-<p>JRuby</p>
-
-<ul>
-<li>has no fork(), since JVMs mostly can&#8217;t safely be forked
-(<code>NotImplementedError: fork is not available on this platform</code>)</li>
-<li>Fibers are native threads, rather than MRI green threads, which means
-you are constrained to native thread overhead/limits.</li>
-</ul>
-
-
-<h2>Rubinius (rbx)</h2>
-
-<ul>
-<li>Designed for concurrency, speed.</li>
-<li>Rubinius 2.0 has no GIL</li>
-<li>All tools written in Ruby, including bytecode VM, compiler,
-generational GC, JIT, etc</li>
-<li>No continuations (because dependent on callcc, a C thing)</li>
-<li>At some point, when dealing with locks and low level things, you&#8217;ll
-find C++.</li>
-</ul>
-
-
-<p>http://rubini.us/2011/02/25/why-use-rubinius/</p>
-
-<h2>Ruby Enterprise Edition</h2>
-
-<p>By Phusion. No longer alive.</p>
-
-<ul>
-<li>Compatible w 1.8.7</li>
-<li>End of Life since 2012</li>
-<li>No more work being done, reasons being:
-
-<ul>
-<li>Rails 4 no longer supporting 1.8</li>
-<li>COW patch accepted on Ruby 2.0</li>
-<li>Many Ruby Enterprise Edition patches addressed in 1.9, 2.0</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>MacRuby</h2>
-
-<p>Implementation of 1.9 Ruby directly on top of Mac OS X core tech, e.g.</p>
-
-<ul>
-<li>Obj-C runtime and GC</li>
-<li>LLVM compiler infrastructure</li>
-</ul>
-
-
-<h2>Reactive manifesto</h2>
-
-<p>TODO: read this http://www.reactivemanifesto.org/</p>
 ]]></content>
   </entry>
   
