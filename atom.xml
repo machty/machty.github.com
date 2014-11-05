@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-10-31T06:44:01-04:00</updated>
+  <updated>2014-11-05T12:40:37-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,308 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Troll toll to get into this Journal]]></title>
+    <link href="http://machty.github.com/blog/2014/10/31/troll-toll-to-get-into-this-journal/"/>
+    <updated>2014-10-31T06:45:00-04:00</updated>
+    <id>http://machty.github.com/blog/2014/10/31/troll-toll-to-get-into-this-journal</id>
+    <content type="html"><![CDATA[<h2>HDIutil</h2>
+
+<p>Trying to make some ramdisks on OS X</p>
+
+<pre><code>hdiutil attach -nomount ram://8388608
+</code></pre>
+
+<p><code>hdiutil</code> attach will normally try to attach and mount a file system.</p>
+
+<ul>
+<li>attach: map a hardware device to some <code>/dev/wat</code> device file</li>
+<li>mount: try to read the device, discover its file system, and mount it
+as a directory so that you can actually cd into it, access files, etc</li>
+</ul>
+
+
+<p>So <code>-nomount</code> prevents the second step and just generates a dev file
+mapped to ram.</p>
+
+<pre><code>diskutil erasevolume HFS+ 'RAM Disk' /dev/wat
+</code></pre>
+
+<h2>What is a volume?</h2>
+
+<p>Seems like a higher-level abstraction over disks and partitions.</p>
+
+<p>http://tldp.org/HOWTO/LVM-HOWTO/whatisvolman.html</p>
+
+<ul>
+<li>Move things around more easily</li>
+<li>give things better names than <code>/dev/sda</code> / sdb etc</li>
+</ul>
+
+
+<p>Basically let&#8217;s you overlay logical volumes on top of physical drives.
+Makes it easy to move space around between various drives, make things
+more sane.</p>
+
+<pre><code>    hda1   hdc1      (PV:s on partitions or whole disks)                        
+       \   /                                                                    
+        \ /                                                                     
+       diskvg        (VG)                                                       
+       /  |  \                                                                  
+      /   |   \                                                                 
+  usrlv rootlv varlv (LV:s)
+    |      |     |                                                              
+ ext2  reiserfs  xfs (filesystems)                                        
+</code></pre>
+
+<p>Use LVM2 in Linux land.</p>
+
+<h2>tcpdump</h2>
+
+<p>Ahhh got it to work</p>
+
+<pre><code>$ sudo tcpdump -t 'host machty.com'
+$ ping machty.com
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 0, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 0, length 64
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 1, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 1, length 64
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 2, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 2, length 64
+</code></pre>
+
+<h2>UDP can broad/multicast</h2>
+
+<p>And TCP cannot?</p>
+
+<h2>Sequenced-packet sockets</h2>
+
+<p>Combined aspects of UDP/TCP.</p>
+
+<ul>
+<li>Connection oriented</li>
+<li>Datagram oriented (message boundaries preserved)</li>
+<li>Reliable</li>
+</ul>
+
+
+<p><code>SOCK_SEQPACKET</code> type, available in UNIX domain. TCP/UDP do not support
+it, but SCTP does.</p>
+
+<p>Stream Control Transmission Protocol. Allows stream multiplexing,
+preserves message boundaries unlike TCP.</p>
+
+<pre><code>socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+</code></pre>
+
+<p>So, TCP isn&#8217;t the only internet-domain stream protocol; SCTP is too.
+It&#8217;s a stream of messages. Rather than bytes.</p>
+
+<p>UDP + congestion controller = DCCP, Datagram Congestion Control
+Protocol.</p>
+
+<h2>Alternative IO</h2>
+
+<ul>
+<li><code>select</code>/<code>poll</code> to watch multiple fds for availability;
+
+<ul>
+<li>benefit over alternatives is that you don&#8217;t have to manually poll w non-blocking
+reads.</li>
+<li>doesn&#8217;t scale well w hundreds+ of FDs</li>
+</ul>
+</li>
+<li>signal-driven IO; kernel notifies when IO ready, process can do other
+still til its ready for IO; benefit over select/poll is that it
+doesn&#8217;t block</li>
+<li>epoll
+
+<ul>
+<li>application can monitor many file descriptors</li>
+<li>linux specific but BSD has kqueue, and there are others</li>
+<li>avoids complexities w signal programming</li>
+</ul>
+</li>
+</ul>
+
+
+<p>There&#8217;s also POSIX async IO (AIO); perform IO but don&#8217;t block, get
+notified later when it goes through. Linux has thread implementation but
+might have it on kernel now, who knows.</p>
+
+<p>Since <code>epoll</code> is Linux specific, use a lib that provides a portal
+evented layer to you process: use epoll if present, else fall back to
+select/pool; <code>libevent</code> is one such lib.</p>
+
+<ul>
+<li>libevent
+
+<ul>
+<li>libev: high perf event loop based on libevent but without bugs
+
+<ul>
+<li>only ran on Unix, so node (which originally use libev) needed a
+solution</li>
+</ul>
+</li>
+<li>libuv: abstraction around libev or IOCP (Windows-based IO Completion
+Port)
+
+<ul>
+<li>used in node</li>
+<li>used in rust</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Two types of readiness notifications:</p>
+
+<ul>
+<li>level-triggered: fd is actually ready, now, for IO
+
+<ul>
+<li>poll/select &amp; epoll</li>
+<li>Allows you to repeat the poll operation after a small read; no need
+to read everything in a buffer at once</li>
+</ul>
+</li>
+<li>edge-triggered: IO has occurred since last poll (but it&#8217;s possible
+someone else already took care of it)
+
+<ul>
+<li>signals &amp; epoll</li>
+<li>Try and read as much as possible because you have no way of knowing
+whether there&#8217;s more data (without a non-blocking fail), usually by
+non-blocking reads in a loop until EAGAIN or EWOULDBLOCK.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note that epoll can do both. These constraints impact program design.</p>
+
+<p>Non-blocking IO + edge-triggered notifications is common because there
+are so many cases where blocking IO will screw you; better to non-block
+in a lop and check if data is actually there.</p>
+
+<p><code>poll</code> is like <code>select</code> but instead of grouping by operation you just
+provide a list of FDs objects and say which type of IO you&#8217;re interested
+in per object.</p>
+
+<p>Readiness means an operation will not block. It doesn&#8217;t mean data will
+transfer as it could mean EOF or error. The only guarantee is
+non-blockage.</p>
+
+<p>Downsides w poll/select when large number of FDs</p>
+
+<ul>
+<li>Need to initialize large structures to pass to kernel</li>
+<li>Kernel needs to loop through all file descriptors</li>
+<li>Program must inspect all returned FDs</li>
+</ul>
+
+
+<h2>Stripe</h2>
+
+<p>You can do a one time charge, or you can save card to a customer.</p>
+
+<p>You can create a Card in their API, but you must specify a customer or
+recipient.</p>
+
+<p>An OAuth access token acts like a secret API key:</p>
+
+<blockquote><p>To swap this for an access_token, which acts like a secret API key&#8230;</p></blockquote>
+
+<p>https://stripe.com/docs/connect/getting-started</p>
+
+<p>So this error: https://support.stripe.com/questions/connect-publishable-key-error-with-shared-customers</p>
+
+<p>Background: every Stripe API request sends in your app&#8217;s secret key for
+authentication.</p>
+
+<pre><code>Stripe.api_key = ENV['YOUR_DUMBASS_STRIPE_SECRET_KEY']
+</code></pre>
+
+<p>This makes it send automatically, but you can also override per API
+request by providing a second parameter.</p>
+
+<pre><code>charge = Stripe::Charge.create({
+  ...
+}, some_api_key)
+</code></pre>
+
+<p>In this case, the issue was that my implicitly provided app api key was
+being provided to the API request to make a charge using a token
+generated by the connected account.</p>
+
+<p>I don&#8217;t really know why this is a problem; seems like something you
+should be able to do, right? But actually you have to provide that
+second parameter as the access token from when the account connected to
+your app.</p>
+
+<p>Trickay.</p>
+
+<h2>Who&#8217;s using ports in OS X?</h2>
+
+<pre><code>sudo lsof -nP -iTCP -sTCP:LISTEN
+</code></pre>
+
+<p>Figured I&#8217;d be able to use netstat for this, should probably look into
+why I can&#8217;t.</p>
+
+<h2>Self pipes</h2>
+
+<p>Because <code>pselect</code> isn&#8217;t widely supported, you can use the self pipe
+trick to get rid of race conditions surrounding signal handlers and
+select. Recall the common race condition:</p>
+
+<ul>
+<li>Install signal handler that sets global flag to true</li>
+<li>Run an IO loop that checks this global flag in order to decide whether
+to perform some action.</li>
+</ul>
+
+
+<p>But if a signal arrives between these steps then you might start looping
+without checking the flag, etc.</p>
+
+<p>So you can self-pipe to get around this:</p>
+
+<ol>
+<li>Create a unix domain pipe, non-blocking on both ends to prevent any
+sort of queueing/blocking behavior.</li>
+<li>Within a signal handler, write a single byte into the pipe; <code>write</code>
+is async signal safe, so we&#8217;re cool.</li>
+<li>Include the pipe in <code>select</code>, always check if self-pipe is in
+<code>readfs</code></li>
+</ol>
+
+
+<p>Unicorn uses a self pipe.</p>
+
+<pre><code># We use SELF_PIPE differently in the master and worker processes:
+#
+# * The master process never closes or reinitializes this once
+# initialized.  Signal handlers in the master process will write to
+# it to wake up the master from IO.select in exactly the same manner
+# djb describes in http://cr.yp.to/docs/selfpipe.html
+#
+# * The workers immediately close the pipe they inherit.  See the
+# Unicorn::Worker class for the pipe workers use.
+</code></pre>
+
+<blockquote><p>Richard Stevens&#8217;s 1992 book &#8220;Advanced programming in the UNIX environment&#8221; says that you can&#8217;t safely mix select() or poll() with SIGCHLD (or other signals). The SIGCHLD might go off while select() is starting, too early to interrupt it, too late to change its timeout.</p></blockquote>
+
+<p>This just means race conditions; anyway, Unicorn doesn&#8217;t mix select with
+other FDs; rather it uses it as parent-child process communication; the
+master will sleep/block on a select of the self pipe, and only the self
+pipe, and will awaken, clear the pipe, and continue onward.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Crowley Girdle]]></title>
@@ -8033,632 +8335,6 @@ the running process so that you can send it signals.</p>
 $ pidof bash
 754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/28/daily-journal/"/>
-    <updated>2014-07-28T08:16:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/28/daily-journal</id>
-    <content type="html"><![CDATA[<h2>Them processes</h2>
-
-<p>Kernel</p>
-
-<!--more-->
-
-
-<ul>
-<li>sits on top of hardware, doing things like
-
-<ul>
-<li>read/write from filesystem</li>
-<li>sending/receiving network data</li>
-<li>playing audio</li>
-</ul>
-</li>
-<li>programs don&#8217;t have access to this stuff, only the kernel</li>
-</ul>
-
-
-<p>System call is the barrier b/w userland and kernel.</p>
-
-<p>What about memory? I think userland can read memory.</p>
-
-<p>Common man pages for FreeBSD or Linux</p>
-
-<p><code>wat(2)</code> means section 2 of manual, wat: <code>man 2 wat</code></p>
-
-<p>Can&#8217;t execute code without a process.</p>
-
-<p><code>Process.pid == $$</code> global var in Ruby, from Perl/bash, but
-<code>Process.pid</code> is way more obvious, duh.</p>
-
-<p>Processes have parents, identified via <code>ppid</code>, <code>Process.ppid</code>, but not
-super often used.</p>
-
-<p>In Unixland, everything is a file.</p>
-
-<p>When opening resources, you&#8217;re given a file descriptor number, unique to
-your process, unshareable with unrelated processes. These resources are
-closed when you exit process, cept forking.</p>
-
-<p>All Ruby <code>IO</code> objects have a <code>fileno</code>, e.g.</p>
-
-<pre><code>2.0.0-p353 :007 &gt; $stdin.fileno
- =&gt; 0
-2.0.0-p353 :007 &gt; $stdout.fileno
- =&gt; 1
-2.0.0-p353 :008 &gt; $stderr.fileno
- =&gt; 2
-</code></pre>
-
-<p>File descriptors are assigned lowest unused value, and are reusable when
-old file handlers are closed.</p>
-
-<p>Streams are lovely, before them, each program had to explicitly handle
-different keyboard types, etc, but the stream abstraction unified all of
-that.</p>
-
-<p><code>fsync</code> flushes file descriptor state to disk, but disk might reorder
-writes. The <code>F_FULLFSYNC</code> will ask the drive to write it immediately and
-preserve order, useful for things like databases, see <code>fsync</code></p>
-
-<pre><code> For applications that require tighter guarantees about the integrity of their
- data, Mac OS X provides the F_FULLFSYNC fcntl.  The F_FULLFSYNC fcntl asks the
- drive to flush all buffered data to permanent storage.  Applications, such as
- databases, that require a strict ordering of writes should use F_FULLFSYNC to
- ensure that their data is written in the order they expect.  Please see fcntl(2)
- for more detail.
-</code></pre>
-
-<p><code>F_FULLFSYNC</code> probably isn&#8217;t available on everything, possibly mac only.</p>
-
-<p>To find the limit of file descriptors you can do <code>Process.getrlimit(:NOFILE)</code></p>
-
-<p>This translates to <code>getrlimit(2)</code>, control max system resource
-consumption. <code>r</code> is resource, <code>NOFILE</code> means &#8220;The maximum number of open
-files for this process&#8221;.</p>
-
-<pre><code>2.0.0-p353 :001 &gt; Process.getrlimit(:NOFILE)
- =&gt; [2048, 2048]
-    #soft, hard
-</code></pre>
-
-<p>Soft means an exception will raise but you can reconfigure. Hard limit
-might be reconfigurable by superuser, or if the process has permissions.</p>
-
-<p><code>sysctl</code> lets you get or set kernel state, useful for configuring
-system-wide kernel details.</p>
-
-<p><code>EMFILE</code> is too many files open. Testable via</p>
-
-<pre><code>machty.github.com :: ruby -e "Process.setrlimit(:NOFILE, 3); File.open('/dev/null')"
--e:1:in `initialize': Too many open files - /dev/null (Errno::EMFILE)
-</code></pre>
-
-<p><code>ulimit</code> is a built in command to control resource usage for this shelll
-and any of its children. It&#8217;s different from system wide <code>sysctl</code> stuff.
-I can change the result above</p>
-
-<p>So I remember <code>ulimit</code> resets the soft limit. If I set to 2046, then</p>
-
-<pre><code>machty.github.com :: ruby -e "puts Process.getrlimit(:NOFILE)"
-2046
-2046
-</code></pre>
-
-<blockquote><p>(Built-in command) In computing, a shell builtin is a command or a function, called from a shell, that is executed directly in the shell itself, instead of an external executable program which the shell would load and execute. ..</p></blockquote>
-
-<p>Use cases for overriding limits</p>
-
-<ul>
-<li>stress-testing utilities (e.g. 5000 simultaneous connections)</li>
-<li>limiting resources for 3rd party stuff, removing permissions to change</li>
-</ul>
-
-
-<p>Environment is nothing more than Env vars, key values pairs.
-Set by parent, inherited by children.</p>
-
-<pre><code>machty.github.com :: A=lol ruby -e "puts ENV['A']"
-lol
-</code></pre>
-
-<p>Note that env var assignment on its own shell line sets them for the
-rest of the process, but followed by a command only sets them for that
-command.</p>
-
-<p>Process names are changeable, e.g. <code>$PROCESS_NAME = "fuckles"</code></p>
-
-<pre><code>  PID TTY           TIME CMD
-45874 ttys011    0:00.68 fuckles
-</code></pre>
-
-<p>Note that TIME is CPU time.</p>
-
-<p>Ah, <code>time</code> makes sense to me now:</p>
-
-<pre><code>machty.github.com :: time sleep 1
-
-real    0m1.012s
-user    0m0.001s
-sys     0m0.003s
-</code></pre>
-
-<p><code>sleep</code> suspends execution thread, consuming no CPU. I think <code>sys</code> means
-system call time, such as telling the pthread to sleep. IT IS ALL MAKING
-SENSE.</p>
-
-<p>Processes have exit codes, 0 is successful.</p>
-
-<p>All the ways to exit</p>
-
-<ul>
-<li>exit, <code>Kernel#exit</code>, exits w 0 by default but you can pass a code,
-runs <code>Kernel#at_exit</code> blocks. <code>exit!</code> does a code 1 and doesn&#8217;t run
-exit blocks.</li>
-<li>abort accepts a string in ruby, runs exit handlers, returns 1</li>
-<li>raised exceptions yield exit code 1 and still raise things.</li>
-</ul>
-
-
-<p>Processes can fork, unless you&#8217;re JRuby. That means Unicorn won&#8217;t work
-for JRuby.</p>
-
-<p>Forking copies all memory (or copy on write). File descriptors are also
-provided to forked thinger.</p>
-
-<pre><code>2.0.0-p353 :016 &gt; fork { puts Process.pid; puts Process.ppid}
- =&gt; 46054
-2.0.0-p353 :017 &gt; 46054
-45874
-2.0.0-p353 :018 &gt;   Process.pid
- =&gt; 45874
-</code></pre>
-
-<p>Parent and child can share file descriptors, open files, sockets, etc.
-Because forking is faster than booting up fresh copies of servers&#8230; it
-is good&#8230;?</p>
-
-<p>Awesome example:</p>
-
-<pre><code>if fork
-  puts "YES"
-else
-  puts "NO"
-end
-</code></pre>
-
-<p>Hahaha, don&#8217;t run this in irb though, because you&#8217;ll have two processes
-reading from the same $stdin, e.g. your keyboard.</p>
-
-<p>Blockless <code>fork</code> returns twice</p>
-
-<ul>
-<li>parent gets child pid</li>
-<li>child gets nil</li>
-</ul>
-
-
-<p>Explains this output</p>
-
-<pre><code>ruby -e "cid=fork; puts cid || 'none'"
-46650
-none
-</code></pre>
-
-<p>What about threads? Do thread ids change after forking?</p>
-
-<pre><code>machty.github.com :: ruby -e "puts Thread.current; fork; puts Thread.current"
-#&lt;Thread:0x007fa7710677a8&gt;
-#&lt;Thread:0x007fa7710677a8&gt;
-#&lt;Thread:0x007fa7710677a8&gt;
-</code></pre>
-
-<p>No it seems they don&#8217;t&#8230; forking really makes everything seem totally
-the same. I wonder how that works at the pthread level.</p>
-
-<p>http://pubs.opengroup.org/onlinepubs/009695399/functions/fork.html</p>
-
-<blockquote><p>A process shall be created with a single thread. If a multi-threaded process calls fork(), the new process shall contain a replica of the calling thread and its entire address space, possibly including the states of mutexes and other resources. Consequently, to avoid errors, the child process may only execute async-signal-safe operations until such time as one of the exec functions is called. [THR] [Option Start]  Fork handlers may be established by means of the pthread_atfork() function in order to maintain application invariants across fork() calls.</p></blockquote>
-
-<p>So only a single thread is created, and the kernel knows it&#8217;s a separate
-thread, but the forked instance still thinks the address of that thread
-is the same as before, even though it&#8217;s obviously a different thread.</p>
-
-<p>Forking allows (but doesn&#8217;t guarantee) a process to run on multiple
-cores. If the system is busy the forked processes might all run on the
-same CPU.</p>
-
-<p>Forking duplicates memory (assuming no copy-on-write; TODO: learn the
-terminology for total memory vs not-yet-copied-on-write memory).
-Running out of memory due to over-forking is called a fork bomb.</p>
-
-<p>Forking means orphaning if the parent process finishes before children.</p>
-
-<p>Daemon processes are intentionally orphaned so that they can stay
-running forever. Orphaned children can be communicated with via signals.</p>
-
-<p>Fork-and-forget vs remembering child process. <code>Process.wait</code> will wait
-for ONE child process to terminate before quitting, and returns the pid
-of the child process that terminates. Spawn 3 processes, must wait three
-times. <code>wait2</code> returns <code>[pid, status]</code>, so you can get codes n shit.
-<code>waitpid</code> and <code>waitpid2</code> wait on specific pids. But they are aliased to
-the same thing: `wait</p>
-
-<p>The kernel queues child process return info so that waiting on a process
-that has already did will return its shit. That said, waiting on
-non-existent children raises <code>ECHILD</code>.</p>
-
-<p>Unicorn forks N times, makes sure the processes are still alive,
-restarts if necessary, etc.</p>
-
-<p>If you don&#8217;t do <code>Process.wait</code> though, the kernel will keep on storing
-information about exit codes, etc. You either need to <code>wait</code> or <code>detach</code>,
-or else you get a zombie process.</p>
-
-<p>http://en.wikipedia.org/wiki/Zombie_process</p>
-
-<p>A Zombie process is a process that has called exit but whose parent
-hasn&#8217;t called <code>wait</code> or <code>detach</code>.</p>
-
-<ul>
-<li>Zombie: un-reaped, terminated child process</li>
-<li>Orphan: still active child process whose parent has died.</li>
-</ul>
-
-
-<p>Orphans get attached to <code>init</code> (or <code>launchd</code> in OS X land), which has a
-pid of 1.</p>
-
-<p>Oh man, fork bombs are hilarious: http://en.wikipedia.org/wiki/Fork_bomb</p>
-
-<p>So ppid actually automatically updates:</p>
-
-<pre><code>fork do
-  loop do
-    puts "(#{Process.pid}, #{Process.ppid})"
-    sleep 1
-  end
-end
-
-sleep 1
-
-abort "k i'm done #{Process.pid}"
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>(47598, 47597)
-(47598, 47597)
-k i'm done 47597
-(47598, 1)
-(47598, 1)
-</code></pre>
-
-<p>Pretty cool.</p>
-
-<p>Also if you <code>brew install pstree</code> and take a look at that, pid 1 is
-<code>launchd</code>.</p>
-
-<p>You can check the status of process and how it changes into a zombie and
-then when it gets removed from the process table when we call
-<code>Process.wait</code>:</p>
-
-<pre><code>cpid = fork {}
-puts `ps -p #{cpid} -o state`
-sleep 1
-puts `ps -p #{cpid} -o state`
-Process.wait
-puts `ps -p #{cpid} -o state`
-</code></pre>
-
-<p>Yields:</p>
-
-<pre><code>STAT
-R+
-STAT
-Z+
-STAT
-</code></pre>
-
-<p>Note the last STAT is empty because no such pid; shit is dead.
-The <code>+</code> means process is in the foreground process group of its control
-terminal.</p>
-
-<p>Note that no memory is allocated to the zombie process itself; just the
-slot in the process table is used; zombie processes prevent other
-processes from taking their place and reusing their PID. Which is
-another thing: a parent process might not want a child pid to be reused
-when creating a child pid, so it&#8217;ll create the new child, and THEN
-<code>wait</code>/<code>detach</code> on original.</p>
-
-<p><code>Process.detach</code> spins up a thread to <code>wait</code> on a process. Here&#8217;s a
-really roundabout way to detach and then wait and get the return value:</p>
-
-<pre><code>t = Process.detach(cpid)
-puts `ps -p #{cpid} -o state`
-puts t.value
-</code></pre>
-
-<p><code>t.join</code> before a <code>t.value</code> is a noop; <code>value</code> must always <code>join</code> in
-order to get the value.</p>
-
-<p>Fork-and-forget is rare. <code>Process.detach</code> has no system call equiv; it&#8217;s
-just a ruby convenience.</p>
-
-<p>SIGCHLD fires when a child process exits. You can trap it and <code>wait</code> for
-that process to finish. Problem is, signal delivery is unreliable; if
-you&#8217;re handling a signal and another one comes in, you might not receive
-that signal. Solution is to pass a second param to <code>wait</code> to describe
-how the kernel should wait for this thing, e.g. <code>Process::WNOHANG</code></p>
-
-<p>Shit is so messy</p>
-
-<pre><code>Process.trap(:CHLD) do
-  nil while Process.wait(-1, Process::WNOHANG) rescue Errno::ECHILD
-end
-</code></pre>
-
-<p>Yes you could unravel but come on.</p>
-
-<p>Signals are async, ignorable, actionable, defaultable. Processes use the
-kernel to as an intermediary to send messages.</p>
-
-<pre><code>echo "puts 'lol'" | ruby
-</code></pre>
-
-<p>Who knew? It accepts input from stdin. So you can pipe Ruby code to it.
-Ctrl-C sends an interrupt. You can trap it and ignore. You can also say
-<code>trap(:INT, "IGNORE")</code></p>
-
-<p>It&#8217;s good form in lib code to define a trap, though it&#8217;s possibly to
-preserve other people&#8217;s callbacks and call them in yours. But you can&#8217;t
-restore default behavior. This is fine if your&#8217;e writing a server
-though.</p>
-
-<blockquote><p>USR2 - reexecute the running binary. A separate QUIT should be sent to the original process once the child is verified to be up and running.</p></blockquote>
-
-<p>https://github.com/ice799/memprof does some cool stuff with trapping
-signals, printing out useful shits.</p>
-
-<p>This guy is boundlessly smart.</p>
-
-<p>Make a pipe, give someone one end to yell into and the other person the
-put their ear up to it. Methinks you see where this is going.</p>
-
-<p>Source and Sink, Writer and Reader. Pipe persists until all associated
-descriptors are closed. Half-closed pipes are &#8220;widowed&#8221;. Writing to a
-widowed pipe yields <code>SIGPIPE</code>, but widowing it is how the reader gets an
-EOF signal. <code>SIGPIPE</code> can be disabled via F_SETNOSIGPIPE in fcntl, which
-we saw above in this journal for telling a hard drive to actually
-preserve write order.</p>
-
-<p>In Ruby you can pass an encoding which tags the read input with that
-encoding.</p>
-
-<p>http://ruby-doc.org/core-2.0/IO.html#method-c-pipe</p>
-
-<pre><code>rd, wr = IO.pipe
-
-if fork
-  wr.close # REQUIRED
-  puts "Parent got: &lt;#{rd.read}&gt;"
-  rd.close
-  Process.wait
-else
-  rd.close # REQUIRED
-  puts "Sending message to parent"
-  wr.write "Hi Dad"
-  wr.close
-end
-</code></pre>
-
-<p>The <code># REQUIRED</code> closes are there because otherwise the data won&#8217;t
-flush, EOF&#8217;s won&#8217;t be called.</p>
-
-<p>So that&#8217;s a neat little primitive, but how is it different than just
-using a StringIO? Well, aside from the fact that I don&#8217;t think you can
-just progressively write into StringIO as you read from it (maybe you
-can), Pipe goes through the kernel; there&#8217;s system calls and overhead.
-Check this bitchin benchmark:</p>
-
-<pre><code>require 'benchmark'
-require 'stringio'
-
-n = 100000
-Benchmark.bm do |x|
-  x.report("pipes:") {
-    n.times do
-      rd, wr = IO.pipe
-      wr.write "HELLO"
-      wr.close
-      raise "wat" unless rd.read == "HELLO"
-      rd.close
-    end
-  }
-
-  x.report("StringIO") {
-    n.times do
-      s = StringIO.new("HELLO")
-      raise "wat" unless s.read == "HELLO"
-      s.close
-    end
-  }
-end
-</code></pre>
-
-<p>yields</p>
-
-<pre><code>              user     system      total        real
-  pipes:  0.630000   0.730000   1.360000 (  1.363994)
-StringIO  0.080000   0.000000   0.080000 (  0.077973)
-</code></pre>
-
-<p>This is skewed by the fact that you&#8217;re not going to be creating and
-dumping pipes all the time, but it just highlights the inner workings of
-Pipe: because it involves syscalls, much of the time is spent in
-<code>system</code>.</p>
-
-<p>With streams (pipes/TCP sockets), you write to a stream followed by a
-delimiter. Newline is the delimiter. Unix sockets are intra machine, and
-fast.</p>
-
-<p>Use sockets to communicate in datagrams vs delimited stream chunks. You
-still have pairs, but rather than read/write pairs, you just have
-bidirectional shits, one of which needs to get closed per process.
-Sockets are bidirectional!</p>
-
-<p>http://stackoverflow.com/questions/731233/activemq-or-rabbitmq-or-zeromq-or
-http://wiki.secondlife.com/wiki/Message_Queue_Evaluation_Notes</p>
-
-<p>From http://www.ruby-doc.org/core-2.1.0/IO.html</p>
-
-<blockquote><p>In the example below, the two processes close the ends of the pipe that they are not using. This is not just a cosmetic nicety. The read end of a pipe will not generate an end of file condition if there are any writers with the pipe still open. In the case of the parent process, the rd.read will never return if it does not first issue a wr.close.</p></blockquote>
-
-<p>Fuckles and shittles.</p>
-
-<pre><code>man socketpair
-</code></pre>
-
-<p>Thom Ass Tover says:</p>
-
-<p>http://www.thomasstover.com/uds.html</p>
-
-<p>So these sockets are Unix Domain Sockets, or local sockets.</p>
-
-<p>Pipes</p>
-
-<ul>
-<li>can be given a name</li>
-<li>writing to a full one yields <code>SIGSTOP</code></li>
-<li>are faster than Unix domain sockets</li>
-<li>require context switches w kernel to use read/write</li>
-</ul>
-
-
-<p>Solaris pipes are special in that they are full duplex, where as on
-Linux and BSD you&#8217;d need two pipes for full duplex. fifos are named
-pipes. I guess they&#8217;re like files.</p>
-
-<p>http://en.wikipedia.org/wiki/Named_pipe</p>
-
-<p>wow:</p>
-
-<pre><code>mkfifo my_pipe
-gzip -9 -c &lt; my_pipe &gt; out.gz &amp;
-</code></pre>
-
-<p>So, Matt Daemon.</p>
-
-<p><code>init</code> or <code>launchd</code> has ppid 0 and pid 1.</p>
-
-<p><code>exit if fork</code> will fork and close the parent process.</p>
-
-<p><code>Process.setsid</code> creates a new session. It talks about a process groups
-and what not. If you call it, your process becomes</p>
-
-<ul>
-<li>session leader of new session</li>
-<li>process group leader of new process group</li>
-<li>and has no controlling terminal</li>
-<li>and becomes the only new thing in the thing</li>
-</ul>
-
-
-<p>returns the new process group ID.</p>
-
-<p>Job control is the way processes are managed by terminal. Process group
-id is generally same as process ID. Fork and the process group id will
-be the same. If they fork and so on then yeah yeah yeah this is how you
-know they all came from the same shit. When you do <code>irb</code> in a terminal
-it&#8217;ll set the process group to the pid of the command you run.</p>
-
-<p>This is why interrupting a Ruby script that&#8217;s shelled out to thing will
-kill all the things if it gets an interrupt; if it&#8217;s still alive, it&#8217;ll
-kill children. It&#8217;s only upon normal exiting that you lose
-thisetoisjdoiasj.</p>
-
-<p>Session groups are higher up, a collection of process groups. One
-session group: <code>echo "lol" | echo "lol"</code>. EPERM fires if you are already
-leader (can only call w children).</p>
-
-<p>Look at http://rubygems.org/gems/daemons</p>
-
-<p><code>exec</code> totally transforms your shit, better fork first.</p>
-
-<pre><code>Thread.new {
-  sleep 2
-  puts "THIS WILL NEVER PRINT"
-}
-Thread.new {
-  sleep 1
-  exec 'ls'
-}
-</code></pre>
-
-<p>It entirely nukes your process context, including any outstanding
-threads. You must escape via a fork.</p>
-
-<p>Ruby&#8217;s <code>exec</code> will close file handles, database connections, etc, before
-passing control to the new shit, though native <code>exec</code> calls would leave
-them open. Sensible default given <code>echo</code> doesn&#8217;t care about your
-database. You might accidentally exec another process that doesn&#8217;t do
-anything with a db connection, and it never totally closes. But you can
-override this default if you want to pass the fileno to the new process
-and keep open that handle when it opens it for reading.</p>
-
-<p>Unlike fork, no memory is shared with the resulting process of an exec.</p>
-
-<p>I am so tired.</p>
-
-<p><code>system</code> returns a true or false. Output barfs to stdout.</p>
-
-<p><code>popen</code> opens a bi-directional pipe; you can write to and read from the
-process spawned</p>
-
-<p><code>popen3</code> gives you access to all 3.</p>
-
-<p>Forking means a copy of all the parent process&#8217;s context before
-<code>exec</code>-ing something super small like <code>ls</code>, but you can use gems that
-wrap <code>posix_spawn(2)</code></p>
-
-<p>https://github.com/rtomayko/posix-spawn</p>
-
-<p>Also check out <code>man vfork</code> for virtual memory friendly forking.</p>
-
-<p>Resque forks for memory management; bloating Ruby tasks tend not to
-shrink, so fork makes it possible for forked workers to bloat and
-disappear.</p>
-
-<p>http://rubydoc.info/github/defunkt/resque/Resque/Worker</p>
-
-<blockquote><p>A Resque Worker processes jobs. On platforms that support fork(2), the worker will fork off a child to process each job. This ensures a clean slate when beginning the next job and cuts down on gradual memory growth as well as low level failures.</p>
-
-<p>It also ensures workers are always listening to signals from you, their master, and can react accordingly.</p></blockquote>
-
-<p>Preforking, is it cool. haidjasoidjasiodj</p>
-
-<p>What&#8217;s the rules on writing to stdout between multiple processes.
-You can do it; there&#8217;s not going to be thread-unsafety, i don&#8217;t think.</p>
-
-<p>http://stackoverflow.com/questions/1326067/how-to-lock-io-shared-by-fork-in-ruby</p>
-
-<p>Preforking has load balancing wins similar to message queuing with
-multiple consumers; when a consumer is ready, it just listens for the
-same thing. A socket is shared b/w forked processes, and kernel makes
-sure only one gets it</p>
-
-<p>I need to understand more about $stdout and buffering and what not. It&#8217;s
-not thread safe, but process-safe? syscall-safe?</p>
-
-<ul>
-<li>fork-safe if the action in question fits within a single syscall</li>
-</ul>
-
-
-<p>I have no fucking IDEA MY BRAIN IS DEAD.</p>
 ]]></content>
   </entry>
   

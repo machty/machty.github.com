@@ -1,0 +1,499 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Troll toll to get into this Journal  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Troll Toll to Get Into This Journal</h2>
+	<div class="entry-content"><h2>HDIutil</h2>
+
+<p>Trying to make some ramdisks on OS X</p>
+
+<pre><code>hdiutil attach -nomount ram://8388608
+</code></pre>
+
+<p><code>hdiutil</code> attach will normally try to attach and mount a file system.</p>
+
+<ul>
+<li>attach: map a hardware device to some <code>/dev/wat</code> device file</li>
+<li>mount: try to read the device, discover its file system, and mount it
+as a directory so that you can actually cd into it, access files, etc</li>
+</ul>
+
+
+<p>So <code>-nomount</code> prevents the second step and just generates a dev file
+mapped to ram.</p>
+
+<pre><code>diskutil erasevolume HFS+ 'RAM Disk' /dev/wat
+</code></pre>
+
+<h2>What is a volume?</h2>
+
+<p>Seems like a higher-level abstraction over disks and partitions.</p>
+
+<p>http://tldp.org/HOWTO/LVM-HOWTO/whatisvolman.html</p>
+
+<ul>
+<li>Move things around more easily</li>
+<li>give things better names than <code>/dev/sda</code> / sdb etc</li>
+</ul>
+
+
+<p>Basically let&#8217;s you overlay logical volumes on top of physical drives.
+Makes it easy to move space around between various drives, make things
+more sane.</p>
+
+<pre><code>    hda1   hdc1      (PV:s on partitions or whole disks)                        
+       \   /                                                                    
+        \ /                                                                     
+       diskvg        (VG)                                                       
+       /  |  \                                                                  
+      /   |   \                                                                 
+  usrlv rootlv varlv (LV:s)
+    |      |     |                                                              
+ ext2  reiserfs  xfs (filesystems)                                        
+</code></pre>
+
+<p>Use LVM2 in Linux land.</p>
+
+<h2>tcpdump</h2>
+
+<p>Ahhh got it to work</p>
+
+<pre><code>$ sudo tcpdump -t 'host machty.com'
+$ ping machty.com
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 0, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 0, length 64
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 1, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 1, length 64
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 2, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 2, length 64
+</code></pre>
+
+<h2>UDP can broad/multicast</h2>
+
+<p>And TCP cannot?</p>
+
+<h2>Sequenced-packet sockets</h2>
+
+<p>Combined aspects of UDP/TCP.</p>
+
+<ul>
+<li>Connection oriented</li>
+<li>Datagram oriented (message boundaries preserved)</li>
+<li>Reliable</li>
+</ul>
+
+
+<p><code>SOCK_SEQPACKET</code> type, available in UNIX domain. TCP/UDP do not support
+it, but SCTP does.</p>
+
+<p>Stream Control Transmission Protocol. Allows stream multiplexing,
+preserves message boundaries unlike TCP.</p>
+
+<pre><code>socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+</code></pre>
+
+<p>So, TCP isn&#8217;t the only internet-domain stream protocol; SCTP is too.
+It&#8217;s a stream of messages. Rather than bytes.</p>
+
+<p>UDP + congestion controller = DCCP, Datagram Congestion Control
+Protocol.</p>
+
+<h2>Alternative IO</h2>
+
+<ul>
+<li><code>select</code>/<code>poll</code> to watch multiple fds for availability;
+
+<ul>
+<li>benefit over alternatives is that you don&#8217;t have to manually poll w non-blocking
+reads.</li>
+<li>doesn&#8217;t scale well w hundreds+ of FDs</li>
+</ul>
+</li>
+<li>signal-driven IO; kernel notifies when IO ready, process can do other
+still til its ready for IO; benefit over select/poll is that it
+doesn&#8217;t block</li>
+<li>epoll
+
+<ul>
+<li>application can monitor many file descriptors</li>
+<li>linux specific but BSD has kqueue, and there are others</li>
+<li>avoids complexities w signal programming</li>
+</ul>
+</li>
+</ul>
+
+
+<p>There&#8217;s also POSIX async IO (AIO); perform IO but don&#8217;t block, get
+notified later when it goes through. Linux has thread implementation but
+might have it on kernel now, who knows.</p>
+
+<p>Since <code>epoll</code> is Linux specific, use a lib that provides a portal
+evented layer to you process: use epoll if present, else fall back to
+select/pool; <code>libevent</code> is one such lib.</p>
+
+<ul>
+<li>libevent
+
+<ul>
+<li>libev: high perf event loop based on libevent but without bugs
+
+<ul>
+<li>only ran on Unix, so node (which originally use libev) needed a
+solution</li>
+</ul>
+</li>
+<li>libuv: abstraction around libev or IOCP (Windows-based IO Completion
+Port)
+
+<ul>
+<li>used in node</li>
+<li>used in rust</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Two types of readiness notifications:</p>
+
+<ul>
+<li>level-triggered: fd is actually ready, now, for IO
+
+<ul>
+<li>poll/select &amp; epoll</li>
+<li>Allows you to repeat the poll operation after a small read; no need
+to read everything in a buffer at once</li>
+</ul>
+</li>
+<li>edge-triggered: IO has occurred since last poll (but it&#8217;s possible
+someone else already took care of it)
+
+<ul>
+<li>signals &amp; epoll</li>
+<li>Try and read as much as possible because you have no way of knowing
+whether there&#8217;s more data (without a non-blocking fail), usually by
+non-blocking reads in a loop until EAGAIN or EWOULDBLOCK.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note that epoll can do both. These constraints impact program design.</p>
+
+<p>Non-blocking IO + edge-triggered notifications is common because there
+are so many cases where blocking IO will screw you; better to non-block
+in a lop and check if data is actually there.</p>
+
+<p><code>poll</code> is like <code>select</code> but instead of grouping by operation you just
+provide a list of FDs objects and say which type of IO you&#8217;re interested
+in per object.</p>
+
+<p>Readiness means an operation will not block. It doesn&#8217;t mean data will
+transfer as it could mean EOF or error. The only guarantee is
+non-blockage.</p>
+
+<p>Downsides w poll/select when large number of FDs</p>
+
+<ul>
+<li>Need to initialize large structures to pass to kernel</li>
+<li>Kernel needs to loop through all file descriptors</li>
+<li>Program must inspect all returned FDs</li>
+</ul>
+
+
+<h2>Stripe</h2>
+
+<p>You can do a one time charge, or you can save card to a customer.</p>
+
+<p>You can create a Card in their API, but you must specify a customer or
+recipient.</p>
+
+<p>An OAuth access token acts like a secret API key:</p>
+
+<blockquote><p>To swap this for an access_token, which acts like a secret API key&#8230;</p></blockquote>
+
+<p>https://stripe.com/docs/connect/getting-started</p>
+
+<p>So this error: https://support.stripe.com/questions/connect-publishable-key-error-with-shared-customers</p>
+
+<p>Background: every Stripe API request sends in your app&#8217;s secret key for
+authentication.</p>
+
+<pre><code>Stripe.api_key = ENV['YOUR_DUMBASS_STRIPE_SECRET_KEY']
+</code></pre>
+
+<p>This makes it send automatically, but you can also override per API
+request by providing a second parameter.</p>
+
+<pre><code>charge = Stripe::Charge.create({
+  ...
+}, some_api_key)
+</code></pre>
+
+<p>In this case, the issue was that my implicitly provided app api key was
+being provided to the API request to make a charge using a token
+generated by the connected account.</p>
+
+<p>I don&#8217;t really know why this is a problem; seems like something you
+should be able to do, right? But actually you have to provide that
+second parameter as the access token from when the account connected to
+your app.</p>
+
+<p>Trickay.</p>
+
+<h2>Who&#8217;s using ports in OS X?</h2>
+
+<pre><code>sudo lsof -nP -iTCP -sTCP:LISTEN
+</code></pre>
+
+<p>Figured I&#8217;d be able to use netstat for this, should probably look into
+why I can&#8217;t.</p>
+
+<h2>Self pipes</h2>
+
+<p>Because <code>pselect</code> isn&#8217;t widely supported, you can use the self pipe
+trick to get rid of race conditions surrounding signal handlers and
+select. Recall the common race condition:</p>
+
+<ul>
+<li>Install signal handler that sets global flag to true</li>
+<li>Run an IO loop that checks this global flag in order to decide whether
+to perform some action.</li>
+</ul>
+
+
+<p>But if a signal arrives between these steps then you might start looping
+without checking the flag, etc.</p>
+
+<p>So you can self-pipe to get around this:</p>
+
+<ol>
+<li>Create a unix domain pipe, non-blocking on both ends to prevent any
+sort of queueing/blocking behavior.</li>
+<li>Within a signal handler, write a single byte into the pipe; <code>write</code>
+is async signal safe, so we&#8217;re cool.</li>
+<li>Include the pipe in <code>select</code>, always check if self-pipe is in
+<code>readfs</code></li>
+</ol>
+
+
+<p>Unicorn uses a self pipe.</p>
+
+<pre><code># We use SELF_PIPE differently in the master and worker processes:
+#
+# * The master process never closes or reinitializes this once
+# initialized.  Signal handlers in the master process will write to
+# it to wake up the master from IO.select in exactly the same manner
+# djb describes in http://cr.yp.to/docs/selfpipe.html
+#
+# * The workers immediately close the pipe they inherit.  See the
+# Unicorn::Worker class for the pipe workers use.
+</code></pre>
+
+<blockquote><p>Richard Stevens&#8217;s 1992 book &#8220;Advanced programming in the UNIX environment&#8221; says that you can&#8217;t safely mix select() or poll() with SIGCHLD (or other signals). The SIGCHLD might go off while select() is starting, too early to interrupt it, too late to change its timeout.</p></blockquote>
+
+<p>This just means race conditions; anyway, Unicorn doesn&#8217;t mix select with
+other FDs; rather it uses it as parent-child process communication; the
+master will sleep/block on a select of the self pipe, and only the self
+pipe, and will awaken, clear the pipe, and continue onward.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-31T06:45:00-04:00" pubdate data-updated="true">Oct 31<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/10/31/troll-toll-to-get-into-this-journal/';
+        var disqus_url = 'http://machty.github.com/blog/2014/10/31/troll-toll-to-get-into-this-journal/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

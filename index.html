@@ -112,6 +112,335 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/10/31/troll-toll-to-get-into-this-journal/">
+		
+			Troll Toll to Get Into This Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>HDIutil</h2>
+
+<p>Trying to make some ramdisks on OS X</p>
+
+<pre><code>hdiutil attach -nomount ram://8388608
+</code></pre>
+
+<p><code>hdiutil</code> attach will normally try to attach and mount a file system.</p>
+
+<ul>
+<li>attach: map a hardware device to some <code>/dev/wat</code> device file</li>
+<li>mount: try to read the device, discover its file system, and mount it
+as a directory so that you can actually cd into it, access files, etc</li>
+</ul>
+
+
+<p>So <code>-nomount</code> prevents the second step and just generates a dev file
+mapped to ram.</p>
+
+<pre><code>diskutil erasevolume HFS+ 'RAM Disk' /dev/wat
+</code></pre>
+
+<h2>What is a volume?</h2>
+
+<p>Seems like a higher-level abstraction over disks and partitions.</p>
+
+<p>http://tldp.org/HOWTO/LVM-HOWTO/whatisvolman.html</p>
+
+<ul>
+<li>Move things around more easily</li>
+<li>give things better names than <code>/dev/sda</code> / sdb etc</li>
+</ul>
+
+
+<p>Basically let&#8217;s you overlay logical volumes on top of physical drives.
+Makes it easy to move space around between various drives, make things
+more sane.</p>
+
+<pre><code>    hda1   hdc1      (PV:s on partitions or whole disks)                        
+       \   /                                                                    
+        \ /                                                                     
+       diskvg        (VG)                                                       
+       /  |  \                                                                  
+      /   |   \                                                                 
+  usrlv rootlv varlv (LV:s)
+    |      |     |                                                              
+ ext2  reiserfs  xfs (filesystems)                                        
+</code></pre>
+
+<p>Use LVM2 in Linux land.</p>
+
+<h2>tcpdump</h2>
+
+<p>Ahhh got it to work</p>
+
+<pre><code>$ sudo tcpdump -t 'host machty.com'
+$ ping machty.com
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 0, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 0, length 64
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 1, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 1, length 64
+IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 2, length 64
+IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 2, length 64
+</code></pre>
+
+<h2>UDP can broad/multicast</h2>
+
+<p>And TCP cannot?</p>
+
+<h2>Sequenced-packet sockets</h2>
+
+<p>Combined aspects of UDP/TCP.</p>
+
+<ul>
+<li>Connection oriented</li>
+<li>Datagram oriented (message boundaries preserved)</li>
+<li>Reliable</li>
+</ul>
+
+
+<p><code>SOCK_SEQPACKET</code> type, available in UNIX domain. TCP/UDP do not support
+it, but SCTP does.</p>
+
+<p>Stream Control Transmission Protocol. Allows stream multiplexing,
+preserves message boundaries unlike TCP.</p>
+
+<pre><code>socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+</code></pre>
+
+<p>So, TCP isn&#8217;t the only internet-domain stream protocol; SCTP is too.
+It&#8217;s a stream of messages. Rather than bytes.</p>
+
+<p>UDP + congestion controller = DCCP, Datagram Congestion Control
+Protocol.</p>
+
+<h2>Alternative IO</h2>
+
+<ul>
+<li><code>select</code>/<code>poll</code> to watch multiple fds for availability;
+
+<ul>
+<li>benefit over alternatives is that you don&#8217;t have to manually poll w non-blocking
+reads.</li>
+<li>doesn&#8217;t scale well w hundreds+ of FDs</li>
+</ul>
+</li>
+<li>signal-driven IO; kernel notifies when IO ready, process can do other
+still til its ready for IO; benefit over select/poll is that it
+doesn&#8217;t block</li>
+<li>epoll
+
+<ul>
+<li>application can monitor many file descriptors</li>
+<li>linux specific but BSD has kqueue, and there are others</li>
+<li>avoids complexities w signal programming</li>
+</ul>
+</li>
+</ul>
+
+
+<p>There&#8217;s also POSIX async IO (AIO); perform IO but don&#8217;t block, get
+notified later when it goes through. Linux has thread implementation but
+might have it on kernel now, who knows.</p>
+
+<p>Since <code>epoll</code> is Linux specific, use a lib that provides a portal
+evented layer to you process: use epoll if present, else fall back to
+select/pool; <code>libevent</code> is one such lib.</p>
+
+<ul>
+<li>libevent
+
+<ul>
+<li>libev: high perf event loop based on libevent but without bugs
+
+<ul>
+<li>only ran on Unix, so node (which originally use libev) needed a
+solution</li>
+</ul>
+</li>
+<li>libuv: abstraction around libev or IOCP (Windows-based IO Completion
+Port)
+
+<ul>
+<li>used in node</li>
+<li>used in rust</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Two types of readiness notifications:</p>
+
+<ul>
+<li>level-triggered: fd is actually ready, now, for IO
+
+<ul>
+<li>poll/select &amp; epoll</li>
+<li>Allows you to repeat the poll operation after a small read; no need
+to read everything in a buffer at once</li>
+</ul>
+</li>
+<li>edge-triggered: IO has occurred since last poll (but it&#8217;s possible
+someone else already took care of it)
+
+<ul>
+<li>signals &amp; epoll</li>
+<li>Try and read as much as possible because you have no way of knowing
+whether there&#8217;s more data (without a non-blocking fail), usually by
+non-blocking reads in a loop until EAGAIN or EWOULDBLOCK.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note that epoll can do both. These constraints impact program design.</p>
+
+<p>Non-blocking IO + edge-triggered notifications is common because there
+are so many cases where blocking IO will screw you; better to non-block
+in a lop and check if data is actually there.</p>
+
+<p><code>poll</code> is like <code>select</code> but instead of grouping by operation you just
+provide a list of FDs objects and say which type of IO you&#8217;re interested
+in per object.</p>
+
+<p>Readiness means an operation will not block. It doesn&#8217;t mean data will
+transfer as it could mean EOF or error. The only guarantee is
+non-blockage.</p>
+
+<p>Downsides w poll/select when large number of FDs</p>
+
+<ul>
+<li>Need to initialize large structures to pass to kernel</li>
+<li>Kernel needs to loop through all file descriptors</li>
+<li>Program must inspect all returned FDs</li>
+</ul>
+
+
+<h2>Stripe</h2>
+
+<p>You can do a one time charge, or you can save card to a customer.</p>
+
+<p>You can create a Card in their API, but you must specify a customer or
+recipient.</p>
+
+<p>An OAuth access token acts like a secret API key:</p>
+
+<blockquote><p>To swap this for an access_token, which acts like a secret API key&#8230;</p></blockquote>
+
+<p>https://stripe.com/docs/connect/getting-started</p>
+
+<p>So this error: https://support.stripe.com/questions/connect-publishable-key-error-with-shared-customers</p>
+
+<p>Background: every Stripe API request sends in your app&#8217;s secret key for
+authentication.</p>
+
+<pre><code>Stripe.api_key = ENV['YOUR_DUMBASS_STRIPE_SECRET_KEY']
+</code></pre>
+
+<p>This makes it send automatically, but you can also override per API
+request by providing a second parameter.</p>
+
+<pre><code>charge = Stripe::Charge.create({
+  ...
+}, some_api_key)
+</code></pre>
+
+<p>In this case, the issue was that my implicitly provided app api key was
+being provided to the API request to make a charge using a token
+generated by the connected account.</p>
+
+<p>I don&#8217;t really know why this is a problem; seems like something you
+should be able to do, right? But actually you have to provide that
+second parameter as the access token from when the account connected to
+your app.</p>
+
+<p>Trickay.</p>
+
+<h2>Who&#8217;s using ports in OS X?</h2>
+
+<pre><code>sudo lsof -nP -iTCP -sTCP:LISTEN
+</code></pre>
+
+<p>Figured I&#8217;d be able to use netstat for this, should probably look into
+why I can&#8217;t.</p>
+
+<h2>Self pipes</h2>
+
+<p>Because <code>pselect</code> isn&#8217;t widely supported, you can use the self pipe
+trick to get rid of race conditions surrounding signal handlers and
+select. Recall the common race condition:</p>
+
+<ul>
+<li>Install signal handler that sets global flag to true</li>
+<li>Run an IO loop that checks this global flag in order to decide whether
+to perform some action.</li>
+</ul>
+
+
+<p>But if a signal arrives between these steps then you might start looping
+without checking the flag, etc.</p>
+
+<p>So you can self-pipe to get around this:</p>
+
+<ol>
+<li>Create a unix domain pipe, non-blocking on both ends to prevent any
+sort of queueing/blocking behavior.</li>
+<li>Within a signal handler, write a single byte into the pipe; <code>write</code>
+is async signal safe, so we&#8217;re cool.</li>
+<li>Include the pipe in <code>select</code>, always check if self-pipe is in
+<code>readfs</code></li>
+</ol>
+
+
+<p>Unicorn uses a self pipe.</p>
+
+<pre><code># We use SELF_PIPE differently in the master and worker processes:
+#
+# * The master process never closes or reinitializes this once
+# initialized.  Signal handlers in the master process will write to
+# it to wake up the master from IO.select in exactly the same manner
+# djb describes in http://cr.yp.to/docs/selfpipe.html
+#
+# * The workers immediately close the pipe they inherit.  See the
+# Unicorn::Worker class for the pipe workers use.
+</code></pre>
+
+<blockquote><p>Richard Stevens&#8217;s 1992 book &#8220;Advanced programming in the UNIX environment&#8221; says that you can&#8217;t safely mix select() or poll() with SIGCHLD (or other signals). The SIGCHLD might go off while select() is starting, too early to interrupt it, too late to change its timeout.</p></blockquote>
+
+<p>This just means race conditions; anyway, Unicorn doesn&#8217;t mix select with
+other FDs; rather it uses it as parent-child process communication; the
+master will sleep/block on a select of the self pipe, and only the self
+pipe, and will awaken, clear the pipe, and continue onward.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-31T06:45:00-04:00" pubdate data-updated="true">Oct 31<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/10/29/crowley-girdle/">
 		
 			Crowley Girdle</a>
@@ -6493,196 +6822,6 @@ with a 417 Expectation Failed.</p>
 
 
 <time datetime="2014-09-17T08:08:00-04:00" pubdate data-updated="true">Sep 17<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/09/15/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>FTP</h2>
-
-<p>Plaintext, unless you&#8217;re using SFTP or some variant.</p>
-
-<p>FTP uses multiple connections: 1 control connection for sending
-commands and tracking current directory, etc, and a connection for
-actually streaming the file data.</p>
-
-<p>How the second connection (data) is established depends on active vs
-passive mode: in active mode, the server will try to connect back to the
-client at PORT+1, and in most modern cases, this will fail due to NATs
-and firewalls, hence passive mode (via PASV) command is meant to get
-around this. In passive mode, the client requests an IP and port from
-the server (via the control connection), and then the client makes the
-second connection to whatever the server returns. This works as clients can
-generally connect to servers without NAT/firewall issues.</p>
-
-<p>Note that active connections are rare. The man page for <code>ftp</code> is
-telling:</p>
-
-<pre><code>-A          Force active mode ftp.  By default, ftp will try to use passive mode
-            ftp and fall back to active mode if passive is not supported by the
-            server.  This option causes ftp to always use an active connection.
-            It is only useful for connecting to very old servers that do not
-            implement passive mode properly.
-</code></pre>
-
-<h2>Application-level gateway</h2>
-
-<p>http://en.wikipedia.org/wiki/Application-level_gateway</p>
-
-<p>TODO: learn more.</p>
-
-<h2>Process per connection</h2>
-
-<p>One way of handling a new connection is to fork and let the forked
-process handle that connection. Makes sense for the parent instance to
-use Ruby&#8217;s <code>Process.detach</code>, which doesn&#8217;t have a native kernel
-equivalent but is just a Ruby convenience that spins up a thread that
-calls <code>wait()</code> on the forked process to prevent it from becoming a
-zombie if the parent process exits before the forked one.</p>
-
-<p>Remember that forking isn&#8217;t available on Windows or JRuby.</p>
-
-<p><code>shotgun</code> is a Ruby server that forks per connection. Why? Isn&#8217;t this
-wasteful (relative to pre-forking solutions like Unicorn)? Yes, but it
-has specific purpose: assuming it&#8217;s not painfully expensive to spin up
-your server (like Rails), and that you don&#8217;t have a mechanism for
-reloading after code changes (like Rails), <code>shotgun</code> will fork per
-connection and entirely reload / spin up the rack server, less reloading
-the latest version of any Ruby code, thus not requiring you to manually
-restart your server.</p>
-
-<h2>Thread per connection</h2>
-
-<p>Typical state-sharing caveats apply when working with threads, hence
-it&#8217;s useful to thing about the simple unit of concurrency that will keep
-your threads isolate and minimize their access to shared data. That unit
-would be a connection; each thread should get its own connection object.
-Create a connection object, immediately create a new thread, and let
-that connection object fall out of scope in the creator thread so that
-only the newly spawned thread has access to it. Simple enough.</p>
-
-<h2>How to verify your code is on multiple cores</h2>
-
-<p>You have to dig in a little bit to verify that Ruby code you&#8217;re writing
-is actually being processed on multiple CPU cores. There are many
-variables:</p>
-
-<ol>
-<li>Does your system even have more than one core? (try <code>system_profiler | grep 'Total Number of Cores'</code> to find out, probably some other ways too)</li>
-<li>Does your Ruby have a GIL? (MRI does, Rubinius and JRuby don&#8217;t)</li>
-<li>Some third thing to pad my arbitrary list of bullshit.</li>
-</ol>
-
-
-<p>Anyway, one easy way is to run the following code:</p>
-
-<pre><code>NUM_CORES = 2
-
-threads = []
-NUM_CORES.times do |t|
-  threads &lt;&lt; Thread.new do
-    log_every = 1000000
-    i = 0
-    loop do
-      i += 1
-      if i == log_every
-        i = 0
-        putc t.to_s
-      end
-    end
-  end
-end
-
-threads.each(&amp;:join)
-</code></pre>
-
-<p>Running this on MRI Ruby results in 100% CPU usage. Running in JRuby
-yields 200%, which means two cores are operating at 100%. Pretty rad,
-yes?</p>
-
-<p>CPU usage reported by activity monitor or <code>top -o cpu</code>.</p>
-
-<h2>Preforking</h2>
-
-<p>e.g Unicorn</p>
-
-<p>What&#8217;s nice is that the kernel will handle load-balancing for us: when
-there are no incoming requests, you have N forked instances blocked on
-<code>accept</code>, and the kernel will choose which instance gets the next
-incoming request. If all forked instances are busy, the kernel will just
-queue up the request internally. If the queue gets full, you&#8217;ll get an
-ECONNREFUSED. Easy peazy.</p>
-
-<p>Unicorn (and probably Rainbows) does some extra tracking on child
-processes to make sure it&#8217;s not getting stuck on long requests, etc.</p>
-
-<p>Main disadvantage is memory usage. By the time you fork, if the parent
-process is 100 mb, then 4 forks and you&#8217;re at 500 mb&#8230; unless 1) your
-OS has COW and 2) you don&#8217;t write to it all that much.</p>
-
-<h2>Reactor</h2>
-
-<p>e.g. Node.js, Twisted, EventMachine</p>
-
-<p>High levels of concurrency (not necessarily parallelism) achievable,
-relative to threading/forking models, which hit their RAM limit much
-faster (Reactor patterns mean that everything is just heap allocations
-on the same thread).</p>
-
-<p>Impacts on programming model:</p>
-
-<ul>
-<li>No processes/threads, so no shared memory, synchronization, etc, to
-have to worry about</li>
-<li>Don&#8217;t block the single Reactor thread (because nothing else will be able to
-run). You wouldn&#8217;t have to worry about this in thread/processland.
-This is why if you&#8217;re using EventMachine, your gems must be
-event-machine aware, otherwise they&#8217;ll block (which would be fine in a
-threading/forking environment).</li>
-</ul>
-
-
-<h2>Node cluster</h2>
-
-<p>http://nodejs.org/api/cluster.html</p>
-
-<p>Based on the fact that you can use child process forking to split heavy
-duty work into process that can each live on a different core, if that&#8217;s
-what you&#8217;re about.</p>
-
-<p>Note that there&#8217;s no C-like or Ruby-like fork in Node; you can&#8217;t just
-call fork and then have both the parent and newly forked child process
-continue execution from that <code>fork()</code> invocation&#8230;</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T19:57:00-04:00" pubdate data-updated="true">Sep 15<span>th</span>, 2014</time></div>
 	
 
 
