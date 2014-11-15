@@ -1,0 +1,459 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Mr Noah  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Mr Noah</h2>
+	<div class="entry-content"><h2>Root/apex/base/DNS and things finally clicking</h2>
+
+<p>They the same thing.</p>
+
+<p>http://stackoverflow.com/a/16041655/914123</p>
+
+<p>Also I like</p>
+
+<pre><code>(Note: root, base, apex domains are all the same thing. Using interchangeably for google-foo.)
+</code></pre>
+
+<p>CNAME:</p>
+
+<ul>
+<li>Canonical Name record: Aliases another name</li>
+<li>Use case: define CNAME for <code>ftp</code>, <code>www</code>, etc to point to the
+<code>example.com</code> A record so that only the A record&#8217;s IP needs to
+change</li>
+<li>Can point to any ol domain, not just within <code>example.com</code>. Heroku
+and other cloud services use this to have a CNAME pointing to
+a domain name under the control of a dynamic name server that
+can dish out different A name records (hence different IPs)</li>
+<li>Can&#8217;t define CNAMEs for apex domains (e.g. <code>example.com</code>).</li>
+<li>Can&#8217;t be shared with other records for that name, e.g. MX. CNAME wins
+and fucks over the others, I think.</li>
+</ul>
+
+
+<p>A record:</p>
+
+<ul>
+<li>Points to an IP address.</li>
+<li>Terminates DNS lookups</li>
+</ul>
+
+
+<p>ALIAS/ANAME:</p>
+
+<p>http://blog.dnsimple.com/2011/11/introducing-alias-record/</p>
+
+<p>http://support.dnsimple.com/articles/differences-between-a-cname-alias-url/</p>
+
+<blockquote><p>Before going further into the details, it’s important to know that A
+and CNAME records are standard DNS records, whilst ALIAS and URL
+records are custom DNS records provided by DNSimple. Both of them
+are translated internally into A records to ensure
+compatibility with the DNS protocol.</p></blockquote>
+
+<p>Aliases can coexist with other records at that level (so someone asking
+for MX gets MX if defined for that name rather than resolving
+elsewhere).</p>
+
+<p>Ok, so DNS hosts just returns CNAMEs and A records (and others too), and
+DNS hosts like DNSimple and DNS Made Easy can provide custom record
+types that ultimately translate to A records. Makes sense.</p>
+
+<p>So what about URL?</p>
+
+<blockquote><p>This type of record uses an HTTP redirect to redirect visitors from a domain to a web site.</p></blockquote>
+
+<p>So the A record returned from a URL record on DNSimple is going to point
+to one of DNSimple&#8217;s server IPs. I set one up for
+snaggletooth.alexmatchneer.com => http://www.example.com.</p>
+
+<pre><code>$ curl -H "Host: snaggletooth.alexmatchneer.com" 50.31.209.254
+&lt;a href="http://www.example.com"&gt;Moved Permanently&lt;/a&gt;
+</code></pre>
+
+<p>I also added a URL record for ugly.alexmatchneer.com to point to some
+random s3 image and discovered that browsers in fact follow redirects
+for images, hence this works:</p>
+
+<pre><code>&lt;img src="http://ugly.alexmatchneer.com"/&gt;
+</code></pre>
+
+<p><img src="http://ugly.alexmatchneer.com" alt="" /></p>
+
+<p>DNSimple is also nice enough to append the path to whatever its
+forwarding, so <code>ugly.alexmatchneer.com/wat</code> forwards to the destination
+specified in the URL record + <code>/wat</code>.</p>
+
+<h2><code>dig</code> recursion</h2>
+
+<p>Either you tell your DNS server to recurse for you, or you do it
+yourself.</p>
+
+<p>Name server does it for you (all these options just get rid of crufty
+shit):</p>
+
+<pre><code>dig +noall +answer +additional +recurse alexmatchneer.com
+alexmatchneer.com.      3544    IN      A       23.235.39.133
+</code></pre>
+
+<p>You do it yourself:</p>
+
+<pre><code>dig +noall +answer +additional +norecurse alexmatchneer.com
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>FWDR is a FiOS thing. These are from the additional section. So I guess
+it means I should call them. But at what point do I go through
+Verizon&#8217;s DNS? I thought I used like 4.2.2.2?</p>
+
+<pre><code>cat /etc/resolve.conf
+
+#
+# Mac OS X Notice
+#
+# This file is not used by the host name and address resolution
+# or the DNS query routing mechanisms used by most processes on
+# this Mac OS X system.
+#
+# This file is automatically generated.
+#
+domain home
+nameserver 192.168.1.1
+</code></pre>
+
+<p>I guess DNS is decided when I connect to a router. Ahhh I guess routers
+perform DNS? Ok ok ok what if I tell <code>dig</code> which name server to query?</p>
+
+<pre><code>$ dig +noall +answer +additional +norecurse @4.2.2.2 alexmatchneer.com
+i.gtld-servers.net.     109080  IN      A       192.43.172.30
+k.gtld-servers.net.     109080  IN      A       192.52.178.30
+m.gtld-servers.net.     166299  IN      A       192.55.83.30
+h.gtld-servers.net.     114566  IN      A       192.54.112.30
+b.gtld-servers.net.     133590  IN      A       192.33.14.30
+b.gtld-servers.net.     118573  IN      AAAA    2001:503:231d::2:30
+a.gtld-servers.net.     159638  IN      A       192.5.6.30
+a.gtld-servers.net.     113094  IN      AAAA    2001:503:a83e::2:30
+e.gtld-servers.net.     113091  IN      A       192.12.94.30
+f.gtld-servers.net.     166299  IN      A       192.35.51.30
+j.gtld-servers.net.     166299  IN      A       192.48.79.30
+g.gtld-servers.net.     109080  IN      A       192.42.93.30
+d.gtld-servers.net.     101447  IN      A       192.31.80.30
+l.gtld-servers.net.     136989  IN      A       192.41.162.30
+</code></pre>
+
+<p>WORD ok top level domains, makes sense. I bet if I let it recurse for me
+it&#8217;ll gimme what I want:</p>
+
+<pre><code>$ dig +noall +answer +additional +recurse @4.2.2.2 alexmatchneer.com
+alexmatchneer.com.      3600    IN      A       23.235.46.133
+</code></pre>
+
+<p>Word. And if I use my router&#8217;s IP:</p>
+
+<pre><code>dig +noall +answer +additional +norecurse @192.168.1.1 alexmatchneer.com
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>It refers me to some Verizon name server shit. Which is why if I type in
+some nonsense domain name, I get redirected to some shitty Verizon
+search page. Regardless of whether I&#8217;m in Chrome or in curl:</p>
+
+<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
+&lt;!DOCTYPE ... blah blah http://searchassist.verizon.com/
+</code></pre>
+
+<p>So what if I enable VPN? Prediction: my VPN provider will be making
+queries on my behalf, presumably not behind some Verizon name server
+shit.</p>
+
+<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
+curl: (6) Could not resolve host: oinasiodasd.asdasiodasod.asdoi
+</code></pre>
+
+<p>Basically (annoying caching hangover aside) dig will skip the FiOS
+forwarding/recursing if I&#8217;m on VPN. All this makes sense. Perfect
+sense. COMPLICATED THOUGH JESUS.</p>
+
+<h2>VPNs and private network IPs</h2>
+
+<p>ICANN set aside numbers like 192.168&#8230; and 10&#8230; for private networks.
+VPN doesn&#8217;t interfere with that shit because it&#8217;s within that range.
+Derp.</p>
+
+<p>Ahhhh that does though that I could still use my router as a DNS, no?</p>
+
+<p>VPN enabled:</p>
+
+<pre><code>$ dig .
+;; SERVER: 8.8.4.4#53(8.8.4.4)
+</code></pre>
+
+<p>VPN disabled:</p>
+
+<pre><code>$ dig .
+;; SERVER: 192.168.1.1#53(192.168.1.1)
+</code></pre>
+
+<p>And even w VPN enabled I could still query my Verizon router&#8217;s DNS</p>
+
+<pre><code>$ dig +norecurse @192.168.1.1 .
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>So who the hell decides where I query from?</p>
+
+<h2>DHCP</h2>
+
+<p>Dynamic Host Configuration Protocol.</p>
+
+<p>When you connect to a network, this tells you all sorts of useful
+defaults:</p>
+
+<blockquote><p>The DHCP server manages a pool of IP addresses and information about client configuration parameters such as default gateway, domain name, the name servers, and time servers.</p></blockquote>
+
+<p>When you connect to a network, the DHCP broadcasting stuff happens and
+you wind up with an IP, bingo bango bongo. When you connect to a network
+but can&#8217;t establish an IP, it&#8217;s probably because DHCP hasn&#8217;t finished
+yet.</p>
+
+<p>But this is where 192.168.1.1 as a name server comes from; the Verizon
+router will use DHCP to tell you to use it. Other routers might do other
+things. When I tether to my phone it gives a different DNS.</p>
+
+<h2>TXT Records</h2>
+
+<pre><code>$ dig +short borflex.alexmatchneer.com TXT
+"Another dumb thing"
+"I am a big dumb ridiculous idiot!"
+</code></pre>
+
+<h2>Nested subdomains</h2>
+
+<p>For the <code>alexmatchneer.com</code> domain, I added a CNAME for
+<code>e.x.c.alexmatchneer.com</code> to point to expresscheckoutapp.com
+and now it just works to nav to http://e.x.c.alexmatchneer.com</p>
+
+<h2>Route 53</h2>
+
+<p>Heyyyy that&#8217;s the port that DNS servers use.</p>
+
+<h2>Rubydns</h2>
+
+<p>https://github.com/ioquatix/rubydns</p>
+
+<p>Pretty cool. You can make your own DNS server. I got mine to tell me I
+was an idiot:</p>
+
+<pre><code>$ dig +short @54.165.102.18 barflonkula TXT
+"You are a big idiot"
+</code></pre>
+
+<h2>SOA Records</h2>
+
+<h2>Pointilism</h2>
+
+<p>Painting with dots. Like that Ferris Bueller painting, or some of Van
+Gogh&#8217;s self portraits.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-08T08:29:00-05:00" pubdate data-updated="true">Nov 8<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/11/08/mr-noah/';
+        var disqus_url = 'http://machty.github.com/blog/2014/11/08/mr-noah/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

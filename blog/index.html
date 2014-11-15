@@ -112,6 +112,829 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/11/11/shananananananananeeees/">
+		
+			Shananananananananeeees</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Linux hierachy layout</h2>
+
+<p><code>man hier</code> answers these questions.</p>
+
+<p>Basically, <code>/usr</code> is a secondary hierarchy for libs/bins/other things
+that aren&#8217;t strictly required for single-user mode (e.g. root).</p>
+
+<p><code>/usr/local</code> is tertiary. Things you compile yourself might belong
+there. Typically implies lower level of permissions. Rationale for
+separting from <code>/usr</code> is that <code>/usr</code> might be some read-only thing
+mounted and shared across machines, ready to be swapped out and upgraded
+at any time, but <code>/usr/local</code> is crap that you can fuck wit.</p>
+
+<p><code>brew</code> expects to install in the tertiary <code>/usr/local</code> directory:
+<code>/usr/local/Cellar</code>. So you can have multiple versions of executables
+installed via brew, but only one wins on the command line by way of
+symlinks within <code>/usr/local/bin</code> pointing to specific executables in
+<code>/usr/local/Cellar/projectname/1.23/bleh</code>. Symlinks to the rescue.</p>
+
+<pre><code>$ sudo brew install wat
+Error: Cowardly refusing to `sudo brew install`
+You can use brew with sudo, but only if the brew executable is owned by root.
+However, this is both not recommended and completely unsupported so do so at
+your own risk.
+</code></pre>
+
+<p>I guess this is nice since it prevents all the ugliness of installing
+shared executables at root privileges when they&#8217;re not needed.</p>
+
+<h2>Raptor</h2>
+
+<p>Ruby server. Apparently fast.</p>
+
+<p>http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/#zero_copy</p>
+
+<ul>
+<li>Uses nginx HTTP parser
+
+<ul>
+<li>due to battle-tested reliability</li>
+<li>could have used PicoHTTPParser, but not much community adoption
+though it claims being faster than nginc</li>
+<li>could have used Mongrel&#8217;s Ragel HTTP parser, but lots of
+Ruby-specific</li>
+</ul>
+</li>
+<li>Comes w reverse proxy buffer, such as what nginx has but hyper
+optimized to typical ruby raptor workflows</li>
+<li>Multi-process</li>
+<li>Sounds like multi-threadedness will be a paid solution that comes
+later.</li>
+</ul>
+
+
+<p>The C++ component of Raptor is the server that consists of:</p>
+
+<ul>
+<li>Buffering reverse proxy</li>
+<li>HTTP parser</li>
+<li>HTTP server</li>
+</ul>
+
+
+<p>Apparently these are all part of the same thing.</p>
+
+<h2>Puma Lopez mode</h2>
+
+<p>Puma Ruby server comes with a Lopez mode named after <code>@brianmario</code> who
+suggested it. It&#8217;s a tcp-only (no http) version of puma. To that guy&#8217;s
+knowledge Puma is the only threaded/pre-forking Ruby server that offers
+such a mode.</p>
+
+<h2>nginx Reverse proxy buffer</h2>
+
+<p>http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering</p>
+
+<p>I think it&#8217;s on by default, but you can disable it, configure buffer
+sizes, or enable with <code>X-Accel-Buffer</code>.</p>
+
+<h2>nginx in general</h2>
+
+<ul>
+<li>master process
+
+<ul>
+<li>manages worker process, reloads config files, etc</li>
+</ul>
+</li>
+<li>worker processes
+
+<ul>
+<li>process requests</li>
+</ul>
+</li>
+</ul>
+
+
+<p>conf files are directives, either one liners or blocks.</p>
+
+<ul>
+<li>Block directives
+
+<ul>
+<li>same structure as normal directives</li>
+<li>but have braces</li>
+<li>if braces allow directives inside of them, it&#8217;s called a context</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Contexts:</p>
+
+<ul>
+<li>main
+
+<ul>
+<li>events</li>
+<li>http
+
+<ul>
+<li>server
+
+<ul>
+<li>location</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Catch up or move along</h2>
+
+<p>http://unlearningeconomics.wordpress.com/2012/04/03/the-keenkrugman-debate-a-summary/</p>
+
+<h2>30s write delay</h2>
+
+<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
+
+<p>http://stackoverflow.com/questions/13650134/after-how-many-seconds-are-file-system-write-buffers-typically-flushed</p>
+
+<p>http://brad.livejournal.com/2116715.html</p>
+
+<p>Modified kernel buffers (of files on disk) wait up to 30s to be flushed
+to disk. You can &#8220;force&#8221; it was fsync. But then your disks might lie to
+you about what actually was persisted (verifiable via a test involving
+pulling the power cord).</p>
+
+<h2>Redis persistence</h2>
+
+<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
+
+<p>It&#8217;s in-memory key-value, so does it ever get saved to disk?</p>
+
+<p>Why yes it does, via:</p>
+
+<ul>
+<li>snapshotting; configure min writes since last sync, or a timeout, and
+it&#8217;ll persist a snapshot to a .rdb file. Half completed transactions
+(via MULTI/EXEC) don&#8217;t show up of course.</li>
+<li>append-only AOF files
+
+<ul>
+<li>get rewritten based on memory contents if file grows too large</li>
+<li>possible for an empty redis db (written and then deleted keys) has a
+large AOF file.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Both can be enabled; it&#8217;s nice to have rdb files that you can back up.</p>
+
+<blockquote><p>AOF rewrites are generated only using sequential I/O operations, so the whole dump process is efficient even with rotational disks (no random I/O is performed). This is also true for RDB snapshots generation. The complete lack of Random I/O accesses is a rare feature among databases, and is possible mostly because Redis serves read operations from memory, so data on disk does not need to be organized for a random access pattern, but just for a sequential loading on restart.</p></blockquote>
+
+<p>Interesting, so usually a database that stores to disk would need to
+organize data for efficient random access, but in Redis-land, everything
+is loaded into memory.</p>
+
+<p>This confused me:</p>
+
+<blockquote><p>One of the additional benefits of RDB is the fact for a given database size, the number of I/Os on the system is bound, whatever the activity on the database is. This is a property that most traditional database systems (and the Redis other persistence, the AOF) do not have.</p></blockquote>
+
+<p>In other words, AOFs can be large even for empty databases (due to
+deletions).</p>
+
+<p>appendfsync:</p>
+
+<ul>
+<li>appendfsync no
+
+<ul>
+<li>syncs at kernel whim (30 s on linux)</li>
+</ul>
+</li>
+<li>appendfsync everysec
+
+<ul>
+<li>average 1 sec, at most 2 delay before buffers sent to kernel and sync&#8217;d</li>
+</ul>
+</li>
+<li>appendfsync always
+
+<ul>
+<li>sync before each client ack</li>
+<li>slowest</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Default is <code>appendfsync everysec</code>, which is pretty good durability
+without murdering speed.</p>
+
+<blockquote><p>What Redis implements when appendfsync is set to always is usually called group commit. This means that instead of using an fsync call for every write operation performed, Redis is able to group this commits in a single write+fsync operation performed before sending the request to the group of clients that issued a write operation during the latest event loop iteration.</p></blockquote>
+
+<p>Hmm that&#8217;s interesting&#8230; Redis has an event loop that can answer
+multiple clients in a single iteration?</p>
+
+<p>http://pauladamsmith.com/articles/redis-under-the-hood.html#event-loop</p>
+
+<p>Ah, it uses epoll and the like; multiple sockets and events can have
+arrived in one go, so it loops through all of those, does the necessary
+reads, etc.</p>
+
+<pre><code>/* Include the best multiplexing layer supported by this system.
+ * The following should be ordered by performances, descending. */
+#ifdef HAVE_EVPORT
+#include "ae_evport.c"
+#else
+    #ifdef HAVE_EPOLL
+    #include "ae_epoll.c"
+    #else
+        #ifdef HAVE_KQUEUE
+        #include "ae_kqueue.c"
+        #else
+        #include "ae_select.c"
+        #endif
+    #endif
+#endif
+</code></pre>
+
+<h2>UTF-8</h2>
+
+<p>http://en.wikipedia.org/wiki/UTF-8</p>
+
+<p>I can&#8217;t believe I never sat down and read this shit.</p>
+
+<ul>
+<li>backwards compat w ASCII since ascii only used the 7 bits (signed
+char) to determine character.</li>
+<li>81% of webpages use this encoding</li>
+<li>ASCII is valid UTF-8</li>
+<li>UTF-8 is variable length; the 8th bit determines length</li>
+<li>there are invalid byte sequences (that you have to look out for when
+reading files / raw shit)</li>
+</ul>
+
+
+<h2>ISO/IEC 8859</h2>
+
+<p>http://en.wikipedia.org/wiki/ISO/IEC_8859</p>
+
+<ul>
+<li>single byte</li>
+<li>all ascii is ISO</li>
+<li>Seems like standard alphabet is preserved, but other 8 bit range stuff
+differs.</li>
+</ul>
+
+
+<h2>Ruby string encoding</h2>
+
+<p>http://stackoverflow.com/questions/20521371/set-utf-8-as-default-for-ruby-1-9-3</p>
+
+<ul>
+<li>Ruby 1.8 and below didn&#8217;t knew the concept of string encodings at all. Strings were more or less byte arrays.</li>
+<li>Ruby 1.9: default string encoding is US_ASCII everywhere.</li>
+<li><p>Ruby 2.0 and above: default string encoding is UTF-8.</p>
+
+<p>  $ ruby -e &#8220;puts &#8221;.encoding&#8221;
+  UTF-8</p></li>
+</ul>
+
+
+<h2>hiredis</h2>
+
+<p>https://github.com/redis/hiredis</p>
+
+<p>Presumably stands for &#8220;high(ish) level redis lib&#8221;.</p>
+
+<p>The Ruby gem can optionally use this as a driver but it comes at the
+expense of portability (JRuby can&#8217;t use this driver). But by default
+Ruby just uses Ruby sockets to talk to redis.</p>
+
+<h2>Public wifi</h2>
+
+<p>Is there any security difference between a password-less public wifi and
+one in which literally everyone knows the password?</p>
+
+<h2>/private on os X</h2>
+
+<p>http://unix.stackexchange.com/questions/63555/what-is-darwins-private-directory-for</p>
+
+<p>fun fact: <code>/etc</code> is a symlink for <code>/private/etc</code> on OS X. Wacky.</p>
+
+<h2>WEP, WPA, WPA2</h2>
+
+<p>http://www.howtogeek.com/167783/htg-explains-the-difference-between-wep-wpa-and-wpa2-wireless-encryption-and-why-it-matters/</p>
+
+<ul>
+<li>WEP (Wired Equivalent Privacy)
+
+<ul>
+<li>oldest</li>
+<li>WEP 128 most common even though there&#8217;s 256</li>
+<li>major security vulnerabilities based on RC4 stream cipher cracking</li>
+<li>on busy network, cracking could happen within a minute; if network
+is slow, attacker can send fake packets and get replies that it can
+use to crack over time.</li>
+<li>passive attacks: you have to collect information. Gather shit.</li>
+<li>Shamir (from RSA fame) was one of the crackahs.</li>
+</ul>
+</li>
+<li>WPA
+
+<ul>
+<li>PSK (pre-shared key) is most common</li>
+<li>256 min (over 64 and 128 WEP garbage)</li>
+<li>message integrity checks (detects some MITM)</li>
+<li>TKIP (temporal key integrity protocol) is predecessor to AES</li>
+<li>too tied to WEP (meant for firmware progressive upgrades) and hence
+prone to some WEP vulnerabilities, hence:</li>
+</ul>
+</li>
+<li>WPA2
+
+<ul>
+<li>AES</li>
+<li>CCMP (replacement for TKIP? but with TKIP fallback)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Just disable a thing called WPS and you&#8217;ll be good.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-11T06:43:00-05:00" pubdate data-updated="true">Nov 11<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/08/mr-noah/">
+		
+			Mr Noah</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Root/apex/base/DNS and things finally clicking</h2>
+
+<p>They the same thing.</p>
+
+<p>http://stackoverflow.com/a/16041655/914123</p>
+
+<p>Also I like</p>
+
+<pre><code>(Note: root, base, apex domains are all the same thing. Using interchangeably for google-foo.)
+</code></pre>
+
+<p>CNAME:</p>
+
+<ul>
+<li>Canonical Name record: Aliases another name</li>
+<li>Use case: define CNAME for <code>ftp</code>, <code>www</code>, etc to point to the
+<code>example.com</code> A record so that only the A record&#8217;s IP needs to
+change</li>
+<li>Can point to any ol domain, not just within <code>example.com</code>. Heroku
+and other cloud services use this to have a CNAME pointing to
+a domain name under the control of a dynamic name server that
+can dish out different A name records (hence different IPs)</li>
+<li>Can&#8217;t define CNAMEs for apex domains (e.g. <code>example.com</code>).</li>
+<li>Can&#8217;t be shared with other records for that name, e.g. MX. CNAME wins
+and fucks over the others, I think.</li>
+</ul>
+
+
+<p>A record:</p>
+
+<ul>
+<li>Points to an IP address.</li>
+<li>Terminates DNS lookups</li>
+</ul>
+
+
+<p>ALIAS/ANAME:</p>
+
+<p>http://blog.dnsimple.com/2011/11/introducing-alias-record/</p>
+
+<p>http://support.dnsimple.com/articles/differences-between-a-cname-alias-url/</p>
+
+<blockquote><p>Before going further into the details, it’s important to know that A
+and CNAME records are standard DNS records, whilst ALIAS and URL
+records are custom DNS records provided by DNSimple. Both of them
+are translated internally into A records to ensure
+compatibility with the DNS protocol.</p></blockquote>
+
+<p>Aliases can coexist with other records at that level (so someone asking
+for MX gets MX if defined for that name rather than resolving
+elsewhere).</p>
+
+<p>Ok, so DNS hosts just returns CNAMEs and A records (and others too), and
+DNS hosts like DNSimple and DNS Made Easy can provide custom record
+types that ultimately translate to A records. Makes sense.</p>
+
+<p>So what about URL?</p>
+
+<blockquote><p>This type of record uses an HTTP redirect to redirect visitors from a domain to a web site.</p></blockquote>
+
+<p>So the A record returned from a URL record on DNSimple is going to point
+to one of DNSimple&#8217;s server IPs. I set one up for
+snaggletooth.alexmatchneer.com => http://www.example.com.</p>
+
+<pre><code>$ curl -H "Host: snaggletooth.alexmatchneer.com" 50.31.209.254
+&lt;a href="http://www.example.com"&gt;Moved Permanently&lt;/a&gt;
+</code></pre>
+
+<p>I also added a URL record for ugly.alexmatchneer.com to point to some
+random s3 image and discovered that browsers in fact follow redirects
+for images, hence this works:</p>
+
+<pre><code>&lt;img src="http://ugly.alexmatchneer.com"/&gt;
+</code></pre>
+
+<p><img src="http://ugly.alexmatchneer.com" alt="" /></p>
+
+<p>DNSimple is also nice enough to append the path to whatever its
+forwarding, so <code>ugly.alexmatchneer.com/wat</code> forwards to the destination
+specified in the URL record + <code>/wat</code>.</p>
+
+<h2><code>dig</code> recursion</h2>
+
+<p>Either you tell your DNS server to recurse for you, or you do it
+yourself.</p>
+
+<p>Name server does it for you (all these options just get rid of crufty
+shit):</p>
+
+<pre><code>dig +noall +answer +additional +recurse alexmatchneer.com
+alexmatchneer.com.      3544    IN      A       23.235.39.133
+</code></pre>
+
+<p>You do it yourself:</p>
+
+<pre><code>dig +noall +answer +additional +norecurse alexmatchneer.com
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>FWDR is a FiOS thing. These are from the additional section. So I guess
+it means I should call them. But at what point do I go through
+Verizon&#8217;s DNS? I thought I used like 4.2.2.2?</p>
+
+<pre><code>cat /etc/resolve.conf
+
+#
+# Mac OS X Notice
+#
+# This file is not used by the host name and address resolution
+# or the DNS query routing mechanisms used by most processes on
+# this Mac OS X system.
+#
+# This file is automatically generated.
+#
+domain home
+nameserver 192.168.1.1
+</code></pre>
+
+<p>I guess DNS is decided when I connect to a router. Ahhh I guess routers
+perform DNS? Ok ok ok what if I tell <code>dig</code> which name server to query?</p>
+
+<pre><code>$ dig +noall +answer +additional +norecurse @4.2.2.2 alexmatchneer.com
+i.gtld-servers.net.     109080  IN      A       192.43.172.30
+k.gtld-servers.net.     109080  IN      A       192.52.178.30
+m.gtld-servers.net.     166299  IN      A       192.55.83.30
+h.gtld-servers.net.     114566  IN      A       192.54.112.30
+b.gtld-servers.net.     133590  IN      A       192.33.14.30
+b.gtld-servers.net.     118573  IN      AAAA    2001:503:231d::2:30
+a.gtld-servers.net.     159638  IN      A       192.5.6.30
+a.gtld-servers.net.     113094  IN      AAAA    2001:503:a83e::2:30
+e.gtld-servers.net.     113091  IN      A       192.12.94.30
+f.gtld-servers.net.     166299  IN      A       192.35.51.30
+j.gtld-servers.net.     166299  IN      A       192.48.79.30
+g.gtld-servers.net.     109080  IN      A       192.42.93.30
+d.gtld-servers.net.     101447  IN      A       192.31.80.30
+l.gtld-servers.net.     136989  IN      A       192.41.162.30
+</code></pre>
+
+<p>WORD ok top level domains, makes sense. I bet if I let it recurse for me
+it&#8217;ll gimme what I want:</p>
+
+<pre><code>$ dig +noall +answer +additional +recurse @4.2.2.2 alexmatchneer.com
+alexmatchneer.com.      3600    IN      A       23.235.46.133
+</code></pre>
+
+<p>Word. And if I use my router&#8217;s IP:</p>
+
+<pre><code>dig +noall +answer +additional +norecurse @192.168.1.1 alexmatchneer.com
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>It refers me to some Verizon name server shit. Which is why if I type in
+some nonsense domain name, I get redirected to some shitty Verizon
+search page. Regardless of whether I&#8217;m in Chrome or in curl:</p>
+
+<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
+&lt;!DOCTYPE ... blah blah http://searchassist.verizon.com/
+</code></pre>
+
+<p>So what if I enable VPN? Prediction: my VPN provider will be making
+queries on my behalf, presumably not behind some Verizon name server
+shit.</p>
+
+<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
+curl: (6) Could not resolve host: oinasiodasd.asdasiodasod.asdoi
+</code></pre>
+
+<p>Basically (annoying caching hangover aside) dig will skip the FiOS
+forwarding/recursing if I&#8217;m on VPN. All this makes sense. Perfect
+sense. COMPLICATED THOUGH JESUS.</p>
+
+<h2>VPNs and private network IPs</h2>
+
+<p>ICANN set aside numbers like 192.168&#8230; and 10&#8230; for private networks.
+VPN doesn&#8217;t interfere with that shit because it&#8217;s within that range.
+Derp.</p>
+
+<p>Ahhhh that does though that I could still use my router as a DNS, no?</p>
+
+<p>VPN enabled:</p>
+
+<pre><code>$ dig .
+;; SERVER: 8.8.4.4#53(8.8.4.4)
+</code></pre>
+
+<p>VPN disabled:</p>
+
+<pre><code>$ dig .
+;; SERVER: 192.168.1.1#53(192.168.1.1)
+</code></pre>
+
+<p>And even w VPN enabled I could still query my Verizon router&#8217;s DNS</p>
+
+<pre><code>$ dig +norecurse @192.168.1.1 .
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>So who the hell decides where I query from?</p>
+
+<h2>DHCP</h2>
+
+<p>Dynamic Host Configuration Protocol.</p>
+
+<p>When you connect to a network, this tells you all sorts of useful
+defaults:</p>
+
+<blockquote><p>The DHCP server manages a pool of IP addresses and information about client configuration parameters such as default gateway, domain name, the name servers, and time servers.</p></blockquote>
+
+<p>When you connect to a network, the DHCP broadcasting stuff happens and
+you wind up with an IP, bingo bango bongo. When you connect to a network
+but can&#8217;t establish an IP, it&#8217;s probably because DHCP hasn&#8217;t finished
+yet.</p>
+
+<p>But this is where 192.168.1.1 as a name server comes from; the Verizon
+router will use DHCP to tell you to use it. Other routers might do other
+things. When I tether to my phone it gives a different DNS.</p>
+
+<h2>TXT Records</h2>
+
+<pre><code>$ dig +short borflex.alexmatchneer.com TXT
+"Another dumb thing"
+"I am a big dumb ridiculous idiot!"
+</code></pre>
+
+<h2>Nested subdomains</h2>
+
+<p>For the <code>alexmatchneer.com</code> domain, I added a CNAME for
+<code>e.x.c.alexmatchneer.com</code> to point to expresscheckoutapp.com
+and now it just works to nav to http://e.x.c.alexmatchneer.com</p>
+
+<h2>Route 53</h2>
+
+<p>Heyyyy that&#8217;s the port that DNS servers use.</p>
+
+<h2>Rubydns</h2>
+
+<p>https://github.com/ioquatix/rubydns</p>
+
+<p>Pretty cool. You can make your own DNS server. I got mine to tell me I
+was an idiot:</p>
+
+<pre><code>$ dig +short @54.165.102.18 barflonkula TXT
+"You are a big idiot"
+</code></pre>
+
+<h2>SOA Records</h2>
+
+<h2>Pointilism</h2>
+
+<p>Painting with dots. Like that Ferris Bueller painting, or some of Van
+Gogh&#8217;s self portraits.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-08T08:29:00-05:00" pubdate data-updated="true">Nov 8<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/06/jaily-dournal/">
+		
+			Jaily Dournal</a>
+	</h2>
+	<div class="entry-content">
+		<h2><code>rails c --sandbox</code></h2>
+
+<p>Rolls back changes on exit.</p>
+
+<pre><code>(0.4ms)  SAVEPOINT active_record_1
+(0.2ms)  ROLLBACK TO SAVEPOINT active_record_1
+</code></pre>
+
+<p>Wraps in a transaction which is why you see the above rather than BEGIN
+statements</p>
+
+<h2>Temporarily change $stdout</h2>
+
+<p>I wanted to get pretty-print output in Ruby. Solution, using <code>rails c</code>:</p>
+
+<pre><code>f = File.open('tmp', 'w')
+stdout_old = $stdout
+$stdout = f
+pp hash
+$stdout = $stdout_old # could also do File.open(1)
+</code></pre>
+
+<h2>Review: difference between pipes and sockets</h2>
+
+<ul>
+<li>pipes came first in early 70s</li>
+<li>pipes are always stream oriented; sockets can also be datagram
+oriented.</li>
+<li>pipes are unidirectional (and require two pipes for back and forth).
+sockets are bi-directional.</li>
+</ul>
+
+
+<h2>FAT doesn&#8217;t support hardlinking</h2>
+
+<p>I was going to try ember-cli-ramdisk mounting on file systems other than
+HFS+, hoping that one FS would support more efficient reuse of freed
+blocks, which might minimize paging on the grounds that if ramdisks
+blocks are being reused, then additional ramdisk file allocations won&#8217;t
+occur, hence memory lookups won&#8217;t occur, hence paging can&#8217;t happen.</p>
+
+<p>Anyway, got initial builds working in FAT32, but incremental rebuilds
+didn&#8217;t work due to hard-linking:</p>
+
+<p>https://github.com/rlivsey/broccoli-concat/blob/master/index.js#L86</p>
+
+<p>I thought we got rid of those, but then again the above use case is
+fine, since hardlinks are only used concat output and not root files.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-06T16:00:00-05:00" pubdate data-updated="true">Nov 6<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/05/oss-cards-against-humanity/">
+		
+			OSS Cards Against Humanity</a>
+	</h2>
+	<div class="entry-content">
+		<p>Why not.</p>
+
+<h2>Black Cards</h2>
+
+<ul>
+<li>&#8220;GamerGate: it&#8217;s actually about <code>__________</code>&#8221;</li>
+<li>&#8220;Ember.js: a framework for creating <code>_________</code>&#8221;</li>
+</ul>
+
+
+<h2>White Cards</h2>
+
+<ul>
+<li>Ethics in video game journalism</li>
+<li><h1>GamerGate</h1></li>
+<li>Thought Leadership</li>
+<li>Brogrammers</li>
+<li>Cracking the Nut</li>
+<li>Destroy All Software</li>
+<li>Ember.js</li>
+<li>AngularJS</li>
+<li>React</li>
+<li>Two-way data-binding</li>
+<li>Unidirectional Data Flow</li>
+<li>Handlebars templates</li>
+<li>Functional reactive programming</li>
+<li>Hacker News</li>
+<li>Stability without Stagnation</li>
+<li>Ambitious Web Applications</li>
+<li>Thirsty Randos</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-05T12:40:00-05:00" pubdate data-updated="true">Nov 5<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/10/31/troll-toll-to-get-into-this-journal/">
 		
 			Troll Toll to Get Into This Journal</a>
@@ -4919,1909 +5742,6 @@ wealth.</p>
 
 
 <time datetime="2014-10-01T08:29:00-04:00" pubdate data-updated="true">Oct 1<span>st</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/09/27/daily-shnurgle/">
-		
-			Daily Shnurgle</a>
-	</h2>
-	<div class="entry-content">
-		<h2>lseek</h2>
-
-<p>&#8220;long&#8221; (int) seek. There used to just be a <code>seek</code> that took a smaller
-int.</p>
-
-<p>You can seek past EOF and the kernel will be fine with it; reads yield 0
-and set EOF flag, but writing will cause a &#8220;file hole&#8221; to exist, wherein
-null bytes are returned but aren&#8217;t actually written to disk until
-someone writes into the hole.</p>
-
-<pre><code>File.open("seektestfile", "r+") do |f|
-  f.write("begin")
-  f.seek(10, IO::SEEK_SET)
-  f.write("end")
-end
-</code></pre>
-
-<p>Then open <code>seektestfile</code> in vim to see the null bytes. Pretty rad. But
-again keep in mind that those null bytes aren&#8217;t actually there on disk
-(well actually I guess it&#8217;s up to the kernel to figure out whether the
-hole is large enough to warrant the overhead of splitting into a
-different block; some file systems don&#8217;t offer file holes at all).</p>
-
-<p>A file is just a collection of allocated disk blocks. No guarantee their
-in the same order. But you could use <code>posix_fallocate</code> to reserve
-multiple blocks even if you&#8217;re writing to different places in it to make
-sure that future writes will succeed rather than risk some other
-application filling a hole and blah.</p>
-
-<p>How many bytes in a block/sector in OS X? <code>diskutil info /</code> reveals
-(among other things):</p>
-
-<pre><code>Device Block Size:        512 Bytes
-</code></pre>
-
-<p>That&#8217;s the hardware block size, which can be different than the file system
-block size (the fs block size must of course be >= device block size).</p>
-
-<p>The <code>stat</code> command tells you information about files, like their size n
-shit. It has a format option which is like printf. You could be like
-<code>stat -f "hello world"</code> and &#8220;hello world&#8221; would be the output, having
-run <code>lstat</code> on STDIN and printing out no actual information about it.</p>
-
-<p><code>ioctl</code> is useful for special-cased IO scenarios, like controlling a
-terminal device special file. You pass it an op code which determines
-what the remaining parameters are.</p>
-
-<h2>syscalls and atomicity</h2>
-
-<p>Examples of system calls that accept flags to ease race condition pain:</p>
-
-<ol>
-<li><code>O_EXCL</code> when opening a file throws an error if it already exists;
-otherwise you&#8217;d have to try and open it (to see if it exists), and
-then try to create it if it doesn&#8217;t, in which time another process
-could have come in and created it. <code>O_EXCL</code> guarantees that if the
-open succeeds, that process is the owner of the new file.</li>
-<li><code>O_APPEND</code> opens a file AND moves its pointer to the end in one shot,
-otherwise two processes trying to append might clobber each other
-between their <code>seek</code> and <code>write</code>s. Some systems like NFS don&#8217;t
-support it and are prone to this race condition. WRONG. I wrote the
-wrong thing. <code>O_APPEND</code> actually works by opening the file, flagging
-it in such a way that all writes also atomically include an EOF seek.
-If <code>O_APPEND</code> worked the way I first described (an <code>open</code> + a
-<code>seek</code>), the race condition described could still happen.</li>
-</ol>
-
-
-<h2>File descriptors vs open files</h2>
-
-<p>You can have multiple file descriptors point to the same open file. This
-for example happens automatically every time you fork a program (its FDs
-get dup&#8217;d).</p>
-
-<p>The kernel maintains</p>
-
-<ul>
-<li>a per-process table of descriptors
-
-<ul>
-<li>close-on-exec flag</li>
-<li>reference to the system-wide open file description</li>
-</ul>
-</li>
-<li>a system-wide table of open file descriptions (the open file table)
-
-<ul>
-<li>current file offset (from reads/writes/seeks)</li>
-<li>status flags from when the file was open()ed (read-only, etc)</li>
-<li>reference to the i-node</li>
-</ul>
-</li>
-<li>file system i-node table</li>
-</ul>
-
-
-<p>Note that there&#8217;s an on-disk i-node and an in-memory i-node that has a
-lot more information about locks and other kernel-specific things that only make sense
-to open files rather than just static files living on a disk somewhere.</p>
-
-<p><code>fork</code>ing and UNIX domain sockets are two (of many? maybe?) ways for two
-processes to have a file descriptor that points to the same system wide
-descriptions.</p>
-
-<p>I originally thought the file offset was stored per descriptor, but
-apparently it lives in the shared description record? Only one way to
-find out:</p>
-
-<pre><code>File.open('shareddesctest.txt', 'w') do |f|
-  if fork
-    # parent
-    f.seek(1, IO::SEEK_SET)
-    Process.wait
-  else
-    # child
-    sleep 1
-    f.write "wat"
-  end
-end
-</code></pre>
-
-<p>If I open vim, I see <code>^@wat</code>, which means in fact the offset is shared:
-parent seeks to offset 1, child waits for this to happen, and then
-writes to a file descriptor it hasn&#8217;t touched yet, and it starts writing
-at where the parent <code>seek</code>ed to. So indeed offsets are stored in the
-shared system-level open file description.</p>
-
-<h2>Redirection and dup2</h2>
-
-<p><code>./a.out &gt; wat 2&gt;&amp;1</code> will pipe both STDOUT and STDERR into the <code>wat</code>
-file, using a single system-level file description. How does this work?
-Pretty hilariously-jankly.</p>
-
-<ul>
-<li>File descriptors are just integers (stdout=1, stderr=2)</li>
-<li>To redirect stderr to stdout, you have to duplicate stdout&#8217;s file
-descriptor but make sure that that final descriptor has a value of 2,
-so that code that writes to stderr (2) is unaffected and will
-successfully keeping writing to the newly redirected stream.</li>
-<li>File descriptor integers are reused; the various syscalls that
-allocate file descriptors always choose the smallest unused file
-descriptor int.</li>
-<li>So you could 1. close stderr and 2. dup stdout, and this would work,
-but not if stdin (0) had already been closed, since the new handle
-would take the lower value 0. LOL.</li>
-<li>So you have to use <code>dup2</code>, which lets you specify the number of the
-file descriptor you&#8217;d like to allocate. Which is what shells with
-stream redirection support. :)</li>
-</ul>
-
-
-<p>Duping FDs can also be done w <code>fcntl</code> and <code>F_DUPFD</code>.</p>
-
-<h2>IO at specific offset</h2>
-
-<p>Good for concurrent processes in some cases, you can use <code>pread</code> and
-<code>pwrite</code> to perform IO at a specific offset without modifying the file
-pointer.</p>
-
-<p>A single syscall is way more performant than multiple ones, hence the
-value in <code>pread</code> and friends. You also sidestep certain race conditions.
-Then again the time to do IO often dwarfs syscall overhead.</p>
-
-<h2>Scatter IO</h2>
-
-<p><code>readv</code> reads a contiguous chunk of data from a file descriptor and
-distributes into multiple buffers supplied to the syscall. <code>writev</code>
-writes a contiguous chunk of data to the file.</p>
-
-<p>This avoids certain race conditions, allows you to combine multiple
-reads/writes.</p>
-
-<h2><code>/dev/fd</code></h2>
-
-<p>Virtual directory of file descriptors, e.g. 0, 1, 2 (stdin, stdout,
-stderr, and some others). Useful for passing a command line utility a
-filename when you really want it to read from stdin, e.g.</p>
-
-<pre><code>echo 'wat' | diff /dev/fd/0 olderwat
-</code></pre>
-
-<p>Note that you could also do process substitution:</p>
-
-<pre><code>diff &lt;(echo 'wat') olderwat
-</code></pre>
-
-<p>which has the same effect but creates a new descriptor rather than
-reusing the stdin descriptor.</p>
-
-<p>Note that these process subsitution file handles also live in <code>/dev/fd</code>:</p>
-
-<pre><code>echo &lt;(echo wat) 
-# /dev/fd/63
-</code></pre>
-
-<h2>&#8220;Header Search Paths&#8221; vs &#8220;User Header Search Paths&#8221;</h2>
-
-<p>User: <code>#include "wat.h"</code>
-Non-user: <code>#include &lt;wat.h&gt;</code></p>
-
-<h2>Process vs Program</h2>
-
-<p>A Process is an instance of a Program. A Program is a description of how
-to construct a Process.</p>
-
-<p>Program consists of:</p>
-
-<ul>
-<li>Binary format ID: describes the format of the executable.</li>
-<li>Machine code</li>
-<li>Program entry point address; address to <code>int main</code>, or something that
-quickly calls <code>int main</code>.</li>
-<li>data (constants, default starting values)</li>
-<li>symbol/relocation tables: locations and names of functions, for
-debugging purposes but also dynamic linking</li>
-<li>shared libs: list of dynamic libs for run time linking</li>
-</ul>
-
-
-<p>A process has an initialized data segment and uninitialized data
-segment. The former contains all starting values for a program, hence
-it&#8217;s stored in disk space, whereas uninitialized data gets initialized
-at process start up through a more dynamic process and hence the space
-it occupies doesn&#8217;t need to be stored on disk. Uninitialized data gets
-zeroed out.</p>
-
-<ul>
-<li>Program break: the &#8220;top&#8221; of the heap</li>
-</ul>
-
-
-<p>Application Binary Interface (ABI) set of rules for what registers are
-set, etc., when interacting with some low-level service, like the
-kernel. SUSv3 standardizes this API so that you&#8217;re using a higher level
-than some ultra low level API.</p>
-
-<h2>Locality of reference</h2>
-
-<p>In regards to memory access and optimizations based thereupon.</p>
-
-<ul>
-<li>spatial locality: tendency for memory accesses to be near recent
-memory accesses (e.g. traversing a data structure, sequential
-execution of code)</li>
-<li>temporal locality: tendency to access a recently accessed location
-(e.g. a loop)</li>
-</ul>
-
-
-<p>This is part of what makes virtual memory possible; it&#8217;s largely pretty
-rare to suddenly need to access a non-resident page.</p>
-
-<p>Each process has a page table, which maps pages to their physical RAM
-locations. If you access a page that&#8217;s not in RAM, then page fault
-occurs (kernel takes over).</p>
-
-<p>Not all virtual memory address regions have a corresponding page, in
-which case, SIGSEGV.</p>
-
-<p>The range of valid virtual addresses changes as the stack grows and more
-stuff is allocated on the heap (malloc). Also when you run <code>mmap</code>.</p>
-
-<p>Virtual memory requires hardware support, specifically a Paged Memory
-Management Unit, which needs to be smart enough to do address
-translating but also notify the kernel of page faults.</p>
-
-<p>VM keeps memory isolated between processes unless you really really want
-to share: <code>shmget</code> and <code>mmap</code> let you do this as a means of
-Inter-Process Communication. It works by having page table entries point
-to the same region of RAM, allowing for the different process page table
-entries to have different permissions, e.g. one process might have read
-access but other has write access to the same page frame in physical
-memory.</p>
-
-<p>There&#8217;s a per-process kernel stack which maps to kernel RAM and is
-therefore inaccessible when not in kernel mode. This is used for syscall
-stacks. I need to read more about this; why can&#8217;t there be a system-wide
-kernel stack shared between processes? Isn&#8217;t only one process going to
-be in kernel mode at any given time? Maybe not&#8230; if multiple processes
-are blocked on IO, does that mean they&#8217;re all in kernel mode? TODO: come
-back to dis shiz.</p>
-
-<h2>argv argc</h2>
-
-<p><code>argv[0]</code> is the process name which can be used to switch the behavior
-of multiple commands that all point to the same executable.
-<code>gzip/gunzip/etc</code> is an example of this. <code>ls -lai</code> yields:</p>
-
-<pre><code>343041 -rwxr-xr-x  4 root  wheel  43200 Oct 31  2013 /usr/bin/gzip
-343041 -rwxr-xr-x  4 root  wheel  43200 Oct 31  2013 /usr/bin/gunzip
-</code></pre>
-
-<p>Same inode 343041. Here&#8217;s all of em (<code>find /usr/bin -inum 343041</code>):</p>
-
-<pre><code>/usr/bin/gunzip
-/usr/bin/gzcat
-/usr/bin/gzip
-/usr/bin/zcat
-</code></pre>
-
-<p>Apparently there&#8217;s no easy way to find all the files that link to an
-inode (the above was simple only because they all happened to be in the
-same directory).</p>
-
-<p>Note that you can&#8217;t hard-link directories.</p>
-
-<p>Short of stashing global vars, you can&#8217;t access argv and argc (Ruby
-facilitates this for you though), unless you&#8217;re willing to do some
-non-portable stuff.</p>
-
-<pre><code>kernel
-argv,environ
-stack
-...
-heap
-uninitialized data
-initialized data
-text (program code)
-...?
-</code></pre>
-
-<p><code>argv</code> lives right above the stack.</p>
-
-<h2>env vars</h2>
-
-<p>If you just do</p>
-
-<pre><code>wat=lol
-</code></pre>
-
-<p>that sets a shell variable, not strictly an env var tied to the shell
-process that gets with children. Functionally, it&#8217;s an environment var
-that doesn&#8217;t get passed to children when forked.</p>
-
-<p>You could then put it into the process env via</p>
-
-<pre><code>export wat
-</code></pre>
-
-<p>or in one shot</p>
-
-<pre><code>export wat=lol
-</code></pre>
-
-<p>You can set a child processes env var (without polluting parent shell
-variable list or environment vars) via</p>
-
-<pre><code>wat=lol somecommand
-</code></pre>
-
-<p>in which case ARGC for somecommand will be 0. If you did</p>
-
-<pre><code>somecommand wat=lol
-</code></pre>
-
-<p>ARGC would be 1, and ARGV[1] would be &#8220;wat=lol&#8221; rather than an env var.</p>
-
-<p>Order of env vars is implementation specific; you don&#8217;t want to rely on
-this shiznittletons.</p>
-
-<h2>Streams and LazyValue</h2>
-
-<p>LazyValue is coming to Ember along with HTMLbars. LazyValues are a kind
-of / relative of Observables, with the unique feature that they avoid
-the back pressure of pushing values into the stream by merely replacing
-the current value and notifying an end consumer that the stream has been
-invalidated, letting the final consumer decide when it should consume
-and actually flush the lazy value through all of its transformations.</p>
-
-<p>I was wondering what the technical term for a stream that doesn&#8217;t mind
-&#8220;dropping&#8221; &#8220;samples&#8221; before it has a chance to consume the latest value.
-Apparently the word for that is a &#8220;signal&#8221;&#8230;?</p>
-
-<h2>brk and sbrk</h2>
-
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;unistd.h&gt;
-
-int main() {
-  void *curBrk;
-
-  for (int i = 0; i &lt; 1; ++i) {
-    curBrk = sbrk(0);
-    printf("brk is %p\n", curBrk);
-  }
-
-  return 0;
-}
-</code></pre>
-
-<p>brk sets the brk lowest address of a process&#8217;s data segment
-(uninitialized) to addr.</p>
-
-<p>These are mad deprecated. Use malloc. Malloc will grow the heap for you
-rather than making you set the break. <code>free</code> won&#8217;t shrink the break but
-rather just return a chunk to the free list. Why?</p>
-
-<ul>
-<li>most frees are in the middle of the heap (as opposed to the edge,
-where shrinking the break makes sense)</li>
-<li>syscalls are expensive</li>
-</ul>
-
-
-<p>Mac OS X specifics: just from a few experiments I can verify that the
-stack grows downward, the break is really small, but malloc seems to be
-producing pointer values much closer to the stack than the break. What
-gives? No idea.</p>
-
-<p><code>free(NULL)</code> is a noop. <code>malloc(NULL)</code> might return a small piece of
-memory that can be freed.</p>
-
-<p><code>malloc</code> scans the free list for something >= the required amount. If >
-than the required amount, the free block is split. Different
-implementations might be first-fit or best-fit. If nothing found, <code>sbrk</code>
-is called to increase it, by some multiple of the virtual memory page
-size.</p>
-
-<p><code>free</code> knows the size of the block to free because malloc sneakishly
-inserts the length at the beginning of a chunk of allocated memory.</p>
-
-<p>Wow, the algorithm for free and malloc is pretty awesome.</p>
-
-<p>Let&#8217;s see nothing&#8217;s been allocated on the heap. Your free list is a
-single element doubly-link list</p>
-
-<pre><code>|Length of Block|prevBlock*|nextBlock*|empty space|
-</code></pre>
-
-<p>Then you <code>malloc(4)</code>. It&#8217;ll start at the beginning of that list, see
-that <code>4</code> is less than the length of the block, and then it&#8217;ll split that
-block. Hmm, so the pointer to the free list needs to remain the same&#8230;
-so either malloc&#8217;d block could get put at the end, length of block is
-decremented. Yeah that&#8217;s probably how it works.</p>
-
-<p>TL;DR: the free list is a doubly-linked list whose nodes are stored in
-the same chunk of memory that&#8217;ll be distributed when mallocs occur. I
-always wondered where the &#8220;free list&#8221; lived&#8230; it seemed like one of
-those problems where it&#8217;d be mallocs all the way down, but this is
-a pretty elegant solution, but it also explains how quickly shit can go
-haywire if you accidentally futz with freed values.</p>
-
-<p>The specific algorithm can vary; glibc uses a boundary tag approach,
-wherein an allocated chunk includes size of previous chunk, size of
-current chunk, and then user space, then size of chunk.</p>
-
-<p>So how are SIGSEGVs detected on double-frees?</p>
-
-<p>http://www.opensource.apple.com/source/Libc/Libc-594.1.4/gen/malloc.c</p>
-
-<p>I think Apple&#8217;s version of malloc tracks allocated blocks (rather than
-just a free list). So it&#8217;ll loop through that list and make sure it&#8217;s
-actually in there. I think glibc see does something else, where it loops
-through the free list to see if it&#8217;s already in there? Or some other
-efficient thing using the boundaries stored in adjacent blocks? Unsure.</p>
-
-<p><code>alloca</code> lets you dynamically allocate on the stack by moving the stack
-frame pointer downward. It gets &#8220;collected&#8221; one you return from the
-function. Not standardized but most systems have it? It&#8217;s useful if
-you&#8217;re actually writing a program that necessitates <code>longjump</code> since
-heap-allocated memory in the stack frames you&#8217;re skipping over can&#8217;t
-possibly be freed, but you get the &#8220;free&#8221; for free if it was allocated
-via <code>alloca</code>. That being said, you probably shouldn&#8217;t use it. :)</p>
-
-<h2>Users and Groups</h2>
-
-<p>You can have multiple usernames/passwords map to the same UID. This
-means multiple users can be granted the exact same privileges by nature
-of them literally being distinguishable by username but not UID.</p>
-
-<p><code>wheel</code> comes from the phrase &#8220;big wheel&#8221; (&#8220;she&#8217;s a big wheel at
-Microsoft&#8221;), it refers to a group with admin privileges. <code>admin</code> is
-also one such group. <code>root</code> is a member of both:</p>
-
-<pre><code>wheel:*:0:root
-admin:*:80:root
-</code></pre>
-
-<p>On Mac OpenDirectory is used instead; you can see all of the
-<code>/etc/group</code> groups in Directory Utility. <code>wheel</code> is System Group,
-<code>admin</code> is Administrators, and there&#8217;s a bunch of other ones specific to
-applications, which seem to be prefixed via underscore blah blah blah
-who cares.</p>
-
-<h2>groups, permissions</h2>
-
-<p>A process with effective user ID of 0 is a <em>privileged process</em>.</p>
-
-<p>A process starts off with a real user and group ID and can change its
-effective user and group ID.</p>
-
-<p>Processes that don&#8217;t start off with the privileges they need can be
-granted the ability to set their effective user and group ids, but only
-to the owner or group, e.g. I, user <code>peon</code>, can execute <code>a.out</code> (if it
-has <code>a+x</code> perms) and have <code>a.out</code> grant itself the permissions that its
-owner has.</p>
-
-<pre><code>machty.github.com :: ls -la wat
--rw-r--r--  1 machty  staff  0 Sep 28 09:23 wat
-machty.github.com :: chmod u+s wat
-machty.github.com :: ls -la wat
--rwSr--r--  1 machty  staff  0 Sep 28 09:23 wat
-</code></pre>
-
-<p>The capital <code>S</code> means set-user-id-able but non-executable (this is rare
-and maybe useless?). If I do <code>chmod u+x wat</code> it becomes:</p>
-
-<pre><code>-rwsr--r--  1 machty  staff  0 Sep 28 09:23 wat
-</code></pre>
-
-<p>If I set group, it&#8217;d be the next column of bits.</p>
-
-<p>Note that there&#8217;s no setUID call that the process has to make to enter
-this mode; rather, the bit causes the kernel to set the effective user
-or group ID once the process begins to run.</p>
-
-<p>Here&#8217;s all the <code>/usr/bin</code>s that have set-user-id</p>
-
-<pre><code>machty.github.com :: ls -la /usr/bin | grep '^...[Ss]'
--r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 at
--r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 atq
--r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 atrm
--r-sr-xr-x     4 root   wheel     75648 Mar 10  2014 batch
--rwsr-xr-x     1 root   wheel     35136 Oct 31  2013 crontab
--rws--x--x     1 root   wheel     23008 Oct 31  2013 ipcs
--r-sr-xr-x     1 root   wheel     68240 Mar 10  2014 login
--r-sr-xr-x     1 root   wheel     44416 Mar 10  2014 newgrp
--r-sr-xr-x     1 root   wheel     19664 Oct 31  2013 quota
--r-sr-xr-x     1 root   wheel     20720 Mar 10  2014 rlogin
--r-sr-xr-x     1 root   wheel     19856 Mar 10  2014 rsh
--rwsr-xr-x     1 root   wheel     21488 Oct 31  2013 su
--r-s--x--x     1 root   wheel    164896 Oct 31  2013 sudo
--r-sr-xr-x     1 root   wheel     83856 Oct 31  2013 top
-</code></pre>
-
-<p>and all the set-group-ids</p>
-
-<pre><code>machty.github.com :: ls -la /usr/bin | grep '^......[Ss]'
--rwxr-sr-x     1 root   mail      24640 Oct 31  2013 lockfile
--rwxr-sr-x     1 root   mail      84656 Oct 31  2013 procmail
--r-xr-sr-x     1 root   tty       20832 Mar 10  2014 wall
--r-xr-sr-x     1 root   tty       19920 Oct 31  2013 write
-</code></pre>
-
-<p><code>wall</code> writes some nonsense to everyone&#8217;s terminal: <code>echo wat | wall</code>.</p>
-
-<p>Processes have the ability to switch in and out of their set-uids and
-set-group ids. In other words, a program might have its set-uid enabled
-(and its owner is root), but it&#8217;s bad/unsafe practice to let a program
-just run in root mode the whole time; rather, it should only switch into
-root mode when doing stuff that requires privileges, and then switch
-back.</p>
-
-<p>In Linux there&#8217;s also the concept of file-system IDs and groupd IDs,
-which follow effective ID/group except when <code>setfsuid</code> and <code>setfsfid</code>
-are called. But they&#8217;re seldom used. They only exist to cover use cases
-of <code>NFS</code>.</p>
-
-<h2>Ruby Base64</h2>
-
-<pre><code>require 'base64'
-Base64.encode64("borf") # =&gt; "Ym9yZg==\n"
-Base64.strict_encode64("borf") # =&gt; "Ym9yZg=="
-</code></pre>
-
-<ul>
-<li><code>encode64</code> implements the base64 referenced in
-<a href="https://www.ietf.org/rfc/rfc2045.txt">IETF 2045</a>,
-the RFC on Multipurpose Internet Mail Extensions (MIME).</li>
-<li><code>strict_encode64</code> implements the base64 specified
-in <a href="http://tools.ietf.org/html/rfc4648">IETF 4648</a>, which
-goes into more detail, gets rid of the newlines</li>
-</ul>
-
-
-<p>I used to have to do <code>gsub(/\n/, "")</code> after encoding to get Ruby&#8217;s
-<code>encode64</code> to be compatible with some other that was more picky about
-Base64.</p>
-
-<p>Also, I was wondering why the <code>==</code> exist. Base64 converts any bytestream
-to a 64 bit alphabet. In other words, 2<sup>6</sup> characters. Consider the
-following random 3 byte stream:</p>
-
-<pre><code>01011010 00001111 10101111
-</code></pre>
-
-<p>We&#8217;re used to thinking of them split by 8 bits, but a base64 character
-can only account for 6 bits, so you&#8217;d actually think of it like:</p>
-
-<pre><code>010110 100000 111110 101111
-</code></pre>
-
-<p>This explains why encoding as base 64 has a 4/3 size overhead, an
-important consideration before willy nilly encoding a bunch of giant
-assets at base 64.</p>
-
-<p>It also explains why encoding strings whose lengths aren&#8217;t a multiple of
-3 end up adding <code>=</code> padding (&#8220;borf&#8221; => &#8220;Ym9yZg==\n&#8221;).</p>
-
-<h2><code>ls -d</code></h2>
-
-<p>e.g. <code>ls -ld somedir</code> to show the directory entry rather than expanding
-it and listing all of its files.</p>
-
-<h2>Y2K for epoch 32 bit = year 2038</h2>
-
-<p>The epoch + 32 bit signed int max = year 2038.</p>
-
-<h2>Service Workers</h2>
-
-<p>http://www.w3.org/TR/service-workers/#motivations</p>
-
-<p>https://github.com/slightlyoff/ServiceWorker/blob/master/explainer.md</p>
-
-<p>Alex Russell&#8217;s been working on this. It&#8217;s a huge improvement over the
-declarative app cache. A ServiceWorker is a WebWorker that can get
-installed on page load, and then once installed, is consulted on future
-page loads, even if there isn&#8217;t any internet.</p>
-
-<blockquote><p>Documents live out their whole lives using the ServiceWorker they start with.</p></blockquote>
-
-<p>This means if no service worker existed at initial doc download, then
-installing a ServiceWorker on the first load means the ServiceWorker
-will have to completely sit out for the lifetime of that page. It&#8217;s only
-on feature reload where it might get consulted. This slightly off
-behavior results in:</p>
-
-<ul>
-<li>better fallback for unsupporting browsers</li>
-<li>makes sure that people write good URLs whether using ServiceWorkers
-or not</li>
-<li>Zalgo issues with pages suddenly switching in and out of being managed
-by a ServiceWorker</li>
-</ul>
-
-
-<p>Other things of note:</p>
-
-<ul>
-<li>ServiceWorkers can die, be aborted, be restarted</li>
-<li>So don&#8217;t write them to be stateful.</li>
-<li>Or if so, use IndexedDB. (If ServiceWorkers are available, IndexedDB
-is available)</li>
-</ul>
-
-
-<h2><code>od</code>: octal decimal dumps</h2>
-
-<pre><code>echo "a" | od
-
-0000000    005141
-0000002
-</code></pre>
-
-<p>I&#8217;d expect just one stupid byte, why are there multiples?</p>
-
-<p>Oh duh because <code>echo</code> includes a newline.</p>
-
-<pre><code>echo -n "a" | od 
-
-0000000    000141
-0000001
-</code></pre>
-
-<p>Wat.</p>
-
-<pre><code>echo -n "aa" | od
-0000000    060541
-0000002
-</code></pre>
-
-<p>Oh right, this is an octal dump. Here&#8217;s binary</p>
-
-<pre><code>echo -n "aa" | od -b
-0000000   141 141
-0000002
-</code></pre>
-
-<p>Makes more sense. The leftmost column is just a row indicator.
-At some point it&#8217;ll wrap, and you always look at the last one for an
-indicator of the length thus far.</p>
-
-<pre><code>echo -n "big ass set of bytes" | od -b
-0000000   142 151 147 040 141 163 163 040 163 145 164 040 157 146 040 142
-0000020   171 164 145 163
-0000024
-</code></pre>
-
-<p>See? It wraps automagically.</p>
-
-<h2>cwd</h2>
-
-<p>Processes have <code>cwd</code>s. They&#8217;re the starting point for filename lookups.
-A shell&#8217;s current directory is that shell&#8217;s <code>cwd</code>. You can use
-<code>getcwd(3)</code> to get the current one.</p>
-
-<p>What&#8217;s the difference between <code>pwd</code> and <code>cwd</code>? <code>pwd</code> is a command that
-stands for Print Working Directory. It prints the <code>cwd</code>. But it does so
-with the <code>PWD</code></p>
-
-<p><code>$PWD</code> is an env var you can check. <code>$OLDPWD</code> is set when you <code>cd</code> and
-<code>cd -</code> uses it.</p>
-
-<p>Soooo I believe the answer to everything is this: the kernel knows about
-<code>cwd</code>, but doesn&#8217;t track the absolute path to it in string form; it&#8217;s
-just a pointer, which is all it needs in conjunction with relative file
-paths to locate and open/create/unlink files, etc.</p>
-
-<p>Shells on the other hand provide a convenience built-in <code>pwd</code> and
-expose/manage the <code>$PWD</code> var (et al) to provide a string.</p>
-
-<h2>Hard-linking directories.</h2>
-
-<p>Forbidden in most things, allowed in Mac OS X; twas responsible for
-the data loss bug in Broccoli, since <code>rm -rf</code> ing a directory would
-follow that link and kill shit.</p>
-
-<p>Why does Mac allow it? Apparently it&#8217;s used in Time Machine. If a
-directory hasn&#8217;t changed, a new snapshot can just point to the same
-directory inode without duplicating it.</p>
-
-<p>Great explanation: http://stackoverflow.com/a/4707231/914123</p>
-
-<p>By the way <code>ln</code> and <code>link</code> are the same executable:</p>
-
-<pre><code>$ ls -lai `which link`
-11551 -rwxr-xr-x  2 root  wheel  14976 Oct 31  2013 /bin/link
-$ ls -lai `which ln`
-11551 -rwxr-xr-x  2 root  wheel  14976 Oct 31  2013 /bin/ln
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-27T09:29:00-04:00" pubdate data-updated="true">Sep 27<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/09/23/daily-snaggletooth/">
-		
-			Daily Snaggletooth</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Nginx Heroku Buildpack</h2>
-
-<p>https://github.com/ryandotsmith/nginx-buildpack</p>
-
-<blockquote><p>Some application servers (e.g. Ruby&#8217;s Unicorn) halt progress when
-dealing with network I/O.</p></blockquote>
-
-<p>This was confusing at first but I think it just means that since
-Heroku&#8217;s router only buffers headers and not the entire request, it&#8217;s
-possible that a slow client with a large payload will hog a unicorn
-worker due to a slow blocking <code>read()</code>, in which time that worker isn&#8217;t
-available to process other requests.</p>
-
-<p>The proposed nginx buildpack solution is to put nginx in front of an
-IO-bound (and poorly designed/optimized) server and buffer the entire
-request and not engage the app server until all the data is there, and
-then it can barf the entire request into the app server in one shot,
-minimizing blocking IO.</p>
-
-<p>In general though Unicorn is non-ideal in the following cases:</p>
-
-<ul>
-<li>Slow client and/or large payload</li>
-<li>The app server is internally IO-bound and makes, say, lots of long
-slow 3rd party API requests, because in that time it&#8217;s blocking
-requests that otherwise could have been handled in a less IO-bound
-setting</li>
-</ul>
-
-
-<h2>TTL: Time to Live</h2>
-
-<p>http://en.wikipedia.org/wiki/Time_to_live#IP_packets</p>
-
-<p>Some reason I always pronounced &#8220;live&#8221; as a-live. Rather than the verb
-&#8220;live&#8221;. Why? I don&#8217;t know. Time to Live (verb) makes way more sense. How
-much time it has to live, rather than, how much time until it is live.
-Ridiculous.</p>
-
-<ul>
-<li>IP: a per-gateway decrementing value (as opposed to a unit of time).
-In other words: IP TTL is max hop.</li>
-<li>DNS: time in seconds that a DNS record can be cached. Low values tax
-authoritative name servers. Higher values risk staleness. 86400 (24
-hours) is common. Before a DNS change, DNS admins might change to a
-lower number in advance. QUESTION: why would I, selfish DNS admin, not
-just choose a TTL of 1 all the time? Presumable answer: DNS is another
-roundtrip unless cached; I might be making my application slower.
-Additionally, if DNS goes down (probably rare?), my clients can
-still use
-<code>#networking</code> validates my presumable answer.</li>
-</ul>
-
-
-<h2>HTTPSAP</h2>
-
-<p>HTTPS Ain&#8217;t a Protocol. It&#8217;s just HTTP layered over TLS, an encrypted
-transport layer.</p>
-
-<h2>Resetting Wifi of Remote Mac server</h2>
-
-<p>Heh, this worked</p>
-
-<pre><code>#!/bin/bash
-
-networksetup -setairportpower en1 off
-sleep 10
-networksetup -setairportpower en1 on
-</code></pre>
-
-<p>Run via <code>nohup ./thisdumbscript &amp;</code>.</p>
-
-<p>SSH will be unresponsive for 10+ seconds and then recover. The Magic of
-the INTERNET!</p>
-
-<h2>WebSockets and proxy servers</h2>
-
-<p>http://www.infoq.com/articles/Web-Sockets-Proxy-Servers</p>
-
-<p>Websockets work on port 80 and 443:</p>
-
-<blockquote><p>HTML5 Web Sockets do not require new hardware to be installed, or new ports to be opened on corporate networks&#8211;two things that would stop the adoption of any new protocol dead in its tracks.</p></blockquote>
-
-<p>Transparent proxy server: let&#8217;s stuff through, might manipulate content?</p>
-
-<h2>BOSH: Bidirectional-streams Over Synchronous HTTP</h2>
-
-<p>http://en.wikipedia.org/wiki/BOSH</p>
-
-<p>Isn&#8217;t this just long polling? It&#8217;s long polling with the assurance that
-immediately after receiving a &#8220;push&#8221;, the client makes a new long-lived
-request on the same keep-alive connection. And it can make no more than
-one connection whenever it needs to send data. Why does this have its
-own stupid name?</p>
-
-<h2>SSH Tunneling</h2>
-
-<p>First off, you can just execute commands like</p>
-
-<pre><code>ssh machty@whatever.com ls
-</code></pre>
-
-<p>and assuming I&#8217;ve already done the keygen stuff, that&#8217;ll log in, run
-<code>ls</code>, and output the result of that.</p>
-
-<p>But you can use <code>ssh</code> to spin up a local server that makes your SSH
-connection act as a proxy to some other IP/port, map that to a local
-port, and then connect other things through to that local port.</p>
-
-<p>If I did</p>
-
-<pre><code>ssh machty@wat.com -L 8080:somesite.com:80
-</code></pre>
-
-<p>Then I could do</p>
-
-<pre><code>curl localhost:8080
-</code></pre>
-
-<p>and then see the contents of somesite.com as a request originating from
-the wat.com server I &#8220;logged&#8221; into. (Except that most sites don&#8217;t
-respond the way you&#8217;d like if <code>Host</code> and other headers are incorrect).</p>
-
-<h2>What is my public IP?</h2>
-
-<p>You need some third party to tell your your public IP after all the NAT
-traversals. You shouldn&#8217;t use this for super sensitive stuff (it&#8217;s
-possible the 3rd party server was compromised and maaaaybe there&#8217;s some
-exploit if you use this fake IP for some internal thing?).</p>
-
-<p>But this worked for me:</p>
-
-<pre><code>curl icanhazip.com
-</code></pre>
-
-<p>Someone on SO suggested this: http://www.moanmyip.com/</p>
-
-<p>I can&#8217;t believe that exists.</p>
-
-<h2>SOCKS proxy</h2>
-
-<p>https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-tunneling-on-a-vps</p>
-
-<p>http://en.wikipedia.org/wiki/SOCKS</p>
-
-<p>With a SOCKS proxy</p>
-
-<h2>tcptraceroute</h2>
-
-<p>Instead of ICMP ECHO packets, which often get filtered out at some point
-by some asshole proxy along the way to the destination, tcptraceroute
-uses TCP SYN packets instead. What&#8217;s that you say? Don&#8217;t we still need
-the incrementing TTL that ICMP uses? TRICK QUESTION: TTL is an octet in
-the IP packet, which wraps TCP/UDP/ICMP. So <code>tcptraceroute</code> still uses
-TTL. It&#8217;s also nice enough to send a TCP RST (reset) package if the the
-destination responds with a SYN|ACK so that you don&#8217;t leave it in a
-connection-half-opened state (normally you&#8217;re supposed to send an ACK
-and then start sending application data).</p>
-
-<p>Interesting: you need root privileges to run tcptraceroute. Why? Because
-the custom SYN packets it creates requires root privileges, probably to
-prevent non-privileged users from doing malicious things with packets.
-I&#8217;d be curious to know exactly where that takes place though.</p>
-
-<h2>IP packets have no port</h2>
-
-<p>Why? Because ports map to applications, a concept which IP packets don&#8217;t
-care about; they&#8217;re all about getting messages to an address. Leave it
-to the UDP/TCP packets to provide a source and destination</p>
-
-<p>So hmmm how does ICMP traceroute work? How do the ECHO&#8217;d packets know to
-come back to that specific traceroute command?</p>
-
-<h2>ICMP</h2>
-
-<ul>
-<li>No port</li>
-</ul>
-
-
-<p>There&#8217;s a single ICMP socket apparently?</p>
-
-<p>https://www.cs.utah.edu/~swalton/listings/sockets/programs/part4/chap18/ping.c</p>
-
-<pre><code>/*
- * pr_pack --
- *  Print out the packet, if it came from us.  This logic is necessary
- * because ALL readers of the ICMP socket get a copy of ALL ICMP packets
- * which arrive ('tis only fair).  This permits multiple copies of this
- * program to be run without having intermingled output (or statistics!).
- */
-</code></pre>
-
-<ul>
-<li>ident = getpid() &amp; 0xFFFF;
-
-<ul>
-<li>this is how a pong that returns is identified as originating from a
-pong.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Anyway here&#8217;s a little Ruby program you can run with <code>sudo</code>
-that&#8217;ll open a raw socket and print a Base64&#8217;d ping packet if you
-<code>ping localhost</code>.</p>
-
-<pre><code>require 'socket'
-require 'base64'
-
-rsock = Socket.open(:INET, :RAW)
-
-loop do
-  s = rsock.recv(1024)
-  enc = Base64.encode64(s)
-  puts enc
-end
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-23T11:18:00-04:00" pubdate data-updated="true">Sep 23<span>rd</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/09/20/daily-juggernaut/">
-		
-			Daily Juggernaut</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Rust is a &#8220;Systems&#8221; programming language</h2>
-
-<p>Seems vague. You can use it for games (<code>#rust-gamedev</code> or
-<code>/r/rust_gamedev</code>). What does systems mean?</p>
-
-<p><code>#rust</code> tells me more vague stuff, but basically:</p>
-
-<ul>
-<li>Rust doesn&#8217;t impose garbage collection, so you maintain fine-grained
-control over memory in that regard</li>
-<li>Rust integrates nicely with C</li>
-</ul>
-
-
-<p>These features are often compared with Go. Go has GC. Go apparently
-doesn&#8217;t integrate as nicely with C (not sure how true this is, need to
-dig in). Apparently Go used to advertise itself as systems, then they
-stopped, and Rust adopted that term to make it clear how it is different
-from the oft-compared Go.</p>
-
-<h2><code>source</code> and <code>export</code></h2>
-
-<p>I always knew the <code>source</code> command as the command you use when you want
-to run a script with a bunch of <code>export</code> definitions, but all it really
-means is that <code>source</code> doesn&#8217;t actually make new process but just runs
-the code in the source file as shell commands. As such, it means that
-any environment vars set in the sourced command don&#8217;t get set in a
-separate child process that dies and forgets set vars.</p>
-
-<p><code>export</code> makes sure that an env var gets passed to child processes. Just
-setting an env var without <code>export</code> won&#8217;t mark it to be shared with
-child processes.</p>
-
-<p>You can verify all of this by <code>source</code>ing a script with a long <code>sleep</code>
-and then checking <code>ps</code> to verify that <code>sleep</code> is a direct child of
-<code>bash</code>; there&#8217;s no intermediate process running that execution.</p>
-
-<h2>prey project</h2>
-
-<p>Protect your devices from theft:</p>
-
-<p>https://preyproject.com/</p>
-
-<p>TODO: look into this shit.</p>
-
-<h2>awesome cheese</h2>
-
-<p>Stompetoren Grand Cru. With Effie&#8217;s Homemade Oatcakes.</p>
-
-<p>So fucking good.</p>
-
-<p>http://bedfordcheeseshop.com/products/stompetoren-gouda-grand-cru</p>
-
-<h2>Why is CORS disabled for XHR but not a 3rd party post?</h2>
-
-<p>CSRF is still a thing, but falls outside of CORS because CORS intends to
-make JavaScript-initiated requests safe. Then again didn&#8217;t
-Chrome/Mozilla just make fonts CORS-y?</p>
-
-<h2>Access-Control-Allow-Origin</h2>
-
-<p>I&#8217;d get this error in devtools console whenever my Rails code errored
-out during an XHR request:</p>
-
-<pre><code>XMLHttpRequest cannot load http://localhost:5000/wat
-No 'Access-Control-Allow-Origin' header is present on the requested resource.
-Origin 'http://localhost:4200' is therefore not allowed access. 
-</code></pre>
-
-<p>It&#8217;s misleading since I have CORS set up correctly, but apparently not
-for erroring requests? Basically, using XMLHTTPRequest (ajax) is going
-to set the <code>Origin</code> request header, which flags the server to send back
-CORS headers. If the browser doesn&#8217;t see those CORS headers, or the
-provided ones don&#8217;t match / grant proper permissions, then the XHR
-request will fail.</p>
-
-<p>So basically I have an error in my server code I need to fix. Maybe it&#8217;s
-good that CORS fails upon error? Because if not, then I might be opening
-up some third party door that&#8217;s sniffing my site due via erroneous
-requets? I can&#8217;t really see it but maybe.</p>
-
-<h2>Why won&#8217;t my dumbass server work?</h2>
-
-<p>Scenario: I have a remote Minecraft server. It runs from a persistent
-tmux session so that I can log in and run server commands on it. I can
-ping it successfully but when I try to join, it fails to connect with
-authentication servers. There&#8217;s lots of reported issues online with
-authentication servers but I think in my case no outbound requests are
-succeeding. <code>curl google.com</code> yields no response, and neither do pings.</p>
-
-<p>Whoops. I just remotely turned off the server&#8217;s wifi and got
-disconnected. I figured I&#8217;d turn it off and on again to see if that
-&#8220;rebooted&#8221; things. But, uh, kinda need internet through that whole
-process. Dumbest moment of 2014.</p>
-
-<h2>Do shells fork to start new processes?</h2>
-
-<p>Yes. Bash will fork itself and then calls execve to transform itself
-into a new process.</p>
-
-<p>There&#8217;s also an <code>exec</code> built-in command that will replace your bash
-instance with whatever you wanna run, which means when the new command
-terminates, your bash terminal will close, e.g.:</p>
-
-<pre><code>exec sleep 1
-</code></pre>
-
-<p>An &#8220;Environment list&#8221; maintains the key value pairs of env vars. When
-you exec a new process, it either inherits the env of its parent or gets
-a new one. In C-land, the <code>char ** environ</code> variable is exposed contain
-all env vars, testable via:</p>
-
-<pre><code>#include &lt;stdio.h&gt;
-extern char **environ;
-int main() {
-  printf("%s\n", environ[0]);
-  return 0;
-}
-</code></pre>
-
-<h2>mmap</h2>
-
-<p>Virtual memory mapping. It&#8217;s a syscall to map a region of virtual memory
-to a file, or to create an anonymous mapping that doesn&#8217;t write to a
-file.</p>
-
-<h2>CGI / Rack limitations</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Common_Gateway_Interface">Common Gateway Interface</a></p>
-
-<p>http://blog.plataformatec.com.br/2012/06/why-your-web-framework-should-not-adopt-rack-api/</p>
-
-<p>Shortcoming: middlewares that allocate/release resources</p>
-
-<h2>Mac Desktop Shell Scripts</h2>
-
-<p>Save this with <code>+x</code> chmod permissions as <code>~/Desktop/wat.command</code>.</p>
-
-<pre><code>#!/bin/bash
-echo "wat"
-</code></pre>
-
-<h2>htop</h2>
-
-<p><code>brew install htop</code></p>
-
-<p>It&#8217;s top but way way more bitchin. OMG, it even has a tree mode.</p>
-
-<h2>man vs info</h2>
-
-<p>Just discovered that there&#8217;s both <code>man bash</code> and <code>info bash</code>. <code>info</code> was
-added in the 90s by GNU, who felt <code>man</code> was too crappy a manual system for
-sophisticated software.</p>
-
-<h2>Job control / monitor mode</h2>
-
-<p>Bash (et al, but apparently not Bourne?) implement job control, the
-ability to suspend resume jobs (process groups) via an interactive
-shell. Job control is enabled when &#8220;monitor mode&#8221; is on. In bash, this
-is enabled by default. To disable: <code>set +m</code>. To enable: <code>set -m</code>. When
-disabled, you&#8217;ll see things like:</p>
-
-<pre><code>$ fg
--bash: fg: no job control
-</code></pre>
-
-<p>You also won&#8217;t be able to ^Z out of a running process (a SIGTSTP still
-fires but bash ignores it). <code>ruby -e "Process.kill(:TSTP,0)"</code> runs to
-completion when monitor mode is disabled.</p>
-
-<p>Actually hmm, interesting, if you disable monitor mode and run</p>
-
-<pre><code>ruby -e "Process.kill(:STOP, 0); puts 'done'"
-</code></pre>
-
-<p>then it just runs to completion? How is that possible?
-My guess is that the process stops, and then is immediately resumed
-because there&#8217;s nothing to take its place? Seems SIGSTOP is ignored even
-when you sent it from another terminal to a terminal with -m.</p>
-
-<p>Also, you can display all the shell options via <code>echo $-</code></p>
-
-<pre><code>himBH
-hiBH # monitor mode disabled
-</code></pre>
-
-<h2>Dollar signs</h2>
-
-<p>http://stackoverflow.com/a/5163260/914123</p>
-
-<pre><code> 1. Positional parameters `$1,$2,$3…` and their corresponding array representation, count and IFS expansion `$@`, `$#`, and `$*`.
- 2. `$-` current options set for the shell.
- 3. `$$` pid of the current shell (not subshell)
- 4. `$_` most recent parameter (or the abs path of the command to start the current shell immediately after startup)
- 5. `$IFS` the (input) field separator
- 6. `$?` most recent foreground pipeline exit status
- 7. `$!` PID of the most recent background command
- 8. `$0` name of the shell or shell script
-</code></pre>
-
-<h2>syscalls</h2>
-
-<p>Example: <a href="http://www.opensource.apple.com/source/tcl/tcl-5/tcl/compat/waitpid.c">waitpid</a></p>
-
-<p>Wrapper C functions stash args in registers, stash syscall id in <code>%eax</code>,
-and then runs a <code>trap</code> machine instruction, which tells the processor to
-switch into kernel mode. (Recent hardware uses <code>sysenter</code> instead of
-slower <code>trap</code>, which incurred interrupt overhead&#8230; TODO: learn about
-interrupts!). The rest is obvious enough.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-20T12:30:00-04:00" pubdate data-updated="true">Sep 20<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/09/17/daily-journeaux/">
-		
-			Daily Journeaux</a>
-	</h2>
-	<div class="entry-content">
-		<h2>nginx book</h2>
-
-<p>This is nice: http://aosabook.org/en/nginx.html</p>
-
-<p>Some random notes:</p>
-
-<p>For CPU-bound loads, number of nginx workers should equal the number of
-cores (&#8220;TCP/IP, doing SSL, or compression&#8221;). For IO-bound stuff
-(&#8220;serving different sets of content from storage, or heavy proxying&#8221; &#8211;
-presumably teh &#8220;different sets&#8221; is important because if it were
-the same stuff, it&#8217;d probably be cached which I guess means the IO would
-be negligible? unsure) &#8211; you might want 1.5-2 times the number of
-cores.</p>
-
-<h2>SSL/TLS random questions:</h2>
-
-<p>I have so many misconceptions? For anyone who reads this, this is stream
-of thought as I try to answer my own questions before looking shit up.</p>
-
-<p>How come domains are signed and not IPs?</p>
-
-<p>Reasoned guess: first off, everyone can encrypt data. It&#8217;s just that the
-key thing that TLS brings in is certification of a sending. It&#8217;s not
-enough to say &#8220;yo here&#8217;s my public key&#8221;, you still have to answer the
-question &#8220;uh ok yes but who are you?&#8221;. Certificate authority to the
-rescue.</p>
-
-<p>So what if CA&#8217;s certified IPs, rather than domain names (maybe they do,
-I don&#8217;t actually know at this point)? Some ideas come to mind:</p>
-
-<ul>
-<li>DNS can map to multiple IPs, and a single IP might load balance to
-many different servers, all of which should be able to (de)/encrypt
-incoming traffic.</li>
-</ul>
-
-
-<p>That&#8217;s actually probably the only reason. I was originally thinking
-that since IPs can change, you might certify server A and then the next
-day the IP changes to server B, and that that would mean the CA is
-giving a stamp of approval to the wrong server, but then, duh, it&#8217;s key
-pairs that are being validated, and server B wouldn&#8217;t have these keys
-and wouldn&#8217;t know how to do the handshake. I think this is close to
-correct, it&#8217;s just I&#8217;m forgetting everything that happens internally
-within the handshake.</p>
-
-<p>http://en.wikipedia.org/wiki/Transport_Layer_Security</p>
-
-<h2>Symmetric Key</h2>
-
-<p>A single key encrypts plaintext and decrypts the ciphertext generated
-from the encryption.</p>
-
-<p>Example: AES.</p>
-
-<h2>Cipher suite</h2>
-
-<p>https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4</p>
-
-<p>A triple of</p>
-
-<ul>
-<li>authentication</li>
-<li>encryption</li>
-<li>and message authentication c</li>
-</ul>
-
-
-<h2>SSL / TLS</h2>
-
-<p>Lots of people use them interchaangeably, but SSL was originally created
-at Netscape and used to be implemented at the application layer, living
-on top of TCP. When it was IETF standardized, it was renamed TLS and
-moved out of the application layer.</p>
-
-<p>TLS provides:</p>
-
-<ul>
-<li>encryption
-
-<ul>
-<li>obfuscate data transmitted from one computer to another</li>
-<li>example: plaintext means zero encryption and easily breakable
-ciphertext means shitty encryption</li>
-</ul>
-</li>
-<li>authentication</li>
-<li>verify that you&#8217;re talking to who you think you&#8217;re talking to</li>
-<li>example: the CA validates the certificate that a server sends you</li>
-<li>integrity
-
-<ul>
-<li>detect message forgery or tampering</li>
-<li>example:</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Beware the intermediaries</h2>
-
-<p>Intermediaries are caching servers, gateways, web accelerators, content
-filters, blah blah blah, all the stuff that&#8217;s come out to aid and extend
-HTTP. They&#8217;re often transparent to the end user, but they come with the
-limitation that if you start wanting to deviate from HTTP on port 80 in some
-application specific way, you&#8217;re boned. And it&#8217;s kinda rare to find
-other ports that are open: 80 and 443 (HTTPS) are usually open but
-everything else is often closed. These intermediaries might improperly
-try to apply their logic to the non HTTP, etc, there&#8217;s no easy way to
-detect when or when not to apply.</p>
-
-<p>Solution: HTTPS tunnel all the things. All data is obfuscated from
-intermediaries and intermediaries have no way of known whether the
-encrypted data is HTTP or some custom proprietary crazy thing.</p>
-
-<h2>Self-signed certificates</h2>
-
-<p>http://www.akadia.com/services/ssh_test_certificate.html</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li>&#8220;If the private key is no longer encrypted, it is critical that this file only be readable by the root user!&#8221;</li>
-<li>You can remove the DES from the private key so that you don&#8217;t have to
-type in the password all the god damn time when your server starts.
-(Verified this with a node app)</li>
-</ul>
-
-
-<p>Turns out you could also just run the following:</p>
-
-<pre><code>openssl req -new 
-</code></pre>
-
-<p>So why is DES required at all? I&#8217;m guessing it&#8217;s possible to generate a
-CSR without it, right?</p>
-
-<h2>ALPN: Application-Layer Protocol Negotiation</h2>
-
-<p>Note to dummy: there&#8217;s no TLS 3 way handshake. You&#8217;re thinking of TCP
-ACK SYN SYNACK that has to happen before app data is exchanged.</p>
-
-<p>ALPN takes place during the</p>
-
-<h2>SNI: Server Name Indication</h2>
-
-<p><a href="https://www.ietf.org/rfc/rfc3546.txt">rfc, page 8</a></p>
-
-<p>If you have a server that you want to host multiple sites with their own
-respective TLS certificates,</p>
-
-<h2>self-signed-certificate</h2>
-
-<p>Useful for testing SSL before you go ahead and buy a certificate for 3rd
-party validation.</p>
-
-<h2>AES vs RSA</h2>
-
-<p>AES is symmetric, and generally speaking symmetric encryption/decryption
-is a lot faster than assymetric, hence AES is used for the
-encryption/decryption of data.</p>
-
-<h2>Sprite gotchas</h2>
-
-<p>I used to think sprites were bitchin; save HTTP requests, combine all
-your images into one. Obviously, these are lame application-level
-optimizations/hacks to cover the ass of the transport layer&#8217;s (HTTP&#8217;s)
-shortcomings (addressed in SPDY / HTTP 2.0).</p>
-
-<p>Downsides of sprites:</p>
-
-<ul>
-<li>all the application-layer crap you have to do to handle it</li>
-<li>change a single pixel of a single image and you&#8217;ve busted a massive
-cached of all the other images in the sprite</li>
-<li>memory intensive; you might not be using each image but you have to
-load all of it in memory, might be too much for mobile clients</li>
-</ul>
-
-
-<h2>Octet</h2>
-
-<p>It means byte. Saw it all over the place in the
-<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-http2/?include_text=1">HTTP 2 spec draft</a></p>
-
-<h2>nginx</h2>
-
-<p>After <code>brew install nginx</code></p>
-
-<pre><code>Docroot is: /usr/local/var/www
-
-The default port has been set in /usr/local/etc/nginx/nginx.conf to 8080 so that
-nginx can run without sudo.
-
-To have launchd start nginx at login:
-    ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
-Then to load nginx now:
-    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.nginx.plist
-Or, if you don't want/need launchctl, you can just run:
-    nginx
-
-WARNING: launchctl will fail when run under tmux.
-</code></pre>
-
-<p>What is docroot?</p>
-
-<ul>
-<li>It&#8217;s a file&#8230; not a directory?</li>
-<li>But you can delete it and replace with a directory and put an
-index.html in there and it works</li>
-<li>So I guess there&#8217;s some default configuration of nginx that just hosts
-static files from this doc root directory</li>
-</ul>
-
-
-<p>What do them commands does?</p>
-
-<pre><code>ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
-</code></pre>
-
-<p>What are launchd and launchctl?</p>
-
-<p><code>launchd</code> is a daemon (conventions dictate that daemons end in a <code>d</code>).
-<code>launchctl</code> is what you use to control that daemon. So if you want to
-schedule something to start</p>
-
-<p>What&#8217;s the <code>mxcl</code> in <code>homebrew.mxcl.redis.plist</code>?</p>
-
-<p>It refers to <code>mxcl</code>, maintainer of Homebrew. Just normal reverse domain
-name notation. So does that mean any homebrew-installed domains get
-prefixed like that? I&#8217;m guessing <code>mxcl</code> also made the Redis recipe.
-Or maybe every homebrew daemon gets prefixed like that? Not sure, who
-cares.</p>
-
-<pre><code> In the launchd lexicon, a "daemon" is, by definition, a system-wide service of
- which there is one instance for all clients. An "agent" is a service that runs
- on a per-user basis. Daemons should not attempt to display UI or interact
- directly with a user's login session. Any and all work that involves interacting
- with a user should be done through agents.
-</code></pre>
-
-<p><a href="https://developer.apple.com/library/mac/technotes/tn2083/_index.html">TN2083 - Daemons and Agents</a></p>
-
-<p>Wow, &#8220;Daemonomicon&#8221; is an awesome word: &#8220;formal definition of the types
-of bg programs you can write&#8221;.</p>
-
-<ul>
-<li>bootstrap server: launchd</li>
-<li>root session: first and last session. Boot-time processes and daemons
-live here. User-independent. e.g. <code>mDNSResponder</code></li>
-<li>login session: proceses launched by or for a user live in login
-session. Login sessions are associated w authenticated users. Each
-user</li>
-</ul>
-
-
-<p>If I</p>
-
-<h2>Origins of TTY</h2>
-
-<p>http://www.linusakesson.net/programming/tty/</p>
-
-<ul>
-<li>stock tickers, then ASCII teletype within a network called Telex.</li>
-<li>Telex was a network that used level of current to respresent different
-characters, vs different voltages used by analog telephone shit</li>
-<li>Telex existed before integration w computers</li>
-<li>When command lines became the norm, teletypes were used as input and
-output since they were readily available on the market</li>
-<li>Lots of different models, needed to standardize in some way; UNIX
-philosophy dictated letting kernel handle low level word length, baud
-rate, flow control, etc., later things like color output, cursor
-movement, etc, was left to application (not kernel)</li>
-<li>Line editing is managed by OS-provided line discipline. Default is
-cooked/canonical mode. raw mode disables things like editing,
-backspace, and generally disables any IO processing within the line
-discipline.</li>
-</ul>
-
-
-<p>Skipping ahead, you can force your terminal into stty raw mode via</p>
-
-<pre><code>stty raw #enable
-stty -raw #disable
-</code></pre>
-
-<p>Now I know how to write a Ruby impl of Press Any Key</p>
-
-<pre><code>print "Press any key... "
-
-begin
-  system("stty raw -echo")
-  c = STDIN.getc
-ensure
-  # re-enable
-  system("stty -raw echo")
-end
-
-puts "Thanks!"
-</code></pre>
-
-<p>Note that it&#8217;ll consume CTRL-C as well rather than signalling an
-interrupt (hence CTRL-C prints &#8220;Thanks!&#8221; rather than terminating
-immediately).</p>
-
-<p>This is also how any text editor functions.</p>
-
-<p>This must be what&#8217;s happening when I kill some script when it doesn&#8217;t
-expect it and then my terminals fucked. Typing in <code>stty -raw</code> even
-though I can&#8217;t see it probably would fix it&#8230; need to try.</p>
-
-<p>Back to the thing:</p>
-
-<ul>
-<li>Kernel provides many line disciplines, only one attached to serial
-device at a time. Default is <code>n_tty</code>. I guess that&#8217;s what we&#8217;re
-configuring when we futz w <code>stty</code></li>
-<li>Other disciplines are for things like packet switched data</li>
-<li><a href="http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/drivers/char/n_tty.c">tty C source code</a></li>
-<li>UART (Universal Async Receiver and Transmitter): converts teletype
-signal into bytes that the OS can process. OS has a UART driver.</li>
-<li>TTY driver: allows user to kill/suspend an infinite looped program,
-bg processes can process til they try to write to terminal (at which
-point they suspend), and user input to fg process only.
-(implemented in <code>tty_io.c</code>)</li>
-<li>TTY Device: triplet of UART driver, line discipline, and TTY driver.</li>
-<li>TTY devices live in <code>/dev</code> w file mode <code>c</code> for &#8220;Character special
-file&#8221;. To manipulate one, you need ownership of the device file
-(e.g. via <code>login</code>).</li>
-<li>TTYs are just objects. Not alive. Other things plug into it. Those
-other things have execution contexts.</li>
-<li>pty = pseudoterminal, as opposed to TTY.</li>
-</ul>
-
-
-<p><code>ps -o stat</code> prints out <code>Ss</code> <code>Ss+</code>, etc&#8230; here&#8217;s what the capital
-letters mean:</p>
-
-<pre><code>R   Running or runnable (on run queue)
-D   Uninterruptible sleep (waiting for some event)
-S   Interruptible sleep (waiting for some event or signal)
-T   Stopped, either by a job control signal or because it is being traced by a debugger.
-Z   Zombie process, terminated but not yet reaped by its parent.
-</code></pre>
-
-<p>Most things are in <code>S</code>. An example of <code>R</code>:</p>
-
-<pre><code>ruby -e 'loop {}'
-</code></pre>
-
-<p><code>s</code> means session group leader. <code>+</code> means process is part of foreground
-process group.</p>
-
-<ul>
-<li>Ctrl Z suspends a process, puts it in <code>T</code> state.</li>
-</ul>
-
-
-<p>Jobs, e.g. <code>fg</code> and <code>bg</code> are just process groups. Consider</p>
-
-<pre><code>ruby -e 'loop {}'  | grep a | grep a | grep a
-</code></pre>
-
-<p>This causes as CPU-intensive loop and will be in R state.</p>
-
-<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
-machty 45754 45014 45754      0    4 R+   s045    7:03.43 ruby -e loop {}
-machty 45755 45014 45754      0    4 S+   s045    0:00.00 grep a
-machty 45756 45014 45754      0    4 S+   s045    0:00.00 grep a
-machty 45757 45014 45754      0    4 S+   s045    0:00.00 grep a
-</code></pre>
-
-<p>and when I suspend:</p>
-
-<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
-machty 45754 45014 45754      0    4 T    s045    7:29.05 ruby -e loop {}
-machty 45755 45014 45754      0    4 T    s045    0:00.00 grep a
-machty 45756 45014 45754      0    4 T    s045    0:00.00 grep a
-machty 45757 45014 45754      0    4 T    s045    0:00.00 grep a
-</code></pre>
-
-<p>Everything below it suspends.</p>
-
-<p><code>jobs</code> are tied to session leaders, and terminals are session leaders.
-If I go to another tmux pane and type <code>jobs</code>, the suspended job <em>won&#8217;t</em>
-show up; I have to be in the same terminal that started it. TODO: can I
-change session IDs?</p>
-
-<p>If I <code>bg 1</code>, the following happens:</p>
-
-<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
-machty 45754 45014 45754      0    4 R    s045    7:39.63 ruby -e loop {}
-machty 45755 45014 45754      0    4 S    s045    0:00.00 grep a
-machty 45756 45014 45754      0    4 S    s045    0:00.00 grep a
-machty 45757 45014 45754      0    4 S    s045    0:00.00 grep a
-</code></pre>
-
-<p>Note how it&#8217;s back to running, but note the missing foreground <code>+</code>. <code>fg 1</code>
-would bring it back.</p>
-
-<p>Note that we could turn one of those greps into <code>R</code> if it was actively
-processing data, e.g.</p>
-
-<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
-machty 46054 45014 46054      0    4 R+   s045    0:37.84 ruby -e loop { puts "a" }
-machty 46055 45014 46054      0    4 R+   s045    0:45.56 grep a
-machty 46056 45014 46054      0    4 R+   s045    0:27.01 grep b
-machty 46057 45014 46054      0    4 S+   s045    0:00.00 grep a
-</code></pre>
-
-<p>(Actually, the first 3 R&#8217;s might be S&#8217;s if you re-run this command;
-there&#8217;s a race condition as to whether the CPU is actually running code
-or whether it&#8217;s blocked on an IO syscall waiting for piped data to come
-in, but the last grep is always S+ because it never gets output from the
-<code>grep b</code>).</p>
-
-<p>A Job is a Processs Group.</p>
-
-<p>If you&#8217;re just starting/stopping/piping processes, all those child
-processes with have a parent process ID of <code>bash</code>&#8217;s pid.</p>
-
-<p>What constitutes a job/process group? Piped commands for one.
-Let&#8217;s see about Process Subsitution. Answer: process substitution
-doesn&#8217;t consider it as a pipe. It considers it as a shit of epic
-fartitude. In other words, process substitution ends up being miserably
-old and mortal and definitely going to die. In other words, process
-substitution is not in the same process group. It&#8217;s its own process
-group. If you do <code>echo &lt;(some long living thing)</code>, the long living thing
-will survive as a sibling process, in its own process GROUP WHO CARES.</p>
-
-<p>You can only read from  / write to TTY if you&#8217;re foreground. If you&#8217;re
-not <code>fg</code> and you try and write to TTY, kernel will suspend your ass.</p>
-
-<ul>
-<li><code>ioctl</code> is the UNIX swiss army knife; manipulates special files like
-terminals.</li>
-<li><code>ioctl</code> requests must be initated from processes, so the kernel can&#8217;t
-asyncly communicate w an application unless the app asked for it.</li>
-<li>Signals are how kernel communicates asyncly w a process. Messy and
-error prone they are.</li>
-</ul>
-
-
-<p>Question: nohup detaches into its own session id to prevent closing on
-SIGHUP&#8230; why does it have to do that? Why can&#8217;t it just ignore that
-signal? Let&#8217;s see.</p>
-
-<pre><code>Signal.trap(:HUP) do
-  puts "I WILL NOT"
-end
-sleep
-</code></pre>
-
-<p>If I ssh localhost and run that in background (with <code>&amp;</code>) and then
-logout, it stays running, PPID changes to 1 (root). So how is that
-different than nohup? TODO: find out. Something with setsid, etc.</p>
-
-<p>SIGINT&#8217;s originate from the terminal&#8230; is it correct to say they
-originate from TTY? I think it is based on the <code>n_tty.c</code> code.
-Also, in raw mode it doesn&#8217;t even fire. COOL.</p>
-
-<ul>
-<li>SIGPIPE isn&#8217;t just an error but also a way to know whoever was
-listening to you has stopped listening to you, e.g. <code>yes | head</code>.</li>
-<li>SIGSTOP is to SIGTSTP as SIGKILL is to SIGQUIT.</li>
-<li>SIGCONT can be sent to a ^Z-suspended process. It behaves as if you
-started the process with <code>&amp;</code>. It&#8217;s running, but it&#8217;s bg. In other
-words, if you have a suspended process 12345, <code>bg 1</code> or
-<code>kill -CONT 12345</code> would do the same thing; it&#8217;d start running in the
-background, spitting out output</li>
-<li>You can break shit with
-<code>ruby -e 'Signal.trap(:TTIN) { puts "wat" }; sleep 1; gets' &amp;</code>
-(recursive SIGTTIN). You try and write to TTY in the background and
-then keep ignoring the signal that it&#8217;s failing. I don&#8217;t know what
-causes the deadlock though, but <em>something</em> screwing up sounds right.</li>
-<li>If you press ^Z, that sends a message to the foreground process group.
-The line discipline sends <code>SIGTSTP</code> to the foreground process group.
-This will suspend the whole process group, whatever the main</li>
-</ul>
-
-
-<p>Question: if you use pipes combined with <code>&amp;</code>, what gets put into the
-background? All tasks? Answer (I think): <code>&amp;</code> ultimately results in a
-process group getting put into the background, and a process group
-contains any pipes, child processes, etc, so it <em>must</em> apply to all of
-the different processes as a whole, and there&#8217;s no way to say that only
-one of the pipe segments runs in the background.</p>
-
-<p>Fun fact: you can reimplement the default ^Z behavior as follows:</p>
-
-<pre><code>has_ignored = false
-Signal.trap(:TSTP) do
-  if has_ignored
-    Process.kill(:STOP, Process.getpgrp)
-  else
-    has_ignored = true
-    puts "ignoring"
-  end
-end
-
-sleep
-</code></pre>
-
-<p>TL;DR the default SIGTSTP ^Z handler fires a STOP. You can catch TSTP
-and immediately do the same for the same effect.</p>
-
-<p>Vim&#8217;s source code (and probably everyone&#8217;s) does some variant of</p>
-
-<pre><code>settmode(TMODE_COOK);
-kill(0, SIGTSTP);       /* send ourselves a STOP signal */
-</code></pre>
-
-<p>So, you return TTY mode to cook mode.</p>
-
-<ul>
-<li>If you run something like <code>echo "wat" | less &amp;</code>, you&#8217;ll immediately
-see <code>[2]+  Stopped   echo "wat" | less</code> because <code>less</code> is always going
-to try and write to TTY in a raw manner&#8230;?</li>
-<li>If you suspend, say, vim, vim will catch the SIGTSTP, move the cursor
-to the last line of the screen w control signals (it&#8217;s still attached
-to TTY) and then fires a SIGSTOP.</li>
-<li>Once stopped, a SIGCHLD is sent to the session leader with the pid of
-the suspended process. When all processes in fg have been suspended
-(T&#8217;d), the current TTY config is stashed for later restoration
-(<code>stty -g</code> is one way of doing this).</li>
-</ul>
-
-
-<p>So why doesn&#8217;t ^Z suspend bash?</p>
-
-<p>Ahh, so here&#8217;s how you get TTOU to fire (and cause a process to suspend)</p>
-
-<pre><code>ruby -r "io/console" -e "IO.console.raw { puts 'wat' }" &amp;
-</code></pre>
-
-<p>Note that if we hadn&#8217;t used <code>.raw</code> to put TTY in raw mode, it would have
-just printed &#8220;wat&#8221; into the same terminal even though the process is
-running in the background, but if you grab full control of the TTY with
-<code>raw</code>, it&#8217;ll cause a TTOU.</p>
-
-<p>You can go in and configure another TTY to update its rows/cols. I can
-fuck w the vim in another tmux pane, tell it its skinnier/wider than it
-is, but once i resized a tmux pane then BOOM it fires its own tty
-commands, and tty fires a SIGWINCH, and then that causes vim to query
-the tty for the current width and repaint.</p>
-
-<p>Ah: realization: the ultimate decider in whether TTOU fires is whether
-topstop</p>
-
-<h2><code>read</code></h2>
-
-<pre><code>read words &lt; &lt;(echo "wat")
-echo $words
-</code></pre>
-
-<h2>resetting the keyboard when things go crazy</h2>
-
-<p><code>reset</code>, or typing Escape and c.</p>
-
-<pre><code>stty raw
-reset
-</code></pre>
-
-<p>and we&#8217;re back. It resets your TTY driver, I guess.</p>
-
-<h2><code>yes</code></h2>
-
-<p>Repeatedly enter <code>y</code> for saying yes to everything. Like the dropper bird
-from the simpsons when homer gets fat. You can also do <code>yes no</code> to say
-other things.</p>
-
-<h2>Ack</h2>
-
-<p>is written in Perl.</p>
-
-<h2>100 Continue status</h2>
-
-<p>An HTTP 1.1 mechanism.</p>
-
-<p>http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html</p>
-
-<p>In some cases, a server knows just by looking at request headers that it
-won&#8217;t process the request, making it potentially wasteful for the client to send a
-giant doomed-to-fail payload. In these cases, the client can decide not
-the send the full payload unless the server has told it &#8220;based on your
-headers, you should Continue sending this full payload because I don&#8217;t
-see any reason why it should fail, just by looking at the headers.&#8221;</p>
-
-<p>To opt into this, the client must provide the following header:</p>
-
-<pre><code>Expect: 100-continue
-</code></pre>
-
-<p>The server will see this, decide if the request will succeed, and if so,
-it send back 100 Continue and keeps reading from the input stream.
-Client then sends the whole payload.</p>
-
-<p>Proxies can reject if it knows the next-hop server is HTTP 1.0 or less
-with a 417 Expectation Failed.</p>
-
-<h2>IOS8 breaks file uploads in Safari</h2>
-
-<p>http://blog.fineuploader.com/2014/09/10/ios8-presents-serious-issues-that-prevent-file-uploading/</p>
-
-<p>Jesus. No workaround? Apple, you suck.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-17T08:08:00-04:00" pubdate data-updated="true">Sep 17<span>th</span>, 2014</time></div>
 	
 
 

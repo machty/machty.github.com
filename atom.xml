@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2014-11-05T12:40:37-05:00</updated>
+  <updated>2014-11-15T13:12:55-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,721 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Shananananananananeeees]]></title>
+    <link href="http://machty.github.com/blog/2014/11/11/shananananananananeeees/"/>
+    <updated>2014-11-11T06:43:00-05:00</updated>
+    <id>http://machty.github.com/blog/2014/11/11/shananananananananeeees</id>
+    <content type="html"><![CDATA[<h2>Linux hierachy layout</h2>
+
+<p><code>man hier</code> answers these questions.</p>
+
+<p>Basically, <code>/usr</code> is a secondary hierarchy for libs/bins/other things
+that aren&#8217;t strictly required for single-user mode (e.g. root).</p>
+
+<p><code>/usr/local</code> is tertiary. Things you compile yourself might belong
+there. Typically implies lower level of permissions. Rationale for
+separting from <code>/usr</code> is that <code>/usr</code> might be some read-only thing
+mounted and shared across machines, ready to be swapped out and upgraded
+at any time, but <code>/usr/local</code> is crap that you can fuck wit.</p>
+
+<p><code>brew</code> expects to install in the tertiary <code>/usr/local</code> directory:
+<code>/usr/local/Cellar</code>. So you can have multiple versions of executables
+installed via brew, but only one wins on the command line by way of
+symlinks within <code>/usr/local/bin</code> pointing to specific executables in
+<code>/usr/local/Cellar/projectname/1.23/bleh</code>. Symlinks to the rescue.</p>
+
+<pre><code>$ sudo brew install wat
+Error: Cowardly refusing to `sudo brew install`
+You can use brew with sudo, but only if the brew executable is owned by root.
+However, this is both not recommended and completely unsupported so do so at
+your own risk.
+</code></pre>
+
+<p>I guess this is nice since it prevents all the ugliness of installing
+shared executables at root privileges when they&#8217;re not needed.</p>
+
+<h2>Raptor</h2>
+
+<p>Ruby server. Apparently fast.</p>
+
+<p>http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/#zero_copy</p>
+
+<ul>
+<li>Uses nginx HTTP parser
+
+<ul>
+<li>due to battle-tested reliability</li>
+<li>could have used PicoHTTPParser, but not much community adoption
+though it claims being faster than nginc</li>
+<li>could have used Mongrel&#8217;s Ragel HTTP parser, but lots of
+Ruby-specific</li>
+</ul>
+</li>
+<li>Comes w reverse proxy buffer, such as what nginx has but hyper
+optimized to typical ruby raptor workflows</li>
+<li>Multi-process</li>
+<li>Sounds like multi-threadedness will be a paid solution that comes
+later.</li>
+</ul>
+
+
+<p>The C++ component of Raptor is the server that consists of:</p>
+
+<ul>
+<li>Buffering reverse proxy</li>
+<li>HTTP parser</li>
+<li>HTTP server</li>
+</ul>
+
+
+<p>Apparently these are all part of the same thing.</p>
+
+<h2>Puma Lopez mode</h2>
+
+<p>Puma Ruby server comes with a Lopez mode named after <code>@brianmario</code> who
+suggested it. It&#8217;s a tcp-only (no http) version of puma. To that guy&#8217;s
+knowledge Puma is the only threaded/pre-forking Ruby server that offers
+such a mode.</p>
+
+<h2>nginx Reverse proxy buffer</h2>
+
+<p>http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering</p>
+
+<p>I think it&#8217;s on by default, but you can disable it, configure buffer
+sizes, or enable with <code>X-Accel-Buffer</code>.</p>
+
+<h2>nginx in general</h2>
+
+<ul>
+<li>master process
+
+<ul>
+<li>manages worker process, reloads config files, etc</li>
+</ul>
+</li>
+<li>worker processes
+
+<ul>
+<li>process requests</li>
+</ul>
+</li>
+</ul>
+
+
+<p>conf files are directives, either one liners or blocks.</p>
+
+<ul>
+<li>Block directives
+
+<ul>
+<li>same structure as normal directives</li>
+<li>but have braces</li>
+<li>if braces allow directives inside of them, it&#8217;s called a context</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Contexts:</p>
+
+<ul>
+<li>main
+
+<ul>
+<li>events</li>
+<li>http
+
+<ul>
+<li>server
+
+<ul>
+<li>location</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Catch up or move along</h2>
+
+<p>http://unlearningeconomics.wordpress.com/2012/04/03/the-keenkrugman-debate-a-summary/</p>
+
+<h2>30s write delay</h2>
+
+<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
+
+<p>http://stackoverflow.com/questions/13650134/after-how-many-seconds-are-file-system-write-buffers-typically-flushed</p>
+
+<p>http://brad.livejournal.com/2116715.html</p>
+
+<p>Modified kernel buffers (of files on disk) wait up to 30s to be flushed
+to disk. You can &#8220;force&#8221; it was fsync. But then your disks might lie to
+you about what actually was persisted (verifiable via a test involving
+pulling the power cord).</p>
+
+<h2>Redis persistence</h2>
+
+<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
+
+<p>It&#8217;s in-memory key-value, so does it ever get saved to disk?</p>
+
+<p>Why yes it does, via:</p>
+
+<ul>
+<li>snapshotting; configure min writes since last sync, or a timeout, and
+it&#8217;ll persist a snapshot to a .rdb file. Half completed transactions
+(via MULTI/EXEC) don&#8217;t show up of course.</li>
+<li>append-only AOF files
+
+<ul>
+<li>get rewritten based on memory contents if file grows too large</li>
+<li>possible for an empty redis db (written and then deleted keys) has a
+large AOF file.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Both can be enabled; it&#8217;s nice to have rdb files that you can back up.</p>
+
+<blockquote><p>AOF rewrites are generated only using sequential I/O operations, so the whole dump process is efficient even with rotational disks (no random I/O is performed). This is also true for RDB snapshots generation. The complete lack of Random I/O accesses is a rare feature among databases, and is possible mostly because Redis serves read operations from memory, so data on disk does not need to be organized for a random access pattern, but just for a sequential loading on restart.</p></blockquote>
+
+<p>Interesting, so usually a database that stores to disk would need to
+organize data for efficient random access, but in Redis-land, everything
+is loaded into memory.</p>
+
+<p>This confused me:</p>
+
+<blockquote><p>One of the additional benefits of RDB is the fact for a given database size, the number of I/Os on the system is bound, whatever the activity on the database is. This is a property that most traditional database systems (and the Redis other persistence, the AOF) do not have.</p></blockquote>
+
+<p>In other words, AOFs can be large even for empty databases (due to
+deletions).</p>
+
+<p>appendfsync:</p>
+
+<ul>
+<li>appendfsync no
+
+<ul>
+<li>syncs at kernel whim (30 s on linux)</li>
+</ul>
+</li>
+<li>appendfsync everysec
+
+<ul>
+<li>average 1 sec, at most 2 delay before buffers sent to kernel and sync&#8217;d</li>
+</ul>
+</li>
+<li>appendfsync always
+
+<ul>
+<li>sync before each client ack</li>
+<li>slowest</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Default is <code>appendfsync everysec</code>, which is pretty good durability
+without murdering speed.</p>
+
+<blockquote><p>What Redis implements when appendfsync is set to always is usually called group commit. This means that instead of using an fsync call for every write operation performed, Redis is able to group this commits in a single write+fsync operation performed before sending the request to the group of clients that issued a write operation during the latest event loop iteration.</p></blockquote>
+
+<p>Hmm that&#8217;s interesting&#8230; Redis has an event loop that can answer
+multiple clients in a single iteration?</p>
+
+<p>http://pauladamsmith.com/articles/redis-under-the-hood.html#event-loop</p>
+
+<p>Ah, it uses epoll and the like; multiple sockets and events can have
+arrived in one go, so it loops through all of those, does the necessary
+reads, etc.</p>
+
+<pre><code>/* Include the best multiplexing layer supported by this system.
+ * The following should be ordered by performances, descending. */
+#ifdef HAVE_EVPORT
+#include "ae_evport.c"
+#else
+    #ifdef HAVE_EPOLL
+    #include "ae_epoll.c"
+    #else
+        #ifdef HAVE_KQUEUE
+        #include "ae_kqueue.c"
+        #else
+        #include "ae_select.c"
+        #endif
+    #endif
+#endif
+</code></pre>
+
+<h2>UTF-8</h2>
+
+<p>http://en.wikipedia.org/wiki/UTF-8</p>
+
+<p>I can&#8217;t believe I never sat down and read this shit.</p>
+
+<ul>
+<li>backwards compat w ASCII since ascii only used the 7 bits (signed
+char) to determine character.</li>
+<li>81% of webpages use this encoding</li>
+<li>ASCII is valid UTF-8</li>
+<li>UTF-8 is variable length; the 8th bit determines length</li>
+<li>there are invalid byte sequences (that you have to look out for when
+reading files / raw shit)</li>
+</ul>
+
+
+<h2>ISO/IEC 8859</h2>
+
+<p>http://en.wikipedia.org/wiki/ISO/IEC_8859</p>
+
+<ul>
+<li>single byte</li>
+<li>all ascii is ISO</li>
+<li>Seems like standard alphabet is preserved, but other 8 bit range stuff
+differs.</li>
+</ul>
+
+
+<h2>Ruby string encoding</h2>
+
+<p>http://stackoverflow.com/questions/20521371/set-utf-8-as-default-for-ruby-1-9-3</p>
+
+<ul>
+<li>Ruby 1.8 and below didn&#8217;t knew the concept of string encodings at all. Strings were more or less byte arrays.</li>
+<li>Ruby 1.9: default string encoding is US_ASCII everywhere.</li>
+<li><p>Ruby 2.0 and above: default string encoding is UTF-8.</p>
+
+<p>  $ ruby -e &#8220;puts &#8221;.encoding&#8221;
+  UTF-8</p></li>
+</ul>
+
+
+<h2>hiredis</h2>
+
+<p>https://github.com/redis/hiredis</p>
+
+<p>Presumably stands for &#8220;high(ish) level redis lib&#8221;.</p>
+
+<p>The Ruby gem can optionally use this as a driver but it comes at the
+expense of portability (JRuby can&#8217;t use this driver). But by default
+Ruby just uses Ruby sockets to talk to redis.</p>
+
+<h2>Public wifi</h2>
+
+<p>Is there any security difference between a password-less public wifi and
+one in which literally everyone knows the password?</p>
+
+<h2>/private on os X</h2>
+
+<p>http://unix.stackexchange.com/questions/63555/what-is-darwins-private-directory-for</p>
+
+<p>fun fact: <code>/etc</code> is a symlink for <code>/private/etc</code> on OS X. Wacky.</p>
+
+<h2>WEP, WPA, WPA2</h2>
+
+<p>http://www.howtogeek.com/167783/htg-explains-the-difference-between-wep-wpa-and-wpa2-wireless-encryption-and-why-it-matters/</p>
+
+<ul>
+<li>WEP (Wired Equivalent Privacy)
+
+<ul>
+<li>oldest</li>
+<li>WEP 128 most common even though there&#8217;s 256</li>
+<li>major security vulnerabilities based on RC4 stream cipher cracking</li>
+<li>on busy network, cracking could happen within a minute; if network
+is slow, attacker can send fake packets and get replies that it can
+use to crack over time.</li>
+<li>passive attacks: you have to collect information. Gather shit.</li>
+<li>Shamir (from RSA fame) was one of the crackahs.</li>
+</ul>
+</li>
+<li>WPA
+
+<ul>
+<li>PSK (pre-shared key) is most common</li>
+<li>256 min (over 64 and 128 WEP garbage)</li>
+<li>message integrity checks (detects some MITM)</li>
+<li>TKIP (temporal key integrity protocol) is predecessor to AES</li>
+<li>too tied to WEP (meant for firmware progressive upgrades) and hence
+prone to some WEP vulnerabilities, hence:</li>
+</ul>
+</li>
+<li>WPA2
+
+<ul>
+<li>AES</li>
+<li>CCMP (replacement for TKIP? but with TKIP fallback)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Just disable a thing called WPS and you&#8217;ll be good.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Mr Noah]]></title>
+    <link href="http://machty.github.com/blog/2014/11/08/mr-noah/"/>
+    <updated>2014-11-08T08:29:00-05:00</updated>
+    <id>http://machty.github.com/blog/2014/11/08/mr-noah</id>
+    <content type="html"><![CDATA[<h2>Root/apex/base/DNS and things finally clicking</h2>
+
+<p>They the same thing.</p>
+
+<p>http://stackoverflow.com/a/16041655/914123</p>
+
+<p>Also I like</p>
+
+<pre><code>(Note: root, base, apex domains are all the same thing. Using interchangeably for google-foo.)
+</code></pre>
+
+<p>CNAME:</p>
+
+<ul>
+<li>Canonical Name record: Aliases another name</li>
+<li>Use case: define CNAME for <code>ftp</code>, <code>www</code>, etc to point to the
+<code>example.com</code> A record so that only the A record&#8217;s IP needs to
+change</li>
+<li>Can point to any ol domain, not just within <code>example.com</code>. Heroku
+and other cloud services use this to have a CNAME pointing to
+a domain name under the control of a dynamic name server that
+can dish out different A name records (hence different IPs)</li>
+<li>Can&#8217;t define CNAMEs for apex domains (e.g. <code>example.com</code>).</li>
+<li>Can&#8217;t be shared with other records for that name, e.g. MX. CNAME wins
+and fucks over the others, I think.</li>
+</ul>
+
+
+<p>A record:</p>
+
+<ul>
+<li>Points to an IP address.</li>
+<li>Terminates DNS lookups</li>
+</ul>
+
+
+<p>ALIAS/ANAME:</p>
+
+<p>http://blog.dnsimple.com/2011/11/introducing-alias-record/</p>
+
+<p>http://support.dnsimple.com/articles/differences-between-a-cname-alias-url/</p>
+
+<blockquote><p>Before going further into the details, it’s important to know that A
+and CNAME records are standard DNS records, whilst ALIAS and URL
+records are custom DNS records provided by DNSimple. Both of them
+are translated internally into A records to ensure
+compatibility with the DNS protocol.</p></blockquote>
+
+<p>Aliases can coexist with other records at that level (so someone asking
+for MX gets MX if defined for that name rather than resolving
+elsewhere).</p>
+
+<p>Ok, so DNS hosts just returns CNAMEs and A records (and others too), and
+DNS hosts like DNSimple and DNS Made Easy can provide custom record
+types that ultimately translate to A records. Makes sense.</p>
+
+<p>So what about URL?</p>
+
+<blockquote><p>This type of record uses an HTTP redirect to redirect visitors from a domain to a web site.</p></blockquote>
+
+<p>So the A record returned from a URL record on DNSimple is going to point
+to one of DNSimple&#8217;s server IPs. I set one up for
+snaggletooth.alexmatchneer.com => http://www.example.com.</p>
+
+<pre><code>$ curl -H "Host: snaggletooth.alexmatchneer.com" 50.31.209.254
+&lt;a href="http://www.example.com"&gt;Moved Permanently&lt;/a&gt;
+</code></pre>
+
+<p>I also added a URL record for ugly.alexmatchneer.com to point to some
+random s3 image and discovered that browsers in fact follow redirects
+for images, hence this works:</p>
+
+<pre><code>&lt;img src="http://ugly.alexmatchneer.com"/&gt;
+</code></pre>
+
+<p><img src="http://ugly.alexmatchneer.com" alt="" /></p>
+
+<p>DNSimple is also nice enough to append the path to whatever its
+forwarding, so <code>ugly.alexmatchneer.com/wat</code> forwards to the destination
+specified in the URL record + <code>/wat</code>.</p>
+
+<h2><code>dig</code> recursion</h2>
+
+<p>Either you tell your DNS server to recurse for you, or you do it
+yourself.</p>
+
+<p>Name server does it for you (all these options just get rid of crufty
+shit):</p>
+
+<pre><code>dig +noall +answer +additional +recurse alexmatchneer.com
+alexmatchneer.com.      3544    IN      A       23.235.39.133
+</code></pre>
+
+<p>You do it yourself:</p>
+
+<pre><code>dig +noall +answer +additional +norecurse alexmatchneer.com
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>FWDR is a FiOS thing. These are from the additional section. So I guess
+it means I should call them. But at what point do I go through
+Verizon&#8217;s DNS? I thought I used like 4.2.2.2?</p>
+
+<pre><code>cat /etc/resolve.conf
+
+#
+# Mac OS X Notice
+#
+# This file is not used by the host name and address resolution
+# or the DNS query routing mechanisms used by most processes on
+# this Mac OS X system.
+#
+# This file is automatically generated.
+#
+domain home
+nameserver 192.168.1.1
+</code></pre>
+
+<p>I guess DNS is decided when I connect to a router. Ahhh I guess routers
+perform DNS? Ok ok ok what if I tell <code>dig</code> which name server to query?</p>
+
+<pre><code>$ dig +noall +answer +additional +norecurse @4.2.2.2 alexmatchneer.com
+i.gtld-servers.net.     109080  IN      A       192.43.172.30
+k.gtld-servers.net.     109080  IN      A       192.52.178.30
+m.gtld-servers.net.     166299  IN      A       192.55.83.30
+h.gtld-servers.net.     114566  IN      A       192.54.112.30
+b.gtld-servers.net.     133590  IN      A       192.33.14.30
+b.gtld-servers.net.     118573  IN      AAAA    2001:503:231d::2:30
+a.gtld-servers.net.     159638  IN      A       192.5.6.30
+a.gtld-servers.net.     113094  IN      AAAA    2001:503:a83e::2:30
+e.gtld-servers.net.     113091  IN      A       192.12.94.30
+f.gtld-servers.net.     166299  IN      A       192.35.51.30
+j.gtld-servers.net.     166299  IN      A       192.48.79.30
+g.gtld-servers.net.     109080  IN      A       192.42.93.30
+d.gtld-servers.net.     101447  IN      A       192.31.80.30
+l.gtld-servers.net.     136989  IN      A       192.41.162.30
+</code></pre>
+
+<p>WORD ok top level domains, makes sense. I bet if I let it recurse for me
+it&#8217;ll gimme what I want:</p>
+
+<pre><code>$ dig +noall +answer +additional +recurse @4.2.2.2 alexmatchneer.com
+alexmatchneer.com.      3600    IN      A       23.235.46.133
+</code></pre>
+
+<p>Word. And if I use my router&#8217;s IP:</p>
+
+<pre><code>dig +noall +answer +additional +norecurse @192.168.1.1 alexmatchneer.com
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>It refers me to some Verizon name server shit. Which is why if I type in
+some nonsense domain name, I get redirected to some shitty Verizon
+search page. Regardless of whether I&#8217;m in Chrome or in curl:</p>
+
+<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
+&lt;!DOCTYPE ... blah blah http://searchassist.verizon.com/
+</code></pre>
+
+<p>So what if I enable VPN? Prediction: my VPN provider will be making
+queries on my behalf, presumably not behind some Verizon name server
+shit.</p>
+
+<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
+curl: (6) Could not resolve host: oinasiodasd.asdasiodasod.asdoi
+</code></pre>
+
+<p>Basically (annoying caching hangover aside) dig will skip the FiOS
+forwarding/recursing if I&#8217;m on VPN. All this makes sense. Perfect
+sense. COMPLICATED THOUGH JESUS.</p>
+
+<h2>VPNs and private network IPs</h2>
+
+<p>ICANN set aside numbers like 192.168&#8230; and 10&#8230; for private networks.
+VPN doesn&#8217;t interfere with that shit because it&#8217;s within that range.
+Derp.</p>
+
+<p>Ahhhh that does though that I could still use my router as a DNS, no?</p>
+
+<p>VPN enabled:</p>
+
+<pre><code>$ dig .
+;; SERVER: 8.8.4.4#53(8.8.4.4)
+</code></pre>
+
+<p>VPN disabled:</p>
+
+<pre><code>$ dig .
+;; SERVER: 192.168.1.1#53(192.168.1.1)
+</code></pre>
+
+<p>And even w VPN enabled I could still query my Verizon router&#8217;s DNS</p>
+
+<pre><code>$ dig +norecurse @192.168.1.1 .
+FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
+FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
+</code></pre>
+
+<p>So who the hell decides where I query from?</p>
+
+<h2>DHCP</h2>
+
+<p>Dynamic Host Configuration Protocol.</p>
+
+<p>When you connect to a network, this tells you all sorts of useful
+defaults:</p>
+
+<blockquote><p>The DHCP server manages a pool of IP addresses and information about client configuration parameters such as default gateway, domain name, the name servers, and time servers.</p></blockquote>
+
+<p>When you connect to a network, the DHCP broadcasting stuff happens and
+you wind up with an IP, bingo bango bongo. When you connect to a network
+but can&#8217;t establish an IP, it&#8217;s probably because DHCP hasn&#8217;t finished
+yet.</p>
+
+<p>But this is where 192.168.1.1 as a name server comes from; the Verizon
+router will use DHCP to tell you to use it. Other routers might do other
+things. When I tether to my phone it gives a different DNS.</p>
+
+<h2>TXT Records</h2>
+
+<pre><code>$ dig +short borflex.alexmatchneer.com TXT
+"Another dumb thing"
+"I am a big dumb ridiculous idiot!"
+</code></pre>
+
+<h2>Nested subdomains</h2>
+
+<p>For the <code>alexmatchneer.com</code> domain, I added a CNAME for
+<code>e.x.c.alexmatchneer.com</code> to point to expresscheckoutapp.com
+and now it just works to nav to http://e.x.c.alexmatchneer.com</p>
+
+<h2>Route 53</h2>
+
+<p>Heyyyy that&#8217;s the port that DNS servers use.</p>
+
+<h2>Rubydns</h2>
+
+<p>https://github.com/ioquatix/rubydns</p>
+
+<p>Pretty cool. You can make your own DNS server. I got mine to tell me I
+was an idiot:</p>
+
+<pre><code>$ dig +short @54.165.102.18 barflonkula TXT
+"You are a big idiot"
+</code></pre>
+
+<h2>SOA Records</h2>
+
+<h2>Pointilism</h2>
+
+<p>Painting with dots. Like that Ferris Bueller painting, or some of Van
+Gogh&#8217;s self portraits.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Jaily Dournal]]></title>
+    <link href="http://machty.github.com/blog/2014/11/06/jaily-dournal/"/>
+    <updated>2014-11-06T16:00:00-05:00</updated>
+    <id>http://machty.github.com/blog/2014/11/06/jaily-dournal</id>
+    <content type="html"><![CDATA[<h2><code>rails c --sandbox</code></h2>
+
+<p>Rolls back changes on exit.</p>
+
+<pre><code>(0.4ms)  SAVEPOINT active_record_1
+(0.2ms)  ROLLBACK TO SAVEPOINT active_record_1
+</code></pre>
+
+<p>Wraps in a transaction which is why you see the above rather than BEGIN
+statements</p>
+
+<h2>Temporarily change $stdout</h2>
+
+<p>I wanted to get pretty-print output in Ruby. Solution, using <code>rails c</code>:</p>
+
+<pre><code>f = File.open('tmp', 'w')
+stdout_old = $stdout
+$stdout = f
+pp hash
+$stdout = $stdout_old # could also do File.open(1)
+</code></pre>
+
+<h2>Review: difference between pipes and sockets</h2>
+
+<ul>
+<li>pipes came first in early 70s</li>
+<li>pipes are always stream oriented; sockets can also be datagram
+oriented.</li>
+<li>pipes are unidirectional (and require two pipes for back and forth).
+sockets are bi-directional.</li>
+</ul>
+
+
+<h2>FAT doesn&#8217;t support hardlinking</h2>
+
+<p>I was going to try ember-cli-ramdisk mounting on file systems other than
+HFS+, hoping that one FS would support more efficient reuse of freed
+blocks, which might minimize paging on the grounds that if ramdisks
+blocks are being reused, then additional ramdisk file allocations won&#8217;t
+occur, hence memory lookups won&#8217;t occur, hence paging can&#8217;t happen.</p>
+
+<p>Anyway, got initial builds working in FAT32, but incremental rebuilds
+didn&#8217;t work due to hard-linking:</p>
+
+<p>https://github.com/rlivsey/broccoli-concat/blob/master/index.js#L86</p>
+
+<p>I thought we got rid of those, but then again the above use case is
+fine, since hardlinks are only used concat output and not root files.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[OSS Cards Against Humanity]]></title>
+    <link href="http://machty.github.com/blog/2014/11/05/oss-cards-against-humanity/"/>
+    <updated>2014-11-05T12:40:00-05:00</updated>
+    <id>http://machty.github.com/blog/2014/11/05/oss-cards-against-humanity</id>
+    <content type="html"><![CDATA[<p>Why not.</p>
+
+<h2>Black Cards</h2>
+
+<ul>
+<li>&#8220;GamerGate: it&#8217;s actually about <code>__________</code>&#8221;</li>
+<li>&#8220;Ember.js: a framework for creating <code>_________</code>&#8221;</li>
+</ul>
+
+
+<h2>White Cards</h2>
+
+<ul>
+<li>Ethics in video game journalism</li>
+<li><h1>GamerGate</h1></li>
+<li>Thought Leadership</li>
+<li>Brogrammers</li>
+<li>Cracking the Nut</li>
+<li>Destroy All Software</li>
+<li>Ember.js</li>
+<li>AngularJS</li>
+<li>React</li>
+<li>Two-way data-binding</li>
+<li>Unidirectional Data Flow</li>
+<li>Handlebars templates</li>
+<li>Functional reactive programming</li>
+<li>Hacker News</li>
+<li>Stability without Stagnation</li>
+<li>Ambitious Web Applications</li>
+<li>Thirsty Randos</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Troll toll to get into this Journal]]></title>
@@ -7656,685 +8371,6 @@ max of 5 simultaneous processes. So cool.</p>
 <h2>Liquid Fire Global</h2>
 
 <p>http://jsbin.com/mifuq/1/edit</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/08/05/daily-journal/"/>
-    <updated>2014-08-05T08:47:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/08/05/daily-journal</id>
-    <content type="html"><![CDATA[<h2>ES6 fat arrow</h2>
-
-<pre><code>var a = this;
-var fn = () =&gt; {
-  console.log(this === a); // true
-}
-</code></pre>
-
-<p>http://tc39wiki.calculist.org/es6/arrow-functions/</p>
-
-<p>yuno CoffeeScript single arrow syntax?</p>
-
-<blockquote><p>However, we don&#8217;t want CoffeeScript&#8217;s ->, it&#8217;s confusing to have two arrows and dynamic this binding is an oft-fired footgun.</p></blockquote>
-
-<h2>SaltStack</h2>
-
-<p>http://docs.saltstack.com/en/latest/</p>
-
-<h2>Open Core</h2>
-
-<p>http://en.wikipedia.org/wiki/Open_core</p>
-
-<p>Open Source core functionality with paid/proprietary add-ons, e.g.
-Sidekiq, or MySQL</p>
-
-<p>Related:</p>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Crippleware">Crippleware</a>: free versions
-cripple the ability to save/export/whatever</li>
-<li><a href="http://en.wikipedia.org/wiki/Freemium">Freemium</a>: free core features,
-pay for higher usage/capacity, e.g. most heroku add-ons</li>
-</ul>
-
-
-<h2>Ember First Class Actions</h2>
-
-<p>http://emberjs.jsbin.com/ucanam/5919/edit</p>
-
-<p>Questions:</p>
-
-<ul>
-<li>singleton vs multiples?</li>
-<li>actions that depend on others?</li>
-<li>link-to?
-
-<ul>
-<li>idea: a LinkView asks the router or url service for an Action
-using the route params, query params, etc.</li>
-<li>LinkView&#8217;s active CP is <code>action.pending</code> || present day isActive</li>
-<li>action will internally delegate to a shared transitionTo action
-that everyone in the world can see; everyone can know where it&#8217;s
-going, etc etc etc.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>We need to separate fake link font decoration style from the underlying
-action.</p>
-
-<p>Link&#8217;s display components:</p>
-
-<pre><code>routeDescriptor: function() {
-  // when resolvedParams change, we need to recalculate
-  // our route object... this should refire only when
-  // params change, not when the URL changes
-  this.urlService.getRouteObject('articles', 1)
-
-
-  this.urlService.createRouteDescriptor({
-    routeName: alias('_linkView.params.firstObject'),
-    contexts: alias('_linkView.contexts'),
-    queryParams: alias('_linkView.queryParams'),
-    _linkView: this
-  });
-}//.property('resolvedParams')
-
-createRouteDescriptor: function(_attrs) {
-  var attrs = {
-    router: this.router, // or maybe just `this`?
-  };
-  Ember.merge(attrs, _attrs);
-  return RouteDescriptor.createWithMixins(attrs);
-}
-
-RouteDescriptor = Ember.Object.extend({
-  // required
-  router: null,
-  routeName: null,
-  contexts: null,
-  queryParams: null,
-
-  allParams: computed('routeName', 'contexts', 'queryParams', function() {
-    // this is just a perfy thing; since all calculations depend
-    // on all these params, we'll avoid the overhead of multiple
-    // CPs depending on each of these params
-    return this.getProperties(['routeName', 'contexts', 'queryParams']);
-  }),
-
-  path: computed('router.url', 'allParams', function() {
-    var allParams = this.get('allParams');
-    var router = this.get('router');
-
-    // presently we only use router.url as a cue that the router
-    // is at a new route
-    var url = this.get('router.url');
-
-    // pass crap to routerJS
-  }),
-
-  perform: function() {
-    // invoke, blah blah blah, same logic as in link to.
-    this.get('allParams');
-  }
-});
-
-service.getRouteDescriptor('articles', 1)
-
-{
-  action:   FCA,
-  isActive: true,
-  path: "/some/dynamic/thing"
-}
-</code></pre>
-
-<p>RouteDescriptors are objects</p>
-
-<ul>
-<li>inactive: !routeObject.active</li>
-<li>active:   routeObject.active</li>
-<li>visited</li>
-</ul>
-
-
-<p>Weird thing: ember link-to&#8217;s concept of &#8220;active&#8221; doesn&#8217;t match with
-<code>&lt;a&gt;</code> tag&#8217;s concept of active; link-to &#8216;active&#8217; means you&#8217;re currently
-in the route specified by that link; <code>&lt;a&gt;</code> tag&#8217;s active means you&#8217;re
-currently clicking this link.</p>
-
-<p>I think I know how to refactor link-to and LinkView and all that</p>
-
-<p>Goals</p>
-
-<ul>
-<li>make linking/routing/active calc logic shareable</li>
-<li>make it possible to click a link to make it active before a slow
-transition has completed.</li>
-<li>support calculating activeness for bootstrap wrapper <code>&lt;li&gt;</code>s and
-anything else in general too.</li>
-</ul>
-
-
-<h2>RFCs</h2>
-
-<p>Rust tempered it&#8217;s freewheeling feature additions by requiring RFCs.</p>
-
-<p>https://github.com/rust-lang/rfcs/blob/master/active/0001-rfc-process.md
-https://github.com/rust-lang/rfcs/blob/master/active/0039-lifetime-elision.md</p>
-
-<p>Sounds like we&#8217;ll be doing this for Ember.</p>
-
-<h2>Elide</h2>
-
-<blockquote><p>omit (a sound or syllable) when speaking: (as adj. elided) : the indication of elided consonants or vowels.</p></blockquote>
-
-<h2>Variadic</h2>
-
-<p>http://en.wikipedia.org/wiki/Variadic_function</p>
-
-<p>A function that is variadic has an indefinite number of arguments.
-<code>.bind</code></p>
-
-<blockquote><p>8:50 PM <spion> bind is variadic and I think it also has to do some stuff with constructors
-8:51 PM <spion> (additional arguments can be used for partial application)
-8:52 PM <spion> the constructor stuff: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Bound_functions_used_as_constructors
-8:53 PM <spion> (creates significant additional overhead)
-8:53 PM <spion> so a simple non-variadic closure implementation of bind has a lot less work to do :P</p></blockquote>
-
-<h2>React forms</h2>
-
-<p>https://github.com/wingspan/wingspan-forms</p>
-
-<p>Powerded by KendoUI</p>
-
-<h2>Reflux</h2>
-
-<p>https://github.com/spoike/refluxjs</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>╔═════════╗       ╔════════╗       ╔═════════════════╗
-</span><span class='line'>║ Actions ║──────&gt;║ Stores ║──────&gt;║ View Components ║
-</span><span class='line'>╚═════════╝       ╚════════╝       ╚═════════════════╝
-</span><span class='line'>     ^                                      │
-</span><span class='line'>     └──────────────────────────────────────┘</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Rationale: http://spoike.ghost.io/deconstructing-reactjss-flux/</p>
-
-<h2>Promixo dedicated</h2>
-
-<p>https://addons.heroku.com/proximo#dedicated</p>
-
-<h2>CIDR: Classless Inter-Domain Routing</h2>
-
-<p>http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing</p>
-
-<p>Classful allocation of IP addresses (pre 1993) defined class A, B, C
-network groups split along the 8 bit chunks. Problem is the smallest
-allocation (256 addresses, assuming you were allocated something like
-123.456.789.XXX) was often too small for companies, whereas the next
-step up from that (123.456.XXX.XXX) was generally too huge (65536) for
-companies/entities to efficiently take advantage of. SOLUTION: CIDR
-blocks and subnet masks.</p>
-
-<blockquote><p>This led to inefficiencies in address use as well as routing because the large number of allocated small (class-C) networks with individual route announcements, being geographically dispersed with little opportunity for route aggregation, created heavy demand on routing equipment.</p></blockquote>
-
-<p>In other words, class C allocations are 123.456.789.XXX allocations,
-each containing 256 addresses, with no requirement that they be
-geographically grouped, such that routers had to maintain large tables
-for very similar looking addresses rather than being able to rely on
-some grouping rules to minimize the routing information they had to know
-about. But now subnet masking is a thing and blah blah blah I&#8217;m done
-learning this shit.</p>
-
-<p>192.168.2.0/24 means that the network is identified by the first 24 bits</p>
-
-<blockquote><p>192.168.100.0/24 represents the given IPv4 address and its associated routing prefix 192.168.100.0, or equivalently, its subnet mask 255.255.255.0 (i.e. 24 &#8220;1&#8221; bits).</p>
-
-<p>the IPv4 block 192.168.100.0/22 represents the 1024 IPv4 addresses from 192.168.100.0 to 192.168.103.255.</p></blockquote>
-
-<h2>TokenEx client-side encryption</h2>
-
-<p>Original misconception:</p>
-
-<ul>
-<li>You post directly to TokenEx via AJAX, and they give you an encrypted
-value that you can pass to your server and exchange for a token</li>
-</ul>
-
-
-<p>Correction:</p>
-
-<ul>
-<li>You only use JSEncrypt to encrypt the PAN via a public key.</li>
-</ul>
-
-
-<p>Wait, I don&#8217;t understand, with tokenizing, if you have a token saved in
-the database, then your server, if compromised, could still send data
-through to TokenEx, which would proxy it through to whomever.</p>
-
-<h2>Form Factor</h2>
-
-<p>https://www.pcisecuritystandards.org/documents/Mobile_Payment_Security_Guidelines_Merchants_v1.pdf</p>
-
-<blockquote><p>The PCI Security Standards Council charter provides a forum for collaboration across the payment space
-to develop security standards and guidance for the protection of payment card data wherever it may be
-stored, processed, or transmitted—regardless of the <em>form factor</em> or channel used for payment.</p></blockquote>
-
-<p>the physical size and shape of a piece of computer hardware.</p>
-
-<p>http://en.wikipedia.org/wiki/Mobile_phone_form_factor</p>
-
-<p>or phone.</p>
-
-<p>what a stupid fucking phrase/word/definition.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/08/02/daily-journal/"/>
-    <updated>2014-08-02T21:24:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/08/02/daily-journal</id>
-    <content type="html"><![CDATA[<h2>NPM is killing me</h2>
-
-<p>Apparently this fixed everything.</p>
-
-<pre><code>npm cache clear &amp;&amp; npm install
-</code></pre>
-
-<p>https://www.npmjs.org/doc/cli/npm-cache.html</p>
-
-<p>npm caches everything in <code>npm config get cache</code>, which for me is:</p>
-
-<pre><code>~/.npm
-</code></pre>
-
-<p>Folder structure is something like</p>
-
-<pre><code>~/.npm/PACKAGE_NAME/VERSION/
-</code></pre>
-
-<p>which contains:</p>
-
-<ul>
-<li>.cache.json
-
-<ul>
-<li>lots of overlap w the project&#8217;s package.json, with additional
-cache-specific things like</li>
-<li>etag, shasum</li>
-<li>deployment-specific data about the package</li>
-</ul>
-</li>
-<li>package.tgz
-
-<ul>
-<li>the original tarball downloaded for this packaage</li>
-</ul>
-</li>
-<li>package/
-
-<ul>
-<li>the unzipped tarball</li>
-</ul>
-</li>
-</ul>
-
-
-<p>In other words</p>
-
-<blockquote><p>Additionally, whenever a registry request is made, a .cache.json file is placed at the corresponding URI, to store the ETag and the requested data. This is stored in {cache}/{hostname}/{path}/.cache.json.</p></blockquote>
-
-<h2>Food Shit</h2>
-
-<p>Pok Pok is a legit ass Thai place I need to check out.</p>
-
-<pre><code>http://pokpokny.com/
-</code></pre>
-
-<h2><code>sed</code> to select lines</h2>
-
-<pre><code>$ git branch
-  cp-qp
-* master
-  new-doctitle
-  setup-controller-qp
-</code></pre>
-
-<p>I wanted to switch to the fourth one without typing
-<code>setup-controller-qp</code>. Here&#8217;s how you could do it by using the line
-number</p>
-
-<pre><code>$ git branch | sed -n '4p' | xargs git checkout
-Switched to branch 'setup-controller-qp'
-</code></pre>
-
-<p>Obviously this is just a dumb exercise since it&#8217;s waaay more typing.
-This is me practicing.</p>
-
-<p>You can also display multiple lines using a syntax similiar to cut&#8217;s
-<code>-f1,2</code> syntax:</p>
-
-<pre><code>$ git branch | sed -n '3,4p' 
-  new-doctitle
-  setup-controller-qp
-</code></pre>
-
-<h2>commissary</h2>
-
-<p>From Orange is the New Black</p>
-
-<blockquote><p>commissary: a restaurant in a movie studio, military base, prison, or other institution.</p></blockquote>
-
-<h2>HRT</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Hormone_replacement_therapy">Hormone replacement therapy</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal]]></title>
-    <link href="http://machty.github.com/blog/2014/07/29/daily-journal/"/>
-    <updated>2014-07-29T07:50:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/29/daily-journal</id>
-    <content type="html"><![CDATA[<h2>tar</h2>
-
-<p>Short for Tape Archives.</p>
-
-<p>Had a tar.xz file, just needed to</p>
-
-<pre><code>tar xf thefile.tar.xz
-</code></pre>
-
-<h2>Dexing</h2>
-
-<p>Convert string names to numbers to be referenced within compiled Java
-whilst packaging android apps.</p>
-
-<h2>Good Food</h2>
-
-<p>Prince St Cafe on Prince and Mott.</p>
-
-<ul>
-<li>Awesome burger</li>
-<li>Awesome lamb thing</li>
-</ul>
-
-
-<h2>ls -l</h2>
-
-<p>Was curious about an <code>@</code> sign I saw next to a .txt file, from <code>ls(1)</code>:</p>
-
-<blockquote><p>The Long Format</p>
-
-<pre><code>If the -l option is given, the following information is displayed for
-each file: file mode, number of links, owner name, group name, number
-of bytes in the file, abbreviated month, day-of-month file was last
-modified, hour file last modified, minute file last modified, and the
-pathname.  In addition, for each directory whose contents are dis-
-played, the total number of 512-byte blocks used by the files in the
-directory is displayed on a line by itself, immediately before the
-information for the files in the directory.  If the file or directory
-has extended attributes, the permissions field printed by the -l
-option is followed by a '@' character.  Otherwise, if the file or
-directory has extended security information (such as an access control
-list), the permissions field printed by the -l option is followed by a
-'+' character.
-</code></pre></blockquote>
-
-<ul>
-<li><code>@</code> extended attributes</li>
-<li><code>+</code> extended security info</li>
-</ul>
-
-
-<h2>Interrupted System Call</h2>
-
-<p>http://infohost.nmt.edu/~eweiss/222_book/222_book/0201433079/ch10lev1sec5.html</p>
-
-<p>I&#8217;m getting some shit about foreman and interrupted system calls. So
-what is it.</p>
-
-<h2>&#8220;data at the edge&#8221;</h2>
-
-<p>Keeping secure data at the edge of your infrastructure, e.g. using
-tokens instead of storing CC&#8217;s in your db.</p>
-
-<h2>PAN (primary account number)</h2>
-
-<p>Bank card number.</p>
-
-<p>http://en.wikipedia.org/wiki/Primary_account_number</p>
-
-<h2>CP (card present)</h2>
-
-<p>e.g AuthorizeNetCP</p>
-
-<p>Cheaper rates if you can prove card present (via CVV).</p>
-
-<h2>TokenEx</h2>
-
-<p>ProcessTransaction</p>
-
-<p>ProcessTransactionWithPAN</p>
-
-<ul>
-<li>pass in all the CC data; no</li>
-</ul>
-
-
-<h2>Levenshtein Distance</h2>
-
-<p>The minimum number of single-element operations (add, remove,
-substitute) between two sequences. Often used for spell-checking
-suggestions.</p>
-
-<p>I was thinking of using it to do an array diffing for React-ish stuff.</p>
-
-<pre><code>Array 1: B C D E F
-Array 2: A B C D E
-</code></pre>
-
-<p>Clearly the answer to how to get from 1 to 2 is</p>
-
-<pre><code>shift A
-delete E
-</code></pre>
-
-<p>But how to programmatically detect that?</p>
-
-<h2>Ruby String Substring Shorthand</h2>
-
-<p>https://speakerdeck.com/headius/jruby-the-hard-parts</p>
-
-<p>I can&#8217;t believe I didn&#8217;t know this&#8230;</p>
-
-<pre><code>s = "alex is quite maudlin"
-s['quite'] = 'very'
-s =&gt; "alex is very maudlin"
-</code></pre>
-
-<p>and if the substring isn&#8217;t in there, then</p>
-
-<pre><code>IndexError: string not matched
-</code></pre>
-
-<p>http://www.ruby-doc.org/core-2.1.2/String.html#method-i-5B-5D-3D</p>
-
-<h2>JRuby the Hard Parts</h2>
-
-<p>Goal: understand this talk https://speakerdeck.com/headius/jruby-the-hard-parts</p>
-
-<h2>Learn about encodings</h2>
-
-<p>I had to resort to this shit:</p>
-
-<pre><code>line = line.force_encoding("iso-8859-1")
-</code></pre>
-
-<p>for a bigass file because I was running into</p>
-
-<pre><code>http://stackoverflow.com/questions/15399530/ruby-match-invalid-byte-sequence-in-utf-8
-</code></pre>
-
-<p>Apparently you can open files as a certain encoding. Seems good.</p>
-
-<h2>Auto-inline CSS with Roadie</h2>
-
-<p>https://github.com/Mange/roadie</p>
-
-<p>Useful for supporting a vast array of shitty email clients that require
-inline CSS. This wouldn&#8217;t be a problem if web components.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Daily Journal 2]]></title>
-    <link href="http://machty.github.com/blog/2014/07/28/daily-journal-2/"/>
-    <updated>2014-07-28T20:43:00-04:00</updated>
-    <id>http://machty.github.com/blog/2014/07/28/daily-journal-2</id>
-    <content type="html"><![CDATA[<h2>User and Kernel</h2>
-
-<p>http://blog.codinghorror.com/understanding-user-and-kernel-mode/</p>
-
-<p>Non-idle tasks.</p>
-
-<p>The CPU graph is tasty. Red means kernel.</p>
-
-<p>CPU hardware knows all about kernels n shit. It isn&#8217;t just a software
-divide. CPU instructions and certain memory locations can only be
-accessed by the kernel, enforced by hardware. User mode makes it so that
-only the app crashes, not the entire system.</p>
-
-<p>http://en.wikipedia.org/wiki/Ring_(computer_security)</p>
-
-<p>Interesrserseting.</p>
-
-<p>x86 CPU hardware:</p>
-
-<ul>
-<li>0 is kernel</li>
-<li>3 is user</li>
-</ul>
-
-
-<p>1 and 2 are device drivers but they&#8217;re not often used. On Windows,
-device drivers can be user or kernel mode, mostly to the user, but video
-cards are often kernel level since they so perfy. In Vista+, the Windows
-Driver Display Model is such that only kernel mode is used for executing
-the GPU commands, but the translation from API to GPU now takes place in
-userland.</p>
-
-<p>Exceptions fire in kernel land I guess? Sometimes?</p>
-
-<h2>Old Foreman Orphans Sidekiq</h2>
-
-<p>After lots of starts/stops of foreman, I noticed lots of sidekiq
-instances with ppid 1. They was orphans. I killed em.</p>
-
-<h2>fspawn</h2>
-
-<p>Refers to the fork+exec approach to spawning a process.</p>
-
-<h2>Daemons</h2>
-
-<p>https://github.com/ghazel/daemons</p>
-
-<p>Library of fun little trinkets.</p>
-
-<ul>
-<li>given some-server.rb, let&#8217;s you write a some-server-control.rb</li>
-<li>inline the server inside such a daemon (you can still run it
-without forking via <code>run</code> command)</li>
-<li>manage multiple daemons</li>
-<li>Ability to take existing server and daemonize it; you do lose control
-over the daemon unless you&#8217;re a <code>ps</code>/<code>kill</code> JOURNEYMAN.
-
-<ul>
-<li>this takes advantage of the <code>fork</code> <code>getsid</code></li>
-</ul>
-</li>
-</ul>
-
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons.rb#L45-L53</p>
-
-<pre><code># 1.  Forks a child (and exits the parent process, if needed)
-# 2.  Becomes a session leader (which detaches the program from
-#     the controlling terminal).
-# 3.  Forks another child process and exits first child. This prevents
-#     the potential of acquiring a controlling terminal.
-# 4.  Changes the current working directory to "/".
-# 5.  Clears the file creation mask (sets +umask+ to 0000).
-# 6.  Closes file descriptors (reopens +STDOUT+ and +STDERR+ to point to a logfile if
-#     possible).
-</code></pre>
-
-<p>Controlling terminal:</p>
-
-<p>http://www.gnu.org/software/libc/manual/html_node/Controlling-Terminal.html</p>
-
-<blockquote><p>An individual process disconnects from its controlling terminal when it calls setsid to become the leader of a new session.</p></blockquote>
-
-<p>Ah I get it:</p>
-
-<ul>
-<li>first fork is to orphan the child, but it&#8217;s still connected to a
-controlling terminal/session.</li>
-</ul>
-
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L201</p>
-
-<p>They actually loop through all known IO files to close file
-descriptors using ObjectSpace:</p>
-
-<p>http://www.ruby-doc.org/core-2.1.2/ObjectSpace.html</p>
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L221</p>
-
-<p>That&#8217;s pretty rad. I guess the GC uses it too.</p>
-
-<h2>.pid file</h2>
-
-<p>It&#8217;s a file in a well known location that contains only the pid of
-some running process, usually a daemon. Useful because daemons are often
-hard to detect, kinda look like forgotten orphan processes, and there
-might be multiple similar ones. But pid files let you look up the pid of
-the running process so that you can send it signals.</p>
-
-<h2><code>$0</code> or <code>$PROGRAM_NAME</code></h2>
-
-<p>If you run this script</p>
-
-<pre><code>fork {
-  $PROGRAM_NAME = "WAT"
-  sleep
-}
-</code></pre>
-
-<p>then <code>ps | grep WOOT</code> yields</p>
-
-<pre><code>62724 ttys022    0:00.00 WOOT
-</code></pre>
-
-<p>Woot wat wat wotasoasdas lol.</p>
-
-<h2><code>pidof</code></h2>
-
-<pre><code>brew install pidof
-
-$ pidof bash
-754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
-</code></pre>
 ]]></content>
   </entry>
   
