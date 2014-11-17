@@ -112,6 +112,493 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/11/15/redis-b-hayes/">
+		
+			Redis B Hayes</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Redis&#8217;n</h2>
+
+<p>This and other notes based on Redis in Action.</p>
+
+<p>Questions:</p>
+
+<ul>
+<li>is it really brag-worthy to say in-memory-store? It gets persisted to
+disk anyway; don&#8217;t other DBs bring as much into memory as possible for
+fast lookups?
+
+<ul>
+<li>A: other databases are &#8220;primarily on-disk&#8221; but of course yes memory
+caching exists.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Relation to memcached:</p>
+
+<ul>
+<li>Similar efficiency based on in-memory lookups</li>
+<li>Redis features 2 persistence strategies (memcached doesn&#8217;t persist I
+guess?)</li>
+<li>Redis supports strings + 4 other data structures; memcached is strings</li>
+</ul>
+
+
+<p>ZSETs are hash of string keys to floating points, can be queried by
+order, ordered by their weight.</p>
+
+<h2>Databases: row insertion (often) fast</h2>
+
+<p>Because no need for a random read + random write; appending to a file
+(what most DBs do) is fast.</p>
+
+<h2>ACID</h2>
+
+<p>Set of properties that guarantee reliable database transactions</p>
+
+<ul>
+<li>Atomicity - all or nothing</li>
+<li>Consistency - transactions bring database from one valid state to another</li>
+<li>Isolation - are partially completed transaction visible to others?</li>
+<li>Durability - post-transaction, data is committed even in power loss</li>
+</ul>
+
+
+<h2>Fortnight</h2>
+
+<p>Two weeks.</p>
+
+<h2>Heroku database URL</h2>
+
+<pre><code>postgres://username:password@ec2-xx-xx-xx-xx-xx.compute-1.amazonaws.com:5432/d45d81ucgm3205
+</code></pre>
+
+<p>It&#8217;s just username + password at some publicly accessible EC2 URL. Your
+cherished postgres instances just live on some EC2 farm. What a crock.</p>
+
+<h2>Docker</h2>
+
+<p>Docker images are read-only templates. Use them to generate containers.
+Build other shit on top of containers.</p>
+
+<p>Docker has its own IANA port numbers for REST and secure REST API&#8230;
+what does this actually mean?</p>
+
+<p>http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=docker#DOCKER</p>
+
+<p>AH OK I have some more ideas:</p>
+
+<p>Boot2Docker is what you use to run Docker on Mac OS X. Why? Because
+docker depends on linux kernel specifics. Boot2Docker runs a Virtual Box
+instance of some Linux-y thing</p>
+
+<pre><code># within the virtual instance
+$ uname
+Linux version 3.16.4-tinycore64 (root@39d2c877bc4f) (gcc version 4.7.2 (Debian 4.7.2-5) ) #1 SMP Thu Oct 23 16:14:24 UTC 2014
+</code></pre>
+
+<p>So with the Boot2Docker setup, when you run the <code>docker</code> command on a
+Mac terminal, it has to jump through some hoops to run the docker
+instance on the Linux virtual box:</p>
+
+<pre><code>Mac `docker` command
+Proxy through to docker:tcuser@192.168.59.103
+Run `docker` command, which talks to 
+docker daemon
+</code></pre>
+
+<p>So there&#8217;s no docker daemon on OS X; the only persistent docker thing
+you&#8217;ll see is Virtual box instances running the docker virtual instance
+that the actual docker daemon lives on:</p>
+
+<pre><code> /Applications/VirtualBox.app/Contents/MacOS/VBoxHeadless --comment boot2docker-vm --startvm 798082c7-01d7-4a4f-89fc-1ebf70bc1a0a --vrde config
+ /Applications/VirtualBox.app/Contents/MacOS/VBoxNetDHCP --ip-address 192.168.59.99 --lower-ip 192.168.59.103 --mac-address 08:00:27:93:D3:BC --netmask 255.255.255.0 --network HostInterfaceNetworking-vboxnet0 --trunk-name vboxnet0 --trunk-type netadp --upper-ip 192.168.59.254
+</code></pre>
+
+<p>You can ssh into the docker VM box. Either w password or reusing the key
+they generate for you when you install boot2docker; put this in
+~/.ssh/config</p>
+
+<pre><code>Host docker
+  HostName 192.168.59.103
+  User docker
+  IdentityFile "/Users/machty/.ssh/id_boot2docker"
+  IdentitiesOnly yes
+</code></pre>
+
+<p>(I realized later that there&#8217;s a convenient command for this:
+<code>boot2docker ssh</code>&#8230; whoops!)</p>
+
+<p>So with this config in place I&#8217;m guessing that I can either run
+<code>docker version</code> or <code>ssh docker docker version</code> and see the same
+thing. BOOYA both produce:</p>
+
+<pre><code>Client version: 1.3.1
+Client API version: 1.15
+Go version (client): go1.3.3
+Git commit (client): 4e9bbfa
+OS/Arch (client): linux/amd64
+Server version: 1.3.1
+Server API version: 1.15
+Go version (server): go1.3.3
+Git commit (server): 4e9bbfa
+</code></pre>
+
+<p>So anyway, you can run commands against a docker image. This spins up a
+container, runs the command, and stops the container&#8230; does it delete
+the container?</p>
+
+<pre><code>docker ps --help
+</code></pre>
+
+<p>Nevermind that I&#8217;ll figure it out later. Let&#8217;s figure out how to get a
+Redis container running:</p>
+
+<pre><code>https://registry.hub.docker.com/_/redis/
+</code></pre>
+
+<p>Use <code>docker build</code> to build from a Dockerfile, which kinda explains how
+it ends up getting mounted to the outside world. So this is how you can
+just have a docker instance of a thing that you can run commands
+against, even in a Mac OS X setting? I know nothing, Jon Snow.</p>
+
+<p>https://docs.docker.com/examples/running_redis_service/</p>
+
+<pre><code>FROM        ubuntu:12.10
+RUN         apt-get update &amp;&amp; apt-get install -y redis-server
+EXPOSE      6379
+ENTRYPOINT  ["/usr/local/bin/my-dumbass-redis-server"]
+</code></pre>
+
+<p>So this starts with the ubuntu:12.10 image, installs redis into the
+container created from that image, exposes 6379&#8230; to&#8230;? What does this
+mean?</p>
+
+<blockquote><p>The EXPOSE instructions informs Docker that the container will listen on the specified network ports at runtime. Docker uses this information to interconnect containers using links (see the Docker User Guide). Note that EXPOSE only works for inter-container links. It doesn&#8217;t make ports accessible from the host. To expose ports to the host, at runtime, use the -p flag.</p></blockquote>
+
+<p>From http://docs.docker.com/reference/builder/</p>
+
+<p>So it&#8217;s exposed if we&#8217;re linking containers but not someone exposed to
+the host app.</p>
+
+<p>Ah I tried</p>
+
+<pre><code>docker run -i --entrypoint=/usr/bin/redis-server dcf91
+</code></pre>
+
+<p>and then I couldn&#8217;t ctrl-C because of, something, but if i do</p>
+
+<pre><code>docker run -it --entrypoint=/usr/bin/redis-server dcf91
+</code></pre>
+
+<p>then the -t option will attach a pseudo TTY and I can do it. This
+stuff is so cray cray. Actually I lied ctrl-C doesn&#8217;t work for TODO
+reasons, but Ctrl-P + Ctrl-Q detaches you from it? Seems good.</p>
+
+<p>OK but if I do</p>
+
+<pre><code>docker run -it -p 9191:6379 --entrypoint=/usr/bin/redis-server dcf91
+</code></pre>
+
+<p>this will run in interactive mode with ctrl-p ctrl-q supporting
+detachability, mapping the container 6379 (default redis port) to the
+host port 9191, and overriding the entrypoint because I didn&#8217;t know what
+I was doing in the Dockerfile. I should have left it at the default
+/usr/bin/redis-server because that&#8217;s where apt-get will put it.</p>
+
+<p>ANYWAY the mapping works, but the problem is i have to SSH into the
+docker host VirtualBox first to see it. How do I get beyond the
+Boot2Docker wall? Wait I know I&#8217;ll just fuckin use some SSH magic.
+Tunnels n shit.</p>
+
+<pre><code>ssh docker -L 9191:localhost:9191
+</code></pre>
+
+<p>ah but this will open a login shell, which I don&#8217;t need/want for what
+I&#8217;m doing:</p>
+
+<pre><code>ssh docker -N -L 9191:localhost:9191
+</code></pre>
+
+<p>The -N stands for &#8220;Do not execute a remote command&#8221;</p>
+
+<p>After which point I could just redis-cli but since I&#8217;m brutally low
+level I&#8217;ll do</p>
+
+<pre><code>$ nc localhost 9191
+SET WAT WOOT
++OK
+GET WAT
+$4
+WOOT
+</code></pre>
+
+<p>Booooooya. So cool.</p>
+
+<p>OK gonna be an idiot. SSH all the way. Is that possible? It means being
+able to SSH into container&#8230; sounds like you can&#8217;t do that without
+going through</p>
+
+<h2>Docker detach</h2>
+
+<p>Docker attaching/detaching is pretty weird. I don&#8217;t know the rationale
+behind it but they make it very easy to attach to a box but then not be
+able to attach. Basically you have to always pass -it to run and then
+can use ctrl-P ctrl-Q to detach.</p>
+
+<p>Or, you can <code>kill -9</code> the attached processed; if you you just do <code>kill</code>,
+that sends SIGTERM and that proxies through and closes the shitty
+process, but again Ctrl-C doesn&#8217;t use it.</p>
+
+<h2>Docker forwarding for OS X</h2>
+
+<p>This is a great article</p>
+
+<p>http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide</p>
+
+<p>Things learned:</p>
+
+<ul>
+<li><code>boot2docker ssh</code></li>
+<li>Add <code>dockerhost</code> to /etc/hosts</li>
+<li>Use <code>nsenter</code>
+
+<ul>
+<li><code>sudo nsenter -m -u -n -i -p -t $PID</code>
+
+<ul>
+<li><code>-m</code> use mount namespace of target process</li>
+<li><code>-u</code> use UTS namespace of target process (UTS stands for time-sharing? legacy unix thing?)</li>
+<li><code>-n</code> use network namespace of target process</li>
+<li><code>-i</code> IPC</li>
+<li><code>-i</code> IPC</li>
+<li><code>-p</code> IPC</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>LXC Containers (vs Docker)</h2>
+
+<p>https://linuxcontainers.org/</p>
+
+<p>Better chroot, comparable to docker containers. Ways of containing
+processes, resources, etc., dependent on modern linux kernel features,
+mostly on process namespacing.</p>
+
+<p>Excellent article comparing to Docker: http://www.flockport.com/lxc-vs-docker/</p>
+
+<p>Things learned:</p>
+
+<ul>
+<li>yuno virtualization?
+
+<ul>
+<li>because of performance cost</li>
+</ul>
+</li>
+<li>LXC and Docker are fast</li>
+<li>Lightweight VMs</li>
+<li>Is Docker a lightweight VM?</li>
+</ul>
+
+
+<p>A Docker container runs a single process:</p>
+
+<blockquote><p>Docker restricts the container to a single process only. The default docker baseimage OS template is not designed to support multiple applications, processes or services like init, cron, syslog, ssh etc. As you can imagine this introduces a certain amount of complexity and has huge implications for day to day usage scenarios. Since current architectures, applications and services are designed to operate in normal multi process OS environments you would need to find a Docker way to do things or use tools that support Docker. When it comes to applications for a LAMP container you would need to build 3 containers that consume services from each other, a PHP container, an Apache container and a MySQL container. Can you build all 3 in one container? You can, but there is no way to run php-fpm, apache and mysqld in the same container without a shell script or install a separate process manager like runit or supervisor.</p></blockquote>
+
+<p>http://docs.docker.com/articles/using_supervisord/</p>
+
+<blockquote><p>Traditionally a Docker container runs a single process when it is launched, for example an Apache daemon or a SSH server daemon.</p></blockquote>
+
+<p>This is the entry point. Note that <code>ubuntu</code> has no entry point. Not sure
+if it&#8217;s possible to use <code>run</code> with a container that has an entry point,
+since the entry point is the process that gets run.</p>
+
+<p>So it should be possible for me to run an ubuntu netcat and portforward
+at the same time:</p>
+
+<p>All from Mac:</p>
+
+<pre><code>$ docker run -i -p 9292:9292 --expose=[9292] ubuntu:14.04 nc -l 0.0.0.0
+</code></pre>
+
+<p>9292</p>
+
+<p>Separate Mac terminal window:</p>
+
+<pre><code>$ nc dockerhost 9292
+</code></pre>
+
+<p>And now these two assholes talk to each other!</p>
+
+<p>Here are all the options I used</p>
+
+<ul>
+<li><code>-i</code>: run container interactively with terminal attached; without
+this, nc immediately closes once someone connects to it since STDIN is
+presumably dev null</li>
+<li><code>-p 9292:9292</code>, map docker host port 9292 to container port 9292</li>
+<li><code>--expose=[9292]</code> open the firewall since it wasn&#8217;t listed as exposed
+in the dockerfile</li>
+</ul>
+
+
+<p>Shit is SO COOL.</p>
+
+<h2>Docker vs Heroku</h2>
+
+<p>Hmm, not even worth comparing.</p>
+
+<h2>Nested SSH tunnels</h2>
+
+<p>http://superuser.com/questions/96489/ssh-tunnel-via-multiple-hops</p>
+
+<p>Map localhost:9998 to host2&#8217;s port 22.</p>
+
+<pre><code>ssh -L 9998:host2:22 -N host1
+</code></pre>
+
+<p>Map localhost:9999 to blahbalhbablh you get the picture.</p>
+
+<pre><code>ssh -L 9999:localhost:1234 -N -p 9998 localhost
+</code></pre>
+
+<p>Shit is sooooo crazy. I love this stuff.</p>
+
+<h2>ProxyCommand</h2>
+
+<p>From <code>SSH_CONFIG(5)</code>.</p>
+
+<pre><code> ProxyCommand
+         Specifies the command to use to connect to the server.  The command string
+         extends to the end of the line, and is executed with the user's shell.  In the
+         command string, any occurrence of `%h' will be substituted by the host name to
+         connect, `%p' by the port, and `%r' by the remote user name.  The command can be
+         basically anything, and should read from its standard input and write to its
+         standard output.  It should eventually connect an sshd(8) server running on some
+         machine, or execute sshd -i somewhere.  Host key management will be done using
+         the HostName of the host being connected (defaulting to the name typed by the
+         user).  Setting the command to ``none'' disables this option entirely.  Note
+         that CheckHostIP is not available for connects with a proxy command.
+
+         This directive is useful in conjunction with nc(1) and its proxy support.  For
+         example, the following directive would connect via an HTTP proxy at 192.0.2.0:
+
+            ProxyCommand /usr/bin/nc -X connect -x 192.0.2.0:8080 %h %p
+</code></pre>
+
+<p>So this proxies through an already established HTTP Connect proxy at
+192.0.2.0:8080. That&#8217;s so awesome.</p>
+
+<p>netcat even brags of this:</p>
+
+<pre><code> Common uses include:
+
+       o   simple TCP proxies
+       o   shell-script based HTTP clients and servers
+       o   network daemon testing
+       o   a SOCKS or HTTP ProxyCommand for ssh(1)
+       o   and much, much more
+</code></pre>
+
+<h2>get.docker.com</h2>
+
+<pre><code>curl https://get.docker.com
+</code></pre>
+
+<p>It returns a bootstrapping shell script for setting up docker.</p>
+
+<p>You can <code>#include</code> it when booting an EC2 instance. Pretty cool.</p>
+
+<h2>Basic Authentication</h2>
+
+<p>If I spin up a stupid netcat server</p>
+
+<pre><code>nc -l localhost 9191
+</code></pre>
+
+<p>and then query it from Chrome</p>
+
+<pre><code>http://user:password@localhost:9191
+</code></pre>
+
+<p>Here&#8217;s what I see:</p>
+
+<pre><code>GET / HTTP/1.1
+Host: localhost:9191
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8
+Cookie: blahblah
+</code></pre>
+
+<p>No reference to <code>user</code> or <code>password</code>. Which means that this information
+isn&#8217;t sent up front unless the server requests basic authentication by
+first sending back a 401 with the <code>WWW-Authenticate</code> header, after which
+point the user and password will be sent.</p>
+
+<p>And because it&#8217;s sent as a header (user:pass in base64) it&#8217;s encrypted
+if sent over TLS. But it&#8217;ll be plaintext in your address bar :).</p>
+
+<h2>SSH randomart</h2>
+
+<p>You see it when you create a key pair. Why? Because it&#8217;s just an easy
+ass visual way to compare keys rather than some Base64 shit.</p>
+
+<p>You can see the randomart for an existing key by printing the
+fingerprint in verbose mode:</p>
+
+<pre><code>$ ssh-keygen -lv -f ~/.ssh/id_boot2docker.pub
+2048 b2:3e:e4:d3:c1:9d:1b:75:46:0b:53:aa:18:6b:c7:c6  machty@machty.home (RSA)
++--[ RSA 2048]----+
+|             ..  |
+|            o..  |
+|        .   .+ . |
+|         * .. +  |
+|      ..S.Eo o   |
+|      .+oo+      |
+|     o.. . o     |
+|     .+ . .      |
+|      .o         |
++-----------------+
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-15T13:16:00-05:00" pubdate data-updated="true">Nov 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/11/11/shananananananananeeees/">
 		
 			Shananananananananeeees</a>
@@ -5008,740 +5495,6 @@ rails db
 
 
 <time datetime="2014-10-06T21:15:00-04:00" pubdate data-updated="true">Oct 6<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/10/01/smelly-journal/">
-		
-			Smelly Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>TCP/UDP/Sockets/wat</h2>
-
-<p>What&#8217;s a socket?  Depends on who you ask.</p>
-
-<p>The <a href="file:///Users/machty/code/machty.github.com/rfc793.html">TCP RFC</a>
-defines a &#8220;socket&#8221; as an IP address (supplied in IP packet) combined
-with a port (supplied in the TCP packet). So a &#8220;socket&#8221; is
-(IP,PORT). Socket + Socket = Connection. Hence, in this sense, you can
-use the same socket for multiple connections.</p>
-
-<blockquote><p>To allow for many processes within a single Host to use TCP
-communication facilities simultaneously, the TCP provides a set of
-addresses or ports within each host.  Concatenated with the network
-and host addresses from the internet communication layer, this forms
-a socket.  A pair of sockets uniquely identifies each connection.
-That is, a socket may be simultaneously used in multiple
-connections.</p></blockquote>
-
-<ul>
-<li>Socket: an operating system abstraction referring to a communication
-endpoint. You can read from it. You can write to it.</li>
-<li>Note that raw sockets don&#8217;t have ports (ports are a UDP/TCP concept).</li>
-</ul>
-
-
-<h2>Built-ins aren&#8217;t sudo-able</h2>
-
-<pre><code>sudo: cd: command not found
-</code></pre>
-
-<p>:). Makes sense. You either need to use absolute paths or <code>sudo bash</code>.</p>
-
-<h2>Switch into another user</h2>
-
-<pre><code>sudo su - machty
-</code></pre>
-
-<h2>socket bind vs listen vs accept</h2>
-
-<p>Why so many steps? What does each one do?</p>
-
-<h3>Bind</h3>
-
-<p>Registers a socket with the kernel. Even if you do nothing with that
-socket, once you bind, anyone else who tries will get an EADDRINUSE.
-This code gets an EADDRINUSE every time.</p>
-
-<pre><code>require 'socket'
-def wat
-  socket = Socket.new(:INET, :STREAM)
-  addr = Socket.pack_sockaddr_in(4485, '0.0.0.0')
-
-  socket.bind(addr)
-end
-
-fork { wat }
-wat
-Process.wait
-</code></pre>
-
-<p>If the socket had been created, then a new file descriptor pointing to
-the same socket could be used by the forked child process, but you can&#8217;t
-just create a totally separate one that points to the same already-bound
-port.</p>
-
-<h3>Listen</h3>
-
-<p><code>listen()</code> indicates a &#8220;willingness to accept incoming connections&#8221;.
-You provide <code>listen</code> with a <code>backlog</code> integer referring to the max
-number of queued connections allowed before you ECONNREFUSED.</p>
-
-<p>It&#8217;s separate from <code>bind</code> because maybe you want to grab a port right at
-application start, but you still need to do some thing before you know
-a) whether to actually start listening or b) how big the queue size
-should be.</p>
-
-<p>It&#8217;s separate from <code>accept</code> because <code>accept</code> kind of a dead end as far
-as application initialization goes; once you start <code>accept</code>ing, you must
-be all set up and fine with the fact that you&#8217;ll be blocked on IO.</p>
-
-<p>SOMAXCONN is the max backlog number. Probably best to just set
-<code>listen</code>&#8217;s backlog to that number. If you&#8217;ve got people queued up for
-connections, you should probably be fixing whatever&#8217;s causing the wait.</p>
-
-<h3>Accept</h3>
-
-<p><code>accept</code> will block.</p>
-
-<p>So basically here&#8217;s what happens if you try to connect to a server
-that&#8217;s ran through the following steps (followed by a sleep unless
-<code>accept</code> is called):</p>
-
-<ul>
-<li>no <code>bind</code>: ECONNREFUSED</li>
-<li><code>bind</code>: client blocks. If you kill the server, ECONNREFUSED</li>
-<li><code>listen</code>: client blocks, reports a successful connection (which means
-that <code>listen</code> makes the kernel start accepting connections even if no
-one&#8217;s accepting&#8230; this makes sense since at this point we&#8217;ve provided
-the kernel a max queue size)</li>
-</ul>
-
-
-<p>If a connection comes in, the kernel will do the handshake, but the
-connection will remain in the queue and future connection attempts won&#8217;t
-get the handshake until the first one is <code>accept</code>ed.</p>
-
-<p>Does that make sense? The alternative would be the kernel not responding
-to the handshake until <code>accept</code>, which seems like a major performance
-hit.</p>
-
-<h2>Elastic Beanstalk</h2>
-
-<p>Tries to do what Heroku does. Apparently a clunkier CLI. But neato
-features.</p>
-
-<h2>Kernel buffers</h2>
-
-<p>C and Ruby provide buffering on top of a kernel buffers. Why not just
-have one buffer? Because the kernel definitely needs to provide
-buffering in general so that you can get the perfs for free. But
-application specific stuff can benefit from buffering on top of the
-kernel&#8217;s defaults, but unfortunately the system calls are megaslow.</p>
-
-<p>Kernel maintains a kernel thread that makes sure that nothing remains
-unflushed for more than 30 seconds and will flush things.</p>
-
-<p>You can <code>fadvise</code> the kernel about how reads/writes are likely to
-occur so that it can select the best strategy for what you&#8217;re doing.</p>
-
-<p>There&#8217;s an <code>madvise</code> memory equivalent. Wouldn&#8217;t you just write your own
-allocator at that point? Guess I should probably learn my shit.</p>
-
-<p>Different types of strategies:</p>
-
-<ul>
-<li>NORMAL: no special patterns to report, default kernel behavior.
-Read-ahead buffer set to 128k.</li>
-<li>SEQUENTIAL: you&#8217;re gonna be reading from lower to higher offsets.
-Large files, streaming large music files, blah blah blah, etc., on
-linux this yields read-ahead window size 2x the default.</li>
-<li>RANDOM: scattershot reads, hence read-ahead is likely a waste, hence
-it is disabled.</li>
-<li>WILLNEED: notify kernel that you&#8217;ll need a segment of memory soon, so
-kernel loads it into the buffer cache (redundant much?). Memory
-presurre from other processes might eject these buffers from the
-cache, so it&#8217;s good to make sure you <code>read</code> soonish after this
-fadvise.</li>
-<li>WONTNEED: flush a region if possible</li>
-<li>NOREUSE: WILLNEED + WONTNEED, basically. You only expect to read the
-region once.</li>
-</ul>
-
-
-<h2>Unzip a curled tar</h2>
-
-<pre><code>curl https://opensource.apple.com/tarballs/bash/bash-92.tar.gz | tar zxf -
-</code></pre>
-
-<p>Pretty amazing.</p>
-
-<h2><code>O_DIRECT</code>: bypass the buffer cache</h2>
-
-<p>Often this means slower performance, but if you reaaaally know what
-you&#8217;re doing, you can use it. If you use <code>O_DIRECT</code>, here&#8217;s what you
-lose:</p>
-
-<ul>
-<li>sensible read-aheads</li>
-<li>sharing buffers between processes using the same files</li>
-<li>other things</li>
-</ul>
-
-
-<p>Database software probably wants <code>O_DIRECT</code> because databases have
-unique IO requirements, maintain their own caches, etc.</p>
-
-<p>You have to start paying attention to things like alignment
-restrictions. The databuffer must begin on a memory boundary that is a
-multiple of block size. I guess that means you have to shift things in
-memory before writing to disk. File offset must also be multiple of
-block size. Length of data transferred must also be multiple. Else
-<code>EINVAL</code>.</p>
-
-<h2>Write-ahead log</h2>
-
-<p>http://en.wikipedia.org/wiki/Write-ahead_logging</p>
-
-<p>Postgres et al use this to provide atomicity / durability. With WAL, all
-modifications are written to a log before applied. Redo/undo information
-is written to the log.</p>
-
-<p>http://en.wikipedia.org/wiki/Point-in-time_recovery</p>
-
-<p>Restore a previous state in time. Time Machine is OS X is an example of
-this (also why they allow directory hard-linking).</p>
-
-<h2>Virtual devices and device files</h2>
-
-<p>Expose universal IO API.</p>
-
-<p>There are character devices like TTYs which can handle a character at a
-time, and there are block devices, which can handle IO in (often 512b)
-blocks.</p>
-
-<p>Use <code>mknod</code> for making device files. Used to be used for other things,
-now it&#8217;s just device files.</p>
-
-<p><code>ls -l</code> displays major or minor number of special device fields in place
-of the size (from <code>man ls</code>)</p>
-
-<pre><code> If the file is a character special or block special file, the major and
- minor device numbers for the file are displayed in the size field. 
-</code></pre>
-
-<h2>Cryptonomicomicon</h2>
-
-<p>Words.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Coolie">Coolie</a>: a laborer from Southern
-China, Indian subcontinent, Phillipines or Indonesia. Nowadays a
-racial slur for people of Asian descent (mostly in South African
-vernacular). Etymology not agreed upon, could be from an Urdu word for
-&#8220;slave&#8221; or in reference to the Koli, or a Tamil word that meant payment
-for work. Coolie trade pretty much was like slave trade, with indentured
-servitude, etc. In Crypto they&#8217;re the workers who trade various Shanghai
-banks silver-backed paper money in for silver, transporting large boxes
-of currency hanging from bamboo sticks.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Claque">Claque</a>: people paid to applaud
-(or heckle) a performance. Basically, real-time proto-laugh tracks,
-originating from France. There were laughers (Rieurs), criers
-(Pleureurs), ticklers (Chatouilleurs, who kept the audience in high
-spirits), and encore-ers (bisseurs). North Korea&#8217;s got lots of claquers.
-Entrenched claque-masters also extorted money from performers in
-exchange for not booing their performance. Fucking dickweeds.</p>
-
-<p>Swabbie: &#8220;a member of the navy, typically one who is of low rank.&#8221;</p>
-
-<p>Estuary (esturial): the tidal mouth of a large river, where the tide
-meets the stream.</p>
-
-<h2>Number authorities</h2>
-
-<p>Kinda like the IANA and port numbers, there&#8217;s a Linux
-http://www.lanana.org for controlling things like major version numbers
-for device files.</p>
-
-<h2>Silicon Valley</h2>
-
-<p>Turns out I never knew where it was: it&#8217;s the southern portion of the
-San Francisco bay area.</p>
-
-<h2>Disk Partitions</h2>
-
-<p>Hard disks have platters, platters have tracks of data, split into
-sectors, split into physical blocks.</p>
-
-<p>Platters > data > sectors > blocks.</p>
-
-<p>Blocks are the smallest unit of data a driver can read/write. They&#8217;re
-usually 512 bytes.</p>
-
-<p>Disk partitions are treated by the kernel as separate devices in
-<code>/dev</code>.</p>
-
-<p>Partitions might consist of</p>
-
-<ul>
-<li>a file system</li>
-<li>totally raw data (some databases do this)</li>
-<li>swap area used by kernel for VM</li>
-</ul>
-
-
-<p>File system on disk is composed of</p>
-
-<ul>
-<li>Boot block: how to boot the OS</li>
-<li>Superblock: single block saying:
-
-<ul>
-<li>size of inode table</li>
-<li>logical block size (always a multiple of physical block)</li>
-<li>size of the system in logical blocks</li>
-</ul>
-</li>
-<li>inode table / ilist</li>
-<li>data blocks</li>
-</ul>
-
-
-<p><code>ext2</code> is special in that it breaks down data blocks into block groups
-and prepends a copy of the super block to each to minimize seeks.</p>
-
-<p><code>ls -li</code> shows inode number in first column. inodes contain:</p>
-
-<ul>
-<li>file type</li>
-<li>owner</li>
-<li>group</li>
-<li>access perms</li>
-<li>timestamps
-
-<ul>
-<li>last access</li>
-<li>last mod</li>
-<li>last status change</li>
-<li>(but not a created at? WEIRD. must be a linux thing; mac has this)</li>
-</ul>
-</li>
-<li>number of hardlinks</li>
-<li>size of file in bytes</li>
-<li>number of blocks allocated (might be less than expected due to holes)</li>
-<li>pointers to blocks</li>
-</ul>
-
-
-<p>Note that there is a tradeoff between fragmenting freespace into small
-chunks that are too small to use vs fragmenting data blocks so that all
-free small chunks can be used.</p>
-
-<p>ext2 has 15 pointers, 12 of which are data block pointers, the next
-which points to a block of pointers, the next which points to a an array
-of block pointers, and then a tertiary one for large fucking files.</p>
-
-<p>This (using blocks for inode indirection) allows for fixed size
-of inode table.</p>
-
-<h2>TLDP</h2>
-
-<p>The Linux Documentation Project</p>
-
-<blockquote><p>LDP is a loosely knit team of volunteers who provide documentation for many aspects of Linux. There are several forms of documentation: Guides, HOWTOs, man pages, and FAQs.</p></blockquote>
-
-<p>That&#8217;s nice.</p>
-
-<h2>McRouter</h2>
-
-<p>https://www.youtube.com/watch?v=EYhcumt8YyI</p>
-
-<p>A &#8220;memcache protocol router, for scaling memcache deployments&#8221;.</p>
-
-<p>Two forms of caching at facebook:</p>
-
-<ul>
-<li>demand-filled cache
-
-<ul>
-<li>fetch from memcache with key. if not there, fetch from db, then set
-memcache w key. all of this logic on webserver</li>
-</ul>
-</li>
-<li>read-through / write-through cache
-
-<ul>
-<li>TAO system; query TAO, and if it&#8217;s not there, <em>it</em> fetches from DB
-on your behalf</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Both share the following in common: two orders of magnitude more reads
-than writes.</p>
-
-<p>Cache becomes bottleneck, extremely crucial or whole site fails.</p>
-
-<p>Having inconsistent implementations of memcache libs might result in
-data loss. So, anyway, McRouter to the rescue. It:</p>
-
-<ul>
-<li>is a proxy between memcache client and server (adheres to same ol API,
-makes for good drop-in replacement)</li>
-<li>also an embedded mode for low latency</li>
-<li>a load balancer</li>
-<li><a href="http://en.wikipedia.org/wiki/Consistent_hashing">consistent hashing</a>
-(where hash table resizes minimize the amount of remapping:
-
-<ul>
-<li>Consistent hashing maps objects to the same cache machine, as
-far as possible. It means when a cache machine is added,
-it takes its share of objects from all the other cache
-machines and when it is removed, its objects are shared
-between the remaining machines.</li>
-</ul>
-</li>
-<li>connection pooling (presumably this means connections are maintained
-by mcrouter to the memcache instances and loaned out when mcrouter
-clients make queries, rather than slowly reopening connections each
-time)</li>
-<li>Server pools&#8230; I guess this means multiple instances of McRouter?</li>
-<li>Automatic failover</li>
-<li>Cold cache warmup</li>
-<li>Broadcast operations</li>
-<li>Replicated Data Sets</li>
-</ul>
-
-
-<p>Connection Pooling:</p>
-
-<p>Application threads share McRouter&#8217;s N connections to the memcache
-instances, rather then each thread creating N connections resulting in
-<code>N*T</code> total connections.</p>
-
-<p>Heterogeneous workloads:</p>
-
-<p>Prefixed keys get routed to specific memcache instances, I guess, rather
-than having them all on the same things getting clobbered by others.</p>
-
-<p>Automatic failover:</p>
-
-<p>Normal server, fail over to backup when error returned, timeout,
-ECONNREFUSED, etc, with probing to see when it can be reconnected.</p>
-
-<p>Twitter <code>twemproxy</code> is similar to McRouter.</p>
-
-<h4>Reddit infrastructure</h4>
-
-<ul>
-<li>AWS</li>
-<li>170-300 servers daily (scales in peak hours)</li>
-<li>73 cache nodes with 1TB memory</li>
-<li>App code fragile-y uses memcache</li>
-</ul>
-
-
-<h4>Reddit Scaling Issues</h4>
-
-<p>AWS constantly releases lovely new instance types, but Reddit can&#8217;t just
-hop onto them without testing them out.</p>
-
-<h2>NTFS</h2>
-
-<p>New Technology File System, as in, Windows NT.</p>
-
-<h2>VFS</h2>
-
-<p>Virtual File System: the unified kernel abstraction, providing familiar
-things like <code>read()</code>, <code>write()</code>, etc.</p>
-
-<h2>Journaling</h2>
-
-<p>If an OS running ext2 crashes, you need to run <code>fsck</code> (filesystem check)
-to make sure inode entries point to real things, etc., else you run the
-risk of breaking more shiznittletons.</p>
-
-<p>Journaling FS&#8217;s imply basic database transactions. All intended metadata
-writes are written to a journal file first before they&#8217;re performed, and
-if the operation is interrupted by a crash, recovery is quick. Actually,
-could just be metadata or full on everything data.</p>
-
-<h2>OS X</h2>
-
-<p>Macs use something called HFS Plus, or Mac OS Extended.</p>
-
-<ul>
-<li>lots of metadata</li>
-<li><p>case-preserving though case-insensitive</p>
-
-<p>  machty.github.com :: cat woot
-  lol
-  machty.github.com :: cat WOOT
-  lol</p></li>
-<li><p>journaling</p></li>
-</ul>
-
-
-<h2>mount</h2>
-
-<p><code>mount</code> and <code>unmount</code> will attach a file system to a specified
-directory.</p>
-
-<p>KEEP IN MIND DINGUS this &#8220;mount&#8221; concept is all over the place. Mount
-routes. Mount external thing blah.</p>
-
-<p><code>unmount2</code> is <code>unmount</code> with flags.</p>
-
-<p>You can mount in multiple mount points.</p>
-
-<pre><code>mount /dev/sdva123 /dumbness
-</code></pre>
-
-<p>A device is not accessible as a file system until you mount it. You
-couldn&#8217;t just do <code>cd /dev/sdva123</code>. You have to mount it first.</p>
-
-<p>Just realized something: the EBS provided to your EC2 instance could be
-formatted into any file system. FUCK IT let&#8217;s do ext4.</p>
-
-<p>mounts can be stacked on top of the same mount point. This makes it
-possible to migrate off of an old mount; old processes maintain their
-file handles on the old mount, new processes use the new fs, and
-eventually you can retire the old mounted fs that&#8217;s not at the top of
-the stack. Kinda nifty, weird as it sounds.</p>
-
-<h2>Basic <code>cat</code> shit</h2>
-
-<p>If you want to type some random shit into a new file, do</p>
-
-<pre><code>cat &gt; lolz
-</code></pre>
-
-<p>and then you can type into cat&#8217;s STDIN and then Control D to signal EOF.</p>
-
-<h2>kitchen sink of disk utils</h2>
-
-<p>What&#8217;s the difference between all these shits?</p>
-
-<ul>
-<li>fdisk: manipulate disk partition table</li>
-<li>df: report file system disk space usage</li>
-<li>mkfs: build a linux filesystem</li>
-</ul>
-
-
-<h2>tmpfs</h2>
-
-<p>Virtual memory file system. But the thing about virtual memory is that
-unused portions might get paged to a swap file on the disk&#8230; so it&#8217;s
-not just strictly memory.</p>
-
-<pre><code>sudo mkdir ./wat
-sudo mount -t tmpfs StupidName ./wat
-</code></pre>
-
-<p><code>tmpfs</code> doesn&#8217;t exist on Mac OS X though some other form probably does.</p>
-
-<p>It&#8217;s used to speed up applications like compilers that make heavy use of
-<code>/tmp</code>.</p>
-
-<p><code>tmpfs</code> has also had other use cases, such as implementing shared
-memory (System V) and the <code>glibc</code> implementation of POSIX shared memory
-and POSIX semaphores.</p>
-
-<h2>Ableton Live</h2>
-
-<ul>
-<li>Opt-shift-B: hide Browser</li>
-</ul>
-
-
-<p>Arrangement view is the classic multi track view. You can disable
-portions of the mixer that you don&#8217;t care about.</p>
-
-<ul>
-<li>IO (opt + command + i): input/output for this track
-
-<ul>
-<li>Input type (device, e.g. M-Audio Whatchufuck)</li>
-<li>Input channel (devices often have multiple)</li>
-<li>Monitoring (radio button basically)
-
-<ul>
-<li>In (enable monitoring of input)</li>
-<li>Auto (only enable when track is armed - not just when actively
-recording)</li>
-<li>Off</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Delay (no shortcut)
-
-<ul>
-<li>delay/predelay to compensate for device/hardware/whatever latency</li>
-</ul>
-</li>
-<li>Mixer (opt + command + m)
-
-<ul>
-<li>Activate/deactivate (mute) the track</li>
-</ul>
-</li>
-<li>Return tracks
-
-<ul>
-<li>Note that if you tab into clip view (?) then the R button splits
-into S and R.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Note the master track at the bottom. The Preview/Cue volume controls the
-metrononme. Not sure what else Cue refers to&#8230;</p>
-
-<p>Count-in is attached to the metronome menu.</p>
-
-<p>Opt+unfold (triangle button) to unfold all them shits.</p>
-
-<p>You can arm multiple tracks with command+click.</p>
-
-<p>Impulse is an Ableton instrument. Instrument Racks are combinations of
-the Impulse instrument with certain pre-saved audio effects.</p>
-
-<h3>Quantize</h3>
-
-<p>This doesn&#8217;t seem to refer to individual notes in a midi recording but
-rather for playback between clips; when you press the play button by a
-clip, it doesn&#8217;t immediately play unless you have it turned off (which
-can result in crazy timing issues). Also, even if you Command-0 to turn
-it off and get shit out of sync, if you Command-9 back to one bar and
-play a new track, it&#8217;ll make sure it starts in sync with the metronome
-(what else could it be? clips don&#8217;t have meter, just a length).</p>
-
-<p>Ah but if you do want per note quantization you can do it a) while
-recording, by going to Edit > Record Quantization.</p>
-
-<p>Then if you already recorded something unquantized, you can Command-U.</p>
-
-<h3>Recording clips</h3>
-
-<p>If you create an empty clip, that clip has a size, as all do, so you&#8217;ll
-be recording within a loop.</p>
-
-<p>Whereas if you pressed the slot&#8217;s record button, there would be no fixed
-length until you stopped recording. The Notes menu associated with that
-clip (which has length info) doesn&#8217;t even appear until after the new
-recording is finished. How grand!</p>
-
-<h3>Looping</h3>
-
-<ul>
-<li>One-indexing: the quickly set things to the beginning of a clip, you
-do 1 tab 1 tab 1, not 0 tab 0 tab 0 which&#8217;ll normalize to -1. But
-lengths can have zero. 2 0 0 means two measures.</li>
-<li>Known trick: 0 0 16 will normalize into 1. If it&#8217;s more convenient to
-think in terms of odd meters, this could be useful&#8230; INSTANT
-MESHUGGAH.</li>
-<li>When loop enabled, normal end is meaningless. When loop disabled, all
-loop info is useless. (Though these details still seem to be
-displayed.</li>
-</ul>
-
-
-<p>Place insert markers just by clicking the grid.</p>
-
-<p>You can manually copy and paste or you could DuplLoop. DuplLoop also
-conveniently works such that if you duplicate into notes you&#8217;ve already
-written, they&#8217;re overwritten, rather than dubbed or something cray cray.</p>
-
-<h3>Hotswapping</h3>
-
-<p>Constrasted with double-clicking a new instrument in the Browser,
-hotswapping seems to:</p>
-
-<ul>
-<li>preserve the rest of the devices you might have attached to the
-instrument you&#8217;re hotswapping.</li>
-<li>open the browser to the current devices folder; relevant for quickly
-finding the thing you want to switch out.</li>
-</ul>
-
-
-<p>Weird that they make such a big deal out of it (do they, or am i just
-saying).</p>
-
-<h2>SHIT IS EBS BACKED, DUMMY</h2>
-
-<p>Root device type: ebs</p>
-
-<p>Root device: <code>/dev/xvda</code></p>
-
-<p><code>#NotAllEC2InstancesStartOffWithEphemeralStorage</code></p>
-
-<h2>Helicopter parent</h2>
-
-<p>http://en.wikipedia.org/wiki/Helicopter_parent</p>
-
-<p>A hovery overbearing parent who&#8217;s still around even when kids have gone
-to college.</p>
-
-<p>Thought it might mean when you&#8217;re a parent who drops in every so often,
-or drops in on other kids. Nope.</p>
-
-<h2>Geocoder can&#8217;t have radiuses be stored on the row</h2>
-
-<p>The bounding box is calculated before the SQL is fired&#8230; then again
-there&#8217;s all sorts of sin/cos shit going on, but all to translate into
-something that can be compared against that box.</p>
-
-<h2>College</h2>
-
-<p>http://www.nytimes.com/2014/05/18/magazine/who-gets-to-graduate.html</p>
-
-<p>Community College:</p>
-
-<p>Means different things depending on the country, but in America it
-usually means a two-year public institution, often granting certificates
-and associate&#8217;s degrees (two-year degrees).</p>
-
-<p>Dropout rate is apparently 40%, and if you include community college
-dropouts, we&#8217;re the worst other than Hungary.</p>
-
-<p>Rich kids are more likely to graduate (90% of the upper quartile of
-income), whereas 25% of the lower half will expect to graduate by 24.</p>
-
-<p>College students who scored the same on standardized tests still have
-educational outcomes (graduation rates) that correlate with family
-wealth.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-01T08:29:00-04:00" pubdate data-updated="true">Oct 1<span>st</span>, 2014</time></div>
 	
 
 

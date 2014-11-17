@@ -112,6 +112,97 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/31/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Git relative revisions</h3>
+
+<pre><code>git checkout 08h398se~1 
+</code></pre>
+
+<h3>Lazy CPs stripped down examples</h3>
+
+<p>Observing a CP requires consuming it with a get
+before its observers will fire upon change:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5200/edit</p>
+
+<p>But, for some reason, future changes to that property
+don&#8217;t fire that observer:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5203/edit</p>
+
+<p>This is because firing the observer tears down the chain
+nodes unless they&#8217;re activated again by future gets:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5204/edit</p>
+
+<p>But firing the observer tears down the chain
+nodes, so future fires also need to be preceded by
+a get to make the observer alive again:</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5201/edit</p>
+
+<p>http://emberjs.jsbin.com/ucanam/5198/edit</p>
+
+<pre><code>// CRUCIAL REALIZATION!!!! THIS IS HOW OBSERVERS
+// STAY LIVE IN VIEWS; RE-RENDERED METAMORPH TEMPLATES
+// CALL .get() to get the LATEST VALUE OF THE FUCK.
+// BUT GENERALLY SPEAKING YOU JUST NEED TO CALL .GET()
+// ON THE THING TO MAKE IT ALIVE AGAIN!
+http://emberjs.jsbin.com/ucanam/5208/edit
+
+
+
+/*
+Ember.addObserver(pojo, 'foo', function() {
+  console.log('foo observer fired');
+});
+*/
+
+
+
+// These additional changes
+// don't fire the fooAlias
+// observer, unless we continue
+// consuming (uncomment the stuff)
+//Ember.get(pojo, 'fooAlias');
+Ember.set(pojo, 'foo', 7);
+//Ember.get(pojo, 'fooAlias');
+Ember.set(pojo, 'foo', 8);
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-31T13:03:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/31/ember-meta/">
 		
 			Ember Meta</a>
@@ -2012,130 +2103,6 @@ but the following works:</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/active-admin/'>Active Admin</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/12/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Ruby <code>Module#===</code></h2>
-
-<p>Ran into <a href="https://github.com/hassox/warden/blob/master/lib/warden.rb#L33-L34">this piece of
-code</a>
-from the Warden repo:</p>
-
-<pre><code>def self.test_mode!
-  unless Warden::Test::WardenHelpers === Warden
-    Warden.extend Warden::Test::WardenHelpers
-    Warden::Manager.on_request do |proxy|
-      unless proxy.asset_request?
-        while blk = Warden._on_next_request.shift
-          blk.call(proxy)
-        end
-      end
-    end
-  end
-  true
-end
-</code></pre>
-
-<p>I hadn&#8217;t seen this usage of <code>===</code> before; I&#8217;m mostly familiar with it as
-an unidiomatic alias of <code>is_a?</code>, e.g.:</p>
-
-<pre><code>Array === []    #=&gt; true
-[].is_a?(Array) #=&gt; true
-</code></pre>
-
-<p><code>#===</code> is the Case Equality operator or
-<a href="http://stackoverflow.com/questions/4527220/3-equals-or-case-equality-operator"><em>subsumption</em> operator</a>;
-it is overridden by subclasses to provide context-specific / semantic
-meaning, for example:</p>
-
-<ul>
-<li><code>Regexp === /asd/</code> #=> true</li>
-<li><code>Fixnum === 5</code> #=> true</li>
-<li><code>Object === {}</code> #=> true</li>
-</ul>
-
-
-<p>Important things to keep in mind about <code>===</code>:</p>
-
-<ol>
-<li>It is not commutative (A===B does not imply B===A)</li>
-<li>It is a method of the object on the left side of an expression,
-e.g. <code>A===B</code> is shorthand for <code>A.===B</code> or <code>A.send(:===, //)</code></li>
-<li>It has nothing to do with equality; beware, JavaScripters.</li>
-</ol>
-
-
-<p>ANYWAY: back to the Warden example: in this case, the <code>Module</code> class has
-an instance method <code>===</code> that returns if the object on the right side
-has extended the methods on the Module that <code>===</code> is called on, so:</p>
-
-<pre><code>module M; end
-class Foo; end
-
-f = Foo.new
-M === f #=&gt; false
-
-# reopen
-class Foo
-  include M
-end
-
-M === f #=&gt; true
-</code></pre>
-
-<p>So we turned <code>===</code> from false to true by including <code>M</code> on class <code>Foo</code>.
-The Warden example is similar, except that the way the module&#8217;s methods
-were mixed in was via <code>extend</code> vs <code>include</code>. <code>extend</code> is a somewhat more
-direct form of <code>include</code> in that it can be called on instances to put
-methods directly on that instance, rather than having to open an
-instance&#8217;s class and add an <code>include</code> statement, which adds all of those
-methods to subclasses.</p>
-
-<p>So when we check</p>
-
-<pre><code>  Warden::Test::WardenHelpers === Warden
-</code></pre>
-
-<p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
-&#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T13:14:00-04:00" pubdate data-updated="true">May 12<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ruby/'>Ruby</a>
 
 </div>
 

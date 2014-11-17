@@ -112,6 +112,46 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/07/15/forgotten-things/">
+		
+			Forgotten Things</a>
+	</h2>
+	<div class="entry-content">
+		<p>Here&#8217;s a progressively-updated list of things I forget throughout the
+day. This is different from the list of things I&#8217;ve learned; that
+approach is useful for packing the things into my brain, hopefully; the
+purpose of this list is to pack things back in when I forget. And for
+now it&#8217;ll just be one giant progressively-updated blog.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-15T12:18:00-04:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/07/14/daily-journal/">
 		
 			Daily Journal</a>
@@ -1258,97 +1298,6 @@ browser discrepancies.</p>
 
 
 <time datetime="2014-06-03T11:57:00-04:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/31/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h3>Git relative revisions</h3>
-
-<pre><code>git checkout 08h398se~1 
-</code></pre>
-
-<h3>Lazy CPs stripped down examples</h3>
-
-<p>Observing a CP requires consuming it with a get
-before its observers will fire upon change:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5200/edit</p>
-
-<p>But, for some reason, future changes to that property
-don&#8217;t fire that observer:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5203/edit</p>
-
-<p>This is because firing the observer tears down the chain
-nodes unless they&#8217;re activated again by future gets:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5204/edit</p>
-
-<p>But firing the observer tears down the chain
-nodes, so future fires also need to be preceded by
-a get to make the observer alive again:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5201/edit</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5198/edit</p>
-
-<pre><code>// CRUCIAL REALIZATION!!!! THIS IS HOW OBSERVERS
-// STAY LIVE IN VIEWS; RE-RENDERED METAMORPH TEMPLATES
-// CALL .get() to get the LATEST VALUE OF THE FUCK.
-// BUT GENERALLY SPEAKING YOU JUST NEED TO CALL .GET()
-// ON THE THING TO MAKE IT ALIVE AGAIN!
-http://emberjs.jsbin.com/ucanam/5208/edit
-
-
-
-/*
-Ember.addObserver(pojo, 'foo', function() {
-  console.log('foo observer fired');
-});
-*/
-
-
-
-// These additional changes
-// don't fire the fooAlias
-// observer, unless we continue
-// consuming (uncomment the stuff)
-//Ember.get(pojo, 'fooAlias');
-Ember.set(pojo, 'foo', 7);
-//Ember.get(pojo, 'fooAlias');
-Ember.set(pojo, 'foo', 8);
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-31T13:03:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2014</time></div>
 	
 
 

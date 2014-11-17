@@ -1,0 +1,657 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Redis B Hayes  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Redis B Hayes</h2>
+	<div class="entry-content"><h2>Redis&#8217;n</h2>
+
+<p>This and other notes based on Redis in Action.</p>
+
+<p>Questions:</p>
+
+<ul>
+<li>is it really brag-worthy to say in-memory-store? It gets persisted to
+disk anyway; don&#8217;t other DBs bring as much into memory as possible for
+fast lookups?
+
+<ul>
+<li>A: other databases are &#8220;primarily on-disk&#8221; but of course yes memory
+caching exists.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Relation to memcached:</p>
+
+<ul>
+<li>Similar efficiency based on in-memory lookups</li>
+<li>Redis features 2 persistence strategies (memcached doesn&#8217;t persist I
+guess?)</li>
+<li>Redis supports strings + 4 other data structures; memcached is strings</li>
+</ul>
+
+
+<p>ZSETs are hash of string keys to floating points, can be queried by
+order, ordered by their weight.</p>
+
+<h2>Databases: row insertion (often) fast</h2>
+
+<p>Because no need for a random read + random write; appending to a file
+(what most DBs do) is fast.</p>
+
+<h2>ACID</h2>
+
+<p>Set of properties that guarantee reliable database transactions</p>
+
+<ul>
+<li>Atomicity - all or nothing</li>
+<li>Consistency - transactions bring database from one valid state to another</li>
+<li>Isolation - are partially completed transaction visible to others?</li>
+<li>Durability - post-transaction, data is committed even in power loss</li>
+</ul>
+
+
+<h2>Fortnight</h2>
+
+<p>Two weeks.</p>
+
+<h2>Heroku database URL</h2>
+
+<pre><code>postgres://username:password@ec2-xx-xx-xx-xx-xx.compute-1.amazonaws.com:5432/d45d81ucgm3205
+</code></pre>
+
+<p>It&#8217;s just username + password at some publicly accessible EC2 URL. Your
+cherished postgres instances just live on some EC2 farm. What a crock.</p>
+
+<h2>Docker</h2>
+
+<p>Docker images are read-only templates. Use them to generate containers.
+Build other shit on top of containers.</p>
+
+<p>Docker has its own IANA port numbers for REST and secure REST API&#8230;
+what does this actually mean?</p>
+
+<p>http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=docker#DOCKER</p>
+
+<p>AH OK I have some more ideas:</p>
+
+<p>Boot2Docker is what you use to run Docker on Mac OS X. Why? Because
+docker depends on linux kernel specifics. Boot2Docker runs a Virtual Box
+instance of some Linux-y thing</p>
+
+<pre><code># within the virtual instance
+$ uname
+Linux version 3.16.4-tinycore64 (root@39d2c877bc4f) (gcc version 4.7.2 (Debian 4.7.2-5) ) #1 SMP Thu Oct 23 16:14:24 UTC 2014
+</code></pre>
+
+<p>So with the Boot2Docker setup, when you run the <code>docker</code> command on a
+Mac terminal, it has to jump through some hoops to run the docker
+instance on the Linux virtual box:</p>
+
+<pre><code>Mac `docker` command
+Proxy through to docker:tcuser@192.168.59.103
+Run `docker` command, which talks to 
+docker daemon
+</code></pre>
+
+<p>So there&#8217;s no docker daemon on OS X; the only persistent docker thing
+you&#8217;ll see is Virtual box instances running the docker virtual instance
+that the actual docker daemon lives on:</p>
+
+<pre><code> /Applications/VirtualBox.app/Contents/MacOS/VBoxHeadless --comment boot2docker-vm --startvm 798082c7-01d7-4a4f-89fc-1ebf70bc1a0a --vrde config
+ /Applications/VirtualBox.app/Contents/MacOS/VBoxNetDHCP --ip-address 192.168.59.99 --lower-ip 192.168.59.103 --mac-address 08:00:27:93:D3:BC --netmask 255.255.255.0 --network HostInterfaceNetworking-vboxnet0 --trunk-name vboxnet0 --trunk-type netadp --upper-ip 192.168.59.254
+</code></pre>
+
+<p>You can ssh into the docker VM box. Either w password or reusing the key
+they generate for you when you install boot2docker; put this in
+~/.ssh/config</p>
+
+<pre><code>Host docker
+  HostName 192.168.59.103
+  User docker
+  IdentityFile "/Users/machty/.ssh/id_boot2docker"
+  IdentitiesOnly yes
+</code></pre>
+
+<p>(I realized later that there&#8217;s a convenient command for this:
+<code>boot2docker ssh</code>&#8230; whoops!)</p>
+
+<p>So with this config in place I&#8217;m guessing that I can either run
+<code>docker version</code> or <code>ssh docker docker version</code> and see the same
+thing. BOOYA both produce:</p>
+
+<pre><code>Client version: 1.3.1
+Client API version: 1.15
+Go version (client): go1.3.3
+Git commit (client): 4e9bbfa
+OS/Arch (client): linux/amd64
+Server version: 1.3.1
+Server API version: 1.15
+Go version (server): go1.3.3
+Git commit (server): 4e9bbfa
+</code></pre>
+
+<p>So anyway, you can run commands against a docker image. This spins up a
+container, runs the command, and stops the container&#8230; does it delete
+the container?</p>
+
+<pre><code>docker ps --help
+</code></pre>
+
+<p>Nevermind that I&#8217;ll figure it out later. Let&#8217;s figure out how to get a
+Redis container running:</p>
+
+<pre><code>https://registry.hub.docker.com/_/redis/
+</code></pre>
+
+<p>Use <code>docker build</code> to build from a Dockerfile, which kinda explains how
+it ends up getting mounted to the outside world. So this is how you can
+just have a docker instance of a thing that you can run commands
+against, even in a Mac OS X setting? I know nothing, Jon Snow.</p>
+
+<p>https://docs.docker.com/examples/running_redis_service/</p>
+
+<pre><code>FROM        ubuntu:12.10
+RUN         apt-get update &amp;&amp; apt-get install -y redis-server
+EXPOSE      6379
+ENTRYPOINT  ["/usr/local/bin/my-dumbass-redis-server"]
+</code></pre>
+
+<p>So this starts with the ubuntu:12.10 image, installs redis into the
+container created from that image, exposes 6379&#8230; to&#8230;? What does this
+mean?</p>
+
+<blockquote><p>The EXPOSE instructions informs Docker that the container will listen on the specified network ports at runtime. Docker uses this information to interconnect containers using links (see the Docker User Guide). Note that EXPOSE only works for inter-container links. It doesn&#8217;t make ports accessible from the host. To expose ports to the host, at runtime, use the -p flag.</p></blockquote>
+
+<p>From http://docs.docker.com/reference/builder/</p>
+
+<p>So it&#8217;s exposed if we&#8217;re linking containers but not someone exposed to
+the host app.</p>
+
+<p>Ah I tried</p>
+
+<pre><code>docker run -i --entrypoint=/usr/bin/redis-server dcf91
+</code></pre>
+
+<p>and then I couldn&#8217;t ctrl-C because of, something, but if i do</p>
+
+<pre><code>docker run -it --entrypoint=/usr/bin/redis-server dcf91
+</code></pre>
+
+<p>then the -t option will attach a pseudo TTY and I can do it. This
+stuff is so cray cray. Actually I lied ctrl-C doesn&#8217;t work for TODO
+reasons, but Ctrl-P + Ctrl-Q detaches you from it? Seems good.</p>
+
+<p>OK but if I do</p>
+
+<pre><code>docker run -it -p 9191:6379 --entrypoint=/usr/bin/redis-server dcf91
+</code></pre>
+
+<p>this will run in interactive mode with ctrl-p ctrl-q supporting
+detachability, mapping the container 6379 (default redis port) to the
+host port 9191, and overriding the entrypoint because I didn&#8217;t know what
+I was doing in the Dockerfile. I should have left it at the default
+/usr/bin/redis-server because that&#8217;s where apt-get will put it.</p>
+
+<p>ANYWAY the mapping works, but the problem is i have to SSH into the
+docker host VirtualBox first to see it. How do I get beyond the
+Boot2Docker wall? Wait I know I&#8217;ll just fuckin use some SSH magic.
+Tunnels n shit.</p>
+
+<pre><code>ssh docker -L 9191:localhost:9191
+</code></pre>
+
+<p>ah but this will open a login shell, which I don&#8217;t need/want for what
+I&#8217;m doing:</p>
+
+<pre><code>ssh docker -N -L 9191:localhost:9191
+</code></pre>
+
+<p>The -N stands for &#8220;Do not execute a remote command&#8221;</p>
+
+<p>After which point I could just redis-cli but since I&#8217;m brutally low
+level I&#8217;ll do</p>
+
+<pre><code>$ nc localhost 9191
+SET WAT WOOT
++OK
+GET WAT
+$4
+WOOT
+</code></pre>
+
+<p>Booooooya. So cool.</p>
+
+<p>OK gonna be an idiot. SSH all the way. Is that possible? It means being
+able to SSH into container&#8230; sounds like you can&#8217;t do that without
+going through</p>
+
+<h2>Docker detach</h2>
+
+<p>Docker attaching/detaching is pretty weird. I don&#8217;t know the rationale
+behind it but they make it very easy to attach to a box but then not be
+able to attach. Basically you have to always pass -it to run and then
+can use ctrl-P ctrl-Q to detach.</p>
+
+<p>Or, you can <code>kill -9</code> the attached processed; if you you just do <code>kill</code>,
+that sends SIGTERM and that proxies through and closes the shitty
+process, but again Ctrl-C doesn&#8217;t use it.</p>
+
+<h2>Docker forwarding for OS X</h2>
+
+<p>This is a great article</p>
+
+<p>http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide</p>
+
+<p>Things learned:</p>
+
+<ul>
+<li><code>boot2docker ssh</code></li>
+<li>Add <code>dockerhost</code> to /etc/hosts</li>
+<li>Use <code>nsenter</code>
+
+<ul>
+<li><code>sudo nsenter -m -u -n -i -p -t $PID</code>
+
+<ul>
+<li><code>-m</code> use mount namespace of target process</li>
+<li><code>-u</code> use UTS namespace of target process (UTS stands for time-sharing? legacy unix thing?)</li>
+<li><code>-n</code> use network namespace of target process</li>
+<li><code>-i</code> IPC</li>
+<li><code>-i</code> IPC</li>
+<li><code>-p</code> IPC</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>LXC Containers (vs Docker)</h2>
+
+<p>https://linuxcontainers.org/</p>
+
+<p>Better chroot, comparable to docker containers. Ways of containing
+processes, resources, etc., dependent on modern linux kernel features,
+mostly on process namespacing.</p>
+
+<p>Excellent article comparing to Docker: http://www.flockport.com/lxc-vs-docker/</p>
+
+<p>Things learned:</p>
+
+<ul>
+<li>yuno virtualization?
+
+<ul>
+<li>because of performance cost</li>
+</ul>
+</li>
+<li>LXC and Docker are fast</li>
+<li>Lightweight VMs</li>
+<li>Is Docker a lightweight VM?</li>
+</ul>
+
+
+<p>A Docker container runs a single process:</p>
+
+<blockquote><p>Docker restricts the container to a single process only. The default docker baseimage OS template is not designed to support multiple applications, processes or services like init, cron, syslog, ssh etc. As you can imagine this introduces a certain amount of complexity and has huge implications for day to day usage scenarios. Since current architectures, applications and services are designed to operate in normal multi process OS environments you would need to find a Docker way to do things or use tools that support Docker. When it comes to applications for a LAMP container you would need to build 3 containers that consume services from each other, a PHP container, an Apache container and a MySQL container. Can you build all 3 in one container? You can, but there is no way to run php-fpm, apache and mysqld in the same container without a shell script or install a separate process manager like runit or supervisor.</p></blockquote>
+
+<p>http://docs.docker.com/articles/using_supervisord/</p>
+
+<blockquote><p>Traditionally a Docker container runs a single process when it is launched, for example an Apache daemon or a SSH server daemon.</p></blockquote>
+
+<p>This is the entry point. Note that <code>ubuntu</code> has no entry point. Not sure
+if it&#8217;s possible to use <code>run</code> with a container that has an entry point,
+since the entry point is the process that gets run.</p>
+
+<p>So it should be possible for me to run an ubuntu netcat and portforward
+at the same time:</p>
+
+<p>All from Mac:</p>
+
+<pre><code>$ docker run -i -p 9292:9292 --expose=[9292] ubuntu:14.04 nc -l 0.0.0.0
+</code></pre>
+
+<p>9292</p>
+
+<p>Separate Mac terminal window:</p>
+
+<pre><code>$ nc dockerhost 9292
+</code></pre>
+
+<p>And now these two assholes talk to each other!</p>
+
+<p>Here are all the options I used</p>
+
+<ul>
+<li><code>-i</code>: run container interactively with terminal attached; without
+this, nc immediately closes once someone connects to it since STDIN is
+presumably dev null</li>
+<li><code>-p 9292:9292</code>, map docker host port 9292 to container port 9292</li>
+<li><code>--expose=[9292]</code> open the firewall since it wasn&#8217;t listed as exposed
+in the dockerfile</li>
+</ul>
+
+
+<p>Shit is SO COOL.</p>
+
+<h2>Docker vs Heroku</h2>
+
+<p>Hmm, not even worth comparing.</p>
+
+<h2>Nested SSH tunnels</h2>
+
+<p>http://superuser.com/questions/96489/ssh-tunnel-via-multiple-hops</p>
+
+<p>Map localhost:9998 to host2&#8217;s port 22.</p>
+
+<pre><code>ssh -L 9998:host2:22 -N host1
+</code></pre>
+
+<p>Map localhost:9999 to blahbalhbablh you get the picture.</p>
+
+<pre><code>ssh -L 9999:localhost:1234 -N -p 9998 localhost
+</code></pre>
+
+<p>Shit is sooooo crazy. I love this stuff.</p>
+
+<h2>ProxyCommand</h2>
+
+<p>From <code>SSH_CONFIG(5)</code>.</p>
+
+<pre><code> ProxyCommand
+         Specifies the command to use to connect to the server.  The command string
+         extends to the end of the line, and is executed with the user's shell.  In the
+         command string, any occurrence of `%h' will be substituted by the host name to
+         connect, `%p' by the port, and `%r' by the remote user name.  The command can be
+         basically anything, and should read from its standard input and write to its
+         standard output.  It should eventually connect an sshd(8) server running on some
+         machine, or execute sshd -i somewhere.  Host key management will be done using
+         the HostName of the host being connected (defaulting to the name typed by the
+         user).  Setting the command to ``none'' disables this option entirely.  Note
+         that CheckHostIP is not available for connects with a proxy command.
+
+         This directive is useful in conjunction with nc(1) and its proxy support.  For
+         example, the following directive would connect via an HTTP proxy at 192.0.2.0:
+
+            ProxyCommand /usr/bin/nc -X connect -x 192.0.2.0:8080 %h %p
+</code></pre>
+
+<p>So this proxies through an already established HTTP Connect proxy at
+192.0.2.0:8080. That&#8217;s so awesome.</p>
+
+<p>netcat even brags of this:</p>
+
+<pre><code> Common uses include:
+
+       o   simple TCP proxies
+       o   shell-script based HTTP clients and servers
+       o   network daemon testing
+       o   a SOCKS or HTTP ProxyCommand for ssh(1)
+       o   and much, much more
+</code></pre>
+
+<h2>get.docker.com</h2>
+
+<pre><code>curl https://get.docker.com
+</code></pre>
+
+<p>It returns a bootstrapping shell script for setting up docker.</p>
+
+<p>You can <code>#include</code> it when booting an EC2 instance. Pretty cool.</p>
+
+<h2>Basic Authentication</h2>
+
+<p>If I spin up a stupid netcat server</p>
+
+<pre><code>nc -l localhost 9191
+</code></pre>
+
+<p>and then query it from Chrome</p>
+
+<pre><code>http://user:password@localhost:9191
+</code></pre>
+
+<p>Here&#8217;s what I see:</p>
+
+<pre><code>GET / HTTP/1.1
+Host: localhost:9191
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8
+Cookie: blahblah
+</code></pre>
+
+<p>No reference to <code>user</code> or <code>password</code>. Which means that this information
+isn&#8217;t sent up front unless the server requests basic authentication by
+first sending back a 401 with the <code>WWW-Authenticate</code> header, after which
+point the user and password will be sent.</p>
+
+<p>And because it&#8217;s sent as a header (user:pass in base64) it&#8217;s encrypted
+if sent over TLS. But it&#8217;ll be plaintext in your address bar :).</p>
+
+<h2>SSH randomart</h2>
+
+<p>You see it when you create a key pair. Why? Because it&#8217;s just an easy
+ass visual way to compare keys rather than some Base64 shit.</p>
+
+<p>You can see the randomart for an existing key by printing the
+fingerprint in verbose mode:</p>
+
+<pre><code>$ ssh-keygen -lv -f ~/.ssh/id_boot2docker.pub
+2048 b2:3e:e4:d3:c1:9d:1b:75:46:0b:53:aa:18:6b:c7:c6  machty@machty.home (RSA)
++--[ RSA 2048]----+
+|             ..  |
+|            o..  |
+|        .   .+ . |
+|         * .. +  |
+|      ..S.Eo o   |
+|      .+oo+      |
+|     o.. . o     |
+|     .+ . .      |
+|      .o         |
++-----------------+
+</code></pre>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-15T13:16:00-05:00" pubdate data-updated="true">Nov 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/11/15/redis-b-hayes/';
+        var disqus_url = 'http://machty.github.com/blog/2014/11/15/redis-b-hayes/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
