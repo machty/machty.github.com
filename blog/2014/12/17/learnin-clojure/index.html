@@ -1,0 +1,1999 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Learnin Clojure  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Learnin Clojure</h2>
+	<div class="entry-content"><h2>Joy of Clojure</h2>
+
+<ul>
+<li>Imperative
+
+<ul>
+<li>a sequence of statements mutates program state</li>
+</ul>
+</li>
+<li>maenad (maenadic): wild and unrestrained: a female follower of
+Bacchus, traditionally associated with divine possession and frenzied
+rites</li>
+<li>expression problem
+
+<ul>
+<li>&#8220;The Expression Problem is a new name for an old problem. The
+goal is to define a datatype by cases, where one can add new cases
+to the datatype and new functions over the datatype, without
+recompiling existing code, and while retaining static type safety
+(e.g., no casts).&#8221;</li>
+<li>Java requires these to be declared up front, suffers</li>
+<li>Why the &#8220;expression&#8221; problem? &#8216;The label &#8220;Expression Problem&#8221; puns on expression = &#8220;how much can your language express&#8221; and expression = &#8220;the terms you are trying to represent are language expressions&#8221;.&#8217;</li>
+</ul>
+</li>
+</ul>
+
+
+<!--more-->
+
+
+<h2>Protocols</h2>
+
+<p>Almost like defining global functions but require that first arg(?)
+adheres to a given protocol.</p>
+
+<pre><code>(defprotocol Searchable
+  (search [this query]))
+</code></pre>
+
+<p>then</p>
+
+<pre><code>(extend-type String
+  Searchable
+  (search [this] 
+    (search [this query]
+      (someshit))))
+</code></pre>
+
+<blockquote><p>The resulting functions dispatch on the type of their first argument, and thus must have at least one argument</p></blockquote>
+
+<p>MAKES SENSE.</p>
+
+<h2>Expression Problem</h2>
+
+<p>You have</p>
+
+<ul>
+<li>a set of abstract methods you&#8217;d like to implement&#8230;</li>
+<li>&#8230;for an existing concrete class&#8230;</li>
+<li>&#8230;without changing the code for either the existing abstract methods
+or the concrete class</li>
+</ul>
+
+
+<p>Ruby&#8217;s solution means reopening the class, possibly monkey patching.
+Clojure&#8217;s solution is protocols&#8230; defining functions that dispatch
+based on the type of the first arg.</p>
+
+<p>Ruby suffers a namespacing issue, hence the danger of monkey patching.
+In Ruby everything is a message, easy to accidentally overwrite a method
+handler. Maybe there&#8217;s a namespace issue in Clojure too, if you&#8217;re not
+careful, but whatever I just need to learn more shit.</p>
+
+<h2>Clojure: namespaces</h2>
+
+<p><code>(ns dumb.shit)</code></p>
+
+<p>and you have <code>defn-</code> macros to declare private methods.</p>
+
+<p>Namespaces encapsulate, but you can also use lexical closures for
+encapsulation.</p>
+
+<h2>Keywords</h2>
+
+<p><code>:asd</code> is not a symbol, it&#8217;s a &#8220;keyword&#8221;. <code>asd</code> is a symbol, and is
+substituted with some underlying value.</p>
+
+<h2>Collections</h2>
+
+<h3>Lists</h3>
+
+<p><code>(a b c)</code> is just a list. When it gets evaluated, <code>a</code> will be treated
+as a function, macro, or operator.</p>
+
+<p>Vectors&#8230; don&#8217;t get evaluated? Why don&#8217;t they make a bigger deal about
+this?</p>
+
+<pre><code>[1 2 3]
+(vector 1 2 3)
+</code></pre>
+
+<h2>Commas are whitespace</h2>
+
+<pre><code>user=&gt; { 1 1 2, 2 }
+{1 1, 2 2}
+</code></pre>
+
+<h2>prefix/infix</h2>
+
+<pre><code>+ 1 2 3 4 5 6 7
+</code></pre>
+
+<p>vs</p>
+
+<pre><code>1 + 2 + 3 + 4 + 5 + 6 + 7
+</code></pre>
+
+<p>Prefix allows any number of args.</p>
+
+<p>Also, when everything is prefix, no question of operator precedence.</p>
+
+<h2>Vars</h2>
+
+<p>don&#8217;t need to be bound</p>
+
+<pre><code>user=&gt; (def y)
+#'user/y
+user=&gt; y
+#&lt;Unbound Unbound: #'user/y&gt;
+</code></pre>
+
+<h2>Special form</h2>
+
+<p>A Clojure expression that&#8217;s part of core language but not created via
+normal functions, types, or macros.</p>
+
+<h2>Lisp</h2>
+
+<p>stands for &#8220;LISt Processing&#8221;</p>
+
+<h2>def defn</h2>
+
+<p><code>def</code> associates a symbol w Clojure data (could be some primitive, or a
+function, or whatever).</p>
+
+<pre><code>(def a (fn [] (println "wat")))
+</code></pre>
+
+<p><code>defn</code> is a macro that wraps the above (and also lets you apply
+documentation).</p>
+
+<pre><code>(defn a "i am a stupid fn" [] (println "wat"))
+(defn a [] (println "wat"))
+</code></pre>
+
+<p>You can use <code>defn</code> for multi-arity fns</p>
+
+<pre><code>user=&gt; (defn a ([a] #{a}) ([a b] #{a b}))
+#'user/a
+user=&gt; (a 2)
+#{2}
+user=&gt; (a 2 3)
+#{3 2}
+user=&gt; (a 2 3 4)
+ArityException Wrong number of args (3) passed to: user/a  clojure.lang.AFn.throwArity (AFn.java:429)
+</code></pre>
+
+<p>What&#8217;s weird about this is <code>([n] #{n})</code>&#8230; if you&#8217;re evaluating this,
+won&#8217;t it try to immediate run <code>[n]</code> as if it were a fn? Yes! But we&#8217;re
+not evaluating&#8230; we&#8217;re in a macro! Eval rules don&#8217;t apply while shit is
+getting reorganized by the macro code. Kiiiinda fuckin weird.</p>
+
+<p>Multi-arity accomplished via</p>
+
+<pre><code>(defn a [&amp; x] (apply vector x))
+</code></pre>
+
+<h2>Homoiconicity</h2>
+
+<p>http://en.wikipedia.org/wiki/Homoiconicity</p>
+
+<p>It means your program&#8217;s AST is the same as its syntax, basically.
+Homoiconicity is a feature of Clojure.</p>
+
+<h2>Reader features</h2>
+
+<p>Like C++ preprocessor macros, rearrange shit (but somehow isn&#8217;t a
+macro?). <code>#()</code> is an inplace function reader feature that gets replaced
+with special form <code>def</code>.</p>
+
+<pre><code>user=&gt; (def a #(vector %1 %3))
+#'user/a
+user=&gt; (a 1 2 3)
+[1 3]
+</code></pre>
+
+<p>The above example shows that you can skip an numbered arg and still wind
+up with an arity of 3.</p>
+
+<pre><code>(def a #(vector % % %))
+user=&gt; (a 1)
+[1 1 1]
+</code></pre>
+
+<h2>Blocks</h2>
+
+<p>do blocks, usually side-effecty</p>
+
+<pre><code>user=&gt; (do
+  #_=&gt; (println "wat")
+  #_=&gt; (println "omg")
+  #_=&gt; 3)
+wat
+omg
+3
+</code></pre>
+
+<h2>Locals (not variables)</h2>
+
+<p>Useless:</p>
+
+<pre><code>(let [] (println "wat"))
+</code></pre>
+
+<p>Useful</p>
+
+<pre><code>(let [a 5] (println "a is" a))
+</code></pre>
+
+<p>Why a vector and not a map? I guess because let internally needs to loop
+through each thing?</p>
+
+<p>Note the use of &#8220;form&#8221;. It&#8217;s <code>let</code> form, it&#8217;s a <code>do</code> form. <code>def</code> is a
+special form&#8230; still need to tease this out. I guess form just means
+language pattern building block that depends on basic Closure types
+(functions, primitives, etc).</p>
+
+<h2>Loops</h2>
+
+<p>Use tail recursion. <code>recur</code> is a special form.</p>
+
+<p>BEFORE I MENTION THAT THOUGH I figured out how to rewrite a fn that runs
+a callback twice</p>
+
+<pre><code>user=&gt; (defn twice ([some-fn] (twice some-fn true)) ([some-fn first] (some-fn) (when (true? first) (twice some-fn false) ) ))
+#'user/twice
+user=&gt; (twice #(println "hello"))
+hello
+hello
+</code></pre>
+
+<p>Could have also used special form <code>fn</code>:</p>
+
+<pre><code>(twice (fn [] (println "hello")))
+</code></pre>
+
+<h2>Android camera bug</h2>
+
+<p>Only on Nexus 5, we had a bug where switching between front and back
+camera failed, reason being something to do with the fact that there&#8217;s
+no guarantee that front and back will have the same aspect ratio /
+resolution, so you need to reinitialize some shits. ISN&#8217;T ANDROID
+FUN?!?!?!?!?!</p>
+
+<h2>Clojure <code>set!</code></h2>
+
+<pre><code>(def a (java.awt.Point. 0 0))
+(.-x a)
+; 0
+(set! (.-x a) 1)
+; 1
+(.-x a)
+; 1
+</code></pre>
+
+<p>So you can think of <code>(.-x a)</code> as a descriptor that <code>set!</code> can operate
+on. Hmm does that mean <code>set!</code> is a macro?</p>
+
+<p>http://clojure.org/java_interop#Java%20Interop-The%20Dot%20special%20form-%28set!%20%28.%20Classname-symbol%20staticFieldName-symbol%29%20expr%29</p>
+
+<p>Apparently it&#8217;s a special form.</p>
+
+<h2>Abstract Window Toolkit</h2>
+
+<p>java.awt stands for Abstract Window Toolkit.</p>
+
+<h2>Capture output</h2>
+
+<pre><code>(with-out-str (println "fuckles"))
+; "fuckles"
+</code></pre>
+
+<p>You can also use this to capture the output of <code>doc</code>, which gets
+docstring:</p>
+
+<pre><code>(defn a "a dumb thing" [] (println()))
+(doc a)
+(with-out-string (doc a))
+</code></pre>
+
+<h2>What are all the special forms?</h2>
+
+<p>They&#8217;re like special hooked-into compiler macros that do special things
+you couldn&#8217;t do with macros.</p>
+
+<pre><code>clojure.lang.Compiler/specials
+{&amp; nil, monitor-exit #&lt;Parser clojure.lang.Compiler$MonitorExitExpr$Parser@14483946&gt;, case* #&lt;Parser clojure.lang.Compiler$CaseExpr$Parser@3826c025&gt;, try #&lt;Parser clojure.lang.Compiler$TryExpr$Parser@1a54177e&gt;, reify* #&lt;ReifyParser clojure.lang.Compiler$NewInstanceExpr$ReifyParser@5d473d44&gt;, finally nil, loop* #&lt;Parser clojure.lang.Compiler$LetExpr$Parser@770f1aba&gt;, do #&lt;Parser clojure.lang.Compiler$BodyExpr$Parser@86b7485&gt;, letfn* #&lt;Parser clojure.lang.Compiler$LetFnExpr$Parser@5e223ed2&gt;, if #&lt;Parser clojure.lang.Compiler$IfExpr$Parser@10668c26&gt;, clojure.core/import* #&lt;Parser clojure.lang.Compiler$ImportExpr$Parser@3636d04a&gt;, new #&lt;Parser clojure.lang.Compiler$NewExpr$Parser@39c8704e&gt;, deftype* #&lt;DeftypeParser clojure.lang.Compiler$NewInstanceExpr$DeftypeParser@17f1292f&gt;, let* #&lt;Parser clojure.lang.Compiler$LetExpr$Parser@59c6d8f0&gt;, fn* nil, recur #&lt;Parser clojure.lang.Compiler$RecurExpr$Parser@75c7b6d7&gt;, set! #&lt;Parser clojure.lang.Compiler$AssignExpr$Parser@77a7ed63&gt;, . #&lt;Parser clojure.lang.Compiler$HostExpr$Parser@615e29b9&gt;, var #&lt;Parser clojure.lang.Compiler$TheVarExpr$Parser@7c8deca3&gt;, quote #&lt;Parser clojure.lang.Compiler$ConstantExpr$Parser@79dce7a9&gt;, catch nil, throw #&lt;Parser clojure.lang.Compiler$ThrowExpr$Parser@cbff27f&gt;, monitor-enter #&lt;Parser clojure.lang.Compiler$MonitorEnterExpr$Parser@567fbf5a&gt;, def #&lt;Parser clojure.lang.Compiler$DefExpr$Parser@3a450e&gt;}
+</code></pre>
+
+<p>Or just</p>
+
+<pre><code>(sort (keys clojure.lang.Compiler/specials))
+(&amp; . case* catch def deftype* do finally fn* if let* letfn* loop* monitor-enter monitor-exit new quote recur reify* set! throw try var clojure.core/import*)
+</code></pre>
+
+<h2>Java <code>..</code> interop macro</h2>
+
+<pre><code>(.. (java.util.Date.) toString (endsWith "2014"))
+</code></pre>
+
+<p>Could also write</p>
+
+<pre><code>(.. (java.util.Date.) (toString) (endsWith "2014"))
+</code></pre>
+
+<p>TLDR the <code>..</code> macro will unwrap each argument and treat as fn
+invocation.</p>
+
+<h2>ligsigsegv</h2>
+
+<p>http://www.gnu.org/software/libsigsegv/</p>
+
+<p><code>clisp</code> uses this&#8230; it&#8217;s a way you can implement virtual memory in user
+space. Probably some clever shit that clisp and other zany interpreters
+use.</p>
+
+<h2>Namespace</h2>
+
+<p>Cutting to that Chase™.</p>
+
+<h2>What is &amp;?</h2>
+
+<pre><code>user=&gt; [&amp; asd]
+CompilerException java.lang.RuntimeException: Unable to resolve symbol: &amp; in this context, compiling:(NO_SOURCE_PATH:0:0)
+</code></pre>
+
+<p>so when can you use it?</p>
+
+<pre><code>(fn [&amp; asd])
+</code></pre>
+
+<p>this is a fn that takes any number of args:</p>
+
+<pre><code>((fn [&amp; asd]))
+((fn [&amp; asd]) 1)
+((fn [&amp; asd]) 1 2)
+</code></pre>
+
+<p>Basically fn is a macro and can rearrange &amp;, which is just a symbol.</p>
+
+<h2>Anaphoric Macros</h2>
+
+<p>http://amalloy.hubpages.com/hub/Unhygenic-anaphoric-Clojure-macros-for-fun-and-profit</p>
+
+<p>TL;DR useful in some cases for code generation.</p>
+
+<p>Basically you should always use backtick <code>\`` (for fully qualified
+symbols) rather thaaaaaaan boring ol single quote</code>&#8217;`.</p>
+
+<h2>Destructuring</h2>
+
+<p>Programming language concept of breaking apart some data structure into
+assigned variables. Pattern matching in Haskell is a form of this.
+Ruby&#8217;s array destructuring assignment has</p>
+
+<pre><code>a,b = [1,2]
+</code></pre>
+
+<p>Apparently even Firefox has some o dat shit</p>
+
+<pre><code>var a,b;
+[a,b] = [1,2];
+</code></pre>
+
+<p>In Clojure, you don&#8217;t have pattern matching a la Haskell but you still
+have parameter destructuring, the difference being (I think) that
+vanilla Clojure won&#8217;t match an argument signature and decide which
+version of the fn to run (unless you add the <code>core.match</code> module, which
+might be a core feature at some point).</p>
+
+<p>Basically Clojure has similar features to Ruby.</p>
+
+<h2>npm pretest</h2>
+
+<pre><code>"pretest": "ember build",
+"test": "bin/run-tests.js",
+</code></pre>
+
+<p>TL;DR when testing ember repo (and the server is already running), just
+directly run <code>/bin/run-tests.js</code>.</p>
+
+<h2>:keys</h2>
+
+<pre><code>{:keys [a b c]}
+</code></pre>
+
+<p>This isn&#8217;t meaningful on its own; it&#8217;s just a map. But it matches one of
+the patterns expected by the <code>let</code> macro.</p>
+
+<pre><code>(let [{:keys [a b c]} {:a "wat" :b "the" :c "hell"}]
+  (println a b c))
+</code></pre>
+
+<p>That doesn&#8217;t rename anything, but if you wanna do that:</p>
+
+<pre><code>(let [{x :a y :b z :c} {:a "wat" :b "the" :c "hell"}]
+  (println x y z))
+</code></pre>
+
+<p>The key thing to remember is that the symbol needs to be on the left:
+<code>{x :a y :b z :c}</code>.</p>
+
+<p>Means you could also do</p>
+
+<pre><code>(defn a [{a :first-name b :last-name} h]
+  (println "HAHA" a " " b))
+</code></pre>
+
+<p>WRONG because of <code>h</code>. These are fn params, not <code>let</code> args that are
+presented up front, so we actually want:</p>
+
+<pre><code>(defn a [{a :first-name b :last-name}]
+  (println "HAHA" a " " b))
+</code></pre>
+
+<p>followed by</p>
+
+<pre><code>(a {:first-name "Wat" :last-name "McMatchneer"})
+</code></pre>
+
+<h2>rationalize</h2>
+
+<p>Converts, say, a float to a fraction.</p>
+
+<h2>Clojure keywords as fns</h2>
+
+<pre><code>user=&gt; (def a { :a 123 })
+#'user/a
+user=&gt; (:a a)
+123
+</code></pre>
+
+<p>If a keyword is in fn position, it does a lookup of itself on the hash
+arg passed to it. Otherwise you&#8217;d have to do:</p>
+
+<pre><code>user=&gt; (get a :a)
+123
+</code></pre>
+
+<h2>So many seqs</h2>
+
+<p><code>Collection</code>: a composite data type: sequence, map, or set.</p>
+
+<p><code>Sequential</code>: ordered series of values (as opposed to, say, a set or a
+map)</p>
+
+<p><code>Sequence</code>: a sequential collection that may or may not exist yet, e.g.
+it could be a vector or it could be a lazy-seq of yet-to-be-computed
+thunks.</p>
+
+<p><code>Seq</code>: an API for navigating collections: <code>first</code>, <code>rest</code>, nil, and
+<code>()</code>. Basically, vectors, lists, PersistentLists are all <code>seq</code>s.</p>
+
+<p><code>seq</code>, of <code>clojure.core/seq</code>, is a fn that returns an object
+implementing <code>Seq</code> API, or nil if collection is empty. <code>seq</code> returns &#8220;an
+immutable variant of an iterator/enumerator`</p>
+
+<h2>Equality partition</h2>
+
+<p>Collections are partitioned into the following categories:</p>
+
+<ul>
+<li>Sequentials</li>
+<li>Map</li>
+<li>Set</li>
+</ul>
+
+
+<p><code>(=)</code> of two objects from different partitions is always false; e.g.
+vector compared w hash w same objs is false.</p>
+
+<p>Within a partition, different concrete types might equal each other:</p>
+
+<pre><code>(= [:a :b :c] '(:a :b :c))
+true
+</code></pre>
+
+<h2>cons-cell</h2>
+
+<p>Two-cell structure upon which Lisps build their data types. Maps to
+first and rest in Clojureland.</p>
+
+<p>Pretty sure this is how sequences are implemented (immutable/persistent
+data structures).</p>
+
+<h2>(class) and .getClass</h2>
+
+<p>Same thing? Maybe?</p>
+
+<pre><code>user=&gt; (class (java.awt.Point.))
+java.awt.Point
+user=&gt; (.getClass (java.awt.Point.))
+java.awt.Point
+</code></pre>
+
+<h2>map</h2>
+
+<p>GOD this shit is so cool.</p>
+
+<p><code>map</code> takes a fn and any number of collections afterward, applies a
+function to the first items, then second items, etc.</p>
+
+<p>It&#8217;s like a zip. But with a map. SO COOL.</p>
+
+<pre><code>(map #(apply + %&amp;) [1 2 3] [4 5 6] '(7 8 9))
+</code></pre>
+
+<p>or</p>
+
+<pre><code>(map vector (range 5) (range 6) (range 7))
+([0 0 0] [1 1 1] [2 2 2] [3 3 3] [4 4 4])
+</code></pre>
+
+<h2>vec or vector</h2>
+
+<pre><code>user=&gt; (vec [1 2 3 4 5])
+user=&gt; (apply vector '(1 2 3 4 5))
+</code></pre>
+
+<p>Basically <code>vec</code> accepts a single collection arg whereas <code>vector</code> accepts
+multiple args. Both create vectors.</p>
+
+<p>Hence</p>
+
+<pre><code>(vec (map char (range 65 76)))
+</code></pre>
+
+<p>Many ways to look up a value in vector.</p>
+
+<ul>
+<li>nth</li>
+<li>get</li>
+<li>vector as fn</li>
+</ul>
+
+
+<p>BARF BARF BARF</p>
+
+<pre><code>user=&gt; (assoc [4 5 6] 0 "wat")
+["wat" 5 6]
+</code></pre>
+
+<p>REMEMBER that defn let&#8217;s you define multiple fn bodies per arity.
+You see this when the arg vector doesn&#8217;t immediately follow the name,
+but a list (starting w arg vector) does.</p>
+
+<p>e.g.</p>
+
+<pre><code>(defn mach-inc
+  ([n] (mach-inc n 1))
+  ([n i] (+ n i)))
+</code></pre>
+
+<p>So now I&#8217;ve made an inc fn that takes an optional increment amount, but
+defaults to 1. If it were just a single-body fn, it&#8217;d be all</p>
+
+<pre><code>(defn mach-inc-single [n]
+  (+ n 1))
+
+user=&gt; (mach-inc-single 5)
+6
+</code></pre>
+
+<p>How to curry? Use partial. This adds two to everything.</p>
+
+<pre><code>(map (partial + 2) (range 10))
+</code></pre>
+
+<p>Rad. Radsauce!</p>
+
+<p>Vectors as stacks: <code>conj</code> and <code>pop</code>. Use <code>peek</code> a lot since <code>pop</code>
+returns new immutable fucker.</p>
+
+<h2><code>map</code> in Lisps, conj vs cons</h2>
+
+<p>Apparently Clojure&#8217;s mapping over collections is more efficient because
+it kinda lets you cheat w vectors. In Lisps without vectors you just
+have lisps, and as you push to an accumulator</p>
+
+<p>Ah ok let&#8217;s talk about cons vs conj.</p>
+
+<p><code>cons</code> unshifts and returns a seq (or a <code>clojure.lang.Cons</code>?):</p>
+
+<pre><code>user=&gt; (cons 4 [1 2 3])
+(4 1 2 3)
+user=&gt; (class (cons 4 [1 2 3]))
+clojure.lang.Cons
+</code></pre>
+
+<p>Same thing if you pass in a list</p>
+
+<pre><code>ArityException Wrong number of args (1) passed to: core/cons  clojure.lang.AFn.throwArity (AFn.java:429)
+user=&gt; (cons 4 `(1 2 3))
+(4 1 2 3)
+</code></pre>
+
+<p>WAAT apparently backtick does some implicit cons</p>
+
+<pre><code>user=&gt; (class '(1 2 3))
+clojure.lang.PersistentList
+user=&gt; (class `(1 2 3))
+clojure.lang.Cons
+user=&gt; (class (quote (1 2 3)))
+clojure.lang.PersistentList
+</code></pre>
+
+<p>Anyyyyway, <code>conj</code> returns a collection as close to the input collection
+as possible. And it &#8220;push&#8221;es.</p>
+
+<pre><code>user=&gt; (conj #{1 2 3} 4)
+#{1 4 3 2}
+user=&gt; (conj [1 2 3] 4)
+[1 2 3 4]
+user=&gt; (conj '(1 2 3) 4)
+(4 1 2 3)
+</code></pre>
+
+<p>Ah HAH! In fact it DOESN&#8217;T always push&#8230; it inserts at the end that
+makes the most sense given the data type (&#8220;in the most efficient way&#8221;):</p>
+
+<pre><code>user=&gt; (conj [1 2 3] 4)
+[1 2 3 4]
+user=&gt; (conj '(1 2 3) 4)
+(4 1 2 3)
+</code></pre>
+
+<p>SOOO</p>
+
+<ul>
+<li>cons
+
+<ul>
+<li>NOT homogeneous; no guarantee <code>next</code> chain will be list</li>
+<li>only guarantee is that <code>next</code> is a seq. Which means you can append
+to the beginning of any stupid thing. That&#8217;s why there&#8217;s
+<code>clojure.lang.Cons</code> as its own type; it could point to anything.
+<code>(class (next some-cons))</code> could be aaaany number of things
+depending on how you composed the <code>cons</code>.</li>
+</ul>
+</li>
+<li>conj
+
+<ul>
+<li>homogeneous: <code>next</code> is always the same type as wha you created it
+with, whether list or vector or chunked seq from a vector, etc.</li>
+<li><code>nil</code> starting list defaults to a PersistentList (but an empty vec
+will be a vec, lol)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Unfortunately all seqs print w parentheses, but they could by all sorts
+of different types of shit.</p>
+
+<pre><code>user=&gt; (class (seq [1 2 3]))
+clojure.lang.PersistentVector$ChunkedSeq
+user=&gt; (class (seq '(1 2 3)))
+clojure.lang.PersistentList
+</code></pre>
+
+<h2>recur</h2>
+
+<p>http://clojure.org/special_forms#recur</p>
+
+<blockquote><p>Note that recur is the only non-stack-consuming looping construct in Clojure. There is no tail-call optimization and the use of self-calls for looping of unknown bounds is discouraged. recur is functional and its use in tail-position is verified by the compiler.</p></blockquote>
+
+<p>Interesting.</p>
+
+<h2>No shift/unshift</h2>
+
+<p>Why? Because internally the fns that manipulate the left side of a
+vector return <code>seq</code>s, not vectors, which severs the ability to use
+vector fns in an optimized way, reusing datastructures, etc.</p>
+
+<p>So if you have</p>
+
+<pre><code>user=&gt; (vec (range 5))
+[0 1 2 3 4]
+</code></pre>
+
+<p>then doing</p>
+
+<pre><code>user=&gt; (rest (vec (range 5)))
+(1 2 3 4)
+
+user=&gt; (class (rest (vec (range 5))))
+clojure.lang.PersistentVector$ChunkedSeq
+</code></pre>
+
+<p>So you have a sequence <em>based</em> on a vector, but it&#8217;s not the original
+vector, so you don&#8217;t have the same vetor fns available. If you want to
+convert to vector again to get all those tasty shits, it&#8217;ll be O(n),
+probably both time and space.</p>
+
+<p>You can&#8217;t subvec a vec unexpect the original vec to be garbage collected
+because subvec maintains a reference.</p>
+
+<h2>PersistentList</h2>
+
+<ul>
+<li>singly-linked</li>
+<li>every node knows distance from end</li>
+<li><p>can only traverse from left to right</p>
+
+<p>  (defmethod print-method clojure.lang.PersistentQueue</p>
+
+<pre><code>[q w]
+(print-method '&lt;- w)
+(print-method (seq q) w)
+(print-method '-&lt; w))
+</code></pre></li>
+</ul>
+
+
+<h2>Shitty things</h2>
+
+<p>It doesn&#8217;t seem like Clojure will yell at you if you mess up and use the
+wrong kind of function for a collection. e.g. <code>rest</code> and <code>pop</code> do
+similar things to a PersistentQueue, but <code>rest</code> yields a <code>seq</code>, and
+<code>pop</code> yields a Queue, the former which gets rid of a lot of performance
+improvements. The behavior you&#8217;ll see, since all <code>seq</code>s seem to
+implement the same fns</p>
+
+<h2>What the hell</h2>
+
+<pre><code>(some #( if (even? %) % nil ) [1 3 4])
+</code></pre>
+
+<p>Sets and maps can behave like predicates.</p>
+
+<pre><code>(#{4 9 10} 9)
+9
+user=&gt;     (#{4 9 10} 11)
+nil
+</code></pre>
+
+<p>So you can use this idiom:</p>
+
+<pre><code>(some #{:b} [:a 1 :b 2])
+</code></pre>
+
+<p>this runs through each collection on the right and checks to see if each
+element is in the collection on the left, because the collection on the
+left acts like a predicate.</p>
+
+<h2>APR</h2>
+
+<p>Annual Percentage Rate. Based on prime rate, e.g. add 12.74% to prime
+rate to determine purchase annual percentage rate.</p>
+
+<p>You can have a credit card and not pay interest if you pay in full all
+the time. You must always pay the minimum rate, or else you get a
+penalty. But the idea is that you can pay your minimum rate, and
+anything above that is subject to an APR. Penalty APR might apply
+indefinitely. Again, doesn&#8217;t matter (other than a shitty credit score)
+if you always pay the full balance after that (APR only affects the
+unpaid balance).</p>
+
+<p>Balance transfers are transferring outstanding balances between cards,
+likely from one w a higher APR to one w lower. New cardholders might be
+offered 0% balance transfer API with the idea that you&#8217;ll transfer money
+to it right away because you&#8217;re so hopelessly in debt. APR applies
+differently to different types of debits on your account, and balance is
+one kind of debit, so if you had a balance transfer APR 5% higher than
+purchase APR, that&#8217;s basically discouraging you from putting balance
+transfers into that new account (makes sense, it&#8217;s kind of a risky thing
+if you&#8217;re just adopting new CCs and constantly transferring balances to
+them; then again it&#8217;ll also be limited by your max credit line. There&#8217;s
+also per-transaction fees, e.g. <code>max($5, 3%)</code>.</p>
+
+<p>Cash transfer is when you debit one card, credit another. Different than
+balance transfer because in one you&#8217;re trading a debt, in the other
+you&#8217;re trading credit (cash). Per-transaction fee is <code>max($10, 3%)</code>.</p>
+
+<p>Overdraft Advance is the ability to automatically withdraw from a credit
+card if your debit card / check bounces. You have to go through the
+hoops and set it up online, linking to a checking account.</p>
+
+<p>US Prime Rate is 300 points above federal funds rate.</p>
+
+<blockquote><p>In general, the United States prime rate runs approximately 300 basis points (or 3 percent) above the federal funds rate. The Federal Open Market Committee (FOMC) meets eight times per year wherein they set a target for the federal funds rate. Other rates, including the prime rate, derive from this base rate.</p></blockquote>
+
+<p>Credit cards actually talk about referencing the prime rate printed in
+the Wall Street Journal; &#8220;If WSJ stops publishing the Prime Rate, we
+will select a similar preference rate.&#8221;</p>
+
+<p>Variable rate just means it might change if the prime rate changes, or
+other reasons.</p>
+
+<p>Cash advances mean ATM withdrawals among other things.</p>
+
+<p>Any amount over the minimum payment account gets applied to payment APR
+first, and descending to other APR types (which might be higher or
+lower). It trickles down.</p>
+
+<h2>Interest charges</h2>
+
+<p>Daily balance approach is common:</p>
+
+<ul>
+<li>take starting balance and add
+
+<ul>
+<li>interest charge from prior day (compounding interest)</li>
+<li>new transactions/debits</li>
+</ul>
+</li>
+<li>subtract payments/credits</li>
+<li>daily balance = max(0, balance) (net credit balance treated as zero)</li>
+<li>Daily interest rate = APR/365.</li>
+<li>Multiply each type of APR by applicable balance type (payments are
+different than balance transfers, etc)</li>
+<li>If interest > 0, interest = max(MinimumInterest, interest)
+
+<ul>
+<li>MinimumInterest is often 0</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Clojure: into</h2>
+
+<p>Pour values into collections:</p>
+
+<pre><code>(into {} {:a 1 :b 2})
+{:b 2, :a 1}
+(into {} [[:a 1] [:b 2]])
+{:a 1, :b 2}
+</code></pre>
+
+<p>The latter stems from the fact that providing a map to <code>seq</code> generates a
+shit:</p>
+
+<pre><code>(seq {:a 1 :b 2})
+([:b 2] [:a 1])
+</code></pre>
+
+<h2>Clojure maps</h2>
+
+<p><code>{}</code> is actually ArrayMap, but most common is HashMap:</p>
+
+<pre><code>(hash-map :a 123)
+</code></pre>
+
+<p><code>zipmap</code> takes a keys and values array</p>
+
+<pre><code>(zipmap [:k0 :k1] [:v0 :v1])
+{:k1 :v1, :k0 :v0}
+
+(zipmap [:k0 :k1] [:v0 :v1 :v2])
+{:k1 :v1, :k0 :v0}
+
+(zipmap [:k0 :k1 :k2] [:v0 :v1])
+{:k1 :v1, :k0 :v0}
+</code></pre>
+
+<p>The latter two demonstrate that it stops at the smallest array.</p>
+
+<h2>second</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>user=&gt; (doc second)
+</span><span class='line'>-------------------------
+</span><span class='line'>clojure.core/second
+</span><span class='line'>([x])
+</span><span class='line'>  Same as (first (next x))</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>invariant</h2>
+
+<p>Assertions in functional land.</p>
+
+<h2>equality</h2>
+
+<p>Meaningless in a mutable system. If you&#8217;re not guaranteed to be equal to
+another object forever, then you&#8217;re not equal.</p>
+
+<p>Ooo unrelated by <code>let</code> locals can refer to previous ones in the same let
+binding vector:</p>
+
+<pre><code>(let [v [4 5 6] a (first v)] (println a))
+4
+</code></pre>
+
+<p>Anyway, immutable objects share data:</p>
+
+<pre><code>(let [v [4 5 6] v0 (cons 1 v) v1 (cons 2 v)] (= (rest v0) (rest v1)))
+</code></pre>
+
+<p>aaaaand they&#8217;re actually identical:</p>
+
+<pre><code>(let [v [4 5 6] v0 (cons 1 v) v1 (cons 2 v)] (identical? (rest v0) (rest v1)))
+false
+</code></pre>
+
+<p>WHOOPSY DAISY: this is apparently wrong because I&#8217;m using a vector and
+not a list&#8230; why? Let&#8217;s see what class they are</p>
+
+<pre><code>(let [v [4 5 6] v0 (cons 1 v) v1 (cons 2 v)] (map class (map next [v0 v1])) )
+(clojure.lang.PersistentVector$ChunkedSeq clojure.lang.PersistentVector$ChunkedSeq)
+</code></pre>
+
+<p>So <code>cons</code> casts the provided collection to a <code>seq</code>, and the vector
+obliges by giving it a chunked sequence, which loses all the vector-y
+stuff about it. No casting needs to take place if it&#8217;s already a seq
+though, hence lists work.</p>
+
+<p>CONFUSING SHIT:</p>
+
+<pre><code>user=&gt; (def h {:a 1})
+#'user/h
+user=&gt; (h :a)
+1
+user=&gt; (:a h)
+1
+</code></pre>
+
+<p>Basically, both keywords and collections themselves can behave like fns.</p>
+
+<h2>&#8220;changes&#8221; in immutable structures</h2>
+
+<p>A new root &#8220;node&#8221; is always returned, whether you&#8217;re pushing to a
+vector, etc, but it might point to the same things.</p>
+
+<h2>lazy-seq, thunks</h2>
+
+<p>A thunk is a description of an operation, usually one step in an
+iteration. Lazy-seq presumably rearranges your eager seq operations
+into lazy thungs.</p>
+
+<p>If you hold onto the head of a lazy sequence though, you can lose all
+the benefits because the head (and the rest of the sequence) won&#8217;t be
+garbage collected. <code>lazy-seq</code> is only useful when intermediate
+calculations can be forgotten, hence the difference between the
+following:</p>
+
+<pre><code>(let [r (range 1e10)]
+  (first r) 
+  (last r))
+
+(let [r (range 1e10)]
+  (last r)   ; r still needed for following calc, so clojure doesn't clear it
+  (first r))
+</code></pre>
+
+<p>Basically we broke the rule of holding onto to the head, which means
+things might not get garbage collected the way we&#8217;d like; this can
+happen in any case where we do bindings, whether let or fn arg bindings.</p>
+
+<p>So while Clojure&#8217;s smart enough to aggressively clear out (for GC)
+locals it no longer needs, it won&#8217;t rearrange code for us because it has
+no way of knowing whether <code>first</code> and <code>last</code> are pure, which might make
+it unsafe to re-order; note that Haskell doesn&#8217;t have this problem
+because it&#8217;s purely functional.</p>
+
+<h2>iterate</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>user=&gt; (doc iterate)
+</span><span class='line'>-------------------------
+</span><span class='line'>clojure.core/iterate
+</span><span class='line'>([f x])
+</span><span class='line'>  Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ah so x doesn&#8217;t even need to be a liast, could just be a number.</p>
+
+<pre><code>(second (iterate inc 1))
+2 
+</code></pre>
+
+<h2><code>-&gt;</code></h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>clojure.core/-&gt;
+</span><span class='line'>([x & forms])
+</span><span class='line'>Macro
+</span><span class='line'>  Threads the expr through the forms. Inserts x as the
+</span><span class='line'>  second item in the first form, making a list of it if it is not a
+</span><span class='line'>  list already. If there are more forms, inserts the first form as the
+</span><span class='line'>  second item in second form, etc.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I have no fucking idea.</p>
+
+<h2>take</h2>
+
+<pre><code>user=&gt; (take 5 (iterate inc 1))
+(1 2 3 4 5)
+user=&gt; (take 5 (range))
+(0 1 2 3 4)
+user=&gt; (take 5 (filter even? (range)))
+(0 2 4 6 8)
+</code></pre>
+
+<p>Ruby/Rails kept making me thing something like <code>.first(5)</code>, but <code>take</code>
+is the functional thing I was looking for.</p>
+
+<p>Unrelated, but</p>
+
+<pre><code>user=&gt; (/ 5)
+1/5
+</code></pre>
+
+<blockquote><p>If no denominators are supplied, returns 1/numerator,</p></blockquote>
+
+<h2>Quicksort</h2>
+
+<p>I forgot quicksort, so here I go remembering it:</p>
+
+<ul>
+<li>Take your array and choose an element in the array (the pivot)</li>
+<li>loop through O(n) and swap elements such that all <code>&lt;</code> elements are to
+the left of the pivot and all <code>&gt;=</code> elements are to the right.</li>
+<li><p>Recurse into the unsorted partitions and do to the same thing.</p>
+
+<p>  4 9 1 3 7 2 8</p>
+
+<pre><code>          P
+        &lt; P
+      &lt;   P
+    &lt;     P
+  &lt;       P
+&gt;         P
+2       8 9
+</code></pre>
+
+  4 2 1 3 7 8 9
+  &lt;         P
+
+<pre><code>        |
+        | 9   -- sorted
+    &lt; P |
+  &lt;   P |
+&lt;     P |
+</code></pre>
+
+  &lt;       P |
+  4 2 1 3 7 8 9
+
+<pre><code>  &lt; P | |
+&lt;   P | |
+</code></pre>
+
+<blockquote><pre><code>P | |
+</code></pre>
+
+<p>  1 2 3 4 | |
+  &#8230;blahblahblah&#8230;
+  1 2 3 4 7 8 9</p></blockquote></li>
+</ul>
+
+
+<p>It is sorrrrted. Divide and conquer babeh, like mergesort.</p>
+
+<h2><code>list</code> and <code>list*</code></h2>
+
+<pre><code>user=&gt; (list 1 2 3 4)
+(1 2 3 4)
+user=&gt; (list [1 2 3 4])
+([1 2 3 4])
+user=&gt; (list (range 5))
+((0 1 2 3 4))
+user=&gt; (apply list (range 5))
+(0 1 2 3 4)
+user=&gt; (list* () () () ())
+(() () ())
+user=&gt; (list* () () () '(6 7 8))
+(() () () 6 7 8)
+user=&gt; (list* 3 2 1 '(6 7 8))
+(3 2 1 6 7 8)
+</code></pre>
+
+<p>So <code>list*</code> is just <code>list</code> where the final arg is a sequence.</p>
+
+<p>unrelated:</p>
+
+<pre><code>user=&gt; (let [a 3 fn #(&lt; % a)] (filter fn '(1 2 3 6)))
+(1 2)
+user=&gt; (let [a 3 fn #(&lt; % a)] (remove fn '(1 2 3 6)))
+(3 6)
+
+(defn sort-parts [work]
+  (lazy-seq
+    (loop [[part &amp; parts] work]
+      (println "work:" work)
+      (println "part:" part)
+      (if-let [[pivot &amp; xs] (seq part)]
+        (let [smaller? #(&lt; % pivot)]
+          (recur (list*
+            (filter smaller? xs)
+            pivot
+            (remove smaller? xs)
+            parts)))
+      (when-let [[x &amp; parts] parts]
+        (cons x (sort-parts parts)))))))
+
+(sort-parts (list [9 1 4 2 6]))
+
+work: ([9 1 4 2 6])
+part: [9 1 4 2 6]
+work: ([9 1 4 2 6])
+part: (1 4 2 6)
+work: ([9 1 4 2 6])
+part: ()
+work: ((4 2 6) 9 ())
+part: (4 2 6)
+work: ((4 2 6) 9 ())
+art: (2)
+work: ((4 2 6) 9 ())
+part: ()
+work: (() 4 (6) 9 ())
+part: ()
+work: ((6) 9 ())
+part: (6)
+work: ((6) 9 ())
+part: ()
+work: (() 9 ())
+part: ()
+work: (())
+part: ()
+</code></pre>
+
+<p>AH HAH this is fucked up because I was thinking <code>recur</code> was going to
+somehow rewrite the value of <code>work</code>. It won&#8217;t. It&#8217;ll change the
+&#8220;l-values&#8221;, whereas <code>work</code> is just meant as the initial value of the
+&#8220;l-values&#8221;. So it should actually be:</p>
+
+<pre><code>(defn sort-parts [work]
+  (lazy-seq
+    (loop [[part &amp; parts] work]
+      (println "part/recur'd min:" part)
+      (println "parts:           " parts)
+      (if-let [[pivot &amp; xs] (seq part)]
+        (let [smaller? #(&lt; % pivot)]
+          (recur (list*
+            (filter smaller? xs)
+            pivot
+            (remove smaller? xs)
+            parts)))
+      (when-let [[x &amp; parts] parts]
+        (println "FULLRECURSE this has been sorted:" x)
+        (cons x (sort-parts parts)))))))
+
+(sort-parts (list [9 1 4 2 6]))
+</code></pre>
+
+<p>Ahh so the final <code>(cons x (sort-parts parts))</code> is how we return one
+sorted element at a time, because <code>cons</code> returns a Cons and is capable
+of being lazy. Can you do a lazy-seq with a recur? Probably not, since
+recur is almost just a looping construct. The cons as a return value
+makes sense, because it returns (cons x lazy-seq).</p>
+
+<p>REMEMBER: destructuring means the &#8220;rest&#8221; list will be nil if nothing&#8217;s
+there.</p>
+
+<pre><code>user=&gt; (let [[x &amp; xs] '(1)] (println xs))
+nil
+</code></pre>
+
+<p>What&#8217;s the difference between a PersistentList <code>()</code> and a seq?</p>
+
+<p>A seq is any collection that implements the <code>Seq</code> api, i.e. you can call
+<code>first</code> and <code>rest</code> on it.</p>
+
+<pre><code>user=&gt; (class (seq '(1)))
+clojure.lang.PersistentList
+user=&gt; (class '(1))
+clojure.lang.PersistentList
+</code></pre>
+
+<p>Sometimes collections need to be cast in some way into some derivative
+class to efficiently implement <code>seq</code>, e.g. vectors:</p>
+
+<pre><code>user=&gt; (class (seq [1]))
+clojure.lang.PersistentVector$ChunkedSeq
+
+user=&gt; (class (rest [1 2 3 4]))
+clojure.lang.PersistentVector$ChunkedSeq
+</code></pre>
+
+<p>So that <code>recur (list *...</code> bit&#8230; <code>list*</code> won&#8217;t flatten the args you
+pass to it, so if the filters/removes yield <code>()</code>, then it might recur
+with <code>() 5 ()</code>, which then gets split into <code>part=() parts=(5 ())</code>.
+Then the <code>if-let</code> will fail because <code>(seq ())</code> yields nil, and then
+when-let does&#8230; wait</p>
+
+<p>What&#8217;s the difference between <code>if</code> and <code>when</code>?</p>
+
+<p>https://groups.google.com/forum/#!topic/clojure/WDIZ6VDhSr0</p>
+
+<p>Basically, <code>if</code> is sa special form with format <code>(if test then else?)</code>.
+You must always pass a <code>then</code>, but <code>else</code> is optional, but else is
+always the arg right after then. So if you wanted to do multiple things
+in <code>then</code>, you&#8217;d need to use a <code>do</code>. e.g.</p>
+
+<pre><code>(if true
+  (do
+    (println "holy")
+    (println "shit")))
+
+(if false
+  (do
+    (println "holy")
+    (println "shit"))
+  (println "FALSE!!!"))
+</code></pre>
+
+<p>But the format of <code>when</code> doesn&#8217;t have an else based on the number of
+args because there&#8217;s an implicit do. It&#8217;s a macro. <code>(source when)</code>:</p>
+
+<pre><code>(defmacro when
+  "Evaluates test. If logical true, evaluates body in an implicit do."
+  {:added "1.0"}
+  [test &amp; body]
+  (list 'if test (cons 'do body)))
+</code></pre>
+
+<h2>cond :else</h2>
+
+<p>http://stackoverflow.com/a/6323249/914123</p>
+
+<p>Things to remember:</p>
+
+<ol>
+<li>:else only seems to idiomatically show up with <code>cond</code></li>
+<li><p>:else could be replaced by any truthy thing; Clojure / cond don&#8217;t
+specifically look out for it, but because it&#8217;s truthy, it&#8217;ll get
+evaluated.</p>
+
+<p> user=>     (cond true 123 true 456)
+ 123
+ user=>     (cond false 123 true 456)
+ 456</p>
+
+<p> user=> (cond (= 4 5) &#8220;haha&#8221; (= 7 9) &#8220;lol&#8221; :else &#8220;HORSES ASS&#8221;)
+ &#8220;HORSES ASS&#8221;
+ user=> (cond (= 4 5) &#8220;haha&#8221; (= 7 9) &#8220;lol&#8221; :IAMAMONKEYSASSHOLE &#8220;HORSES ASS&#8221;)
+ &#8220;HORSES ASS&#8221;
+ user=> (cond (= 4 5) &#8220;haha&#8221; (= 7 9) &#8220;lol&#8221; false &#8220;HORSES ASS&#8221;)
+ nil</p></li>
+</ol>
+
+
+<h2>Moscow Mule</h2>
+
+<p>A vodka + ginger beer + lemon juice mixed drink in a copper mug.</p>
+
+<p>http://en.wikipedia.org/wiki/Moscow_mule</p>
+
+<p>Invented in the 50s. There was a vodka craze in the 50s.</p>
+
+<p>http://www.thenibble.com/reviews/main/cocktails/vodka-history.asp</p>
+
+<p>Apparently The Mule kicked off the vodka craze. Then came 60s Bond
+saying Vodka Martini, shaken not stirred.</p>
+
+<h2>A fish rots from the head down</h2>
+
+<p>I guess it means that whoever&#8217;s in charge sets the example.</p>
+
+<p>http://www.zdnet.com/article/lennart-poetterings-linus-torvalds-rant/</p>
+
+<blockquote><p>&#8220;If Linux had success, then that certainly happened despite, not because of this [Torvald&#8217;s] behavior. I am pretty sure the damage being done by this is quite obvious, it not only sours the tone in the Linux community, it is also teaches new contributors to adopt the same style, but that&#8217;s only if it doesn&#8217;t scare them away in the first place. In other words: A fish rots from the head down.&#8221;</p></blockquote>
+
+<p>Or &#8220;When an organization or state fails, it is the leadership that is
+the root cause.&#8221;</p>
+
+<p>And it&#8217;s not true; guts rot before anything near the fish&#8217;s head.</p>
+
+<h2>We aren&#8217;t all comely young women</h2>
+
+<p>http://www.reddit.com/r/pics/comments/2qdubq/we_arent_all_comely_young_women_some_of_are_old/</p>
+
+<p>comely: pleasant to look at</p>
+
+<h2>systemd</h2>
+
+<p>http://en.wikipedia.org/wiki/Systemd</p>
+
+<p>systemd replaces the <code>init</code> daemon, but also refers to the suite of low
+level software surrounding this low level tool for</p>
+
+<h2>Clojure: seq cons list</h2>
+
+<ul>
+<li>(seq): returns a seq on the passed-in collection. A seq is just
+something that&#8217;s guaranteed to implement <code>first</code> and <code>rest</code>, which is
+all you need to iterate through a collection. KEY THING: it doesn&#8217;t
+append anything, it just converts to a seq. Note that seq returns
+whatever&#8217;s passed to it if it&#8217;s already a seq:
+<code>(let [a []] (= (seq a) (seq (seq a))))</code></li>
+<li><p>(cons): returns a new seq where x is first el and seq is the rest.</p>
+
+<p>  user=> (def a (lazy-seq (range)))
+  user=> (class a)
+  clojure.lang.LazySeq</p></li>
+<li><p>(list) isn&#8217;t just an API of first/rest but is an actual datatype, a
+singly linked list where every item knows its distance from the end.</p>
+
+<p>  user=> (let [a (list 1)] (= a ( seq (seq a))))
+  true</p></li>
+</ul>
+
+
+<p>Ughhh how is this possible? It seems like a list is already a seq and
+hence doesn&#8217;t need to change in any way to be a seq? A list is a
+concrete implementation of seq, one that is so close that no translation
+needs to take place in the way a vector would.</p>
+
+<h2>Collections as functions</h2>
+
+<pre><code>([6 7 8] 2)
+({:a 123} :a)
+</code></pre>
+
+<p>Collections act as functions. Not only can collections act as functions,
+but functions can act as data, dem FIRST CLASS SHITS.</p>
+
+<p>First class means</p>
+
+<ul>
+<li>createable on demand</li>
+<li>can be stored in data structure</li>
+<li>can be passed into a fn</li>
+<li>can be returned from fn</li>
+</ul>
+
+
+<p>Compose w comp</p>
+
+<pre><code>(def fifth (comp first rest rest rest))
+</code></pre>
+
+<p>Create on demand nth fn</p>
+
+<pre><code>(defn fnth [n]
+  (apply comp
+     (cons first
+           (take (dec n) (repeat rest)))))
+
+((fnth 5) '[a b c d e])
+</code></pre>
+
+<p>So why is this ok?</p>
+
+<pre><code>user=&gt; (class '[123])
+clojure.lang.PersistentVector
+user=&gt; (class [123])
+clojure.lang.PersistentVector
+</code></pre>
+
+<p>Basically the quote means things won&#8217;t be evaluated. You&#8217;re quoting.
+Which means you can return symbols without them being evaluated.</p>
+
+<p>Anyway, you apply to comp a cons of (first rest rest rest rest)</p>
+
+<pre><code>user=&gt; (map {:a 3 :b 5} [:a :b])
+(3 5)
+user=&gt; (map (comp keyword #(.toLowerCase %) name) '(a B C))
+(:a :b :c)
+</code></pre>
+
+<h2>CURRYING in clojure</h2>
+
+<p>Use <code>partial</code>, but partial isn&#8217;t exactly what you might think.
+Specifically, it is not currying because currying keeps returning new
+functions until concrete args have been provided for all of its args,
+whereas with partial, there&#8217;s no concept of a fixed number of args, but
+once you&#8217;ve constructed a function with partial, once you invoke that
+partial, it immediately tries to evaluate.</p>
+
+<h2>Complement</h2>
+
+<pre><code>((complement even?) 3)
+((comp not even?) 3)
+(#(not (even? %)) 3)
+</code></pre>
+
+<h2>metadata</h2>
+
+<pre><code>(defn join
+  {:test (fn []
+            (assert
+              (= (join "," [1 2 3]) "1,3,3")))}
+  [sep s]
+  (apply str (interpose sep s)))
+</code></pre>
+
+<p>That&#8217;s kinda rad. There&#8217;s also shorthand:</p>
+
+<pre><code>(defn ^:woot ^:yeah fn-name [] (println "yeah"))
+
+(defn fn-name 
+  { :woot true, :yeah true }
+  [] (println "yeah"))
+</code></pre>
+
+<h2>Higher order fn</h2>
+
+<p>one that either</p>
+
+<ul>
+<li>takes 1+ fns as args</li>
+<li>returns a fn</li>
+</ul>
+
+
+<h2>holy shit</h2>
+
+<pre><code>user=&gt;    (sort-by second [[:a 7] [:c 31] [:b 21]])
+([:a 7] [:b 21] [:c 31])
+</code></pre>
+
+<p>or comparing different types as if they were strings</p>
+
+<pre><code>(sort-by str [:b :a {} 5 1 2 "c" "a"])
+</code></pre>
+
+<p>or treating keywords as fns</p>
+
+<pre><code>(sort-by :lastname [{ :lastname "Match" } { :lastname "Borf" } { :lastname "Sally" }])
+</code></pre>
+
+<p>Remember the function-like things! Like keywords.</p>
+
+<h2>EFT</h2>
+
+<p>Electronic Funds Transfer, a means of payment for various sites that
+often just means withdrawing from your checking account, so you gotta
+enter routing number account number blah blah blah.</p>
+
+<h2>Pure fn</h2>
+
+<ul>
+<li>always returns same result given same arguments</li>
+<li>no side effects</li>
+</ul>
+
+
+<h2>referential transparency</h2>
+
+<p>The reference to the function is transparent to time. Time has no
+effect. It always does the same thing. But if it changes some internal
+(or external) state, then you lose it.</p>
+
+<h2>recursion</h2>
+
+<ul>
+<li>mundane: explicitly named recursion, rather than mutual or recur</li>
+<li>linear: e.g. one stack per iteration</li>
+</ul>
+
+
+<p>Tail-recursive pow</p>
+
+<pre><code>(defn pow [base exp]
+  (letfn [(kapow [base exp acc]
+             (if (zero? exp)
+                acc
+                (recur base (dec exp) (* base acc))))]
+         (kapow base exp 1)))
+</code></pre>
+
+<p>Two techniques for mundane recursion to tail recursion:</p>
+
+<ul>
+<li>use internal helper fn</li>
+<li>helper fn uses an accumulator</li>
+</ul>
+
+
+<p>Another way to avoid stack overflow exceptions with mundane recursion is
+to pair w lazy-seq.</p>
+
+<h2>Arrow</h2>
+
+<p>The &#8220;thread-first&#8221; macro (AKA &#8220;thrush&#8221; operator?)</p>
+
+<pre><code>http://clojuredocs.org/clojure.core/-%3E
+
+user=&gt; (+ 3 (+ 4 (+ 5)))
+12
+user=&gt; (-&gt; 5
+  #_=&gt;     (+ 4)
+  #_=&gt;     (+ 3))
+12
+</code></pre>
+
+<p>It basically inverts nestings:</p>
+
+<pre><code>user=&gt; (-&gt; "a b c d" 
+           .toUpperCase 
+           (.replace "A" "X") 
+           (.split " ") 
+           first)
+</code></pre>
+
+<p>Useful for pulling values out of deeply nested shits:</p>
+
+<pre><code>user=&gt; (let [h {:a {:b {:c 123}}}] (-&gt; h :a :b :c))
+123
+</code></pre>
+
+<h2>Partition</h2>
+
+<pre><code>user=&gt; (partition 2 [1 2 3])
+((1 2))
+user=&gt; (partition 2 [1 2 3 4])
+((1 2) (3 4))
+</code></pre>
+
+<p>It&#8217;s like <code>in_groups_of</code>.</p>
+
+<h2>letfn</h2>
+
+<p>Special form. Like <code>let</code> (also a special form), but let bindings are
+serial (later bindings can refer to previous bindings, but there are no
+forward bindings). <code>letfn</code> bindings can all refer to each other.</p>
+
+<pre><code>(letfn [(a [] (b)) 
+        (b [] (println "b"))] 
+          (a))
+</code></pre>
+
+<p>Prints &#8216;b&#8217;.</p>
+
+<h2>trampoline</h2>
+
+<p>If you have an algo where you&#8217;d like to keep returning 0-arity fns until
+finally it returns a non-fn value, trampoline is your source for
+non-stack-consuming mutual recursion. Mutual recursion means rather <code>a</code>
+calling <code>a</code>, <code>a</code> might call <code>b</code> might call <code>a</code> might call <code>b</code>, etc.
+It&#8217;s actually not that crazy of a fn to understand via <code>(source trampoline)</code>.</p>
+
+<pre><code>(defn trampoline
+  ([f]
+     (let [ret (f)]
+       (if (fn? ret)
+         (recur ret)
+         ret)))
+  ([f &amp; args]
+     (trampoline #(apply f args))))
+</code></pre>
+
+<p><code>trampoline</code> is meant to accept a 0-arity fn. The 2 lines at the bottom
+just convert a 2+arity call to trampoline to a call with a zero-arity
+fn. Trampoline will</p>
+
+<ul>
+<li>call <code>f</code> (with supplied args)</li>
+<li>if value returned is a fn, recur (preventing stack consumption)</li>
+<li>else return value</li>
+</ul>
+
+
+<p>Wow preeeeeetty freakin simple, and recur makes stuff pretty obvious.</p>
+
+<p>So if I do</p>
+
+<pre><code>(defn do-some-crap []
+  (letfn [(a [x] (b x))
+          (b [x] (c x))
+          (c [x] (d x))
+          (d [x] x) ]
+            (trampoline a 123)))
+</code></pre>
+
+<p>This returns 123 and the chain of a-b-c-d only consumes one stack frame.
+Pretty cool. Ahh nevermind I&#8217;m an idiot, i&#8217;m returning values, not
+functions, fixed:</p>
+
+<pre><code>(defn do-some-crap []
+  (letfn [(a [x] #(b x))
+          (b [x] #(c x))
+          (c [x] #(d x))
+          (d [x] x) ]
+            (trampoline a 123)))
+</code></pre>
+
+<p>Useful for implementing state machines.</p>
+
+<h2>identity</h2>
+
+<p>Returns its arg:</p>
+
+<pre><code>(identity 5)
+</code></pre>
+
+<h2>FICO</h2>
+
+<p>FICO credit scores. Fair Isaac Corporation. Started in 58. Fannie and
+Freddie started using their scores in 95. Ubiquitous as fuck.</p>
+
+<p>http://en.wikipedia.org/wiki/FICO</p>
+
+<p>FICO score introduced in 89, based on 3 credit files</p>
+
+<ul>
+<li>Experian</li>
+<li>Equifax</li>
+<li>TransUnion</li>
+</ul>
+
+
+<p>(so people don&#8217;t refer to FICO, but rather FICO polls the 3 above?)</p>
+
+<p>http://en.wikipedia.org/wiki/Credit_score_in_the_United_States#mediaviewer/File:Credit-score-chart.svg</p>
+
+<p>Score composed of</p>
+
+<ul>
+<li>35% payment history, presence of derogatory info (defaults, bankruptcies)</li>
+<li>30% debt burden, including credit card debt to limit ratio (e.g. if
+I&#8217;m $100 in credit card debt, the FICO penalty is smaller if I have a
+higher limit).</li>
+<li>15% length of credit history: average age of accounts, and age of
+oldest account (hence a new CC might temporarily lower score since it
+decreases average age).</li>
+<li>10% types/diversity of credit:</li>
+<li>10% recent searches
+
+<ul>
+<li>hard inquiries:
+
+<ul>
+<li>applications for loans/CCs count against you, but then again these
+are coalesced within 30-45 days as a single query if you&#8217;re &#8220;rate
+shopping&#8221;</li>
+</ul>
+</li>
+<li>soft inquiries:
+
+<ul>
+<li>consumer queries</li>
+<li>applying to rent an apartment</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Hard inquiries look bad because maybe you&#8217;re desperate for credit or
+maybe they&#8217;re so frequently because past hard inquiries led to your
+rejection. Limit to 1-2 times a year to minimize penalty.</p>
+
+<p>When people say triple credit score, they mean they&#8217;ll show you your
+Experian, Equifax, and TransUnion scores.</p>
+
+<p>FICO scores are out of 850. 280 is shitty, 700 is &#8220;good&#8221;, 760+ is
+excellent.</p>
+
+<h2>Mortgage</h2>
+
+<p>http://en.wikipedia.org/wiki/Mortgage_loan</p>
+
+<p>The distinguishing characteristic is that real or personal property is
+put up as collateral for the loan in the case of default.</p>
+
+<p>Real property refers to legally defined property mixed with human
+effort, e.g. houses, roads, etc. Usually means &#8220;land and anything
+affixed to it&#8221;, vs private property (&#8220;clothing, furniture, money&#8221;).</p>
+
+<h2>Alternative Financial Services</h2>
+
+<p>http://en.wikipedia.org/wiki/Alternative_financial_services</p>
+
+<p>Pawn shops, paycheck advancements.</p>
+
+<p>In impoverished countries, microfinancing also falls under this
+category.</p>
+
+<h2>Catfish</h2>
+
+<p>http://www.urbandictionary.com/define.php?term=catfish</p>
+
+<blockquote><p>A catfish is someone who pretends to be someone they&#8217;re not
+using Facebook or other social media to create false identities,
+particularly to pursue deceptive online romances.</p></blockquote>
+
+<h2>Installment Credit / Fixed Credit</h2>
+
+<p>Installment: type of credit that has fixed no of payments.</p>
+
+<p>Revolving credit: no fixed payments, can withdraw from balance,
+transfer, etc, e.g. credit cards.</p>
+
+<h2>Clojure riddle</h2>
+
+<pre><code>(take 1 (map (fn [a] (println a)) (range)))
+(take 32 (map (fn [a] (println a)) (range)))
+</code></pre>
+
+<p>Both of these print 0 to 31.</p>
+
+<pre><code>(take 32 (map (fn [a] (println a)) (range)))
+</code></pre>
+
+<p>This prints 0-63. Why? I think it has something to do with 32 legged
+tries something something. Or chunks. Or something.</p>
+
+<h2>IRAs</h2>
+
+<p>Individual Retirement Account</p>
+
+<p>http://www.rothira.com/traditional-ira-vs-roth-ira</p>
+
+<p>Traditional IRA:</p>
+
+<ul>
+<li>deposit pre-tax assets</li>
+<li>no income limits</li>
+<li>started in 1974 in some congressional act</li>
+</ul>
+
+
+<p>Roth IRA:</p>
+
+<ul>
+<li>deposit post-tax assets</li>
+<li>early withdraw has 10% penalty, with some exceptions for first house,
+education expenses, etc</li>
+<li>maximum income enforced of 114k-128k before you can&#8217;t contribute</li>
+<li>desirable if you think you&#8217;ll be in a higher tax bracket if you&#8217;re
+older (relative to IRA where you&#8217;re taxed when you withdraw, so if
+you&#8217;re withdrawing at a higher tax bracket then you&#8217;re boned).</li>
+<li>largely targets younger, lower income</li>
+<li>established in 1997 after proposed in 89 by someone and senator
+William Roth</li>
+</ul>
+
+
+<p>In general there&#8217;s penalties for early withdraw until 59.5 years of age
+(who decides this shit?).</p>
+
+<p>401k is where an employee deducts from employee&#8217;s paycheck (optionally
+matching) and makes a tax-free deposit. Withdraws are taxed though, like
+a traditional IRA.</p>
+
+<p>401k different from IRAs in it&#8217;s a plan optionally provided by an
+employer. eg A freelancer can&#8217;t take advantage of a 401k, and not all
+employees can take advantage of a company&#8217;s 401k.</p>
+
+<p>All of this to encourage people to save and invest and prepare ourselves
+for retirement.</p>
+
+<p>Both IRAs and 401ks have the minimum penalty distribution (withdrawals)
+age of 59 1/2 years.</p>
+
+<p>IRAs have limits like $5,500 per a given year. This might change from
+year to year though.</p>
+
+<h2>Smart Folder</h2>
+
+<p>http://www.cultofmac.com/48911/100-tips-19-what-are-smart-folders/</p>
+
+<p>AMAZINGLY I have no idea what this is.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T12:52:00-05:00" pubdate data-updated="true">Dec 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/12/17/learnin-clojure/';
+        var disqus_url = 'http://machty.github.com/blog/2014/12/17/learnin-clojure/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

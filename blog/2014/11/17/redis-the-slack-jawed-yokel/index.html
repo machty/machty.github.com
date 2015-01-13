@@ -1,0 +1,673 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Redis the slack-jawed yokel  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Redis the Slack-jawed Yokel</h2>
+	<div class="entry-content"><p>Some stores&#8217;ll never page to disk, but then again, some stores&#8217;ll, like
+Redis, the slack-jawed yokel.</p>
+
+<h2>Transparent Huge Pages</h2>
+
+<p>https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Performance_Tuning_Guide/s-memory-transhuge.html</p>
+
+<p>Huge pages are a Linux feature whereby pages, normally 4096 bytes,
+can be 2MB or 1 GB. Useful for some applications, difficult to
+configure, hence Transparent Huge Pages is provided automagically, I
+guess. But it&#8217;s not recommended for database workloads&#8230; why not?</p>
+
+<p>Probably Redis has the answer:</p>
+
+<p>http://redis.io/topics/latency</p>
+
+<p>Redis uses forking for</p>
+
+<ul>
+<li>generating RDB snapshot</li>
+<li>rewriting AOF</li>
+</ul>
+
+
+<p>Forking is slower in certain virtual settings; EC2 old Xen instances
+could take more than a second to fork. Newer ones using HVM
+(hardware virtual machine) leverages assistive hardware to make this
+efficient.</p>
+
+<p>If you have transparent hugepages, they&#8217;ll need to be COW&#8217;d upon fork,
+which is expensive. So you can disable them entirely:</p>
+
+<pre><code>echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled
+</code></pre>
+
+<h2>Hypervisor / Virtual Machine Monitor</h2>
+
+<p>http://en.wikipedia.org/wiki/Hypervisor</p>
+
+<p>Tis what it sounds like. It&#8217;s the thing that schedules processing time
+b/w multiple virtual machines. It&#8217;s the host to the guest virtual
+machines.</p>
+
+<h2>Multiple values in sysfs</h2>
+
+<p>http://techoverflow.net/blog/2013/08/01/how-to-check-if-hugepages-are-enabled-in-linux/</p>
+
+<pre><code>$ cat /sys/kernel/mm/transparent_hugepage/enabled
+always [madvise] never
+</code></pre>
+
+<p>I thought this meant the first value (active) was the current value and
+the other two were left as documentation, but no, it means madvise is
+current value among the other two options. Kinda wacky. Who parses this?</p>
+
+<p>IRC tells me this is a common sysfs pattern.</p>
+
+<pre><code>$ cat /sys/block/xvda/queue/scheduler
+[noop]
+</code></pre>
+
+<h2>SSR</h2>
+
+<p>Server-side render.</p>
+
+<h2>InfoSec</h2>
+
+<p>Information Security. Usually refers to IT security, but sometimes
+physical backups play into it, such as off-site tape backups.</p>
+
+<h2>Which process is using which port?</h2>
+
+<pre><code>lsof -i $PORT
+# e.g.
+lsof -i :5000
+</code></pre>
+
+<p><code>-i</code> just means filter by internet address. The above supplied only a
+port, you could also provide a host name.</p>
+
+<h2>Redis Pub Sub</h2>
+
+<p>Not super common because</p>
+
+<ul>
+<li>older versions might crash system / OS if clients don&#8217;t read published
+messages fast enough, back pressure, bloating outgoing buffer. New
+versions disconnect slow readers though.</li>
+<li>Unreliable message delivery if there&#8217;s an intermittent disconnect and
+reconnect.</li>
+</ul>
+
+
+<h2>Redis Expiration</h2>
+
+<ul>
+<li>you can manually DEL or use expiration</li>
+<li>expires whole keys, i.e. can&#8217;t expire individual items in a set (hence
+more common to use ZSETs with timestamps and manual deletion based on
+a range)</li>
+</ul>
+
+
+<h2>Stripe Token Retrieval</h2>
+
+<p>https://stripe.com/docs/api#retrieve_token</p>
+
+<p>This is only interesting since it clarified that a token wraps a card
+with details that you can access before you, say, add it to a card.
+This is the only way presently to prevent attaching the same card
+to a customer twice: retrieve and then add.</p>
+
+<p>But for my purposes I can just add it twice, and check the fingerprint
+after word to prevent duplicates on my app&#8217;s Customer obj.</p>
+
+<p>Why doesn&#8217;t Stripe de-dup? https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/OzmhpQOs_SU</p>
+
+<blockquote><p>We do not check, as many people have their own policies around when
+duplicates are acceptable or aren&#8217;t.
+However, you can look at the &#8220;fingerprint&#8221; property on cards that you
+have saved in order to dedup.</p></blockquote>
+
+<h2>Ruby Enumerators are awesome</h2>
+
+<p>&#8220;Hey how come there&#8217;s <code>each_with_index</code> but not <code>map_with_index</code>?&#8221;</p>
+
+<p>Use enumerators. Lots of the Ruby Enumerables return enumerators if you
+don&#8217;t pass a block to them, and they can be chained. For instance you
+can create a 1-indexed series via:</p>
+
+<pre><code>10.times.map { |i| i+1 }
+</code></pre>
+
+<p>Does this work with lazy enumerators?</p>
+
+<pre><code>(0..Float::INFINITY).lazy.map { |i| i + 1 }.first(10)
+</code></pre>
+
+<p>So yeah, just that ranges have no <code>times</code>&#8230; probably more correct to
+think of <code>10.times</code> as a range rather than other way around.</p>
+
+<h2>Stripe Checkout is only Web</h2>
+
+<p>There&#8217;s no native ios/android version of Stripe Checkout. It&#8217;s just web.
+iOS/Android SDKs offer token exchange utilities and some widgets but
+it&#8217;s not the full tailored UI solution that Checkout is.</p>
+
+<h2>Stripe passes through failed CVVs</h2>
+
+<p>https://support.stripe.com/questions/cvc-or-avs-failed-but-payment-succeeded</p>
+
+<p>You can still process a card with the wrong CVV. Though you probably
+shouldn&#8217;t.</p>
+
+<p>Test:</p>
+
+<blockquote><p>4000000000000101: cvc_check will fail.</p></blockquote>
+
+<h2>Rx state machine</h2>
+
+<p>https://github.com/logicalguess/rx-state-machine</p>
+
+<p>Basically every transition that occurs maps to a new state machine. You
+define a state machine in a classic OO manner but it streamifies it for
+you.</p>
+
+<h2>Write amplification w SSDs</h2>
+
+<p>http://en.wikipedia.org/wiki/Write_amplification</p>
+
+<p>When the amount you write to an SSD is amplified by the fact that you
+often have to flash much more than you originally intended to write
+based on how SSD works. So you wanna be careful about abusing <code>fsync</code>.
+Ramdisks might help too.</p>
+
+<h2>MySQL installation n00bness</h2>
+
+<p>There&#8217;s <code>mysql</code> and <code>mysql-server</code>. They&#8217;re separate packages. Derp.
+One can connect to a server and issue commands, one actually installs
+the database.</p>
+
+<pre><code>/usr/bin/mysqladmin -u root password 'new-password'
+</code></pre>
+
+<p><code>mysqld_safe</code> is a script for starting up the daemon (as opposed to
+<code>service mysqld start</code>?).</p>
+
+<pre><code>cd /usr ; /usr/bin/mysqld_safe &amp;
+</code></pre>
+
+<p>Apparently it&#8217;s helpful because it:</p>
+
+<ul>
+<li>restarts the server upon error</li>
+<li>runtime logging</li>
+</ul>
+
+
+<p>Apparently MySQL on Linux stores the DB files in</p>
+
+<pre><code>/var/lib/mysql/
+</code></pre>
+
+<p>There&#8217;s a secure install script that does a few things:</p>
+
+<pre><code>sudo /usr/bin/mysql_secure_installation
+</code></pre>
+
+<ol>
+<li>Encourages you to set root password</li>
+<li>Require <code>root</code> login must come from <code>localhost</code>; disable remote
+logins.</li>
+<li>Delete test database</li>
+<li>Reload perms table.</li>
+</ol>
+
+
+<h2>PHP FPM</h2>
+
+<p>http://php-fpm.org/</p>
+
+<p>A simple and robust FastCGI Process Manager for PHP</p>
+
+<p>I think this is necessary if you do nginx + php (apache has built in
+niceties w php).</p>
+
+<p>I already wrote about this shit and forgot it again:</p>
+
+<blockquote><p>CGI applications are processes spun up by a web server to handle an
+incoming request. Unscalable since spinning up processes all the time
+takes a toll on the OS, not to mention that there&#8217;s no way to do
+resource sharing (DB connection sharing, in-memory caching (because
+the process dies at the end of request)).</p>
+
+<p>With FastCGI, there&#8217;s a persisting FastCGI server that owns all of the
+CGI programs, and webservers interact with FastCGI via a binary protocol
+(over a socket (local) or TCP connection (remote)).</p></blockquote>
+
+<p>So FPM is the thing that stays up and running, and may spawn PHP
+instances, but can do the connection sharing.</p>
+
+<h2>WordPress FPM</h2>
+
+<p>http://codingsteps.com/install-php-fpm-nginx-mysql-on-ec2-with-amazon-linux-ami/</p>
+
+<pre><code>location / {
+    root   /var/www/html;
+    index  index.php index.html index.htm;
+}
+location ~ \.php$ {
+      fastcgi_pass   unix:/var/run/php-fpm/php-fpm.sock;
+      fastcgi_index  index.php;
+      fastcgi_param  SCRIPT_FILENAME  /usr/share/nginx/
+                       html$fastcgi_script_name;
+      include        fastcgi_params;
+}
+</code></pre>
+
+<p>Why location and not server? Isn&#8217;t this gonna be required within
+nginx.conf? I guess server means a proxy.</p>
+
+<p>I&#8217;m guessing it&#8217;s expecting this include to be within a server
+directive. Which I don&#8217;t want. I want simultaneous blogs, yo.</p>
+
+<p>AH OK figured it out:</p>
+
+<ul>
+<li><code>server</code> doesn&#8217;t just mean a proxy; it means nginx will spin up such a
+server, bind to the ports, and then proxy or serve the thing itself or
+pass to FastCGI, however you&#8217;ve configured it. <code>server</code> must be
+within the <code>http</code> context.</li>
+<li><code>location</code> must be within <code>server</code> or nested within <code>location</code>
+context.</li>
+</ul>
+
+
+<p>So we have</p>
+
+<pre><code>location / { ...
+</code></pre>
+
+<p>and</p>
+
+<pre><code>location ~ \.php$ { ... 
+</code></pre>
+
+<p>So the first matches root. The second case-insensitive matches anything
+ending in .php.</p>
+
+<h2>Nginx FastCGI</h2>
+
+<p>FastCGI is a binary protocol. Nginx implements that protocol. Just in
+the same way nginx can match a URL and proxy through to an underlying
+server, nginx can match a URL and proxy through to a FastCGI server.</p>
+
+<p>There might be multiple FastCGI-speaking servers that nginx might talk
+to. PHP-FPM is an alternative implementation over the default FastCGI.</p>
+
+<p>Nginx won&#8217;t spin up a fastCGI server (in the same way it won&#8217;t spin up a
+proxy server that it proxies requests to), but rather expects it to be
+already running and answering requests from a unix socket or internet socket.</p>
+
+<p>A fast-cgi process is a process manager. It might spin up 8 worker
+instances of, say, php, and reuse these instances efficiently. It might
+feature adaptive process spawning, like PHP-FPM does, or it might just
+block one request if N+1 requests arrive at the same time. Either way,
+it&#8217;s better than:</p>
+
+<ol>
+<li>Constant process starting/stopping that plain of CGI entails</li>
+<li>Building PHP into apache (<code>mod_php</code>), which means you can&#8217;t restart
+PHP (after, say, an upgrade) without restarting Apache. Also, you
+lose permissions granularity if it&#8217;s built into Apache, which opens
+security holes that could be closed by letting PHP run at a different
+uid/group, etc.</li>
+</ol>
+
+
+<p>So what&#8217;s PHP FPM?</p>
+
+<h2>Nginx index causing internal redirect</h2>
+
+<p>http://nginx.org/en/docs/http/ngx_http_index_module.html#index</p>
+
+<p>It should be noted that using an index file causes an internal redirect, and the request can be processed in a different location. For example, with the following configuration:</p>
+
+<p>Interesting. That&#8217;s how you can make a <code>/</code> behave like a PHP and be
+processed like a PHP.</p>
+
+<h2>Configure PHP-FPM to create unix domain socket with nginx owner/user</h2>
+
+<p>http://stackoverflow.com/questions/23443398/nginx-error-connect-to-php5-fpm-sock-failed-13-permission-denied</p>
+
+<p>You can configure php-fpm to create a unix domain socket and chown it
+to a different user/group. Since nginx workers need to talk to it, it
+should be configured to their user/group, which was <code>nginx</code> for me.</p>
+
+<p>Now I&#8217;m getting &#8220;No input file specified.&#8221;</p>
+
+<p>LONG STORY SHORT I was pointing to home/some-user/sites/wordpress and
+unless you&#8217;re root, that&#8217;s inaccessible.</p>
+
+<h2>PHP config</h2>
+
+<p>https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-ubuntu-12-04</p>
+
+<p>They want me to change <code>cgi.fix_pathinfo</code> to 0, else it will be fuzzy
+match a php file for processing, a potential security risk.</p>
+
+<p>Then I have to change PHP FPM to accept requests off a unix domain
+socket:</p>
+
+<pre><code>listen = /var/run/php5-fpm.sock
+</code></pre>
+
+<p>Makes sense, otherwise it assumes the fast cgi server is localhost 9000.</p>
+
+<p>So&#8230; does nginx spin up a FastCGI server? Is it part of nginx? Is it
+just a protocol?</p>
+
+<h2>System V Services</h2>
+
+<p>You don&#8217;t directly start mysqld, you do</p>
+
+<pre><code>service mysqld start
+</code></pre>
+
+<h2>CentOS</h2>
+
+<p>http://en.wikipedia.org/wiki/CentOS</p>
+
+<p>Largely a clone of Red Hat Enterprise Linux.</p>
+
+<p>http://unix.stackexchange.com/questions/27323/is-centos-exactly-the-same-as-rhel</p>
+
+<blockquote><p>CentOS is very close to being RHEL without the branding and support. In particular, the library versions are the same, so binaries that work on one will work on the other. The administration tools are the same and configured in similar ways. However, there are a few differences, as the two distributions sometimes apply different minor patches. For example, in this question, it was apparent that RHEL 5 and CentOS 5 apply different rules to identify files under /etc/cron.d.</p>
+
+<p>In other words, at the level of your course, you can treat CentOS and RHEL as interchangeable. But if you needed to look up the precise behavior of a program in a corner of the man page, you may encounter differences.</p></blockquote>
+
+<h2>Alice in Flames</h2>
+
+<p>http://techblog.netflix.com/2014/11/nodejs-in-flames.html</p>
+
+<p>Flame chart things I didn&#8217;t know:</p>
+
+<ul>
+<li>X axis isn&#8217;t necessarily passage of time; I think it is in Chrome but
+doesn&#8217;t need to be for purposes of flame chart?</li>
+<li>Width of a box is aggregate call time;</li>
+</ul>
+
+
+<p>Ehh I guess flame charts do different things? Seems that chrome X axis
+is in order. But it doesn&#8217;t need to be, in the same way that the tree
+view of calls isn&#8217;t in time order; you care about total elapsed time,
+not passage of time.</p>
+
+<h2>Heroku one-off dynos</h2>
+
+<p>https://devcenter.heroku.com/articles/one-off-dynos</p>
+
+<p>TL;dr heroku run console (and any other run) will use a one-off dyno.</p>
+
+<h2>Sampling vs Tracing</h2>
+
+<p>https://www.jetbrains.com/profiler/webhelp/Profiling_Guidelines__Choosing_the_Right_Profiling_Mode.html</p>
+
+<p>Sampling vs Tracing.</p>
+
+<p>TL;DR tracing is more expensive, affects perf, but is more accurate than
+sampling.</p>
+
+<h2>Wordpress Admin on SSL</h2>
+
+<p>http://codex.wordpress.org/Administration_Over_SSL</p>
+
+<p>If you&#8217;re reverse-proxying, you have to prevent loops via:</p>
+
+<pre><code>define('FORCE_SSL_ADMIN', true);
+if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+       $_SERVER['HTTPS']='on';
+</code></pre>
+
+<p>Remember that wp-config.php is going to be loaded on every stupid thing.
+Right?</p>
+
+<h2>Heroku buildpacks</h2>
+
+<p>Integration-tested via <a href="https://github.com/heroku/hatchet">Hatchet</a>.</p>
+
+<p>https://devcenter.heroku.com/articles/buildpack-api</p>
+
+<ul>
+<li>detect: determines whether to apply buildpack to app</li>
+<li>compile: apply the transformations</li>
+<li>release: provides metadata back to runtime&#8230;?</li>
+</ul>
+
+
+<p>If you want both a node and ruby setup, you can do</p>
+
+<pre><code>https://github.com/ddollar/heroku-buildpack-multi
+</code></pre>
+
+<p>and point to the default heroku-provided buildpacks within a .buildpacks
+file.</p>
+
+<h2>nginx-buildpack</h2>
+
+<p>https://github.com/ryandotsmith/nginx-buildpack/blob/master/bin/start-nginx</p>
+
+<p>This is a pretty awesome file that uses lots of Linux-y IPC trickery to
+get</p>
+
+<p>You must put the following in your Procfile:</p>
+
+<pre><code>web: bin/start-nginx bundle exec unicorn -c config/unicorn.rb
+</code></pre>
+
+<p>The start-nginx script spins up processes in the background; nginx
+will wait for</p>
+
+<h2>App server</h2>
+
+<p>Unicorn, Puma, Rainbows, zbatery, etc. It&#8217;s the thing that listens to a
+socket and runs your application code for you. Rails isn&#8217;t an app
+server, but Puma running a rails app is. Rails is an app framework. Puma is
+an app server.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-17T08:02:00-05:00" pubdate data-updated="true">Nov 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/11/17/redis-the-slack-jawed-yokel/';
+        var disqus_url = 'http://machty.github.com/blog/2014/11/17/redis-the-slack-jawed-yokel/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

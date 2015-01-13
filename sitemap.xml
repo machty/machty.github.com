@@ -286,7 +286,7 @@
     </url>
     <url>
         <loc>http://machty.github.com/blog/2014/10/06/crowley-journal/</loc>
-        <lastmod>2014-10-10T10:24:37-04:00</lastmod>
+        <lastmod>2014-11-19T16:09:58-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/2014/10/10/faily-burnhole/</loc>
@@ -325,20 +325,56 @@
         <lastmod>2014-11-17T01:47:37-05:00</lastmod>
     </url>
     <url>
+        <loc>http://machty.github.com/blog/2014/11/17/redis-the-slack-jawed-yokel/</loc>
+        <lastmod>2014-11-20T15:58:42-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2014/11/20/stankonia/</loc>
+        <lastmod>2014-12-01T11:31:58-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2014/12/01/sloggin/</loc>
+        <lastmod>2014-12-10T12:23:33-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2014/12/08/808s-and-android-heartbreak/</loc>
+        <lastmod>2014-12-10T11:03:23-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2014/12/10/xorblasm/</loc>
+        <lastmod>2014-12-17T12:51:59-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2014/12/17/learnin-clojure/</loc>
+        <lastmod>2015-01-02T12:12:38-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2015/01/02/omnifocus-et-al/</loc>
+        <lastmod>2015-01-07T14:03:55-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2015/01/04/everything-and-nothin/</loc>
+        <lastmod>2015-01-05T15:40:18-05:00</lastmod>
+    </url>
+    <url>
+        <loc>http://machty.github.com/blog/2015/01/07/a-life-of-possibilities/</loc>
+        <lastmod>2015-01-13T15:30:04-05:00</lastmod>
+    </url>
+    <url>
         <loc>http://machty.github.com/archives/</loc>
-        <lastmod>2014-11-17T01:47:37-05:00</lastmod>
+        <lastmod>2015-01-13T15:30:04-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/archives/</loc>
-        <lastmod>2014-11-17T01:47:37-05:00</lastmod>
+        <lastmod>2015-01-13T15:30:04-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/blog/</loc>
-        <lastmod>2014-11-17T01:47:37-05:00</lastmod>
+        <lastmod>2015-01-13T15:30:04-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/</loc>
-        <lastmod>2014-11-17T01:47:37-05:00</lastmod>
+        <lastmod>2015-01-13T15:30:04-05:00</lastmod>
     </url>
     <url>
         <loc>http://machty.github.com/robots.txt</loc>

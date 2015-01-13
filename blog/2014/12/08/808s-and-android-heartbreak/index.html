@@ -1,0 +1,465 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>808s and Android Heartbreak  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">808s and Android Heartbreak</h2>
+	<div class="entry-content"><h2>TL;DR on Android WebView Form Shit</h2>
+
+<p>Here&#8217;s a list of unsurmountable barriers involved when implementing
+forms in a mobile web app in Cordova</p>
+
+<ul>
+<li>You <em>cannot</em> focus an input field on a setTimeout
+
+<ul>
+<li>It must be tied to a user input event (e.g. a touchstart/end)</li>
+<li>It might look focused but it won&#8217;t bring up the keyboard</li>
+<li>You can halfass get things working in cordova by using a plugin that
+opens the keyboard before you tell the field to focus, but it you
+lose all configurability of the keyboard (whether it&#8217;s numpad,
+whether autocorrect is enabled, etc).</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Android WebView</h2>
+
+<p>https://www.youtube.com/watch?v=HbOtn5VhGZU</p>
+
+<p>Android Browser just uses a WebView (probably not Chrome).</p>
+
+<p>Platform</p>
+
+<ul>
+<li>network, disk</li>
+<li>system integration, e.g. HTML5 Camera integration</li>
+<li>graphics and rendering; this is why differences exists b/w webkit</li>
+<li>V8 is used in Android WebView instead of default webkit</li>
+</ul>
+
+
+<p>What is +1 dependent?</p>
+
+<p>Render loop:</p>
+
+<ul>
+<li><p>Event -> Paint -> Draw</p></li>
+<li><p>Before Honeycomb (2012?)</p>
+
+<ul>
+<li>Paint loops are tight, they capture content into a Picture, and
+then render the Picture</li>
+<li>Picture is Vector representation of page, not just visible area</li>
+<li>No need to go back to webkit when
+
+<ul>
+<li>scrolling</li>
+<li>zooming</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Multithreading
+
+<ul>
+<li>UI Thread (Picture)</li>
+<li>WebCore Thread (webkit; generates a new Picture that UI thread can
+use for zooming, scrolling, etc)</li>
+</ul>
+</li>
+<li>Software rendering
+
+<ul>
+<li>Slow, risk of taking longer than 16ms</li>
+<li>CSS3D not supported in software</li>
+</ul>
+</li>
+<li>Async rendering
+
+<ul>
+<li>e.g. flash, composited on top and often lagged behind scroll</li>
+</ul>
+</li>
+<li>Software doesn&#8217;t keep up w increasing size</li>
+<li>Tiling via Hardware
+
+<ul>
+<li>Scroll event kicks off request for new tiles to render, if they
+don&#8217;t arrive in time, no big deal, everything will be fast even if
+there&#8217;s a moment where it&#8217;s blank</li>
+</ul>
+</li>
+<li>Texture Generation Thread?
+
+<ul>
+<li>the thing that splits things into tiles</li>
+</ul>
+</li>
+<li>w Hardware acceleration:
+
+<ul>
+<li>Painting slower, drawing (compositing?) faster!</li>
+<li>Precache tiles
+
+<ul>
+<li>prefetch surrounding tiles</li>
+<li>direction dependent (e.g. prefetch tiles below if you&#8217;re scrolling
+down)</li>
+</ul>
+</li>
+<li>low-res tiles when scrolling quickly&#8230; blur sharpens once it&#8217;s had
+time to settle and finish painting</li>
+<li>memory usage
+
+<ul>
+<li>limited number of tiles (device dependent)</li>
+<li>tiles are 256x256</li>
+<li>check if plain colors&#8230; JellyBean</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>AHH fuck it all it&#8217;s powered in Chromium now. Why bother.</p>
+
+<p>Android Versions</p>
+
+<p>Operating Systems:</p>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Android_Ice_Cream_Sandwich">Android 4: Ice Cream Sandwich</a></li>
+</ul>
+
+
+<h2>Android API levels</h2>
+
+<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels</p>
+
+<p>API Levels are just integers that match up w Platform versions</p>
+
+<pre><code>Platform Version    API Level   VERSION_CODE    Notes
+Android 5.0 21  LOLLIPOP    Platform Highlights
+Android 4.4W    20  KITKAT_WATCH    KitKat for Wearables Only
+Android 4.4 19  KITKAT  Platform Highlights
+Android 4.3 18  JELLY_BEAN_MR2  Platform Highlights
+Android 4.2, 4.2.2  17  JELLY_BEAN_MR1  Platform Highlights
+Android 4.1, 4.1.1  16  JELLY_BEAN  Platform Highlights
+Android 4.0.3, 4.0.4    15  ICE_CREAM_SANDWICH_MR1  Platform Highlights
+</code></pre>
+
+<h2>Android Activity / Fragment Lifestyle</h2>
+
+<p>https://plus.google.com/+StevePomeroy/posts/HsthxN21Yp1</p>
+
+<p>http://staticfree.info/~steve/complete_android_fragment_lifecycle.png</p>
+
+<p>https://github.com/xxv/android-lifecycle</p>
+
+<h2>Server-push</h2>
+
+<p>http://caniuse.com/#feat=eventsource</p>
+
+<p>Android supports SSE from 4.4 onward (since Nov 2013).</p>
+
+<h2>Android Chromium WebView since 4.4 KitKat (Nov 2013)</h2>
+
+<p>https://www.youtube.com/watch?v=IOY2UNZU9QQ</p>
+
+<p>Android Browser still uses WebView, just that it&#8217;s Chromium now.
+Snapshot of Chrome 30.</p>
+
+<p>Chrome vs Chrome WebView</p>
+
+<ul>
+<li>Graphics backend</li>
+<li>Otherwise invisible to app developer</li>
+<li>Chop out Chrome backend, replace w graphics stack compatible w android
+graphics.</li>
+<li>SurfaceFlinger</li>
+<li>Hardware accelerated layers.</li>
+</ul>
+
+
+<p>KitKat webview is way more HTML5 compliant, rather than old WebKit
+browser.</p>
+
+<p>Features:</p>
+
+<ul>
+<li>IndexedDB (ios only has shitty/buggy support in 8+)
+
+<ul>
+<li>async, non-blocking, etc</li>
+</ul>
+</li>
+<li>Websockets</li>
+<li>requestAnimationFrame</li>
+<li>SVG filters and effects, sepia, convolution blurs</li>
+<li>Hardware accelerated
+
+<ul>
+<li>everything</li>
+<li>default for all new apps is hardware accelerated on</li>
+<li>Question: hardware acceleration can be enabled for the app, but also
+the webview itself?</li>
+</ul>
+</li>
+</ul>
+
+
+<p>WebView methods must be run on UI Tthread, use <code>runOnUiThread</code> if you&#8217;re
+within a different thread&#8230;</p>
+
+<p>Compositing Thread,</p>
+
+<p>Main UI thread</p>
+
+<p><a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> since kitkat all urls
+most conform to it.</p>
+
+<p>A CSS pixel corresponds to 1, 2, 4, etc, depending on your viewport.</p>
+
+<p>There must only be one Meta Viewport tag&#8230; only the last one is
+actually used.</p>
+
+<p>Shorthand CSS can override others in KitKit+; be specific w CSS
+properties unless you really want to override many things.</p>
+
+<h2>uses-sdk</h2>
+
+<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html</p>
+
+<p>Always set target API, but you can still support min SDK versions for
+fallback.</p>
+
+<h2>lint</h2>
+
+<p>Android <code>lint</code></p>
+
+<pre><code>$ which lint
+/Users/machty/adt-bundle-mac-x86_64/sdk/tools/lint
+</code></pre>
+
+<p>seems like ADT, the Eclipse plugin suite.</p>
+
+<p>http://developer.android.com/tools/sdk/eclipse-adt.html</p>
+
+<h2>Focusing fields within Android</h2>
+
+<p>Is it actually fucking possible?</p>
+
+<p>https://code.google.com/p/android/issues/detail?id=27438</p>
+
+<p>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#toggleSoftInput(int, int)</p>
+
+<p>WTF is toggleSoftInput vs toggleSoftInputFromWindow vs</p>
+
+<p>TODO: prevent defocusing with</p>
+
+<pre><code>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#SHOW_FORCED
+</code></pre>
+
+<p>?</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-08T12:21:00-05:00" pubdate data-updated="true">Dec 8<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/12/08/808s-and-android-heartbreak/';
+        var disqus_url = 'http://machty.github.com/blog/2014/12/08/808s-and-android-heartbreak/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,986 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>OmniFocus et al  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">OmniFocus Et Al</h2>
+	<div class="entry-content"><h2>OmniFocus</h2>
+
+<ul>
+<li>Quick action add: ctrl+option+space</li>
+<li>Send to inbox: Ctrl+F6
+
+<ul>
+<li>Note this is a Service that some reason not all apps implement?
+But it works in Chrome so I think we&#8217;re good</li>
+</ul>
+</li>
+<li>Once you assign an inbox item to a project, it&#8217;s removed from the project</li>
+<li>Someday maybe:
+
+<ul>
+<li>Put in single action project, mark project as on hold.</li>
+</ul>
+</li>
+<li>So projects can have an On Hold status&#8230; but there&#8217;s also a waiting context?
+
+<ul>
+<li>Ah, both projects and contexts can choose what status they are&#8230;
+from the same list of possible statuses.</li>
+</ul>
+</li>
+<li>How does the repeat work? &#8220;1 week&#8221;? Why does it say multiple values?
+
+<ul>
+<li>Ah I should probably do this one at a time. The way it works is once
+you complete, it&#8217;ll immediately schedule another one.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>OmniFocus is implements GDT: <a href="http://gettingthingsdone.com/">Getting Things Done</a></p>
+
+<h2>Elephants in Trees</h2>
+
+<p>Why do you never see elephants hiding in trees?</p>
+
+<p>Because they&#8217;re very good at it.</p>
+
+<!--more-->
+
+
+<h2>ASasidoasidj</h2>
+
+<p>http://www.consumerreports.org/cro/2013/12/do-you-need-to-register-new-products-you-buy/index.htm</p>
+
+<p>http://abcnews.go.com/Business/register-product-christmas/story?id=21348313</p>
+
+<p>For software it probably makes more sense since they&#8217;ll have your name
+on file to let you know of any major security updates / breaches and
+what not, but often warranties don&#8217;t actually require registering a
+product. It&#8217;s decently likely the company just wants to sell info to
+marketers, making money off of you and subjecting you to spam.</p>
+
+<h2>DirectInput vs XInput</h2>
+
+<p>http://en.wikipedia.org/wiki/DirectInput#DirectInput_vs_XInput</p>
+
+<p>Relevant because I just got a wireless gamepad that may or may not work
+with Mac. Apparently Mac only supports DirectInput, but either way these
+shits are Microsoft API for interacting with input, DirectInput being
+the deprecated one, XInput being the new.</p>
+
+<p>This is the most useless shit I could have blogged / reminded myself
+about. Why do I do it?</p>
+
+<h2>Pulmonology</h2>
+
+<p>http://en.wikipedia.org/wiki/Pulmonology</p>
+
+<p>Medical specialty dealing in the heart.</p>
+
+<h2>Insurance, carriers, etc</h2>
+
+<p>What&#8217;s a carrier? What&#8217;s the relationship b/w carrier and, e.g.
+BlueCross BlueShield? What&#8217;s a PPO?</p>
+
+<p>http://www.ehealthinsurance.com/health-plans/ppo/</p>
+
+<p>http://www.ehealthinsurance.com/health-plans/hmo/;</p>
+
+<p>HMO: Health Maintenance Organization: broad network of healthcare
+services; broader range of preventative care than something else. You
+choose a Primary Care Physician, and they must refer you to specialists.</p>
+
+<p>Managed care: http://en.wikipedia.org/wiki/Managed_care</p>
+
+<p>It&#8217;s a US-only term describing a bunch of techniques to keep health care
+costs down; incentives for physicians and patients alike, preventative
+care, etc. Spurred on by HMO act of 1973</p>
+
+<p>https://nfb.org/images/nfb/publications/vodold/mngdcare.htm</p>
+
+<p>Managed care:</p>
+
+<ul>
+<li>explicit standards for selecting providers</li>
+<li>formal programs for ongoing quality review / improvement</li>
+<li>preventative care, keeping enrollees healthy to reduce use of services</li>
+<li>financial incentives for enrollees to use providers and procedures
+covered by the plan.</li>
+</ul>
+
+
+<p>Managed care integrates financing and delivery of health care services.
+It is implemented/used/referenced by:</p>
+
+<ul>
+<li>HMOs (Health Maintenance Organizations): provides wide range of services
+for fixed, periodic payment (like monthly insurance payments)</li>
+<li>PPOs (Preferred Provider Organizations): groups of hospitals,
+physicians, etc., who contract with insurer, employer, 3rd party
+admin, etc, to provide health care to all insured</li>
+<li>POS plans (point of service): combo of HMO+PPO&#8230;?</li>
+</ul>
+
+
+<p>Features common to managed care:</p>
+
+<ul>
+<li>pre-authorization (let insurer know before you do some surgery, etc)</li>
+<li>rigorous utilization review&#8230;?</li>
+<li>emphasis on use of primary physicians (why? what does this offer?)</li>
+</ul>
+
+
+<p>OK I TAKE THIS ALL BACK this was a shitty little abstract to link to.</p>
+
+<p>Indemnity:</p>
+
+<ul>
+<li>security or protection against a loss or other financial burden</li>
+<li>security against or exception of legal responsibility of one&#8217;s actions</li>
+<li>payment to victor of war as a condition for PEACE</li>
+</ul>
+
+
+<h2>Family Medicine</h2>
+
+<p>http://en.wikipedia.org/wiki/Family_medicine</p>
+
+<p>It means a physician for people of all ages.</p>
+
+<h2>Quorum</h2>
+
+<p>the minimum number of members of an assembly or society that must be present at
+any of its meetings to make the proceedings of that meeting valid.</p>
+
+<p>e.g. House of Cards quorum.</p>
+
+<h2>Random fucking World MasterCard benefits</h2>
+
+<ul>
+<li>Auto rental collision damage waiver
+
+<ul>
+<li>Must use applicable card for entire rental transaction</li>
+<li>Decline rental company&#8217;s collision waiver</li>
+<li>&#8220;For most cards, the coverage is secondary, meaning that if you have car insurance, you have to file a claim there first (and your premium may go up). But your credit card should step in and pick up where your auto insurer leaves off, paying the tab for your deductible, towing charges and other fees. However, as many frustrated cardholders have learned, the fine print can be tricky. Credit card companies have their own restrictions and exclusions and they, too, often refuse to pay some types of fees levied by car rental companies.&#8221;</li>
+<li>If you <em>don&#8217;t</em> have primary insurance, you can use CDW as primary so
+long as you have a notarized report at time of incident that you had
+no insurance. Why notarized? Not just because Chase is a dick but
+because people might not want to report to their primary insurance
+because their rates will go up.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>What&#8217;s a declaration page?</p>
+
+<p>It&#8217;s info from the car insurance company summarizing benefits, which car
+they apply to, which drivers, address of driver, summary of coverage,
+liability limits.</p>
+
+<ul>
+<li><p>Purchase protection</p>
+
+<ul>
+<li>Items purchased w card covered in case of theft, damage, accidental loss</li>
+<li>Will replace/repair/reimburse up to $500 per claim, $50,000 per account</li>
+<li>Secondary&#8230; if you have preexisting applicable insurance, that must come first</li>
+<li>Not covered:
+
+<ul>
+<li>plants/animals, antiques, boats/cars/autos/motorized vehicles,
+software, items purchased for resale, &#8220;mysteriously disappearing&#8221;
+items (where no evidence of wrongful act), <em>items lost by common
+carrier (like USPS)</em>, jewelry/watches stolen from non-carry-on
+luggage, items lost from war/terrorism/rebellion/confiscation/earthquakes,
+medical equipment, perishables/consumables/perfumes/cosmetics,
+travelers checks/cash/tickets, <em>used/pre-owned items</em></li>
+</ul>
+</li>
+<li>Needed for reimbursement:
+
+<ul>
+<li>claim form</li>
+<li>copy of card receipt</li>
+<li>copy of itemized store receipt</li>
+<li>copy of police report (made within 48 hours of incident), or
+whatever kind of report</li>
+</ul>
+</li>
+<li>If you have personal/primary insurance:
+
+<ul>
+<li>You must use it (homeowner&#8217;s/renter&#8217;s/automabile), and the CC
+company will cover any leftover deductible, or even the item
+itself if you&#8217;ve exhausted the insurance.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Trip Cancellation/Interruption</p>
+
+<ul>
+<li>Trip cancellation is before the trip starts, interruption is during, derp</li>
+</ul>
+</li>
+<li><p>Price Protection:</p>
+
+<ul>
+<li>e.g you buy something, and then a printed ad lists it for less, then
+within 90 days of purchase you can make a claim and get reimbursed
+the difference.</li>
+<li>Pretty cool, too lazy to describe the fine print</li>
+</ul>
+</li>
+<li><p>Lost luggage</p>
+
+<ul>
+<li>Applies to both checked or carry on</li>
+</ul>
+</li>
+<li><p>Baggage delay</p>
+
+<ul>
+<li>if baggage delayed 6+ hours</li>
+<li>You&#8217;re reimbursed for the emergency purchase of &#8220;essential items&#8221;</li>
+<li>Up to $100 per day, max 3 days</li>
+<li>Emergency items:
+
+<ul>
+<li>clothing, toiletries, charging cables</li>
+</ul>
+</li>
+<li>Not covered:
+
+<ul>
+<li>contacts, hearing aids, artificial teeth, cash, checks,
+securities, jewelry,</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>By a person or persons</h2>
+
+<p>Legalese. I wanna use this is a sentence.</p>
+
+<h2>iOS app manager view</h2>
+
+<p>It has Recent contacts at the top, and swipe it right and you can see
+Favorites! Why don&#8217;t I use this? If you tap it, it reveals option to
+Call or Message. SO GOOD.</p>
+
+<h2>What&#8217;s Rust named after?</h2>
+
+<p>A RobUST fungus:</p>
+
+<p>http://www.reddit.com/r/rust/comments/27jvdt/internet_archaeology_the_definitive_endall_source/</p>
+
+<h2>Sky Ferreira and Charli XCX doin shit</h2>
+
+<p>http://www.musictimes.com/articles/10302/20140916/sky-ferreira-reveals-charli-xcx-collaboration-will-sound-very-tatu.htm</p>
+
+<p>t.A.T.u. is a Russian duo.</p>
+
+<p>http://en.wikipedia.org/wiki/T.A.T.u.</p>
+
+<p>Sky Ferreira, Charli XCX, and Grimes. They&#8217;re all buds.</p>
+
+<h2>A skillet is a fucking frying pan</h2>
+
+<p>And the difference between a fry(ing) pan/skillet and a saute pan is
+that saute pans have 90 degree angle sides, where&#8217;s skillets are sloped.
+Skillets aren&#8217;t designed to hold a lot of liquid and are optimized for
+reaching in and flipping shit, like eggs and pancakes n stuff.</p>
+
+<p>Some people think there <em>is</em> a difference b/w skillet and frying pan,
+that pans are flimsy but skillets are thick.</p>
+
+<h2>Colanders and Strainers</h2>
+
+<p>Colanders are the often plastic bowls with holes for draining noodles
+and rice. I can&#8217;t believe I didn&#8217;t know that. <code>say colander</code>. Colanders
+usually stand up on their own; they have a <em>footed base</em>.</p>
+
+<p>Strainers are generally wire mesh, have a handle, and are used for, say,
+catching lemon seeds when squeezing a lemon.</p>
+
+<h2>Sinecure</h2>
+
+<p>a position requiring little or no work but giving the holder status or financial benefit.</p>
+
+<p>Reference: http://consultingbyrpm.com/blog/2014/12/timid-guys-finish-last.html</p>
+
+<p>Cushy sinecures. White guys getting cushy sinecures.</p>
+
+<p>Sinecure : sine cura : &#8220;without care&#8221;</p>
+
+<h2>Easy ass awesome spicy noodles</h2>
+
+<p>http://www.budgetbytes.com/2012/08/spicy-noodles/</p>
+
+<h2>JSCS</h2>
+
+<p>JSHint is going to get rid of style rules, and just test things like
+shadowing, hoisting, syntactical things.</p>
+
+<p>Enter JSCS to fill in the style spot.</p>
+
+<p>https://github.com/jscs-dev/node-jscs</p>
+
+<h2>Instacart</h2>
+
+<p>https://www.instacart.com</p>
+
+<p>Seems pretty badass? I guess? Shop from multiple</p>
+
+<h2>AWOL</h2>
+
+<p>Absent Without Official Leave.</p>
+
+<h2>kip</h2>
+
+<p>British for &#8216;nap&#8217;.</p>
+
+<h2>The spirit is willing</h2>
+
+<p>but the flesh is weak, or spongey and bruised.</p>
+
+<p>http://biblehub.com/matthew/26-41.htm</p>
+
+<blockquote><p>&#8220;Watch and pray so that you will not fall into temptation. The spirit is willing, but the flesh is weak.&#8221;</p></blockquote>
+
+<h2>MFA</h2>
+
+<p>Museum of Fine Arts in Boston.</p>
+
+<p>http://www.mfa.org/about</p>
+
+<h2>My dumb thing</h2>
+
+<p>12 seconds gold</p>
+
+<p>6 second repetition, so use the gold one&#8217;s motor/governor.</p>
+
+<h2>Bacon.js</h2>
+
+<ul>
+<li>EventStream: distinct events that happen over time</li>
+<li>Property: value that changes over time</li>
+</ul>
+
+
+<p>TODO: Why have both?</p>
+
+<ul>
+<li>EventStreams have no initial value</li>
+</ul>
+
+
+<p><code>combine</code>: basically map two streams/properties into a Property (why not
+event stream? what&#8217;s the EventStream equivalent?). You can pass a method
+name as the second arg and it&#8217;ll be called on the&#8230; I don&#8217;t know. In
+the case of <code>.scan</code> it&#8217;s the accumulator. What makes sense for combine?
+Proably on the first arg, but that&#8217;s weird. NO it&#8217;s not, it gets called
+on the current property of course. Let&#8217;s test this theory.</p>
+
+<p>Actually no this makes no sense, they have an example</p>
+
+<pre><code>var out = a.combine(b, ".concat")
+</code></pre>
+
+<p>It makes sense that it&#8217;d use the current value of the output property to
+call <code>.concat</code> on, such as an array, but <code>.concat</code> mutates the
+underlying array&#8230; is that ok? Seems fucky, seems like someone who got
+a previous value from <code>out</code>, array, might have their array value
+mutated. Let&#8217;s find out why this would not be the case&#8230;</p>
+
+<p>Fuck it too lazy right now.</p>
+
+<p>Convert promise to EventStream: <code>Bacon.fromPromise</code>.</p>
+
+<p>So, flat map exists whenever you&#8217;d like to map to some asynchronous
+value where order can&#8217;t be preserved&#8230; so for instance if you had a
+serialize of values and you wanted to map them to some other value that
+could be determined synchronously, you&#8217;d just map, but if you can&#8217;t
+return something synchronously, each &#8220;map&#8221; should essentially return a
+new stream, case in point: AJAX-based auto-completes. You translate text
+field updates into ajax queries, each of which have their own unique
+async.</p>
+
+<pre><code>textUpdate -&gt; map -&gt; map -&gt; mapToAjax
+                                -&gt; ajax promise
+                                -&gt; ajax promise
+                                -&gt; ajax promise
+</code></pre>
+
+<p>Need to reconcile these back into a single stream.</p>
+
+<p>The pattern is expand into async via ajax and coalesce back into values
+with flatMap.</p>
+
+<ul>
+<li><code>flatMap</code>: does NOT preserve ordering</li>
+<li><code>flatMapLatest</code>: discards/forgets previous values if new ones come
+back first</li>
+</ul>
+
+
+<p>Question: is there a flatMap that preserves order without discarding?</p>
+
+<p><code>fromBinder</code>: create your own custom stream. The callback accepts a
+<code>sink</code> function which is how you emit events.</p>
+
+<p>What does <code>sink</code> mean? I guess it means a consumer of a stream? Why the
+stream sinks into.</p>
+
+<p><code>interval</code> vs <code>fromPoll</code>:</p>
+
+<ul>
+<li><code>interval</code> returns a stream that emits an optional value that you pass
+to it.</li>
+<li><p><code>fromPoll</code> has no concept of a value, it just runs your callback</p>
+
+<p>  var stream = Bacon.fromBinder(function(sink) {</p>
+
+<pre><code>sink([new Bacon.Next("2nd"), new Bacon.Next("3rd")])
+sink(["4th", "5th"])
+sink(["6th", new Bacon.Next("7th")])
+sink([new Bacon.Next("8th"), "9th"])
+return function() {
+   // unsub functionality here, this one's a no-op
+}
+</code></pre>
+
+<p>  })
+  stream.log()</p></li>
+</ul>
+
+
+<p>Output:</p>
+
+<pre><code>2nd
+3rd
+["4th", "5th"]
+6th
+7th
+[b, "9th"]
+</code></pre>
+
+<p>You can use <code>Bacon.Next</code> to convert an array into sequentially emitted
+values, rather than the value emitted being an array. It&#8217;s like a
+flatten decided by the emitter?</p>
+
+<p>Bus: https://github.com/baconjs/bacon.js#bus</p>
+
+<p>A Bus an an EventStream that you can push values into.
+I think: <code>promise:defer::eventStream:bus</code>, except that Deferreds
+don&#8217;t have the promise&#8217;s <code>.then</code> api whereas a Bus <em>is</em> an event stream
+with the same event stream API, plus a <code>.push</code> method.</p>
+
+<p>Properties have optional starting values.</p>
+
+<p>If provided, <code>onValue</code> emits a value immediately, else it only updates
+on the first thing.</p>
+
+<ul>
+<li><code>EventStream.toProperty()</code>: convert to property</li>
+<li><code>Property.change()</code>: convert to event stream</li>
+</ul>
+
+
+<p><code>Bacon.update</code>: create Property from initial value, update value based
+on multiple inputs.</p>
+
+<p>INTERESTING. This is kinda what we&#8217;ve been talking about in Emberland.
+EXCEPT that <code>Bacon.update</code> doesn&#8217;t expose the means of updating the
+property, it just encapsulates all updates into a single property, and
+you need to provide the write-able buses via some other mechanism.</p>
+
+<p>I <em>think</em> Property and EventStreams are both Observables. c/d?</p>
+
+<h2>Synchronizing streams, Bacon.when</h2>
+
+<p>You&#8217;d like to zip together streams into a single stream, but when do you
+fire an event? When both have since fired? When only one? <code>Bacon.when</code>
+to the rescue to disambiguate and let you decide!</p>
+
+<pre><code>Bacon.when(seed
+</code></pre>
+
+<h2>Braindumpin</h2>
+
+<p>http://baconjs.github.io/tutorials.html#content/tutorials/4_Building_Applications_Out_Of_Bacon</p>
+
+<p>Goal: understand Ember action bubbling vs Flux dispatcher pattern among
+other things, grand unifying FRP theory.</p>
+
+<p>Mutable state is an oxymoron, it&#8217;s hard to reason about programs with
+mutable data structures, hence React is nice because renders are
+stateless, allowing functional/immutability patterns.</p>
+
+<p>It&#8217;s more and more frowned upon to do</p>
+
+<p>and allow <code>x-foo</code> to directly change <code>blah</code>, which in present-day/legacy
+Ember style would flow the data back upward. The data-down-actions-up
+approach would involve:</p>
+
+<p>and <code>updateBlah</code> would perform the set. It&#8217;s really just moving the
+<code>set</code> back up to the parent so in that way it might just seem like
+needless indirection, but this allows:</p>
+
+<ul>
+<li>easier reasonability/testability</li>
+<li>can override <code>updateBlah</code> to do whatever and asyncly update <code>value</code>,
+after some validation. It&#8217;s reaaaally hard/awkward/annoying to sub out
+the <code>set</code> behavior</li>
+</ul>
+
+
+<h2>Flux et al</h2>
+
+<p>What are the core concepts?</p>
+
+<pre><code>Views ---&gt; (actions) ----&gt; Dispatcher ---&gt; (registered callback) ---&gt; Stores -------+
+Ʌ                                                                                   |
+|                                                                                   V
++-- (Controller-Views "change" event handlers) ---- (Stores emit "change" events) --+
+</code></pre>
+
+<p>First off, a store is like what&#8217;s traditionally called a model; it has
+app state and app logic. A store might directly represent a single model
+(i.e. what might be called a UserStore might just be a User model in
+other MVCs), but in general stores can represent many objects, scoped to
+a particular domain of the application.</p>
+
+<p>If you click a button in a component, it never directly invokes some
+method on a store. Why? Because it would be hard to trace the
+dependencies? Any new component could come along and start calling
+methods on some random store? Yes, confirm, you don&#8217;t want to do that.
+You want a message bus. The dispatcher is that bus.</p>
+
+<pre><code>action ---&gt;
+action ---&gt;
+action ---&gt;---&gt; dispatcher
+action ---&gt;
+action ---&gt;
+</code></pre>
+
+<p>So in your tests you can stub the dispatcher and assert that expected
+methods were called on it. Easy peasy I guess? Doesn&#8217;t it mean
+you&#8217;ll have some giant switch statement that&#8217;s gotta divvy out events in
+the dispatcher? Often: yes, it does, which is desirable for small enough
+stuff, issues with scalability though.</p>
+
+<p>The dispatcher model does have the benefit of being able to intercept
+events and filter/debounce/coalesce them; this would be a nice place to
+ensure that a stray tap in the middle of a sideways transition in a
+mobile app didn&#8217;t fire some event.</p>
+
+<p>Anyway, calling action helper fns on a dispatcher doesn&#8217;t do anything if
+stores haven&#8217;t subscribed to dispatcher events.</p>
+
+<h2>Reflux</h2>
+
+<p>https://github.com/spoike/refluxjs</p>
+
+<p>Seems like an improvement; gets rid of the switch statements; makes
+actions listenable; makes stores listenable in case some stores depend
+on others (replaces <code>waitFor</code>)</p>
+
+<p>The actions being listenable is good because it gets rid of stores
+receiving ALL actions and having to selectively respond to them via big
+switch statement matching by string name.</p>
+
+<p>Actions are functors, you can call them directly and that passes through
+the payload to everyone listening.</p>
+
+<pre><code>var statusUpdate = Reflux.createAction();
+statusUpdate(data); // Invokes the action statusUpdate
+statusUpdate.triggerAsync(data); // same effect as above
+</code></pre>
+
+<p>or</p>
+
+<pre><code>var statusUpdate = Reflux.createAction({ sync: true });
+statusUpdate(data); // Invokes the action statusUpdate SYNChronously
+statusUpdate.trigger(data); // same effect as above
+</code></pre>
+
+<p>var Actions = Reflux.createActions([
+  &#8220;statusUpdate&#8221;,
+  &#8220;statusEdited&#8221;,
+  &#8220;statusAdded&#8221;
+]);</p>
+
+<p>There&#8217;s lots of features for async and converting an action into async
+based on its children.</p>
+
+<p>Blah blah blah back to other ideas:</p>
+
+<p>So if you wanted to do something like Flux in Ember, you&#8217;d have to do
+something like</p>
+
+<p>TODO: https://github.com/spoike/refluxjs#joining-parallel-listeners-with-composed-listenables</p>
+
+<p>So my whole better actions idea was so that you could quickly reason
+about action state.</p>
+
+<pre><code>var TopLevelComponent = Ember.Component.extend({
+
+  // Better Actions API
+  submitForm: action(function() {
+    return ajaxPromise(whatever);
+  })
+});
+</code></pre>
+
+<p>This worked <em>ok</em> ish but was horrible for lists because it&#8217;s a
+singleton.</p>
+
+<p>Use case: TODO MVC with slow async deletes; additional deletes should be
+prevented if animating out of this route. There is a loading spinner if
+at least one item is being deleted. Version 1 lets you delete multiple
+items at the same time, Version 2 prevents this.</p>
+
+<p>My goals is that I want to see how stream composition can address the
+actions problem. Got async actions? Don&#8217;t want them firing at the same
+time? Debounce those shits, or flatmap latest. (TODO: what&#8217;s the stream
+approach for letting a previous action finish first before starting
+another one? I think the answer is flatMapFirst)</p>
+
+<p>For the &#8220;additional deletes should be prevented if animating out&#8221;
+requirement, there should be some concept of an EventStream that
+dilineates the start and end of when a route is active. If you&#8217;re using
+LiquidFire this should be after a route has finished transitioning in
+and right before the route has started transitioning out
+(animation-wise). The idea being that by default actions are filtered
+through that window. But how do you do that?</p>
+
+<p>You want a stream that only emits events per some predicate&#8230;</p>
+
+<p>Actually this is probably a good use case for takeWhile&#8230; takeWhile
+route is active. http://jsbin.com/tuzifo/2/edit</p>
+
+<p>But given that we might have components already being displayed, but
+we&#8217;re not ready to receive their actions, we need to figure out how to
+hook them up&#8230;</p>
+
+<p>So what the fuck does <code>&lt;button &gt;Click me&lt;/button&gt;</code>
+do?</p>
+
+<pre><code>TopLevelComponent
+  MidLevelComponent
+    LeafComponent
+      &lt;button &gt;Click me&lt;/button&gt;
+</code></pre>
+
+<p>Maybe components implicitly pass down an actions stream? And
+route-driven components just get a decorated one from the router? And
+then Liquid Fire could provide one for components rendered within an
+outlet?</p>
+
+<p>actually expands to</p>
+
+<p>&#8230;?</p>
+
+<p>What am I trying to accomplish here? I&#8217;m so lost.</p>
+
+<p>TODO: replace bullshit with something more meaningful.</p>
+
+<p>https://github.com/baconjs/bacon.js#observable-zip</p>
+
+<p>zip only fires when both streams produce a value, else
+backpressure/buffering can occur. Difference between these two is that
+back pressure occurs when consumers/sinks can&#8217;t consume fast enough;
+buffering can occur for other reasons on the source side of things, e.g.
+only one stream in zip is producing values and hence buffering up
+values. This can be alleviated by choosing a different join pattern than
+the zip default.</p>
+
+<p>Use Bacon.when biaaatch.</p>
+
+<h2>Blood pressure</h2>
+
+<p>110/70. What&#8217;s it mean.</p>
+
+<blockquote><p>If your blood pressure is 120/80, 120 represents systolic pressure, or the pressure of blood against artery walls when the heart beats. Eighty represents diastolic pressure, or the pressure between beats.</p></blockquote>
+
+<p>So it&#8217;s like a max min range, pressure will be the highest in the middle
+of a heart beat, lowest between.</p>
+
+<p>Systolic = during heart beat. Diastolic = pressure between beats. High
+systolic is generally more serious.</p>
+
+<h2>Make no promises</h2>
+
+<p>http://swannodette.github.io/2013/08/23/make-no-promises/</p>
+
+<h2>Buses as an anti-pattern</h2>
+
+<p>http://baconjs.github.io/tutorials.html#content/tutorials/4_Building_Applications_Out_Of_Bacon</p>
+
+<pre><code>var shoppingCartBus = new Bacon.Bus()
+$.ajax('/api/cart').done(cart =&gt; shoppingCartBus.push(cart))
+...
+shoppingCartBus.onValue(cart =&gt; renderCart(cart))
+</code></pre>
+
+<p>What happens if the ajax push occurs before the <code>onValue</code> is set? It&#8217;s
+missed, nothing gets rendered. It&#8217;s the same as</p>
+
+<pre><code>var wat = new Wat();
+// ...
+wat.foo = new Foo();
+</code></pre>
+
+<p>What if someone does something depending on <code>.foo</code> being present? Boom.</p>
+
+<p>Solution: inject your dependencies. Pass in buses. Pass in your inputs.
+Pass in your actions.</p>
+
+<p>This is kinda fucky:</p>
+
+<pre><code>function ShoppingCartView(cart) {
+  return {
+    cartView: ...
+    removeItemStream: $('#shopping-cart').asEventStream('click', '.remove-item')
+      .map(function(e) { return $(e.currentTarget).data('id') })
+}
+</code></pre>
+
+<p>So creating a view not only just creates the view but also returns the
+&#8220;outputs&#8221; of the view, e.g. the actions being emitted from the view.
+But this causes cyclic dependencies because you want to pass in a cart
+model which provides inputs to the view but you want to provide the
+outputs of that view back to the model, but also avoid the temporal
+construction issues.</p>
+
+<h2>RX vs Bacon</h2>
+
+<p>https://github.com/baconjs/bacon.js#for-rxjs-users</p>
+
+<p>Bacon offers EventStreams and Properties, subclasses of Observables,
+whereas RxJS just has Observables. So how do current values work in RxJS
+or do you always have to save it to some state?</p>
+
+<h2>RX hot/cold observables</h2>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/creating.md#cold-vs-hot-observables</p>
+
+<p>TODO read about this.</p>
+
+<h2>Hemipenes</h2>
+
+<p>http://en.wikipedia.org/wiki/Hemipenis</p>
+
+<p>Snakes have two penises, or penes, called hemepenes. Only one is used.
+It&#8217;s a spiky weird thing that bloats out when aroused. Other similarly
+animals have them, like lizards. Sharks have two &#8220;penises&#8221; but they&#8217;re
+called claspers.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-02T16:27:00-05:00" pubdate data-updated="true">Jan 2<span>nd</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/01/02/omnifocus-et-al/';
+        var disqus_url = 'http://machty.github.com/blog/2015/01/02/omnifocus-et-al/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

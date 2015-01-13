@@ -112,6 +112,480 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2013/03/29/ember-jeopardy/">
+		
+			Ember Jeopardy</a>
+	</h2>
+	<div class="entry-content">
+		<p>At last night&#8217;s <a href="http://www.meetup.com/EmberJS-NYC/events/106490682/">NYC Ember Meetup</a>,
+I led the gang through a somewhat enduring session of Jeopardy,
+featuring a ton of different Ember.js trivia questions. The app itself
+was written in Ember.js and the source code is mostly good, and
+certainly well-commented. Have a look see:</p>
+
+<p><a href="http://ember-jeopardy.herokuapp.com/">Ember Jeopardy</a></p>
+
+<p><a href="https://github.com/machty/ember-jeopardy">Source code</a></p>
+
+<p>It&#8217;s (somewhat needlessly) hosted within a Rails app, but you can find the
+Ember-specific code in <code>app/assets/javascripts/</code>. It presently only
+works on non-retina Safari/Chrome, given all the 3D stuff going on, but
+if you can figure out how to slay the remaining CSS3 demons, I&#8217;d
+definitely appreciate a pull request.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-29T15:36:00-04:00" pubdate data-updated="true">Mar 29<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-js/'>Ember.js</a>, <a class='category' href='/blog/categories/jeopardy/'>Jeopardy</a>, <a class='category' href='/blog/categories/meetup/'>Meetup</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/">
+		
+			Stubbing Date::valueOf for Benefit of Make Great Good Determinism</a>
+	</h2>
+	<div class="entry-content">
+		<p>Quick thing: if you ever find yourself in the situation of writing
+JavaScript test cases that involve <code>setTimeout</code> or some other timer
+logic where the order of timers firing is the subject of testing, you
+might find this trick handy to get rid of brittle, non-deterministic
+test cases.</p>
+
+<p>In short, you can stub out the <code>Date</code> class&#8217;s <code>valueOf</code> method to return
+a value you expect for the duration of the test case.</p>
+
+
+		
+		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-24T13:20:00-04:00" pubdate data-updated="true">Mar 24<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/javascript/'>JavaScript</a>, <a class='category' href='/blog/categories/determinism/'>determinism</a>, <a class='category' href='/blog/categories/testing/'>testing</a>, <a class='category' href='/blog/categories/valueof/'>valueOf</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/">
+		
+			NYC Ember.js Meetup Run Loop Slides</a>
+	</h2>
+	<div class="entry-content">
+		<p>Just did a talk on the Ember run loop at the
+<a href="http://www.meetup.com/EmberJS-NYC/">NYC Ember.js Meetup</a>.
+You can check them out
+<a href="http://machty.github.com/blog/ember_run_loop_talk">here</a>.
+There&#8217;s also a blurb on the <code>ember-source</code>, <code>handlebars-source</code> stuff
+I <a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">wrote about
+yesterday</a>.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-28T21:22:00-05:00" pubdate data-updated="true">Feb 28<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>, <a class='category' href='/blog/categories/nyc-meetup/'>nyc meetup</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">
+		
+			Slaying the Ember/Handlebars JS-RB Dependency Demons With Gem Wrappers</a>
+	</h2>
+	<div class="entry-content">
+		<p>Ember.js devotees may have noticed a series of related commits that I
+put in recently with reference to &#8220;removing vendored .js files in favor
+of ember-source, handlebars-source, etc&#8221;, or something of the like.
+They&#8217;re all checked in now, and I think they&#8217;ve gone a long way towards
+alleviating the dependency hell stemming from multiple gems packaging
+vendored .js files.</p>
+
+<p>For a better understanding of the motivation behind these
+changes and how they might affect you, read on.</p>
+
+
+		
+		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-27T23:28:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/emblem-source/'>emblem-source</a>, <a class='category' href='/blog/categories/gemifying/'>gemifying</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/">
+		
+			Emblem.js - Indented Templating Targeting Handlebars.js and Ember.js</a>
+	</h2>
+	<div class="entry-content">
+		<p>I wrote a templating language called
+<a href="https://github.com/machty/emblem.js">Emblem</a> which you can use instead
+of Handlebars to write templates for your views in Ember.js (and soon,
+in any other setting). It&#8217;s still very new, and I definitely have more
+planned as far as syntax enhancements/refinements, but what&#8217;s there is
+pretty solid and I hope you&#8217;ll take it for a test drive and give me some
+feedback, or better yet submit a PR or two.</p>
+
+<p>You can check out a zany little demo <a href="http://jsbin.com/ulegec/17/edit">here</a>, which
+gives you an opportunity to try out some syntactical experiments
+yourself.</p>
+
+<p>Aaand
+<a href="https://speakerdeck.com/machty/emblem-dot-js-ember-targeting-indentation-based-templates">here</a>
+are the slides from the presentation at made at the NYC Ember.js meetup
+I made this week. The rest of this post goes into some of the
+motivation and architecture behind Emblem.</p>
+
+
+		
+		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-27T14:13:00-05:00" pubdate data-updated="true">Jan 27<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember/'>ember</a>, <a class='category' href='/blog/categories/emblem/'>emblem</a>, <a class='category' href='/blog/categories/handlebars/'>handlebars</a>, <a class='category' href='/blog/categories/indentation/'>indentation</a>, <a class='category' href='/blog/categories/parsing/'>parsing</a>, <a class='category' href='/blog/categories/pegjs/'>pegjs</a>, <a class='category' href='/blog/categories/templates/'>templates</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/">
+		
+			Quickly Peruse Gem Source: Vim + Tmux + Bundle Open</a>
+	</h2>
+	<div class="entry-content">
+		<p>Ever find yourself
+working on a project and needing to dig into the source code of a Gem
+you&#8217;re using? In the past I used to just go to the github for that gem
+and use their project explorer, searching for particular commands using
+their ultra helpful <code>t</code> command, but I got sick of having to do that, so
+I found a better way using Vim + tmux + <code>bundle open</code>. The result is a
+command I can run in Vim, which autocompletes gem names by looking
+through <code>Gemfile.lock</code>, which splits the current tmux pane and runs a
+new instance of Vim in the root directory of the Gem I&#8217;m looking for.</p>
+
+<p>Even if you don&#8217;t
+share my exact configuration, you might learn something about any of the
+following: Tmux, Vim, <code>bundle open</code>, and some Unix commands, and the end
+result code is pretty easily modifiable.</p>
+
+
+		
+		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-13T15:45:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/bundle/'>bundle</a>, <a class='category' href='/blog/categories/gems/'>gems</a>, <a class='category' href='/blog/categories/tmux/'>tmux</a>, <a class='category' href='/blog/categories/vim/'>vim</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/">
+		
+			Everything You Never Wanted to Know About the Ember Run Loop</a>
+	</h2>
+	<div class="entry-content">
+		<p>Just posted a
+<a href="http://stackoverflow.com/questions/13597869/what-is-ember-runloop-and-how-does-it-work/14296339#14296339">Giant Ass Response on Stack Overflow</a> about the Ember Run Loop. I&#8217;ve reproduced the text below. The question basically was: What is the Run Loop? How long does it take? When does it fire up? Can I expect views to be rendered to the DOM by the end of the run loop? etc. etc. Take a look, I think there&#8217;s some good stuff in there. Without further ado:</p>
+
+<p>First off, read these:</p>
+
+<p><a href="http://blog.sproutcore.com/the-run-loop-part-1/">Sproutcore Run Loop, part 1</a>
+<a href="http://blog.sproutcore.com/the-run-loop-part-2/">Sproutcore Run Loop, part 2</a></p>
+
+<p>They&#8217;re not 100% accurate to Ember, but the core concepts and motivation behind the RunLoop still generally apply to Ember; only some implementation details differ. But, on to your questions:</p>
+
+
+		
+		<a href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-12T13:09:00-05:00" pubdate data-updated="true">Jan 12<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/binding-w/'>binding:w</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/">
+		
+			Rake Pipeline Filter for Syncing With Client-Managed Static Site</a>
+	</h2>
+	<div class="entry-content">
+		<p>Just rolled out a quick <a href="http://megancoxmusic.com/">single-pager for my bandmate</a>,
+which is just a super simple static site that she&#8217;ll be updating herself
+via FTP. Problem is, at some point in the future I&#8217;ll be called upon to
+make some change to the JS, or the player widget, or something messy
+enough that my non-developer client would be rightfully reluctant to fidget with.
+If she updates the headers or the paragraph descriptions, and I want to
+make changes to the rest of the page, I&#8217;ll have to go through the
+annoying process of copying her raw HTML modifications into my freshly
+regenerated local HTML.</p>
+
+
+		
+		<a href="/blog/2012/12/29/rake-pipeline-filter-for-syncing-with-client-managed-static-site/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-29T17:47:00-05:00" pubdate data-updated="true">Dec 29<span>th</span>, 2012</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/nokogiri/'>nokogiri</a>, <a class='category' href='/blog/categories/rake-pipeline/'>rake pipeline</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2012/11/12/jquery-accelerated-hover-scroll/">
+		
+			jQuery Accelerated Hover Scroll</a>
+	</h2>
+	<div class="entry-content">
+		<p>Working on a small-ish brochure app for a beach resort, and there&#8217;s one
+section that called for a horizontal scrolling container based on where
+the mouse was hovering over the container. The closer you hover to the
+edge, the faster the container scrolls. This is by no means a new user
+interaction, but I couldn&#8217;t find a suitable plugin for my needs, so I
+wrote one, and you can check it out / download it
+<a href="https://github.com/useful-robot/jquery.accel-hover-scroll">here</a>.</p>
+
+<p>I took perhaps 3 separate stabs at this surprisingly awkward problem,
+and here&#8217;s what I learned&#8230;</p>
+
+
+		
+		<a href="/blog/2012/11/12/jquery-accelerated-hover-scroll/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-12T03:43:00-05:00" pubdate data-updated="true">Nov 12<span>th</span>, 2012</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/hover/'>hover</a>, <a class='category' href='/blog/categories/jquery/'>jquery</a>, <a class='category' href='/blog/categories/plugin/'>plugin</a>, <a class='category' href='/blog/categories/scroll/'>scroll</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/">
 		
 			Transferring S3-Enabled Heroku Apps Between Dev/Staging/Prod</a>
@@ -156,269 +630,16 @@ complicated if Amazon S3 is involved.</p>
 	
 </div></article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/">
-		
-			SpreeCommerce Meets Ember.js</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a record label website in Ember.js with all sorts of
-lovely dynamic goodies, infinite scrolling feeds, embedded music player,
-blah blah blah, and most challengingly a full-on store where user&#8217;s can
-browse albums, shirts, whatevers, add them to their cart, and eventually
-check out. This post covers a few lessons learned in getting a dynamic
-JS website to play nicely with Spree, an open source e-commerce
-framework.</p>
-
-<p>Things you might learn from this article:
-* Digging into gem source code
-* Passing Javascript data in and out of iframes
-* Converting non-prototype-extended data into prototype-extended data</p>
-
-
-		
-		<a href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-02T20:44:00-04:00" pubdate data-updated="true">Nov 2<span>nd</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/spree/'>spree</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">
-		
-			Scraping OpenGraph for Video Cover Images</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a site for a record company, and the folk in charge of
-the content usually just host their videos on YouTube, Vimeo, or some
-hosting service, so I needed to come up with a simple way for them to
-enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
-could be added to a gallery.</p>
-
-<p>This site also does a lot of magical things with images that
-require us to know ahead of time the dimensions of the images we&#8217;re working with,
-so it was also important for us to be able to store the thumbnail for the video internally
-(and also allow this automatically selected thumbnail to be overridden
-with an image of their choice).</p>
-
-
-		
-		<a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-23T21:35:00-04:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/opengraph/'>OpenGraph</a>, <a class='category' href='/blog/categories/video/'>video</a>, <a class='category' href='/blog/categories/vimeo/'>vimeo</a>, <a class='category' href='/blog/categories/youtube/'>youtube</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/10/12/batterypop-is-live/">
-		
-			batteryPOP Is Live</a>
-	</h2>
-	<div class="entry-content">
-		<p>You can check out the latest <a href="http://www.usefulrobot.io">Useful Robot</a>
-project at <a href="http://www.batterypop.com">batteryPOP.com</a>.</p>
-
-<p>batteryPOP is a children&#8217;s website featuring a bubbly, animated,
-tree-based menu that drives kids to the videos they want to watch and
-articles they want to read. It was written in
-<a href="http://www.emberjs.com">Ember.js</a>/Rails and had to look good on the
-iPad, so we couldn&#8217;t use any Flash, though the effect is largely the
-same.</p>
-
-
-		
-		<a href="/blog/2012/10/12/batterypop-is-live/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-12T10:50:00-04:00" pubdate data-updated="true">Oct 12<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/batterypop/'>batterypop</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/09/28/dry-your-ember-routes/">
-		
-			DRY and Tie Your Ember Routes</a>
-	</h2>
-	<div class="entry-content">
-		<h4>UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues</h4>
-
-<h4>UPDATE 1/6/12: this post is deprecated since the new <a href="http://emberjs.com/guides/routing/defining-your-routes/">Ember Router v2 API</a> came out.</h4>
-
-<p>A common complaint about Ember.js routing is that seems to force you to
-create pairs of extremely light-weight, useless Views and Controllers
-for each new route you create. Another is that it&#8217;s not particular
-obvious how data ought to be shared between routes/controllers. Here&#8217;s
-one way to cut down on the seeming boilerplate while linking your data.</p>
-
-
-		
-		<a href="/blog/2012/09/28/dry-your-ember-routes/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-28T13:54:00-04:00" pubdate data-updated="true">Sep 28<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/dry/'>dry</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/routing/'>routing</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/08/07/speeding-up-ff-css3-transform-transitions-with-rotate/">
-		
-			Speeding Up Firefox CSS3 Transform Transitions With rotate(0.01deg)</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a heavily animated (non-Flash) kids&#8217; website and was getting some exceptionally slow performance from Firefox during supposedly GPU-accelerated CSS3 transitions.</p>
-
-<p><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663776">Turns out there&#8217;s a bug</a>, still unaddressed, that lubricates Gecko with jank molasses anytime it has to animate a transition involving the <code>scale()</code> property. The solution? Add a dash of <code>rotate(0.01deg)</code> to your <code>transform</code> property and the problem magically goes away. Somehow, adding a small degree of unnoticeable rotation renders the transition way more smoothly, and this goes for both CSS3 transitions and animations in Firefox.</p>
-
-<p>So if you&#8217;d like to transition <code>-moz-transform</code> to <code>scale(2)</code>, set it instead to <code>scale(2) rotate(0.01deg)</code> and watch the jank magically disappear.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-07T02:53:00-04:00" pubdate data-updated="true">Aug 7<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/css3/'>CSS3</a>, <a class='category' href='/blog/categories/firefox/'>Firefox</a>, <a class='category' href='/blog/categories/rotate/'>rotate</a>, <a class='category' href='/blog/categories/transitions/'>transitions</a>
-
-</div>
-
-
-	
-</div></article>
-
 <nav id="pagenavi">
     
         <a href="/blog/page/7/" class="prev">Prev</a>
     
     
+        <a href="/blog/page/9/" class="next">Next</a>
+    
     <div class="center"><a href="/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2014
+	<footer id="footer" class="inner">Copyright &copy; 2015
 
     Alex Matchneer
 

@@ -1,0 +1,1196 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>A life of possibilities  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">A Life of Possibilities</h2>
+	<div class="entry-content"><h2>More actions shit</h2>
+
+<p>Scenario: mobile app, I have a back button, I don&#8217;t want it to cause
+another transition if the app is in mid-transition.</p>
+
+<p>Mid-transition means:</p>
+
+<ul>
+<li>data has already started loading for a target route, or</li>
+<li>some animation is underway, e.g. liquid fire</li>
+</ul>
+
+
+<p>Present day Ember:</p>
+
+<ul>
+<li><code>willTransition</code> hook to check some &#8220;isTransitioning&#8221; state (which you
+have to remember to properly set and unset (though ember could/should
+probably provide this for you))</li>
+<li>some other router reopen hook, override transitionTo behavior. Pretty
+crappy.</li>
+</ul>
+
+
+<p>React w react-router:</p>
+
+<pre><code>Router.run(routes, function (Handler) {
+  // custom data-loading logic, construct your own chain of promises
+  // ...
+  // maybe use flatMapLatest so that you're only responding to the
+  // most recent transition, and then eventually:
+  // React.render(&lt;Handler/&gt;, document.body);
+
+  // this could be modeled by a stream 
+});
+</code></pre>
+
+<p>Hmm so I want to be able to push values into a stream (let&#8217;s call it raw
+stream), but have it only come out the other side if some other&#8230;
+stream? predicate? allows it.</p>
+
+<h2>Rx/Bacon Diagrams</h2>
+
+<ul>
+<li>Bacon: <code>flatMapConcat</code> (or <code>flatMapWithConcurrencyLimit(1)</code>)</li>
+<li>Rx: <code>concatAll</code></li>
+</ul>
+
+
+<p>Flatten, preserve order of previously started streams (buffers later streams)</p>
+
+<pre><code>...{1}
+......{2........3}
+.........{}
+............{4}
+{...1..2........3.4}
+</code></pre>
+
+<ul>
+<li>Bacon: <code>flatMap</code> (or <code>flatMapWithConcurrencyLimit(infinity)</code>)</li>
+<li>Rx: <code>mergeAll</code></li>
+</ul>
+
+
+<p>Flatten, don&#8217;t preserve order (no buffering). (limiting concurrency
+means buffering).</p>
+
+<pre><code>...{1}
+......{2........3}
+.........{}
+............{4}
+
+produces
+{...1..2.....4..3}
+</code></pre>
+
+<ul>
+<li>Bacon: <code>flatMapLatest</code></li>
+<li>Rx: <code>switchLatest</code></li>
+</ul>
+
+
+<p>Flatten, unsubscribe from previous streams, RIGHT when the new stream
+begins, not on its first value!</p>
+
+<pre><code>...{1}
+......{2........3}
+............{4}
+
+produces
+{...1..2.....4}
+</code></pre>
+
+<p>and</p>
+
+<pre><code>...{1}
+......{2........3}
+............{.........4}
+
+produces
+{...1..2.....4}
+</code></pre>
+
+<h2>CircleCI uses ClojureScript/Om</h2>
+
+<p>http://blog.circleci.com/local-state-global-concerns/</p>
+
+<h2>MRR</h2>
+
+<p>Monthly recurring revenue: a way to calculate monthly revenue based off
+of multiple dissimilar subscription terms.</p>
+
+<h2>Observable of 1 is a promise</h2>
+
+<p>http://www.infoq.com/presentations/async-programming-netflix</p>
+
+<p>Promises can&#8217;t be cancelled.</p>
+
+<ul>
+<li>Work is already being done (in flight)</li>
+<li>No way to stop it</li>
+</ul>
+
+
+<p>Observables are lazy. You can build a giant nested logical chunk of
+observable but nothing happens until, say, a <code>forEach</code> subscribes to the
+result of an observable that all the internal logic kicks into place.
+Not true for promises (unless someone implements a lazy thennable).</p>
+
+<p>TODO: hot vs cold observables distinction? does this exist in bacon?</p>
+
+<p>This is how the <code>retry</code> operator works&#8230; in the same way you can call
+<code>forEach</code> N times on an observable and kick start all the internal
+logic/event handlers, retry will internally do this until it gets a
+non-error response.</p>
+
+<p>This is unless promises, which have the <code>.then</code> operator:</p>
+
+<ul>
+<li>Regardless of whether you call <code>.then</code>, the promise logic has already started</li>
+<li>Calling <code>.then</code> at the same time just subscribes to the single,
+already running promise, and <code>.then</code> on an already resolved promise
+just returns that.</li>
+</ul>
+
+
+<!--more-->
+
+
+<h2>phone it in</h2>
+
+<p>http://www.urbandictionary.com/define.php?term=phone+it+in</p>
+
+<blockquote><p>Perform an act in a perfunctory, uncommitted fashion, as if it didn&#8217;t matter.</p>
+
+<p>She sang the National Anthem, but she was just phoning it in as far as I could tell.</p></blockquote>
+
+<h2>ENZ in Trojan ENZ</h2>
+
+<p>https://answers.yahoo.com/question/index?qid=20070211111727AAnr6Kn</p>
+
+<p>It refers to the reservoir tip at the end (ENZ = ends) to prevent fluids
+from leaking from rubbing.</p>
+
+<h2>Clojure: &#8220;classes&#8221; not coupled to namespace</h2>
+
+<p>In Clojure, given you have, say, a Person record, you can extend Person
+to two different protocols that have the same method name (so long as
+those protocols are in two different namespaces. This is a nice because
+in, say, Java, you might be implementing methods from N different
+interfaces, yet (possibly unnecessarily) sharing the same private data
+and other items on the same namespace.</p>
+
+<h2>defrecord</h2>
+
+<pre><code>(ns alex/wat)
+
+(defprotocol ALEX (lol [a]))
+
+(defrecord AlexThing [a b c]
+  ALEX
+  (lol [a] (println a)))
+</code></pre>
+
+<p>err clearly i&#8217;m doing something wrong&#8230; this is null pointer
+exceptioning.</p>
+
+<h2>can&#8217;t use recur and get polymorphism</h2>
+
+<p>Unlikely to bite, but worth pointing out that whatever you pass as the
+first arg to <code>recur</code> won&#8217;t dynamically dispatch, because <code>recur</code> is
+really just a looping construct. I can&#8217;t see how this would actually
+matter though? Maybe I don&#8217;t get it.</p>
+
+<h2>ISeq, IPersistentStack</h2>
+
+<p><code>I</code> stands for interface.</p>
+
+<h2>Dynamic Dispatch</h2>
+
+<p>Dynamic dispatch is the selection of which method to run in a
+polymorphic setting. Which implementation of <code>foo</code> should run here?</p>
+
+<pre><code>(foo thing)
+</code></pre>
+
+<p>From what I understand, Clojure will look for protocols that specify
+<code>foo</code> and check if <code>thing</code> is part of that. If a protocol is found but
+<code>thing</code> doesn&#8217;t implement it, then boom, but Clojure will also try and
+find a multi-method. (TODO: figure out the order of resolution?)</p>
+
+<p>Multimethods can be simple and dispatch on the type of some map
+property, or it can run a more complicated functions to determine which
+to run. I believe the difference between this and switch-on-type
+inheritance is blah blah blah write this later.</p>
+
+<h2>famo.us</h2>
+
+<p>http://famo.us/university/</p>
+
+<p>Baby&#8217;s first famous.</p>
+
+<p>TODO: Engines, Contexts, and Surfaces.</p>
+
+<p>Surfaces</p>
+
+<ul>
+<li>Seems to pos abs, 100% width and height by default; size actually
+inherits from parent surface/context.</li>
+</ul>
+
+
+<p>State Modifiers</p>
+
+<ul>
+<li>seem to just wrap transform matrices</li>
+</ul>
+
+
+<p>http://devchat.tv/js-jabber/128-jsj-famo-us-with-steve-newcomb</p>
+
+<ul>
+<li>Rendering in the browser is faster than rendering in the browser
+
+<ul>
+<li>Multiplying matrices is CPU-bound</li>
+<li>Browsers were meant to lay out text docs w links, etc., that&#8217;s
+highly optimized</li>
+<li>Layout engine optimized for matrix-based layouts; famo.us layout
+engine &#8220;14x&#8221; faster than using CSS-based browser matrices. Why?
+Because lots of browser layout stuff <em>isn&#8217;t</em> GPU stuff, but rather
+the static text layout stuff that <em>is</em> highly optimized.</li>
+</ul>
+</li>
+<li>Create the scene in JS
+
+<ul>
+<li>Post to DOM
+
+<ul>
+<li>used for context, text/titles</li>
+</ul>
+</li>
+<li>Post to SVG</li>
+<li>Post to WebGL
+
+<ul>
+<li>high end graphics</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>e.g. write in famo.us, use their render tree, render to each thing</li>
+<li>vs ionic
+
+<ul>
+<li>ionic still relies on DOM</li>
+<li>famo.us puts way more into JavaScript, render tree / physics engine
+all lives in JS.</li>
+<li>future-feasible to run ionic templates in famo.us</li>
+</ul>
+</li>
+<li>rendering in famo.us
+
+<ul>
+<li>render the RenderTree</li>
+<li>based on that, produce flattest dom possible
+
+<ul>
+<li>important to minimize DOM and manage it wisely, else reflow, frame
+rate volatility</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Physics Engines
+
+<ul>
+<li>Unreal / iOS</li>
+<li>Native-feeling animations; prevent the feeling of html5</li>
+</ul>
+</li>
+<li><p>Docker</p>
+
+<ul>
+<li>docker containers</li>
+<li>containing a system, making it highly portable</li>
+<li>famous wants a front-end container, e.g. write a carousel container,
+implementations might swap as time goes on, fetching all the
+libraries to present it happens automatically, etc.</li>
+</ul>
+</li>
+<li><p>align</p>
+
+<ul>
+<li>sets anchor point on the element (defaults to upper left corner)</li>
+</ul>
+</li>
+<li>origin
+
+<ul>
+<li>sets default 0,0 point that children will be inserted into.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>wtf is a graphics context</h2>
+
+<p>Wtf is context is general. Is it unavoidable that this word be used all
+the time?</p>
+
+<p>https://developer.apple.com/library/mac/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/dq_overview/dq_overview.html#//apple_ref/doc/uid/TP30001066-CH202-TPXREF131</p>
+
+<p>It comes up in so many graphicsy shit. It kinda just means &#8220;where all
+state is stored&#8221;.</p>
+
+<p>You have an Engine, where all the API logic (and maybe hardware
+interfacing logic) lives, and you have to feed it different contexts to
+operate on.</p>
+
+<p>Both Quartz and famo.us describe the context as a &#8220;drawing destination&#8221;;
+in Quartz you could apply the same butterfly-drawing routines to both a
+page that you want to print on, or a bitmap graphics context, or a
+window context (obtained by your application from the window server).</p>
+
+<h2>Opqaue Data Type</h2>
+
+<p>A data type whose interface is incompletely specified, and only
+internal, private fns/methods have access to its internals. e.g. the
+Quartz 2D graphics context is an opaque data type; you don&#8217;t/can&#8217;t care
+what its internals are but you know you have to supply it to all API
+calls (or like OpenGL you might be able to swap out the current graphics
+context).</p>
+
+<p>Usually the context includes the canvas that you&#8217;re drawing to, current
+fill color, depth of field settings, etc.</p>
+
+<h2>Rx Marbles</h2>
+
+<p>http://rxmarbles.com/</p>
+
+<ul>
+<li>sample: Use one stream to control the sample rate of another.</li>
+<li>startWith: create a new stream that immediately emits a value</li>
+<li>distinct: remember past values, prevent refires</li>
+<li>distinctUntilChanged: pretty much just &#8220;uniq&#8221;? prevent duplicate
+values in a row</li>
+<li>findIndex: return the index of the stream</li>
+<li>pausable: zip two stream, true/false values of one starts/stops the
+flow of the other: HINT HINT HINT can totally use this for pausing
+streams during animations / route transitions / any async shit!</li>
+<li>pausableBuffered: remember/buffer the paused items, fire them once
+&#8220;true&#8221; comes in!!!!!!!</li>
+<li>skip/take: skips or takes the first N elements</li>
+<li>skipLast/takeLast: skips or takes the last N elements of the stream;
+is smart enough to start emitting values if the buffered size exceeds
+N, rather than naively waiting for the stream to run to completeion</li>
+<li>skipUntil: ignore shits until the thing comes in.</li>
+</ul>
+
+
+<h2>Reactive MVC</h2>
+
+<p>http://futurice.com/blog/reactive-mvc-and-the-virtual-dom</p>
+
+<ul>
+<li>React inspired by reactive programming, ended up mix of interactive
+and reactive patterns: TODO what is interactive?</li>
+<li>If a change in <code>foo</code> affects <code>bar</code>, and <code>foo</code> is responsible for
+telling <code>bar</code>, it&#8217;s interactive; reactive would be <code>bar</code> just
+magically responding&#8230;</li>
+<li>Interactive: &#8220;module X defines which others modules X affects&#8221;</li>
+<li>Reactive: &#8220;module X defines which other modules affects X&#8221;
+
+<ul>
+<li>often implemented w EventEmitter (see below)</li>
+</ul>
+</li>
+<li>Controllers are inherently interactive, so get rid of em</li>
+<li>Models should export Observables, views should subscribe to model
+events.</li>
+<li>Fill the gap of controller:</li>
+</ul>
+
+
+<h2>EventEmitter</h2>
+
+<pre><code>#!/usr/bin/env node
+
+var EventEmitter = require('events').EventEmitter;
+
+var ee = new EventEmitter();
+
+ee.on('wattles', function(foo) {
+  console.log("received some serious wattles", foo);
+});
+
+console.log("numlisteners:", ee.listeners('wattles').length)
+
+setTimeout(function() {
+  ee.emit('wattles', 123);
+}, 2000);
+</code></pre>
+
+<h2>Kefir.js</h2>
+
+<p>http://pozadi.github.io/kefir/</p>
+
+<p>FRP JS lib based on Bacon and Rx but focused on high perf, low mem
+usage.</p>
+
+<p>Like Bacon, it distinguishes b/w Properties and EventStreams.</p>
+
+<h2>Cycle.js</h2>
+
+<p>https://github.com/staltz/cycle</p>
+
+<p>This framework is based on the seminal blog
+http://futurice.com/blog/reactive-mvc-and-the-virtual-dom</p>
+
+<p>and these slides http://staltz.com/dont-react</p>
+
+<h2>Ideas</h2>
+
+<p>I believe Cycle.js has no concept of a component. The idea that even a
+little business / stateful logic lives in the component riles that guy&#8217;s
+feathers, but components are crucial for simplifying the mental model
+and easily packaging / reusing things. Seems that nuts hasn&#8217;t been
+cracked in Cycle.js yet.</p>
+
+<p>UPDATE: components are custom elements in cycle.js
+https://github.com/staltz/cycle/blob/master/src/custom-elements.js</p>
+
+<p>(There&#8217;s also unanswered questions about minimizing use of globals,
+dependency injection, etc.)</p>
+
+<p>It also seems pretty bad that there&#8217;s lots of examples of reaching in
+and grabbing the <code>data-wat-id</code> out of the event target.</p>
+
+<p>So it still seems pretty good that the job of a component is to
+translate DOM events into component domain events. A DayCellComponent
+in a calendar should translate click/tap events&#8230;</p>
+
+<h2>Taps/Clicks, who&#8217;s responsible?</h2>
+
+<p>Is it up to a component to discern b/w a tap and a click? Some other way
+of using input stream?</p>
+
+<p>In Ember we could do something like override &#8220; to mean
+different things in different contexts, tap vs click (which I use).</p>
+
+<p>It&#8217;s pretty nice being able to do that; I guess in React you&#8217;d use
+<code>withContext</code>?</p>
+
+<p>This seems like a nice hookable thing for event delegation&#8230; oh wait it
+already is in ember.</p>
+
+<p>Maybe &#8220; should declare an input stream that you can hook into
+n the component?</p>
+
+<p>HERE IS a very concrete question I&#8217;d like to resolve:</p>
+
+<p>Given:</p>
+
+<ul>
+<li>You have a list of items</li>
+<li>Selecting an item expands an item</li>
+<li>Only one item can be expanded at a time</li>
+<li>In a desktop setting, &#8220;selections&#8221; happen via clicks, in a mobile
+setting, &#8220;selections&#8221; happen via taps</li>
+</ul>
+
+
+<p>You&#8217;ll probably model this with:</p>
+
+<ul>
+<li>a ListComponent</li>
+<li>ItemComponents</li>
+</ul>
+
+
+<p>My beef (and TODO list):</p>
+
+<ul>
+<li>Does it make sense for <code>ItemComponent</code>s to attach their own event
+listeners?
+
+<ul>
+<li>What if they just got a stream of input? That means something
+outside could:
+
+<ul>
+<li>decide whether taps or clicks were to be used for selection,
+and child components would just receive a selectionEventStream
+that they could respond to
+
+<ul>
+<li>Hmmm, but given the constraint</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Note that iOS let&#8217;s you suspend/resume touch interactions in general:
+http://iosdevelopertips.com/event-handling/suspend-touch-events.html
+But I think we want something more granular.</p>
+
+<p>There seems to be a tug of war between re-render everything and
+streamify everything. E.g. you diff the data and get per item stream
+updates of isExpanded streams&#8230; so that you can re-render only those
+items&#8230;? What&#8217;s the goal of this?</p>
+
+<p>If you have virtual dom and re-render all the time, then when you do
+want streams?</p>
+
+<ul>
+<li>Business logic, series of queries, async, and updating properties
+along the way. Maybe UI isn&#8217;t much of a place for streams?
+Unless I can show that there is UI not elegantly handled by virtual
+DOM, I should drop trying to force streams into UI somehow&#8230;</li>
+<li>It still seems like there&#8217;s a place for it though in app state in
+general, particularly in actions management.
+
+<ul>
+<li>In particular, I never want to have to set some isLoading flag every
+again. I should never have to check timerIds and cancel them ever
+again. I should never have a bunch of transient properties every
+again. Actions should jump start some process and you can listen to
+their completion. Everything else: virtual dom (and virtual dom
+can/should depend on these properties that you expose). Virtual DOM
+state is explicit.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>OK WE ARE GETTING CLOSE: handlebars/htmlbars templates have the benefit
+of declaring loud and clear which properties are depended on for
+rendering. If any of those properties change, it amounts to an implicit
+setState. Otherwise there&#8217;s no need to re-render (this is all still
+implying that KVO exists in Ember somehow).</p>
+
+<pre><code>dismissStream = timer(2000).map(() =&gt; false)
+newActionStreams = ... something that fires when a new event starts
+// newActionStreams = filter(UIevents, () =&gt; actionIsUnderway???)
+postActionMessageStream = race(dismissStream, newActionStreams)
+</code></pre>
+
+<p>OK OK OK so what I want is a way to express</p>
+
+<ul>
+<li>progression of time in a template</li>
+<li>current values, certain flags, etc, without setting boolean properties</li>
+</ul>
+
+
+<p>Let&#8217;s say we have a stream of status on some complex multi-step async
+process:</p>
+
+<pre><code>observable = someUIEvent.flatMapLatest(some ajax with retries)
+                        .followedBySomeOtherAsync
+                        .followedBySomeOtherThing
+
+// maybe...
+observable = someUIEvent(someAjaxThing).flatMapLatest(some ajax with retries).state("stepOne")
+                        .followedBySomeOtherAsync.state("stepTwo")
+                        .followedBySomeOtherThing.state("stepThree")
+</code></pre>
+
+<p>There&#8217;s not really a nice mechanism for representing this in a
+template without a lot of manual <code>.set</code>s. It&#8217;s like we want some kind of
+switch statement?</p>
+
+<pre><code>    &lt;h3&gt;Loading  items from server&lt;/h3&gt;
+
+    &lt;p&gt;
+      Here are all the step one things.
+    &lt;/p&gt;
+
+    &lt;h3&gt;Please select from the following options:&lt;/h3&gt;
+
+    &lt;ul&gt;
+
+        &lt;li &gt;&lt;/li&gt;
+
+    &lt;/ul&gt;
+</code></pre>
+
+<p>Does this make sense? Maybe we just want / need a switch statement in
+general. This would also have to work with LiquidFire as well&#8230;</p>
+
+<p>But what the above demonstates is:</p>
+
+<ul>
+<li>scoped properties linked to progressive states within an
+observable/promises</li>
+<li>no global/manual flag management</li>
+<li>no timer ids to set and reset</li>
+</ul>
+
+
+<p>TODO:</p>
+
+<ul>
+<li>Just have to find the sweet spot with plugging this stuff into ember
+in a way people prefer.</li>
+<li>How to you go back to a previous &#8220;state&#8221;? What is a &#8220;state&#8221;? How do
+people normally model state machines in rx?</li>
+</ul>
+
+
+<p>https://github.com/logicalguess/rx-state-machine</p>
+
+<h2>The silk road</h2>
+
+<p>http://www.wired.com/2015/01/why-silk-road-trial-matters/</p>
+
+<ul>
+<li>Ross Ulbricht
+
+<ul>
+<li>aka Dread Pirate Roberts</li>
+<li>accused of running silk road</li>
+<li>accused of hiring hitmen for 2-6 killings, none which were carried out</li>
+<li>defended by attorney Joshua Dratel, financed by a bitcoin mogul</li>
+</ul>
+</li>
+<li>Silk Road
+
+<ul>
+<li>anonymized by bitcoin and Tor</li>
+<li>copycat markets: Evolution and Agora</li>
+</ul>
+</li>
+<li>Trial
+
+<ul>
+<li>Will highlight/expose vulnerabilities for other sites to learn from</li>
+<li>Will highlight/set precedent of whether screenshots are admissible
+for evidence</li>
+</ul>
+</li>
+<li>Fourth amendment:
+
+<ul>
+<li>The Fourth Amendment (Amendment IV) to the United States Constitution is the part of the Bill of Rights that prohibits unreasonable searches and seizures and requires any warrant to be judicially sanctioned and supported by probable cause.</li>
+<li>Warrantless searches apply</li>
+<li>FBI pretty much admitted to hacking the site without warrant to
+obtain IP, find dread pirate</li>
+<li>FBI investigators likely to be questions, 4th amendment repeated again</li>
+</ul>
+</li>
+<li>Linked in profile: https://www.linkedin.com/in/rossulbricht</li>
+<li>Breaking Bad
+
+<ul>
+<li>Ulbricht first sold shrooms on silk road, then</li>
+<li>expansion into anarchist community / drug market</li>
+<li>hiring hitmen?</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>React keys vs refs</h2>
+
+<p>Clojure has a concept of refs (and similar concurrency primitives) to
+add the concept of identity to a value that changes over time (given
+that Clojure has immutable data types but still needs to synchronize
+and share data b/w threads).</p>
+
+<p>In React, you use keys to distinguish array values so that your
+renders don&#8217;t do weird things; how would this work given immutable
+datatypes?</p>
+
+<ul>
+<li>Well, if only the array changes but the items in that array are the
+same, then you&#8217;re fine</li>
+<li>But if, say, the selected item has modified, then the previous
+reference is invalid/points to an older version of the thing</li>
+</ul>
+
+
+<p>Maybe there&#8217;s a sexy way we could handle this in ember&#8230; maintain a ref
+to a changing value.</p>
+
+<h2>Observables and Observables</h2>
+
+<ul>
+<li>Observable
+
+<ul>
+<li>changing values over time</li>
+</ul>
+</li>
+<li>Observer
+
+<ul>
+<li>consumes observers</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Observables don&#8217;t do anything on their own until they&#8217;re consumed in
+some way. SO WEIRD. But the following doesn&#8217;t do anything&#8230;</p>
+
+<pre><code>var obs = Rx.Observable.return('wat').do(function(a) {
+    console.log("do", a);
+});
+</code></pre>
+
+<p>until you add</p>
+
+<pre><code>function K() {}
+obs.forEach(K);
+obs.forEach(K);
+</code></pre>
+
+<p>So what I&#8217;d like is a statemachine with its own stream events, w auto
+desubscribe/dispose/etc</p>
+
+<pre><code>var defaultState = {
+};
+
+var defaultState = {
+};
+
+var states = {
+  defaultState: {
+  },
+
+  editingItem: function() {
+    // TODO: define streams/actions for leaving this state
+    // tapping another item leaves it....
+  },
+
+  savingItem: {
+  }
+};
+</code></pre>
+
+<h2>Bacon state machine</h2>
+
+<p>http://jsbin.com/qihabo/2/edit?html,js,console,output</p>
+
+<pre><code>Bacon.fromArray([1,2,3]).withStateMachine(0, function(sum, e) {
+   if (e.hasValue()) {
+       return [sum + e.value(), []];
+   } else if (e.isEnd()) {
+       return [sum, [new Bacon.Next(function() { return sum; }), e]];
+   } else {
+       alert("asd")
+       return [sum, []];
+   }
+}).log();
+</code></pre>
+
+<p>TL;DR it&#8217;s a state machine only for computing the next value of stream,
+it&#8217;s not some implementation of a state machine or anything like that.</p>
+
+<p>Could be useful in the rare cases where you can&#8217;t represent what you
+want in the form of other stream operators.</p>
+
+<h2>Sequences of Coincidence</h2>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/17_SequencesOfCoincidence.html#SequencesOfCoincidence</p>
+
+<p>I think this is what I&#8217;ve been looking for; handling actions differently
+if they occur within the &#8220;window&#8221; of another event, e.g. &#8220;handle these
+actions if they happen while a given route is active (and the router is
+stable / not loading transitions)&#8221;.</p>
+
+<p>Buffers are conceptually grouped with window operators:</p>
+
+<p>It converts a stream of values into a stream of buffered arrays of
+values, buffered according to time, or some buffer size, or whatever.
+In other words buffer takes <code>IObservable&lt;T&gt;</code> and returns
+<code>IObservable&lt;IList&lt;T&gt;&gt;</code>.</p>
+
+<pre><code>source|-0-1-2-3-4-5-6-7-8-9|
+result|-----0-----3-----6-9|
+            1     4     7
+            2     5     8
+</code></pre>
+
+<p>The analogy is that a window is open when Buffer receives first value,
+and window closes when buffer&#8217;s full or time elapses.
+Windows return <code>IObservable&lt;IObservable&lt;T&gt;&gt;</code></p>
+
+<p>So the subscribe handler of a window passes you the observable, rather
+than the already flattened List that Buffer would give to you.</p>
+
+<p>So in rxjs: http://jsbin.com/colora/3/edit</p>
+
+<pre><code>var source = Rx.Observable.timer(0, 50)
+  .window(function () { return Rx.Observable.timer(125); })
+  .take(4)
+  .flatMap(function (x) { return x.toArray(); });
+
+var subscription = source.subscribe(
+  function (x) {
+    console.log('Next: ' + x);
+  },
+  function (err) {
+    console.log('Error: ' + err);
+  },
+  function () {
+    console.log('Completed');
+  });
+</code></pre>
+
+<p>produces</p>
+
+<pre><code>"Next: 0,1,2"
+"Next: 3,4,5"
+"Next: 6,7"
+"Next: 8,9,10"
+</code></pre>
+
+<p>Why 6,7? Because the initial timer w 50ms period never stops firing:</p>
+
+<pre><code>starting timer: 0----50---100--150--200--250--300--350--400--450--500--550--600--650
+close timer:    0-----------125----------250---------375----------500
+window1:        0    1     2 |
+window2:                        3    4   5|
+window3:                                       6   7  |
+window4:                                                 8   9  10|
+</code></pre>
+
+<p>The 50ms period never stops firing and it&#8217;s on the third iteration where
+because of the relative late start of the next period timer firing after
+the beginning of the 125ms close interval, it can only get 2 events in
+before the stream closes.</p>
+
+<p>SO WTF do I want to do with this: something about windows for
+currently active route states? Does that make sense?</p>
+
+<p>There&#8217;s apparently a version that lets you overlap windows&#8230; why would
+this be useful? I don&#8217;t know! And it doesn&#8217;t seem like it&#8217;s implemented
+in RxJS, but the idea is you provide an observable that fires when a
+window should be opened, and a close observer that runs for each new
+window, so if your close fires at a larger interval than opens happen,
+then you&#8217;ll have overlapping streams, which I guess means, say, a &#8220;3&#8221; or
+&#8220;4&#8221; might be fired on multiple streams sprung up.</p>
+
+<h2>RxJs Joins</h2>
+
+<p>Note that all of this is part of the <code>coincidence</code> lib of Rx.</p>
+
+<p>Join operator joins too sequence; zip is kind of a join, but zip is based
+on index, and join does sequences.</p>
+
+<p>zip accepts</p>
+
+<ul>
+<li>a &#8220;left&#8221; observable: each value produced opens another window</li>
+<li>a &#8220;right&#8221; observable: produces values that pair open with the values
+of left, while left stream is still open.</li>
+<li>a &#8220;left duration&#8221; fn: returns an observable whose first value or
+closing will close the left-generated observable (note: it doesn&#8217;t
+even matter what type the closing value/observable is)</li>
+</ul>
+
+
+<p>So &#8220;right&#8221; values that start after &#8220;left&#8221; values will still be joined
+with cached, previously opened windows. e.g.</p>
+
+<pre><code>L 0-1-2-3-4-5-
+</code></pre>
+
+<p>plus</p>
+
+<pre><code>R --A---B---C-
+</code></pre>
+
+<p>produces</p>
+
+<pre><code>0, A
+1, A
+0, B
+1, B
+2, B
+3, B
+0, C
+1, C
+2, C
+3, C
+4, C
+5, C
+</code></pre>
+
+<p>Interesting:</p>
+
+<blockquote><p>Now it seems fairly obvious that, if I immediately closed the window by returning Observable.Empty<Unit>, or perhaps Observable.Return(0), windows would never be opened thus no pairs would ever get produced. However, what could I do to make sure that these windows did not overlap- so that, once a second value was produced I would no longer see the first value? Well, if we returned the left sequence from the leftDurationSelector, that could do the trick. But wait, when we return the sequence left from the leftDurationSelector, it would try to create another subscription and that may introduce side effects. The quick answer to that is to Publish and RefCount the left sequence. If we do that, the results look more like this.</p></blockquote>
+
+<p>In Rx the default is to always create a new subscription; it&#8217;s NOT like
+a promise whereby a singleton promise has already started firing.
+Solution: use Publish.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/publish.md</p>
+
+<p>Publish allows for the sharing of subscriptions.</p>
+
+<p>So my question is&#8230; does publishing on its own start its own
+subscription? Naw, I think you need to call <code>connect</code> once you&#8217;ve added
+all your subscribers.</p>
+
+<p>http://jsbin.com/colora/6/edit</p>
+
+<pre><code>var obs = Rx.Observable.return('wat').do(function(a) {
+  console.log("do", a);
+});
+
+var p = obs.publish();
+
+function K() {}
+p.forEach(K);
+p.forEach(K);gma
+
+
+// uncomment this to actually fire side effects
+//p.connect();
+</code></pre>
+
+<p>refCount is hard to describe&#8230;</p>
+
+<p>http://stackoverflow.com/questions/7509503/how-can-i-create-an-rx-observable-which-stops-publishing-events-when-the-last-ob/7510245#7510245</p>
+
+<p>Publish as in pub sub&#8230; you want to stop consuming resources once
+everyone&#8217;s stopped subscribing?</p>
+
+<p>http://www.zerobugbuild.com/?p=144</p>
+
+<p>Publish creates a hot subscription, refCount makes it close when
+subscribers are zero.</p>
+
+<p>If you don&#8217;t do <code>refCount</code>, you have to do <code>connect</code>. If you don&#8217;t do
+<code>connect</code> or <code>refCount</code>, I think the subscription never gets activated,
+or something? I still don&#8217;t get it&#8230;</p>
+
+<p>Anyway, back to join:</p>
+
+<blockquote><p>The quick answer to that is to Publish and RefCount the left sequence. If we do that, the results look more like this:</p></blockquote>
+
+<pre><code>left  |-0-1-2-3-4-5|
+right |---A---B---C|
+result|---1---3---5
+          A   B   C
+</code></pre>
+
+<p>TL;DR once you start using right duration selector, you can implement
+other operators.</p>
+
+<p>TODO: watch
+http://channel9.msdn.com/Shows/Going+Deep/Bart-De-Smet-MinLINQ-The-Essence-of-LINQ</p>
+
+<h2>console.log printf</h2>
+
+<p>Saw this in Rx docs: https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/timer.md</p>
+
+<pre><code>console.log("wat %s", 3);
+</code></pre>
+
+<p>Prints &#8220;wat 3&#8221; (but jsbin&#8217;s console.log override is not smart enough to
+substitute).</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-07T14:07:00-05:00" pubdate data-updated="true">Jan 7<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/01/07/a-life-of-possibilities/';
+        var disqus_url = 'http://machty.github.com/blog/2015/01/07/a-life-of-possibilities/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,431 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Xorblasm  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Xorblasm</h2>
+	<div class="entry-content"><h2>Frameless App</h2>
+
+<p>Chromeless app, nothing more than a webview really, for quick
+prototyping of mobile web apps.</p>
+
+<p>https://itunes.apple.com/us/app/frameless-full-screen-web/id933580264?mt=8</p>
+
+<h2>Servo</h2>
+
+<p>Parallel browser project written in Rust for parallel execution, memory
+safety, etc. Doesn&#8217;t intend to be a full on user-facing browser, but
+intends to have other folk build on top of it.</p>
+
+<p>http://blog.servo.org/</p>
+
+<h2>&#8220;use strict&#8221;; as opposed to sloppy</h2>
+
+<p>Non <code>"use strict";</code> mode is AKA sloppy mode.</p>
+
+<h2>Safari inspector learnings</h2>
+
+<p>There are THREE TABS:</p>
+
+<ul>
+<li>Resources (ctrl + 1)</li>
+<li>Timelines (ctrl + 2)</li>
+<li>Debugger (ctrl + 3)</li>
+</ul>
+
+
+<p>They control the middle view, but when active they can be clicked again
+to remove the left panel. THAT IS KINDA FUCKED UI, PEOPLE.</p>
+
+<p>Pressing Escape a bunch of times always yields Console, for which there
+is a full on console tab, but in Resources (1) and Debugger (2) you can
+open a debugger on the bottom, but on Timelines I guess it doesn&#8217;t make
+sense to embed that console. Alt+Command+C opens the full on console.
+Functionality on full screen console and embedded console seems the
+same.</p>
+
+<p>Filter vs Search resources:</p>
+
+<ul>
+<li>filter: filename only</li>
+<li>search: searches file contents</li>
+</ul>
+
+
+<h2>TIL <code>sessionStorage</code></h2>
+
+<p>Ridiculous, why is this useful? Why is this fundamentally different than
+a global var?</p>
+
+<h2>(Safari) Webarchive</h2>
+
+<p>http://en.wikipedia.org/wiki/Webarchive</p>
+
+<p>Save all resources associated w a document, used by Safari.</p>
+
+<p>You can go to Resources tab and click the down arrow to download a
+webarchive.</p>
+
+<h2>Tiled Rendering</h2>
+
+<p>Android and pretty much everyone uses tiled rendering.</p>
+
+<p>http://en.wikipedia.org/wiki/Tiled_rendering#cite_note-1</p>
+
+<p>&#8220;Show composited layer borders&#8221; in chrome will show you all the layers
+that get uploaded to the GPU, after which the GPU does compositing. So
+you paint w CPU and then composite on the GPU.</p>
+
+<h2>Continuous Repaint</h2>
+
+<p>Repaints don&#8217;t happen all the time, but you still might want to identify
+which parts of the page are slow to paint, so you can force the renderer
+to repaint all the things all the time by enabling this setting, showing
+and removing sections.</p>
+
+<p>https://developer.chrome.com/devtools/docs/rendering-settings</p>
+
+<h2>Chrome Timeline Counters</h2>
+
+<ul>
+<li>Listeners: [1:4]</li>
+</ul>
+
+
+<p>means that at the start of listening, there was 1 listener, and at the
+end, there were 4.</p>
+
+<h2>Sysdig</h2>
+
+<p>http://www.sysdig.org/</p>
+
+<blockquote><p>Think of it as strace + tcpdump + lsof + awesome sauce.</p></blockquote>
+
+<h2>Gradle daemon and parallel</h2>
+
+<p>Add this to your <code>gradle.properties</code>:</p>
+
+<pre><code>org.gradle.daemon=true
+org.gradle.parallel=true
+</code></pre>
+
+<p>IT DOES WHAT YOU THINK IT DOES.</p>
+
+<h2>Comme de Garcons</h2>
+
+<p>http://en.wikipedia.org/wiki/Comme_des_Gar%C3%A7ons</p>
+
+<p>Heart with eyes logo.</p>
+
+<h2>Cul-de-sac</h2>
+
+<p>http://en.wikipedia.org/wiki/Cul-de-sac</p>
+
+<p>It just means a fucking dead end. DEAD END.</p>
+
+<p>One of these shits:</p>
+
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/b/b2/Cul-de-Sac_cropped.jpg" alt="cul de sac" /></p>
+
+<h2>Live updates in Cordova</h2>
+
+<ul>
+<li>HTTP caching
+
+<ul>
+<li>Make sure the WebView is set up to cache</li>
+<li>Do we have control over that though? What if webview ejects these
+items from cache? Can we prevent that?</li>
+<li>Assuming full, non-forgetting HTTP caching is an option:
+
+<ul>
+<li>user session GET query returns assets that the user should use</li>
+<li>webview downloads them; assets are aggressively cached</li>
+</ul>
+</li>
+<li>But what about</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>HTMLBars attr interpolation</h2>
+
+<pre><code>&lt;div attr=&gt;
+</code></pre>
+
+<p>vs
+,[</p>
+
+<pre><code>&lt;div attr=""&gt;
+</code></pre>
+
+<p>The rule is that quotes ALWAYS means string interpolation. Even if the
+above evals to the same thing, the latter goes through a layer of string
+interpolation.</p>
+
+<h2>Broccoli funnel</h2>
+
+<p>subset of a tree, matched by regex.</p>
+
+<p>https://www.npmjs.com/package/broccoli-funnel</p>
+
+<h2>Ember-cli-addons</h2>
+
+<p>Hahah of course, just including an ember-cli addon doesn&#8217;t mean</p>
+
+<h2>No property syntax in ES6 class syntax</h2>
+
+<p>This is intentional. You have to set all your properties in the
+<code>constructor()</code>.</p>
+
+<h2>popState, router stuff</h2>
+
+<p>I need to fix this:</p>
+
+<p>https://github.com/emberjs/ember.js/pull/9752</p>
+
+<p>Transitions need to be undoable.</p>
+
+<ul>
+<li>pushState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
+
+<ul>
+<li>undo: popState</li>
+</ul>
+</li>
+<li>replaceState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
+
+<ul>
+<li>undo: replaceState(&#8216;bar&#8217;)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>No such support for back button w HashLocation.</p>
+
+<blockquote><p>Clicking back and then clicking forward, and aborting the transition in the willTransition is still broken. The reason is that when I hit back I now the previous route, but when I hit back and then forward again I don&#8217;t have that info.</p></blockquote>
+
+<p>You don&#8217;t have &#8220;forward&#8221;. Like, the URL you&#8217;re going to?</p>
+
+<h2>onpopstate fires for all changes?</h2>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#The_popstate_event</p>
+
+<p>Weird.</p>
+
+<p>http://jsbin.com/coxega/1#foo</p>
+
+<p>Poorly named?</p>
+
+<blockquote><p>Browsers tend to handle the popstate event differently on page load. Chrome (prior to v34) and Safari always emit a popstate event on page load, but Firefox doesn&#8217;t.</p></blockquote>
+
+<h2>.npmignore defaults to .gitignore</h2>
+
+<p>nuff said.</p>
+
+<h2>How do preview a publish?</h2>
+
+<p><code>npm pack</code></p>
+
+<p>Then inspect the tgz.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-10T11:04:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2014/12/10/xorblasm/';
+        var disqus_url = 'http://machty.github.com/blog/2014/12/10/xorblasm/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
