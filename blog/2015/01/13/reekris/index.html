@@ -1,0 +1,828 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Reekris  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Reekris</h2>
+	<div class="entry-content"><h2>More on Rx state machines</h2>
+
+<p>From https://github.com/logicalguess/rx-state-machine</p>
+
+<pre><code>// Pattern:
+// 1. start off with initial door state, 
+// 2. scan the UI event stream with a initial door state and a
+//    transforming function. The transforming function is the thing
+//    that runs the UI event on the current state, and returns the next state.
+//    In this case the transforming fn is `transition`.
+events.scan(door, transition).map(doorStatus)
+    .subscribe(function (value) {
+        view.render(value);
+    });
+</code></pre>
+
+<p>So what I want to do is expose an API where you can group related events
+into states, possibly share events between states, get an actions stream,
+and&#8230; somehow transition elsewhere after that?</p>
+
+<pre><code>var state = {
+  submitForm: function() {
+    // this is just a normal callback handler, just like actions api
+  },
+
+  // but maybe if you decorate your handler in some way...
+  $submitForm: function(stream) {
+    // ... you get a stream of actions instead
+    // What should this API look like? How to export another stream
+    // or property? 
+    // Goals:
+    // - make it easy/possible to
+    //   - derive flag/state from action progress
+    //   - 
+  }
+};
+
+&lt;form &gt;
+  &lt;SubmitButton action='submitForm'&gt;
+&lt;/form&gt;
+</code></pre>
+
+<h2>Harness</h2>
+
+<p>I don&#8217;t think I&#8217;ve ever grokked the word &#8220;harness&#8221; in a computer science
+context.</p>
+
+<blockquote><p>a set of straps and fittings by which a horse or other draft animal is fastened to a cart, plow, etc., and is controlled by its driver.</p></blockquote>
+
+<p>So, a horse harness, wrapped around a horse to control it. Or a
+parachute harness that wraps around a person to levitate them. Or a
+child-restraining harness.</p>
+
+<pre><code>so in this case, it takes a compiled ember CLI app that can normally run by itself, adds some bootstrap code, and runs it in a different environment
+
+wrapper is maybe a synonym
+
+but with slightly different connotations
+
+I think of a harness as "holding the software in place" so you can make modifications to it, then run it
+
+whereas wrapper implies you're trying to hide the underlying software
+</code></pre>
+
+<p>So put the otherwise self-contained / self-sufficient software in a
+harness so you can run a bunch of tests on it, run it in a different
+environment.</p>
+
+<!--more-->
+
+
+<h2>BHO Butane Hash Oil</h2>
+
+<p>http://www.reddit.com/r/CrappyDesign/comments/2sacxp/this_is_butane_fluid_why/</p>
+
+<p>http://www.theweedblog.com/what-is-marijuana-butane-hash-oil-bho-and-is-it-safe/</p>
+
+<p>You can push pure liquid butane through ground marijuana, which absorbs
+the cannibinoids, and then the butane evaporates, leaving some extremely
+rich THC honey.</p>
+
+<h2>ClojureScript</h2>
+
+<p>Came after Clojure, is a pretty faithful redesign of Clojure, targeting
+JS runtime (way more faithful than the meaningless Java vs JavaScript).</p>
+
+<p>Differences:</p>
+
+<ul>
+<li>ClojureScript internally builds on top of protocols; no type-based
+dispatching like there is (internally) for Clojure/Java classes
+
+<ul>
+<li>side effect of this is that implementations for protocols can be
+scattered all over the code; it doesn&#8217;t need to bloat the definition
+of a polymorphic fn in one place where it doesn&#8217;t belong via
+manual switch/type-based dispatching</li>
+</ul>
+</li>
+</ul>
+
+
+<p><code>-</code> in a method name is just another character in the name. Used for low
+level cljs fns, has no special meaning (in the way that preceding <code>.</code>
+does).</p>
+
+<h2>Do nils still stuck in ClojureScript?</h2>
+
+<p>Gary Bernhardt (and many, many others) have been vocal about the evil of
+leaky <code>nil</code>s in your program. In Ruby it&#8217;s particularly rampant/evil
+because <code>Hash#[]</code> just returns <code>nil</code> if the key isn&#8217;t present (hence
+it&#8217;s a good practice to use <code>Hash#fetch</code> if you really expect the value
+to be there, in, say, an options hash), and whatever that value is gets
+passed around and it&#8217;s later on, far away from the original nil leak,
+that you get a <code>NoMethodError</code> on <code>NilClass</code> because you had something
+in your code that looks like:</p>
+
+<pre><code>obj.meth
+</code></pre>
+
+<p>Clojure(Script) isn&#8217;t object oriented, so it&#8217;d be something like</p>
+
+<pre><code>(some-fn obj)
+</code></pre>
+
+<p>and if you&#8217;re using protocols, you&#8217;d define <code>some-fn</code> as a function
+(method?) of that protocol, and if you wanted to &#8220;guard&#8221; against nils,
+you&#8217;d provide an implementation of that protocol for <code>nil</code>.</p>
+
+<p>So there is one benefit over OO in this case which is that you can give
+<code>nil</code> meaning in the protocol in question without having to stash a
+duck-typed method on <code>NilClass</code> (and hope no one else clobbers it),
+which means your code won&#8217;t throw an ugly exception in the case of
+<code>(some-fn obj)</code>, when it would for <code>nil.meth</code>, but there&#8217;s still damage
+done by a leaked nil: if it&#8217;s easy to produce a nil and have it
+referenced elsewhere in your code at some later time, the fact that it&#8217;s
+a class/datatype that you never expected means it&#8217;s a lot easier for
+other expected datatypes to accidentally become nil, but your
+compiler/runtime won&#8217;t raise a fuss about it because this universal nil
+object implements your protocol. If you had an error in your code and
+actually passed the wrong datatype to a protocol method (that didn&#8217;t
+implement that datatype), you&#8217;d actually get a compiler error (which is
+what you want).</p>
+
+<p>TL;DR nil leaks still exist in Clojure(Script), they&#8217;re potentially less
+damaging than in an OO setting because of protocols, but it&#8217;s still
+problematic because of the universality of <code>nil</code> and the likeliness that
+protocols will be implemented for <code>nil</code>, hiding the problem. It also
+doesn&#8217;t help that <code>(seq empty-list)</code> returns <code>nil</code>, but I&#8217;d have to
+think about this problem more to expand the scope of my criticism. :) :)
+:)</p>
+
+<p>Note: it&#8217;s also probably important to distinguish between
+intentional/accidental nils: it&#8217;s already bad to intentionally
+incorporate <code>nil</code>s into your software&#8217;s design, but accidentaly <code>nil</code>s
+do to <code>#[]</code> is even worse.</p>
+
+<p>Relevant David Nolen / Gary Bernhardt tweetoff:
+https://twitter.com/swannodette/status/555548047837380608</p>
+
+<h2>Ruby Enumerable#zip</h2>
+
+<p>This was a nice pattern: I was looking for a way to combine two arrays
+via some fn but couldn&#8217;t find it: the following seemed to work:</p>
+
+<pre><code>expected.zip(actual).all? { |a,b| a.quantity == b.quantity &amp;&amp; a.scan_code == b.scan_code }
+</code></pre>
+
+<h2>KVO vs Immutable</h2>
+
+<p>KVO is PLOP (Place Oriented Programming). Putting new values in the same
+place that everyone&#8217;s referencing, clobbering any sort of history,
+mutating &#8220;state&#8221;.</p>
+
+<p>But the nice thing is if you change that value, everyone gets updated.
+But the subscription model is KVO. There&#8217;s always a subscription model.
+Publish by replacing the place.</p>
+
+<p>Publishing immutable objects has different challenges. There&#8217;s no
+&#8220;place&#8221;. Either there&#8217;s a stream of immutable values, or a setState. All
+subscriptions must be one of those. React child components are
+&#8220;subscribed&#8221; by nature of being, well, child components, and they get
+notified by render/setState. Consumers of a stream.</p>
+
+<p>So what about async on an immutable obj? You&#8217;d probably use a promise or
+a stream, fire a publish event when it comes back. Just in the same way
+you&#8217;d do for a synchronous immutable update. This is obvious shit.</p>
+
+<h2>Clojure: rifle-oriented programming</h2>
+
+<p>http://thinkrelevance.com/blog/2009/08/12/rifle-oriented-programming-with-clojure-2</p>
+
+<p>TODO: read this</p>
+
+<h2>CSP w JS generators:</h2>
+
+<p>https://github.com/ubolonton/js-csp</p>
+
+<p>What ClojureScript accomplishes with macros, this achieves with
+generators. Hence it&#8217;s only in Chrome >= 28 (current version at time of
+writing is 39) but it&#8217;s behind experimental flag, and Firefox >= 27.</p>
+
+<h2>Slalom: Constraints, animations, touch interactions, etc</h2>
+
+<p>http://iamralpht.github.io/constraints/</p>
+
+<h2>Bitmapped vector tree</h2>
+
+<p>https://www.youtube.com/watch?v=mS264h8KGwk&amp;feature=youtu.be</p>
+
+<ul>
+<li>random access</li>
+<li>efficient push</li>
+<li>based on Phil Bagwell&#8217;s mutable Hash Array Map trie</li>
+<li>updates on a path only update that path. Everything else can get
+shared.</li>
+<li>branching factor; length of each segment. 32 is the empirically
+derived Clojure default.
+
+<ul>
+<li>7 max hops before you reach the end of an array that you can keep in
+memory</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Rx Begin and end</h2>
+
+<p>I want to express &#8220;fire resize events while the app is running&#8221;. I guess
+I&#8217;d have to create some observable that begins on app creation and ends
+on app destruction&#8230; first stab:</p>
+
+<pre><code>Rx.Observable.fromEvent(window, 'resize')
+             .takeWhile(Rx.Observable.timer(2000))
+             .forEach(function() {
+    console.log("hello");
+});
+</code></pre>
+
+<p>I&#8217;m getting some error because takeWhile expects a predicate. Maybe
+takeUntil will do it?</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/takeuntil.md</p>
+
+<p>HUZZAH: http://jsbin.com/colora/9/edit?html,js,console,output</p>
+
+<p>Now I just need to create an observable&#8230;</p>
+
+<h2>Rx Emberified</h2>
+
+<p>Didn&#8217;t expect to see this in fromEvent code in the RxJS repo:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  if (!!root.Ember && typeof root.Ember.addListener === 'function') 
+</span><span class='line'>    return fromEventPattern(
+</span><span class='line'>      function (h) { Ember.addListener(element, eventName, h); },
+</span><span class='line'>      function (h) { Ember.removeListener(element, eventName, h); },
+</span><span class='line'>      selector);
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>selectMany === flatMap</h2>
+
+<p>nuff said. Why is selectMany a good name though?</p>
+
+<h2>LINQ</h2>
+
+<p>http://en.wikipedia.org/wiki/Language_Integrated_Query</p>
+
+<p>It&#8217;s syntax introduced into .NET languages for querying lists,
+relational databases, observables, etc. Meant to be used in conjunction
+w Rx.</p>
+
+<h2>mies cljs template</h2>
+
+<p>https://github.com/swannodette/mies</p>
+
+<pre><code>▾ out/
+  ▾ cljs/
+      core.cljs
+      core.cljs.cache.edn
+      core.js
+      core.js.map
+  ▾ clojure/
+    ▾ browser/
+        event.cljs
+        event.cljs.cache.edn
+        event.js
+        event.js.map
+        net.cljs
+        net.cljs.cache.edn
+        net.js
+        net.js.map
+        repl.cljs
+        repl.cljs.cache.edn
+        repl.js
+        repl.js.map
+  ▾ goog/
+    ▾ array/
+        array.js
+    ▾ asserts/
+        asserts.js
+    ▾ async/
+        delay.js
+        nexttick.js
+        run.js
+    ▾ debug/
+        debug.js
+        entrypointregistry.js
+        error.js
+        logbuffer.js
+        logger.js
+        logrecord.js
+    ▾ disposable/
+        disposable.js
+        idisposable.js
+    ▾ dom/
+        browserfeature.js
+        dom.js
+        nodetype.js
+        safe.js
+        tagname.js
+        tags.js
+    ▾ events/
+        browserevent.js
+        browserfeature.js
+        event.js
+        eventhandler.js
+        eventid.js
+        events.js
+        eventtarget.js
+        eventtype.js
+        listenable.js
+        listener.js
+        listenermap.js
+    ▾ functions/
+        functions.js
+    ▾ html/
+        safehtml.js
+        safestyle.js
+        safeurl.js
+    ▾ i18n/
+        bidi.js
+    ▾ iter/
+        iter.js
+    ▾ json/
+        json.js
+    ▾ labs/
+      ▾ useragent/
+          browser.js
+          engine.js
+          util.js
+    ▾ log/
+        log.js
+    ▾ math/
+        coordinate.js
+        math.js
+        size.js
+    ▾ messaging/
+        abstractchannel.js
+        messagechannel.js
+    ▾ mochikit/
+      ▾ async/
+          deferred.js
+    ▾ net/
+      ▾ xpc/
+          crosspagechannel.js
+          crosspagechannelrole.js
+          directtransport.js
+          frameelementmethodtransport.js
+          iframepollingtransport.js
+          iframerelaytransport.js
+          nativemessagingtransport.js
+          nixtransport.js
+          transport.js
+          xpc.js
+        errorcode.js
+        eventtype.js
+        httpstatus.js
+        wrapperxmlhttpfactory.js
+        xhrio.js
+        xhrlike.js
+        xmlhttp.js
+        xmlhttpfactory.js
+    ▾ object/
+        object.js
+    ▾ promise/
+        promise.js
+        resolver.js
+        thenable.js
+    ▾ reflect/
+        reflect.js
+    ▾ string/
+        const.js
+        string.js
+        stringbuffer.js
+        typedstring.js
+    ▾ structs/
+        collection.js
+        map.js
+        set.js
+        structs.js
+    ▾ testing/
+        watchers.js
+    ▾ timer/
+        timer.js
+    ▾ uri/
+        uri.js
+        utils.js
+    ▾ useragent/
+        useragent.js
+      base.js
+      deps.js
+  ▾ hello_world/
+      core.cljs
+      core.cljs.cache.edn
+      core.js
+      core.js.map
+▸ scripts/
+▸ src/
+▾ target/
+  ▾ cljsbuild-compiler-1/
+    ▸ cljs/
+    ▸ clojure/
+    ▸ hello_world/
+      constants_table.js
+  hello_world.js
+  hello_world.min.js
+  index.html
+  project.clj
+  README.md
+</code></pre>
+
+<h2>Rx return vs of</h2>
+
+<pre><code>Rx.Observable.of(1,2,3,4)
+</code></pre>
+
+<p>vs</p>
+
+<pre><code>Rx.Observable.return(1)
+// aliases
+Rx.Observable.just(value, [scheduler])
+Rx.Observable.returnValue(value, [scheduler])
+</code></pre>
+
+<p><code>of</code> accepts multiple values&#8230; return just does 1? Why does there n</p>
+
+<h2>Windows, buffers</h2>
+
+<pre><code>* @param {Number} [skip] Number of elements to skip between creation of consecutive windows. If not specified, defaults to the count.
+</code></pre>
+
+<p>Basically, a buffer TODO TODO TODO</p>
+
+<h2>Value vs identity</h2>
+
+<p>In ClojureScript, something something TODO</p>
+
+<p>Sharp distinction between value and identity. Identities are things like
+refs or atoms and you have to deference them to get the value. You can
+use <code>=</code> fn to test value equality, and once equal, ALWAYS equal, thanks
+to immutability.</p>
+
+<h2>Promise-aware Ember Chainwatchers implemented in Rx</h2>
+
+<p>http://emberjs.jsbin.com/penuko/4/edit</p>
+
+<h2>Elm lang</h2>
+
+<p>FRP lang that compiles to JS.</p>
+
+<p>http://elm-lang.org/Blog.elm</p>
+
+<p>http://www.infoq.com/presentations/elm-reactive-programming</p>
+
+<h2><code>-&gt;</code> vs <code>-&gt;&gt;</code></h2>
+
+<p>The difference is where the rest of one expression gets passed into the
+following form(s).</p>
+
+<pre><code>(-&gt; 1
+  (- 2))
+-1
+</code></pre>
+
+<p>vs</p>
+
+<pre><code>(-&gt;&gt; 
+  (- 2))
+1
+</code></pre>
+
+<h2>Cljsbin</h2>
+
+<p>http://cljsfiddle.net/</p>
+
+<h2>Chrome Script/Framework Blackboxing</h2>
+
+<p>https://developer.chrome.com/devtools/docs/blackboxing</p>
+
+<p>Seems pretty awesome. TL;DR: skip framework/minified code when you&#8217;re
+stepping in/over/out of it. Especially useful for iteration/callbacks.</p>
+
+<h2>Rx Event capture</h2>
+
+<p>Goal: have something work like <code>window.alert()</code>, but animated and async,
+and effortless.</p>
+
+<p>Restrictions: literally everything needs to pass through (and get
+buffered by Rx), except maybe mousemoves?</p>
+
+<p>What are important stream windows?</p>
+
+<ul>
+<li>Views/Components
+
+<ul>
+<li>receive UI events when window is &#8220;active/focused/live&#8221;
+
+<ul>
+<li>e.g. NOT when view is animating</li>
+<li>NOT when view is destroyed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Anything</li>
+</ul>
+
+
+<p>Realization: controller/store/websocket events probably don&#8217;t need to be
+buffered/filtered in any way, given that 99% of the events you&#8217;d like to
+block probably come from UI events. Exceptions to this rule? Perhaps
+some instance where you have a <code>window.alert()-ish</code> thing and the pushed
+websockets data can&#8217;t be acted upon until the alert is tapped. My head
+hurts a lot. Quite a bit. Ah, what about timers within views/components?
+What if they go off in the middle of a thing? They should kinda be
+considered a UI event&#8230; maybe?</p>
+
+<p>Idea: components are meant to have inputs and outputs. And then ideally
+they have some logic within themselves that encapsulates some tricky bit
+of UI. But there are problems with this:</p>
+
+<ul>
+<li>Should it really be up to a component to switch between clicks and
+taps for desktop / mobile?</li>
+<li>Should a UI event like a click even be considered as &#8220;originating&#8221;
+from that component?</li>
+</ul>
+
+
+<p>It seems like we should make it possible to inject these UI event
+dependencies somehow? jQuery is probably effed&#8230; but if you&#8217;re using
+jQuery you&#8217;ve already lost.</p>
+
+<ul>
+<li>We can use Rx/bacon/FRP to provide these events?</li>
+<li>Who are the gate keepers? Parent DOM? Parent components?</li>
+<li>Can we still make DOM event delegation work?</li>
+</ul>
+
+
+<p>So I guess we do</p>
+
+<h2>eventPhase</h2>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/event.eventPhase</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Event.NONE = 0
+</span><span class='line'>Event.CAPTURING_PHASE = 1
+</span><span class='line'>Event.AT_TARGET = 2
+</span><span class='line'>Event.BUBBLING_PHASE = 3</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>React capture phase</h2>
+
+<p>http://facebook.github.io/react/docs/events.html</p>
+
+<p>React wraps native wrappers and provides a SyntheticEvent interface that
+also does event delegation to keep things cheap. <code>nativeEvent</code> gives you
+access to the (not-browser-unified) native event object.</p>
+
+<p>You can also get capture-phase handlers to fire by adding <code>Capture</code> to
+the name of the handler. Preeeetty clever I guess.</p>
+
+<p>Still trying to find the cleverest way.</p>
+
+<h2>Rx guidelines</h2>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/designguidelines/readme.md</p>
+
+<h2>Rx 010101 series into windows</h2>
+
+<p>http://jsbin.com/colora/15/edit</p>
+
+<h2>oaijsd</h2>
+
+<p>http://jsbin.com/sedeta/1/edit?html,js,output</p>
+
+<h2>LayerVault</h2>
+
+<p>git for design.</p>
+
+<h2>Rx Schedulers</h2>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/schedulers.md</p>
+
+<h2>Rx-ish integration in React</h2>
+
+<p>TODO: research this</p>
+
+<p>https://github.com/facebook/react/issues/2928</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-13T17:06:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/01/13/reekris/';
+        var disqus_url = 'http://machty.github.com/blog/2015/01/13/reekris/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

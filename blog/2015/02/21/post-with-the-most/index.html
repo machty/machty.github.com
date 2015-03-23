@@ -1,0 +1,343 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Post with the most  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Post With the Most</h2>
+	<div class="entry-content"><h2>DI, Clojure Components</h2>
+
+<p>https://www.youtube.com/watch?v=13cmHf_kt-Q</p>
+
+<p>A component is an object (just like in OOP) that encapsulates some state
+but really just tries to focus on behavior rather than the manipulation
+of that internal state.</p>
+
+<p>Types of Components:</p>
+
+<ul>
+<li><p>State Wrapper</p>
+
+<ul>
+<li>e.g. wrap a stateful connection to a database</li>
+<li>e.g. open expensive connection object on create, kill on destroy
+
+<ul>
+<li><code>(defrecord DB [host conn])</code>
+
+<ul>
+<li>host and conn are meant to be private fields, but privacy
+isn&#8217;t actually enforcible in clojure</li>
+</ul>
+</li>
+<li>Public API
+
+<ul>
+<li><code>(defn query [db &amp; ...] (.doStatement (:conn db)))</code></li>
+<li>these functions <em>do</em> access the conn and host fields; they&#8217;re
+the &#8220;public methods&#8221;</li>
+</ul>
+</li>
+<li>Constructor
+
+<ul>
+<li>You don&#8217;t have to just use (and maybe shouldn&#8217;t use?) the
+default defrecord constructor (e.g. ->DB)</li>
+<li>Instead you should expose more convenient constructors that
+are themselves side-effect less but return the record.</li>
+<li>e.g. <code>(defn db [host] (map-&gt;DB {:host host}))</code></li>
+<li>NOTE: <code>map-&gt;RECORDNAME</code> is something declared for you by
+the <code>defrecord</code> macro, specifically <code>(declare ~(symbol (str 'map-&gt; gname))</code></li>
+<li>Again, no side effects&#8230; a constructor just produces an object,
+but that object still needs to be kicked into gear in some way,
+let&#8217;s say, via:</li>
+</ul>
+</li>
+<li>Lifeycle Protocol
+
+<ul>
+<li>Side effects!</li>
+</ul>
+</li>
+</ul>
+
+
+<p>(defrecord DB [host conn]
+  component/Lifecycle
+  (start [this]</p>
+
+<pre><code>(assoc this   ;; returns new thing!!! don't just sideeffect the obj
+  :conn (Driver/connect host)))
+</code></pre>
+
+  (stop [this]
+
+<pre><code>(.stop conn)
+this)
+</code></pre></li>
+</ul>
+</li>
+<li><p>Service Wrapper</p>
+
+<ul>
+<li>a service like Email is initialized with, say, host and api-key,
+but after that point, everyone just needs to pass args like
+address and body to use it; that state is encapsulated.</li>
+</ul>
+</li>
+<li><p>Domain Model</p>
+
+<ul>
+<li>some subset of functionality and represent as a component</li>
+<li>as opposed to OOP where you&#8217;d have a Customer obj with both state
+for a specific customer as well as methods to control behavior and
+manipulate state, a <code>Customers</code> domain model is an aggregate of
+behavioral operations.</li>
+<li><p>behavioral dependencies are encapsulated together; a Customers
+object depends on the db state wrapper and email service</p>
+
+<p>(defrecord Customers [db email])</p>
+
+<p>;; public api:
+(defn notify [customers name message]
+  (let [{:keys [db email]} customers</p>
+
+<pre><code>    address (query db ... name)]
+(send email address message)))
+</code></pre></li>
+</ul>
+</li>
+<li><p>Domain Model (cont.)</p>
+
+<ul>
+<li>fetches db and email dependencies from customers record&#8230;</li>
+<li>&#8230; queries address from db</li>
+<li>&#8230; and uses the email service to send it to the customer</li>
+</ul>
+</li>
+<li><p>Constructing components</p>
+
+<ul>
+<li>make a <code>defn</code>, tell the name of the dependences with :keywords.</li>
+</ul>
+</li>
+<li>Associative injection
+
+<ul>
+<li>a system (container in Ember) is just a map</li>
+<li>if you want to stub dependencies, just assoc those stubs
+
+<ul>
+<li>weakness: if you base these test systems off the live one,
+if you add another component to the live one, you have to
+remember to stub it out (hence isolated containers)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Sample RxJsbin w testing</h2>
+
+<p>http://jsbin.com/colora/31/edit</p>
+
+<p>Good lord do they need help w docs.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-21T16:33:00-05:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/02/21/post-with-the-most/';
+        var disqus_url = 'http://machty.github.com/blog/2015/02/21/post-with-the-most/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

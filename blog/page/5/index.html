@@ -112,6 +112,1819 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/07/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Them processes</h2>
+
+<p>Kernel</p>
+
+
+		
+		<a href="/blog/2014/07/28/daily-journal/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-28T08:16:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/26/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>top</h2>
+
+<blockquote><p>display and update sorted information about processes</p></blockquote>
+
+<p><code>top</code> will display a sampled, updating list of processes, ordered by pid
+by default. Order by cpu:</p>
+
+<pre><code>top -o cpu
+</code></pre>
+
+<p>Filter by a pid</p>
+
+<pre><code>top -pid 12345
+</code></pre>
+
+<p>Show a single sample of the pid and thread number for a given pid</p>
+
+<pre><code>top -l1 -pid 1234 -stats pid,th
+</code></pre>
+
+<h2>Spawn 50 ruby threads&#8230;</h2>
+
+<p>and you wind up w 52: <code>Thread.main</code> + the 50 you created + Ruby
+housekeeping thread (listening for OS signals and piping them
+synchronously to main thread).</p>
+
+<p>Ruby creates legit OS threads, vs <code>_____</code> threads, whatever the
+terminology is for threads that live entirely in the code.</p>
+
+<h2>Thread#join</h2>
+
+<p>Yes, you have to call it on a spawned thread so that the main thread
+will wait on it before prematurely exiting. But did you know that
+exceptions thrown in a spawned thread get re-raised on the main thread
+if you do <code>.join</code>?</p>
+
+<p><code>Thread#value</code> joins and returns the last value of the thread.</p>
+
+<p><code>Thread#status</code> returns status for live, dead, erroed, dying threads.</p>
+
+<p><code>Thread.stop</code> puts the thread to sleep and it won&#8217;t wake up until
+someone calls <code>wakeup</code> on it</p>
+
+<p><code>Thread.pass</code> hints the OS to schedule another thread, but this may be
+ignored by the scheduler.</p>
+
+<p><code>Thread#raise</code> lets you externally fire exceptions within another thread
+but should not be used because <code>ensure</code> is busted. <code>Thread#kill</code> does
+what you expect but should also be aborted for the same reasons.</p>
+
+<p>Multiple threads mean concurrency; they <em>might</em> mean parallelism. One
+CPU switching b/w threads means concurrency but not parallelism;
+multiple cores means paralleilism if they&#8217;re both executing.</p>
+
+<p>Code can&#8217;t be parallel, only concurrent. The executation of concurrent
+code can be parallel if the scheduler so chooses.</p>
+
+<h2>golang concurrency vs parallelism</h2>
+
+<p>http://concur.rspace.googlecode.com/hg/talk/concur.html#slide-2</p>
+
+<p>Concurrency is defined as:</p>
+
+<blockquote><p>Programming as the composition of independently executing processes</p></blockquote>
+
+<p>not Linux processes, but rather the famously harder to define Process.</p>
+
+<p>Parallelism is</p>
+
+<blockquote><p>Programming as the simultaneous execution of (possibly related) computations.</p>
+
+<p>Concurrency provides a way to structure a solution to solve a problem that may (but not necessarily) be parallelizable</p></blockquote>
+
+<p>Concurrency facilitates but doesn&#8217;t guarantee parallelism.</p>
+
+<p>Goroutines aren&#8217;t threads; they&#8217;re similar but cheaper, won&#8217;t block
+other goroutines, and multiplexed onto OS threads as necessary.</p>
+
+<p>Synchronize via channels. I guess this is like Ruby Queue? Sounds like
+you&#8217;d never do someGoroutine.value but rather use the channel primitive.</p>
+
+<h2>ruby concurrency and you</h2>
+
+<p>https://blog.engineyard.com/2011/ruby-concurrency-and-you</p>
+
+<p>Green threads</p>
+
+<ul>
+<li>scheduled by VM, rather than underlying OS</li>
+<li>pre 1.9 Ruby was this way (MRI)</li>
+<li>managed in user space rather than kernel space</li>
+</ul>
+
+
+<p>Test: if i run Ruby 1.8.7 and do a top of new threads, I would expect
+the thread count to be only whatever I started with.</p>
+
+<p>BEHOLD, on 1.8.7:</p>
+
+<pre><code>PID    #TH
+84752  1
+</code></pre>
+
+<p>So old ruby didn&#8217;t even spawn another thread for housekeeping&#8230; I guess
+maybe it wasn&#8217;t necessary because it didn&#8217;t have to coordinate the
+signals landing at any random currently-active thread? Pretty cool.</p>
+
+<p>I guess green threads are easy to implement in any interpreted language:
+in the main loop of the interpreter you can just check if 100ms has gone
+by and then move to another other known threads.</p>
+
+<p>Early Java had green threads&#8230; I don&#8217;t know enough about Java to
+comment here.</p>
+
+<p>Ruby &lt;1.9 was smart enough to know when one of these threads was blocked
+on external data so that it could &#8220;sleep&#8221; until the data arrived:</p>
+
+<blockquote><p>MRI 1.8.7 is quite smart, and knows that when a Thread is waiting for some external event (such as a browser to send an HTTP request), the Thread can be put to sleep and be woken up when data is detected.</p></blockquote>
+
+<p>1.9 uses native threads, but there&#8217;s still a GIL because the non-Ruby
+parts of MRI 1.9 aren&#8217;t thread-safe.</p>
+
+<p>MRI 1.9 uses the same technique as MRI 1.8 to improve the situation,
+namely the GIL is released if a Thread is waiting on an external
+event (normally IO) which improves responsiveness.</p>
+
+<p>Great read:</p>
+
+<p>http://yehudakatz.com/2010/08/14/threads-in-ruby-enough-already/</p>
+
+<p>Threads are hard, but requests are an extremely clean concurrency
+primitive: controllers and the models loaded and views rendered, etc.,
+are not shared between threads that are processing requests. It&#8217;s only
+if you start using global state that problems arise, but why are you
+doing that?</p>
+
+<p>Why the Ruby/Rails thread FUD?</p>
+
+<ul>
+<li>Early Rails wasn&#8217;t threadsafe; essentially a mutex around each request</li>
+<li>Mongrel explicitly mutexed around its Rails adapter, so even when
+<code>threadsafe!</code> was added, you&#8217;d still have zero concurrency in mongrel.</li>
+</ul>
+
+
+<blockquote><p>For safety, Ruby does not allow a context switch while in C code unless the C code explicitly tells the VM that it’s ok to do so.</p></blockquote>
+
+<p>And mysql was poorly written in this case. So mysql would block.</p>
+
+<blockquote><p>A lot of people talk about the GIL (global interpreter lock) in Ruby 1.9 as a death knell for concurrency. For the uninitiated, the GIL disallows multiple CPU cores from running Ruby code simultaneously. That does mean that you’ll need one Ruby process (or thereabouts) per CPU core, but it also means that if your multithreaded code is running correctly, you should need only one process per CPU core. I’ve heard tales of six or more processes per core. Since it’s possible to fully utilize a CPU with a single process (even in Ruby 1.8), these applications could get a 4-6x improvement in RAM usage (depending on context-switching overhead) by switching to threadsafe mode and using modern drivers for blocking operations.</p></blockquote>
+
+<p>Node vs Ruby Threading:</p>
+
+<p>Yehuda: &#8220;the main difference is that a callback is smaller in size than a stack&#8221;</p>
+
+<p>In other words, the context switch that happens when switching threads
+includes copying over an entire stack of the thread you&#8217;re resuming and
+some other details I don&#8217;t know of off the top of my head. But with
+callbacks, the callbacks have no stack (is this true in Rubyland? maybe
+there&#8217;s stack trace information but probably no stack. The only stack
+starts from where the callback/block was created, and the same is true w
+threads, but the point is that in a thread-per-request model, the stack
+goes all the way up to when the request was first received, which can be
+a pretty tall stack).</p>
+
+<p>So what about Fibers? They&#8217;re cooperative, but why is their context
+switch not a big deal? They have a stack size limit of 4kb. How can I
+test this?</p>
+
+<p>Here&#8217;s a nice article:</p>
+
+<p>http://timetobleed.com/fixing-threads-in-ruby-18-a-2-10x-performance-boost/</p>
+
+<p>Seems to suggest that the stack that needs to be copied when context
+switching includes interpreter code, which has many local vars and
+sometimes the stack is up to 4kb, which is cray cray.</p>
+
+<p>Green threads: pre-emptible userland threads. userland = not kernel
+land.</p>
+
+<p>You can hack into the thread-yielding code of old Ruby to allocate
+stacks on the heap so that all you have to do to context switch is
+change what rsp (pointer to the bottom of the stack) points to. This
+means the stack won&#8217;t grow (so you have to pick a sensible size).</p>
+
+<p>Ruby 1.9 performs way better in the benchmarks than his hacks&#8230; why?
+&#8220;Thanks. 1.9 uses pthreads which create stacks in a similar manner to
+what I did.&#8221; Awesome.</p>
+
+<p>pthreads = POSIX threads</p>
+
+<p>http://timetobleed.com/threading-models-so-many-different-ways-to-get-stuff-done/</p>
+
+<p>Threads models:</p>
+
+<h3>1:1 (native threads)</h3>
+
+<p>One kernel thread for every user thread.</p>
+
+<p>Pros</p>
+
+<ul>
+<li>execute threads on different CPUs</li>
+<li>threads don&#8217;t block each other</li>
+<li>shared memory b/w threads</li>
+</ul>
+
+
+<p>Cons</p>
+
+<ul>
+<li>Setup overhead since creating a thread requires a system call (and
+those are slow)</li>
+<li>Low upper bound on the number of threads that can be created</li>
+</ul>
+
+
+<p><code>pthread_create</code> is the fn that makes the system call to create the
+thread.</p>
+
+<h3>1:N (green threads)</h3>
+
+<p>&#8220;lightweight threads&#8221;</p>
+
+<ul>
+<li>thread creation, execution, cleanup are cheap</li>
+<li>lots of threads can be created</li>
+</ul>
+
+
+<p>Cons</p>
+
+<ul>
+<li>kernel doesn&#8217;t know about it, so no parallel execution across CPUs</li>
+<li>blocking IO can block all green threads</li>
+</ul>
+
+
+<p>Forking + threading and cross-process communication is one way around
+limitations.</p>
+
+<h3>M:N</h3>
+
+<p>Hybrid of above</p>
+
+<ul>
+<li>Multi CPUs</li>
+<li>Not all threads blocked by blocking system calls</li>
+<li>Cheap</li>
+</ul>
+
+
+<p>Cons</p>
+
+<ul>
+<li>Really really hard to synchronize userland and kernel scheduler</li>
+<li>Green threads will block within same kernel thread</li>
+<li>Difficult to maintain</li>
+</ul>
+
+
+<p>1:1 has shown itself to be more performant, but in some cases M:N might
+be the right choice.</p>
+
+<p>TODO: read this http://www.akkadia.org/drepper/nptl-design.pdf</p>
+
+<pre><code>b = nil
+
+t = Thread.new do
+  b = Fiber.new {
+    puts "FIBER"
+  }
+end
+
+while !b
+  # just wait
+end
+
+b.resume
+</code></pre>
+
+<p>This results in</p>
+
+<pre><code>fiberthread.rb:13:in `resume': fiber called across threads (FiberError)
+        from fiberthread.rb:13:in `&lt;main&gt;'
+</code></pre>
+
+<p>Of course it would.</p>
+
+<p>Use strace / dtruss to trace sys calls.</p>
+
+<p>Spinlocks are locks that, rather than sleeping, actively busy-wait until
+the lock is free. This only makes sense if the wait is expected to be
+short, otherwise it might block other threads.</p>
+
+<p>Interesting, from the wiki:</p>
+
+<blockquote><p>Most operating systems (including Solaris, Mac OS X and FreeBSD) use a hybrid approach called &#8220;adaptive mutex&#8221;. The idea is to use a spinlock when trying to access a resource locked by a currently-running thread, but to sleep if the thread is not currently running. (The latter is always the case on single-processor systems.)</p></blockquote>
+
+<p>The idea is that a lock by an active thread is likely to be finished
+soon, and since spinlocks avoid the scheduling overhead of a context
+switch, then hooray.</p>
+
+<p>Busy-waiting in general means while-looping until some condition is
+true. You can even do this in JS:</p>
+
+<pre><code>var end = +new Date() + 1000;
+while (+new Date() &lt; end) {}
+</code></pre>
+
+<p>So whether Node or EventMachine, the concept is the same: both run on
+callbacks.</p>
+
+<p>Realization: I was thinking that I could demonstrate the difference b/w
+green threads and OS threads by seeing if a while(true) in a green
+thread would yield to others, but the answer is:</p>
+
+<ul>
+<li>of course it would yield; each iteration of the while true is
+an iteration of the interpreter loop that&#8217;s running commands, so its
+timer would fire at that point.</li>
+<li>the only time it&#8217;d block is if you called out to a C extension that
+looped and didn&#8217;t yield back control.</li>
+</ul>
+
+
+<p>It seems a Fiber&#8217;s 4k stack begins at the point at which it is created.
+Hmm. So does it or does it not include interpreter stuff? Well for one
+it&#8217;s in the same thread as a requirement.</p>
+
+<p>Reasons why Fibers are faster than threads:</p>
+
+<ul>
+<li>limited 4kb stack for quick context switching</li>
+<li>no pre-emption means no aggressive/frequent context switching;
+context-switch as infrequently as you&#8217;d like.</li>
+</ul>
+
+
+<p>https://github.com/eventmachine/eventmachine/blob/master/docs/old/LIGHTWEIGHT_CONCURRENCY</p>
+
+<p>Lightweight Concurrency generally means</p>
+
+<ul>
+<li>putting thread scheduling under the control of your program</li>
+</ul>
+
+
+<blockquote><p>By &#8220;lighter,&#8221; we mean: less
+resource-intensive in one or more dimensions, usually including memory and
+CPU usage. In general, you turn to LC in the hope of improving the
+performance and scalability of your programs.</p></blockquote>
+
+<p>NOTE: race conditions can happen in concurrent environments, even if
+parallelism isn&#8217;t there, e.g. preempting</p>
+
+<p>Mac has a max 2048 thread limit.</p>
+
+<p>&#8220;IO Bound&#8221; means your program is mostly bottlenecked by IO, such that
+swapping for a faster IO would boost your program performance immensely.</p>
+
+<p>In such a case, going multi-threaded is a no-brainer rather than
+serially getting blocked on each slow thing. But if you over do it then
+you might just be wasting memory/CPU resources from thread stacks and
+context switching that it&#8217;s not justified.</p>
+
+<p>&#8220;CPU bound&#8221; means doubling CPU would mean the job would get done that
+much faster.</p>
+
+<p>Quad-core with 4 threads on CPU bound means mega-wins for Rubinius but
+obviously not GIL&#8217;d MRI. If you make it 5, then you get the
+context-switching overhead.</p>
+
+<p>Rails apps are combo of IO-bound and CPU-bound</p>
+
+<p>IO:</p>
+
+<ul>
+<li>Database</li>
+<li>Third party APIs</li>
+<li>Files read</li>
+</ul>
+
+
+<p>CPU:</p>
+
+<ul>
+<li>Rendering templates</li>
+<li>Rendering JSON</li>
+</ul>
+
+
+<p>Measure measure measure.</p>
+
+<p>This is comically incorrect:</p>
+
+<pre><code>Mutex.new.synchronize do
+  puts "LOL please never do this"
+end
+</code></pre>
+
+<p>should be</p>
+
+<pre><code>m = Mutex.new
+
+# ...create thread...
+
+m.synchronize do
+  puts "LOL please never do this"
+end
+</code></pre>
+
+<p>&#8220;critical section&#8221; refers to the part of your concurrent code that
+alters shared data.</p>
+
+<p>Memory Models describe the guarantees made to threads when
+reading-from/writing-to memory, which mostly become important to think
+about in a multi-threaded settings. The memory model describes how
+caching occurs in the registers before actually writing out to memory,
+and it describes the scope of compiler/hardware optimizations that can
+be made that lead to non-determinant order of memory operations which
+can fuck your shit unless you use <code>volatile</code> in Java or explicit mutexes
+in Ruby.  Ruby doesn&#8217;t have a memory model spec yet. Java and Go and
+others do. I guess Rust nips this in the bud w ownership.</p>
+
+<p>Mutex is a form of a memory barrier, and I think <code>volatile</code> is too.</p>
+
+<p>Livelocking is when <code>try_lock</code>s repeatedly fail, so the threads are
+still technically alive but stuck in the same loop.</p>
+
+<p>Best solution is to declare mutex grabbing in the same order via a mutex
+hierarchy.</p>
+
+<h2>Signals in ruby</h2>
+
+<p>Rubyz</p>
+
+<pre><code>Signal.trap("USR1") do
+  puts "lol handling your custom user handler"
+end
+puts Process.pid # =&gt; e.g. 12345
+</code></pre>
+
+<p>Shellz</p>
+
+<pre><code>kill -s USR1 12345
+</code></pre>
+
+<p>So many ways to kill a program:</p>
+
+<ul>
+<li>Abort: often self-initiated by <code>abort</code></li>
+</ul>
+
+
+<h2>Difference b/w seg fault and bus error</h2>
+
+<p>http://stackoverflow.com/questions/838540/bus-error-vs-segmentation-fault</p>
+
+<p>On most architectures I&#8217;ve used, the distinction is that:</p>
+
+<ul>
+<li>a SEGV is caused when you access memory you&#8217;re not meant to
+(e.g., outside of your address space).</li>
+<li>a SIGBUS is caused due to alignment issues with the CPU
+(e.g., trying to read a long from an address which isn&#8217;t a multiple of 4).</li>
+</ul>
+
+
+<h2>Signals in C</h2>
+
+<p>This is just for fun, but you can set up signal masks and signal
+handles and all that fun crap.</p>
+
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+
+static int gotSignal = 0;
+
+void wat(int s) {
+  printf("Got Signal %d", s);
+  gotSignal = 1;
+}
+
+int main() {
+  /* SIGUSR1 == 16 */
+  signal(SIGUSR1, &amp;wat);
+
+  pid_t pid = getpid();
+  printf("The process id is %d", pid);
+
+  // prevent signal from getting here
+  sigset_t s;
+  sigaddset(&amp;s, SIGUSR1);
+  // uncomment to block the signal from arriving
+  //sigprocmask(SIG_BLOCK, &amp;s, NULL);
+
+  while(!gotSignal) {
+    printf(".");
+    fflush(stdout);
+    sleep(1);
+  }
+
+  printf("\nDone!\n");
+}
+</code></pre>
+
+<p>and you can send it usr1 via</p>
+
+<pre><code>kill -s USR1 12345
+</code></pre>
+
+<h2>Signals in Node</h2>
+
+<pre><code>var done = false;
+
+process.on("SIGUSR1", function() {
+  done = true;
+});
+
+console.log("pid: ", process.pid);
+
+var timerId = setInterval(function() {
+  if (done) {
+    console.log("DONEZO");
+    clearInterval(timerId);
+  } else {
+    process.stdout.write(".");
+  }
+}, 500);
+</code></pre>
+
+<p>Note that SIGUSR1 is reserved by node.js to start the debugger.
+The above code will work but if the debugger&#8217;s enabled then that&#8217;ll also
+cause it to start.</p>
+
+<p>Seems that signals are often used to start a debugger, or some kind of
+debugging operation. Interesting.</p>
+
+<h2>Condition Variables</h2>
+
+<p>A provider and consumer both use the same mutex. Provider locks when
+providing an update. Consumer locks when trying to perform an operation,
+but internally does a <code>condvar.wait(mutex)</code> with the locked <code>mutex</code> to
+unlock until the <code>condvar</code> is <code>signal</code>ed by the provider.</p>
+
+<p>So why wrap the consumer in a while loop rather than an if (see page 104
+of storimer)? Because there could be multiple consumers.</p>
+
+<p><code>ConditionVariable#signal</code> wakes up a single thread, <code>ConditionVariable#broadcast</code>
+wakes up all threads.</p>
+
+<h2><code>thread_safe</code> gem</h2>
+
+<ul>
+<li>ThreadSafe::Array</li>
+<li>ThreadSafe::Hash</li>
+<li>ThreadSafe::Cache
+
+<ul>
+<li>similar to Hash, but insertion order enumeration isn&#8217;t preserved,
+which means it can be faster</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Immutable = threadsafe</h2>
+
+<p>Read more about it.</p>
+
+<h2>Globals</h2>
+
+<p>The Ruby AST is a global (is it really an AST at that point? is
+dynamically adding a method an example of modifying an AST? ASTs are for
+parsing, not so much adding/removing methods from a class obj).</p>
+
+<p>Anyway, Kaminari was bitten by this:</p>
+
+<p>https://github.com/amatsuda/kaminari/issues/214</p>
+
+<h2>Thread-locals</h2>
+
+<p>Variables that are global to everything in the current thread but hidden
+to everyone else. So you could do</p>
+
+<pre><code>Thread.current[:some_service] = SomeService.new
+</code></pre>
+
+<p>which could open a new connection. Connections are nice concurrency
+primitives, much like request objects in Rails. But if you have too many
+threads, you might hit a max connection limit, so in that case, use
+pools, lol.</p>
+
+<p>Pools let you specify max concurrency, which is likely less than the
+number of threads that might want to consume it, and then when
+requesting access to a thing in a pool, it&#8217;ll block until a slot&#8217;s
+available.</p>
+
+<p>See: https://github.com/mperham/connection_pool</p>
+
+<p>mperham is Mr Sidekiq. Mr. Concurrency in general I guess.</p>
+
+<p>Question: is a connection pool the same as a thread pool? Probably not,
+connection pool is just a resource pool that is thread-aware, but
+doesn&#8217;t constitute individual threads.</p>
+
+<h2>Rubinius Actor</h2>
+
+<p>https://github.com/rubinius/rubinius-actor</p>
+
+<p>Depends on core Rubinius class <code>Channel</code>. TODO: find out why <code>Channel</code>
+doesn&#8217;t/can&#8217;t exist in MRI.</p>
+
+<h2>Rubinius Ruby JITting</h2>
+
+<p>Talking to IRC folk: one of the major reasons for Ruby all the way down
+or at least Ruby most of the way down is that more of it can be JITted
+rather than having the hard C/C++ boundary after which no more
+optimizations can be made.</p>
+
+<p>Also, in some benchmarks b/w Rubinius and JRuby and MRI, etc., one thing
+that comes up a lot is the suggestion that the tests run for longer so
+that the JIT is primed, all the optimizations have been made, etc etc
+etc.</p>
+
+<h2>Rails Batches</h2>
+
+<p>http://api.rubyonrails.org/classes/ActiveRecord/Batches.html</p>
+
+<pre><code>Article.find_each do |a|
+  a.wat
+end
+</code></pre>
+
+<p>this internally splits DB queries into batches of 1000 so that you&#8217;re
+not instantiating potentially a billion Ruby objects for each row. In
+the end you&#8217;ll still allocate the same amount of memory but it can be
+GC&#8217;d along the way vs causing an insane spike and possibly crashing your
+server.</p>
+
+<h2>Server-sent events</h2>
+
+<p>http://tenderlovemaking.com/2012/07/30/is-it-live.html</p>
+
+<ol>
+<li>A stream obj is added to Rails request object, quacks like IO obj.
+You can write to it and close it, but it doesn&#8217;t actually stream live
+to the client; it buffers, and then flushes.</li>
+<li>With <code>ActionController::Live</code>, it&#8217;ll actually stream live.</li>
+<li>Some WebServers, like WEBrick will thwart this by buffering the
+response until it&#8217;s complete. Unicorn could work, but it&#8217;s meant for
+fast responses; anything taking longer than 30s might get terminated.
+Rainbows/Puma/Thin would work.</li>
+</ol>
+
+
+<h2>Celluloid</h2>
+
+<p>Transforms method invocations into blocking messages. Precede w <code>async</code>
+to prevent blocking (obviously still happens async);</p>
+
+<pre><code>require 'celluloid'
+
+class DoesStuff
+  include Celluloid
+
+  attr_accessor :i
+
+  def foo
+    # currently this displays
+    # one item per second.
+    # if you swap comments with
+    # the line after it'll wait
+    # until the very end to print them all
+    # at once because the each at the end
+    # will evaluate the "longest" future first
+    sleep i
+    #sleep (11 - i)
+    i
+  end
+end
+
+
+futures = []
+
+10.times do |i|
+  thing = DoesStuff.new
+  thing.i = i
+
+  futures &lt;&lt; thing.future.foo
+end
+
+
+futures.each do |f|
+  puts "Completed: #{f.value.i}"
+end
+
+sleep
+</code></pre>
+
+<p>This is interesting: https://github.com/celluloid/celluloid/wiki/Frequently-Asked-Questions#q-can-i-do-blocking-io-inside-an-actor-or-do-i-have-to-use-celluloidio</p>
+
+<p>It&#8217;s fine to have blocking IO such as waiting for a DB query to return,
+or slow HTTP response, but you shouldn&#8217;t have it waiting on
+<em>indefinite</em> IO; for that, use Celluloid::IO.</p>
+
+<p>I believe that an actor can&#8217;t be handling multiple messages at the same
+time. Wrong! That&#8217;s only if Erlang/Exclusive mode is on, and you have to
+be careful about that because it means a higher risk of deadlock:</p>
+
+<p>https://github.com/celluloid/celluloid/wiki/Exclusive</p>
+
+<p>Sidekiq doesn&#8217;t make use of return values a whole lot; rather actors are
+expected to send messages back to their &#8220;callers&#8221;.</p>
+
+<p>Accessing localvars is faster than ivars: https://github.com/puma/puma/commit/fb4e23d628ad77c7978b67625d0da0e5b41fd124</p>
+
+<h2>Compare and set (CAS)</h2>
+
+<p>aka check-and-set</p>
+
+<p>For platforms that support it, CAS is a mutex-free approach to
+thread-safety</p>
+
+<pre><code>a += 1
+</code></pre>
+
+<p>is not thread safe, but</p>
+
+<pre><code>cur = a.value
+new_value = cur + 1
+if (!a.compare_and_set(cur, new_value)) 
+  # try again
+end
+</code></pre>
+
+<p>is.</p>
+
+<p>Worth pointing out that Redis supports a form of this using WATCH.</p>
+
+<pre><code>MULTI # begin transaction
+SET foo lol
+SET bar wat
+EXEC # execute
+</code></pre>
+
+<p>so basically if you do</p>
+
+<pre><code>WATCH someval
+MULTI
+set someval lol
+EXEC
+</code></pre>
+
+<p>and someval changed after the MULTI then it will fail.</p>
+
+<p>So why use CAS over a mutex?</p>
+
+<blockquote><p>If the cost of retrying the operation is cheap, or rare, it may be much less expensive than using a lock.</p></blockquote>
+
+<p>Logic checks out.</p>
+
+<pre><code>require 'atomic'
+v = Atomic.new(0)
+v.update do |current|
+  current + 1
+end
+</code></pre>
+
+<p>This is the shorthand to the idempotent loop with CAS.</p>
+
+<p>Lockless showed mega improvements relative to locking in Rubinius but
+not JRuby for some reason.</p>
+
+<p>Hamster is the immutability gem to check out.</p>
+
+<h2>oni</h2>
+
+<p>https://github.com/olery/oni</p>
+
+<p>Uses SQS, look into it because i am such a nooblet.</p>
+
+<h2>SQS</h2>
+
+<p>Uses a visibility timeout after a consumer has started to receive a
+message in which time it is hidden from other consumers, and in this
+time it should be deleted.</p>
+
+<ul>
+<li>Supports GET/POST requests to public URLs, presuming you pass in a
+valid signature
+
+<ul>
+<li>This means you could fire requests directly to SQS rather than
+having to go to a server first&#8230; that is badass.</li>
+</ul>
+</li>
+<li>Reports of scalability problems</li>
+</ul>
+
+
+<p><a href="http://nsono.net/amazon-sqs-vs-rabbitmq/">Alternative: RabbitMQ</a></p>
+
+<ul>
+<li>SQS: consumers must poll for messages, and SQS charges by the request,
+even if the response is empty.</li>
+<li>RabbitMQ supports push</li>
+<li>is free and open source</li>
+<li>based on erlang</li>
+<li>adheres to AMQP (standard for high performance messages queues)</li>
+<li>supports durable queues (crash-recoverable, written to disk)</li>
+<li>delivered in order unless message requeued</li>
+<li>more consistent (much less likely to deliver a message twice unless
+the message actually failed)</li>
+</ul>
+
+
+<p>cons</p>
+
+<ul>
+<li>not necessarily highly available (because it&#8217;s a server that runs on
+whatever instance you wanna put it on, so you have to manage failover,
+redundancy, etc, whereas SQS is a system that handles all of that)</li>
+<li>this is configurable, but the default is for RabbitMQ to drop messages
+if there are no consumers; surprising to SQS folk.</li>
+</ul>
+
+
+<h2>Heartbeats</h2>
+
+<p>https://www.rabbitmq.com/reliability.html</p>
+
+<blockquote><p>In some types of network failure, packet loss can mean that disrupted TCP connections take some time to be detected by the operating system. AMQP offers a heartbeat feature to ensure that the application layer promptly finds out about disrupted connections (and also completely unresponsive peers). Heartbeats also defend against certain network equipment which may terminate &#8220;idle&#8221; TCP connections. In RabbitMQ versions 3.0 and higher, the broker will attempt to negotiate heartbeats by default (although the client can still veto them). Using earlier versions the client must be configured to request heartbeats.</p></blockquote>
+
+<p>Re: &#8216;Heartbeats also defend against certain network equipment which may
+terminate &#8220;idle&#8221; TCP connections.&#8217;: I bet that&#8217;s referring to NAT, which
+manages a cache of IP translations and will go inactive if nothings been
+sent to / received from an IP for a while.</p>
+
+<p>YAY I WAS RIGHT http://stackoverflow.com/questions/865987/do-i-need-to-heartbeat-to-keep-a-tcp-connection-open#comment1713801_866003</p>
+
+<p>So Heartbeats</p>
+
+<ul>
+<li>reassure you the connection is alive in some cases where the failure
+conditions aren&#8217;t otherwise detectable</li>
+<li>keep the NAT state tables warm for your IP</li>
+</ul>
+
+
+<h2>Celluloid::IO</h2>
+
+<p>https://github.com/celluloid/celluloid-io</p>
+
+<p>Provides a different class of Actor that&#8217;s heavier than normal Celluloid
+actors, but contains a high performance reactor like EventMachine or
+cool.io (todo: check out cool.io). So unlike EventMachine you can have
+multiple loops, e.g. one in each actor (resources permitting). (Also,
+does EM really force you to just have one?)</p>
+
+<h2>Autoload</h2>
+
+<p>Yes we know it&#8217;s not threadsafe in MRI. Recent JRuby versions make it
+thread safe, but just eager load your shits before spawning threads.</p>
+
+<h2>Requests as concurrency unit</h2>
+
+<p>I guess in general you should always look for the concurrency unit; that
+domain object that encapsulates all the data you need to get a job done
+so that hopefully you&#8217;re not sharing data between threads. Each request
+gets handled by its own thread.</p>
+
+<h2>Queue</h2>
+
+<p><code>Queue#pop</code> will suspend a thread until data is in the queue. Like a
+mofuggin stream.</p>
+
+<p>Queue is apparently the only thread-safe data structure that ships with
+Ruby.</p>
+
+<h2>JRuby</h2>
+
+<p>Foreign function interface</p>
+
+<p>http://en.wikipedia.org/wiki/Foreign_function_interface</p>
+
+<p>Mechanism for languages to invoke routines from other languages.</p>
+
+<p>Write your extension code in Ruby, FFI will call the write C / Java /
+whatever stuff. It won&#8217;t even be compiled. I guess it just links into
+dynamic libs?</p>
+
+<p>JRuby obviously doesn&#8217;t support C extensions, but FFI extensions will
+work.</p>
+
+<p>JRuby</p>
+
+<ul>
+<li>has no fork(), since JVMs mostly can&#8217;t safely be forked
+(<code>NotImplementedError: fork is not available on this platform</code>)</li>
+<li>Fibers are native threads, rather than MRI green threads, which means
+you are constrained to native thread overhead/limits.</li>
+</ul>
+
+
+<h2>Rubinius (rbx)</h2>
+
+<ul>
+<li>Designed for concurrency, speed.</li>
+<li>Rubinius 2.0 has no GIL</li>
+<li>All tools written in Ruby, including bytecode VM, compiler,
+generational GC, JIT, etc</li>
+<li>No continuations (because dependent on callcc, a C thing)</li>
+<li>At some point, when dealing with locks and low level things, you&#8217;ll
+find C++.</li>
+</ul>
+
+
+<p>http://rubini.us/2011/02/25/why-use-rubinius/</p>
+
+<h2>Ruby Enterprise Edition</h2>
+
+<p>By Phusion. No longer alive.</p>
+
+<ul>
+<li>Compatible w 1.8.7</li>
+<li>End of Life since 2012</li>
+<li>No more work being done, reasons being:
+
+<ul>
+<li>Rails 4 no longer supporting 1.8</li>
+<li>COW patch accepted on Ruby 2.0</li>
+<li>Many Ruby Enterprise Edition patches addressed in 1.9, 2.0</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>MacRuby</h2>
+
+<p>Implementation of 1.9 Ruby directly on top of Mac OS X core tech, e.g.</p>
+
+<ul>
+<li>Obj-C runtime and GC</li>
+<li>LLVM compiler infrastructure</li>
+</ul>
+
+
+<h2>Reactive manifesto</h2>
+
+<p>TODO: read this http://www.reactivemanifesto.org/</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-26T15:10:00-04:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/19/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Crank</h2>
+
+<p>Meth.</p>
+
+<p>An eccentric person, esp. one who is obsessed by a particular subject or
+theory: when he first started to air his views, they labeled him a
+crank | [ as modifier ] : I am used to getting crank calls from
+conspiracy theorists.</p>
+
+<h2>Roko&#8217;s modern basilisk</h2>
+
+<p>It&#8217;s happening.</p>
+
+<h2>Transactional UIs</h2>
+
+<p>People build forms. Ember gives you sweet syntax sugar for 2wb.
+Not for transactional UI, anything that needs a buffer.</p>
+
+<p>Old mindset: if you need 1wb, just&#8230; don&#8217;t set on the other side of a
+2wb.</p>
+
+<p>TODO: ask kris more about the async/sync cocoa observer binding
+limitations.</p>
+
+<ul>
+<li>Most observers just do something and stop.</li>
+<li>And they mostly want to know the last thing they cared about.</li>
+</ul>
+
+
+<p>Bubbling doesn&#8217;t describe actions; actions go wherever. Bubbling only in
+route hierarchy.</p>
+
+<p>Services:</p>
+
+<ul>
+<li>session/user</li>
+<li>timer</li>
+<li>websocket</li>
+<li>analytics</li>
+</ul>
+
+
+<p>Idea: components provide services to the components the render. They
+have a ServiceCertificate</p>
+
+<p>Goal:</p>
+
+<ul>
+<li>Try and associate actions with objects.</li>
+<li><code>actions</code> themselves can just be passed into the <code>actions</code></li>
+</ul>
+
+
+<h2>Non-dynamic routes</h2>
+
+<pre><code>resolveEntry: function(params, model, transition) {
+  return model || this.store.find(params.id);
+}
+
+resolveEntry: function(params, model, transition) {
+  return model || this.store.find(params.id);
+}
+</code></pre>
+
+<p>Initializers vs <code>applicationRoute#beforeModel</code>.</p>
+
+<p>retcon for how to use controllers</p>
+
+<p>asop to data binding</p>
+
+<p>HTMLbars knows what parts of the template are dynamic vs static.</p>
+
+<p>In React, if you have a conditional</p>
+
+<h2>Skunkworks project</h2>
+
+<blockquote><p>A skunkworks project is a project developed by a small and loosely
+structured group of people who research and develop a project
+primarily for the sake of radical innovation.[1] The terms
+originated with Lockheed&#8217;s World War II Skunk Works project.</p></blockquote>
+
+<p>http://en.wikipedia.org/wiki/Skunk_Works</p>
+
+<blockquote><p>The designation &#8220;skunk works&#8221;, or &#8220;skunkworks&#8221;, is widely used
+in business, engineering, and technical fields to describe a
+group within an organization given a high degree of autonomy
+and unhampered by bureaucracy, tasked with working on advanced
+or secret projects.</p></blockquote>
+
+<p>Lockheed Martin&#8217;s Skunk Works project made SR-71.</p>
+
+<h2>Project Svelte</h2>
+
+<p>http://www.trustedreviews.com/opinions/android-4-4-kitkat-s-project-svelte-what-it-is-and-why-you-should-care</p>
+
+<blockquote><p>‘dogfooding’ – that is making its employees use and live with their own projects</p></blockquote>
+
+<p>They dogfooded their employees by forcing them to dev on handicapped
+phones. Android 4.4 was the result, apparently it was way more
+performant.</p>
+
+<h2>RACK_ENV vs RAILS_ENV</h2>
+
+<p><code>Rails.env</code> is decided by <code>RAILS_ENV || RACK_ENV || "development"</code>. It&#8217;s
+common to set <code>RACK_ENV</code> which will also set <code>RAILS_ENV</code>, but if you
+have any rack middleware that behaves differently in different
+environments, you might screw yourself if you&#8217;re using <code>RAILS_ENV</code>.</p>
+
+<h2>wythoughts on blocks</h2>
+
+<p>The reason <code>|i|</code> is ok is for the same reason you can&#8217;t do the following
+in Ruby:</p>
+
+<pre><code>a = { |it| wat }
+</code></pre>
+
+<p>You have to do</p>
+
+<pre><code>a = proc { |it| wat }
+</code></pre>
+
+<p>Case in point you need an fn to save a block.</p>
+
+<h2>mythoughts on mutability</h2>
+
+<p>Can/should we swap POJOs when an observed property changes? Is there any
+value to</p>
+
+<pre><code>var pojo = {
+  a: {
+    b: 123
+  }
+};
+
+var a = pojo.a;
+Ember.set(pojo, 'a.b'
+</code></pre>
+
+<h2>ASI: automatic semicolon insertion</h2>
+
+<p>Nuff said.</p>
+
+<h2>old browser disagreements on ws</h2>
+
+<pre><code>[ text ws text]
+</code></pre>
+
+<p>cloneNode produces:</p>
+
+<ul>
+<li>ie8: 1 node</li>
+<li>ie9: 2 nodes</li>
+<li>else: 3 nodes</li>
+</ul>
+
+
+<h2>NoScope</h2>
+
+<p>http://www.thecssninja.com/javascript/noscope</p>
+
+<p>tldr NoScope is an old IE categorization of nodes, and NoScope dictates
+that innerHTML and cloneNode will strip these els.</p>
+
+<h2>Ropes: DAG of string implementation for FF/Chrome</h2>
+
+<p>http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=181EEF66EB411F4277C009A1D492CF75?doi=10.1.1.14.9450&amp;rep=rep1&amp;type=pdf</p>
+
+<p>Look into this more. Too lazy to read / comment.</p>
+
+<p>How to force Chrome to not use a rope:</p>
+
+<ul>
+<li>Less than 12 chars</li>
+</ul>
+
+
+<p>What does it mean to intern strings?</p>
+
+<h2>CSP: Content Security Policy</h2>
+
+<p>http://www.html5rocks.com/en/tutorials/security/content-security-policy/</p>
+
+<h2>String interning</h2>
+
+<pre><code>String.prototype.intern = (function() {
+   "use strict";
+   var o = {"- ": 0};
+   delete o["- "];
+   return function() {
+       var str = this;
+       o[str] = true;
+       var ret = Object.keys(o)[0];
+       delete o[str];
+       return ret;
+       try {} finally {}
+   };
+})();
+</code></pre>
+
+<h2>Component pinning</h2>
+
+<p>Associating the re-render with the pre-existing fragment.</p>
+
+<h2>localStorage on iOS Cordova webviews</h2>
+
+<ol>
+<li>Run dev, set <code>localStorage.wat = "lol"</code></li>
+<li>Stop and re-run the app, and <code>localStorage.wat</code> still is &#8220;lol&#8221;</li>
+<li>Delete the app, re-install, still dev, <code>localStorage.wat</code> is undefined</li>
+</ol>
+
+
+<p>I don&#8217;t even have to check&#8230; your app can&#8217;t run in both dev and prod.
+You can&#8217;t share userSessions across dev and prod apps. Then again, our
+servers could maintain keys for both APNS and APNS_SANDBOX.</p>
+
+<h2>GCM project number vs project ID</h2>
+
+<p>https://developers.google.com/compute/docs/faq#whatisthedifference</p>
+
+<p>You pick project ID, they pick project number. Project number is the
+Sender ID you use for GCM.</p>
+
+<h2>Pointer comparisons for such perf</h2>
+
+<pre><code>if (wat === false) {
+}
+</code></pre>
+
+<p><code>false</code> can be implemented to just refer to a unique memory location,
+such that all browsers need to comparison in the above code is <code>wat</code>&#8217;s
+memory address against <code>false</code>&#8217;s.</p>
+
+<p>Same goes with</p>
+
+<pre><code>if (wat === undefined) {
+}
+</code></pre>
+
+<p>just that the presence of <code>foo</code> in <code>cache.foo</code> is ambiguous without
+testing <code>foo in cache</code>; might be easier to do <code>cache.foo = UNDEFINED</code>
+where</p>
+
+<pre><code>function UNDEFINED() {}
+</code></pre>
+
+<p>Sentinel as fuck.</p>
+
+<h2>PushPlugin</h2>
+
+<p>Only starts firing PNs after <code>register</code>. We need a user session to
+register, right? Seems weird we can&#8217;t query it for information before
+immediately registering&#8230; either way, works fine for us, at least we
+killed Zalgo.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-19T11:30:00-04:00" pubdate data-updated="true">Jul 19<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/18/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Cookies</h2>
+
+<p>What ends up in <code>document.cookie</code>?</p>
+
+<p>Test: kill a previous localhost:5000 server, start a server for a
+separate project. Reload the page. Request headers sent include
+a transient cookie from the previous server. I bet it was due to
+Turbolinks. I was right!</p>
+
+<p>From http://tools.ietf.org/html/rfc6265#section-4.1.1</p>
+
+<blockquote><p> Origin servers MAY send a Set-Cookie response header with any
+ response.  User agents MAY ignore Set-Cookie headers contained in
+ responses with 100-level status codes but MUST process Set-Cookie
+ headers contained in other responses (including responses with 400-
+ and 500-level status codes).  An origin server can include multiple
+ Set-Cookie header fields in a single response.  The presence of a
+ Cookie or a Set-Cookie header field does not preclude HTTP caches
+ from storing and reusing a response.</p></blockquote>
+
+<p>So you can send multiple headers with the same key. Makes sense, since
+comma separation will conflict with the UTC date (e.g. <code>Aug 12, 2014</code>).</p>
+
+<p>So how do you set multiple cookies in Rack?</p>
+
+<p>Interesting: https://github.com/rack/rack/blob/master/lib/rack/utils.rb#L266</p>
+
+<p>Anyway, split cookies with newlines and Rack will cause this to send two
+<code>Set-Cookie</code> headers, which is totally fine.</p>
+
+<p>You can also use <code>set_cookie</code> on <code>Rack::Response</code> if you&#8217;re into that
+sort of thing..</p>
+
+<p>I psyched myself out thinking cookies were overwriting each other by doing:</p>
+
+<pre><code>"Set-Cookie" =&gt; "foo\nbar\nbaz"
+</code></pre>
+
+<p><code>document.cookie</code> was only revealing <code>baz</code>. But, I&#8217;m a dumb: cookies
+need to be key-value pairs, which fixed it.</p>
+
+<p>You can use <code>HttpOnly</code> to prevent JS (and other APIs?) access to the
+cookie sent by the server. Makes sense; less likely that&#8217;ll break
+something.</p>
+
+<p>Getting <code>document.cookie</code> returns all the cookies available to JS.
+Setting it will only set the cookie you provide.</p>
+
+<blockquote><p>Notice that servers can delete cookies by sending the user agent a
+new cookie with an Expires attribute with a value in the past.</p></blockquote>
+
+<h2>JavaScript set focus</h2>
+
+<p><code>focus()</code> is a method on input elements. So is <code>blur()</code>.</p>
+
+<p><code>document.activeElement</code> in modern browsers points to the focused
+element, which might also include scroll windows.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/document.activeElement</p>
+
+<p>In older browsers, to <code>blur</code> the active element, you&#8217;d have to know what
+that element was; there was no way to query. Might be wrong about this.</p>
+
+<h2>React Nested Router</h2>
+
+<p>http://www.youtube.com/watch?v=P6xTa3RRzfA</p>
+
+<ul>
+<li>State is just data</li>
+<li>Your route is data, e.g. you could render a top-level App component
+and tell it what its route is, and render everything a la React,
+pretend like you&#8217;re redrawing the whole page.</li>
+<li>Rather than switch-statement-based routing, the <code>activeRoute</code> just
+gets passed in via <code>props</code> like any other property
+
+<ul>
+<li><code>router.match</code> handlers will create all the routes, and pass in a
+single <code>activeRoute</code>; every route segment along the way just knows
+about with its activeRoute child is, if one exists.</li>
+<li>e.g. <code>contact/profile</code>, app.activeRoute = contact,
+contact.activeRoute = profile</li>
+</ul>
+</li>
+<li>API
+
+<ul>
+<li>Route component
+
+<ul>
+<li>handler = a React Class</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Differences w Ember
+
+<ul>
+<li>No auto-gen &#8216;index&#8217; routes</li>
+<li>paths don&#8217;t inherit parent paths
+
+<ul>
+<li>this means if you&#8217;re &#8220;overwriting&#8221; a parent dynamic segment, the
+dynamic segment must appear <em>somewhere</em> in the child route so you
+can actually load that data.
+
+<ul>
+<li>AH, the router will detect when children omit ids that their
+parents have declared. That&#8217;s nice.</li>
+<li>also yells at you if you use the same path in two places.</li>
+</ul>
+</li>
+<li>nice that it lets you have <code>/profile</code> vs <code>/user</code></li>
+</ul>
+</li>
+<li>Ember is less typing, but
+
+<ul>
+<li>React makes it easier to share handlers</li>
+<li>Overwriting URL is nice when you need it, error checking is nice</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>So each non leaf handler gets <code>activeRoute</code>, all handlers get all
+<code>params</code>.</li>
+<li>Refactorability/decoupling:
+
+<ul>
+<li>Because route names and paths are fully specified and all params are provided to
+each handler, changing the nesting of a route means you don&#8217;t have
+to rewrite all your link-tos from &#8220;wat.foo&#8221; to &#8220;foo&#8221;. Then again
+if you&#8217;re using resources you don&#8217;t have to do that either.</li>
+</ul>
+</li>
+<li>Question: what about other <code>props</code> you&#8217;d want to pass into a
+component?
+
+<ul>
+<li>Answer: Route components aren&#8217;t concerned with props other than how
+to be a route handler.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://jsbin.com/vukacule/6/edit</p>
+
+<p>It is really cool that you can switch between rendering a route with App
+as a handler vs just rendering App. The difference is that, when
+route-driven, it gets passed props.</p>
+
+<p>The <code>Route</code> components you use are obviously stateless; all state lives
+on the Handlers.</p>
+
+<p>Ah, in React <code>` syntax just means</code>{blah: &#8220;wat&#8221;}` inside
+the normal single-curly.</p>
+
+<p>How do Links work? They call transitionTo and there&#8217;s a single URLStore
+singleton.</p>
+
+<h2>TLS Replay?</h2>
+
+<p>I had it in my head that man-in-the-middle wasn&#8217;t a problem for TLS but
+maybe they could replay the messages? Turns out I am wrong; TLS includes
+a sequence mechanism.</p>
+
+<p>That being said, your app might send repeat messages, which demands its
+own double checking / application-level sequencing or some other
+prevention mechanism.</p>
+
+<h2>chroot</h2>
+
+<p>http://en.wikipedia.org/wiki/Chroot</p>
+
+<p>Learned about this when speculating w Ember Core about how the front
+page Rust evaluator works at http://www.rust-lang.org/</p>
+
+<p>It runs a program with the assumption that <code>/</code> is somewhere else, and it
+can&#8217;t access it.</p>
+
+<p>Change</p>
+
+<h2>process.nextTick</h2>
+
+<p><code>process</code> doesn&#8217;t exist on the browser, so therefore neither does
+<code>nextTick</code>, but you can hack it if you&#8217;re on a browser that has a native
+<code>Promise</code> object, since the <a href="http://promisesaplus.com/">spec</a> mentions
+that resolution callbacks must happen when the execution context
+consists only of platform code.</p>
+
+<blockquote><p>onFulfilled or onRejected must not be called until the execution
+context stack contains only platform code. [3.1].</p></blockquote>
+
+<p>So here&#8217;s how you could write nextTick, note that there&#8217;s no need to</p>
+
+<pre><code>var p = Promise.resolve();
+function nextTick(cb) {
+  p.then(cb);
+}
+</code></pre>
+
+<h2>Visibility API</h2>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API">mdn</a></p>
+
+<p>e.g.</p>
+
+<ul>
+<li>pause video when you tab-away</li>
+<li>stop requestAnimationFrame</li>
+</ul>
+
+
+<h2>Closing over <code>let i</code></h2>
+
+<pre><code>var fns = [];
+for (var i = 0; i &lt; 10; ++i) {
+  fns.push(function() {
+    console.log(i);
+  });
+}
+</code></pre>
+
+<p>The above code has the gotcha that by the time the <code>fns</code> functions run,
+they&#8217;ll all print out <code>10</code>, rather than the value of <code>i</code> when the
+closing-over function was created. This is part of the reason why jshint
+will yell at you for creating functions in a loop, e.g.</p>
+
+<pre><code>var fns = [];
+for (var i = 0; i &lt; 10; ++i) {
+  fns.push(makeCallback(i));
+}
+
+function makeCallback(num) {
+  return function() {
+    console.log(num);
+  }
+}
+</code></pre>
+
+<p>Then <code>i</code> will be uniquely preserved for each callback.</p>
+
+<p>The es6 <code>let</code> keyword gives you block scope, which includes everything
+declared within the for loop. If you just use <code>let</code> in the original
+code, you can do</p>
+
+<pre><code>var fns = [];
+for (let i = 0; i &lt; 10; ++i) {
+  fns.push(function() {
+    console.log(i);
+  });
+}
+</code></pre>
+
+<p><code>i</code> doesn&#8217;t get hoisted; rather, each iteration gets its own <code>i</code> value
+that gets closed over.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-18T03:50:00-04:00" pubdate data-updated="true">Jul 18<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/16/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>WeakMap</h2>
+
+<p>Use objects as keys. If you lose access to a key, it and its value will
+eventually be removed by GC because references to keys are weak. This
+also means WeakMaps are non enumerable since GC is non-deterministic and
+a key that might exist pre GC might not exist after.</p>
+
+<h2>ES6 Symbols</h2>
+
+<p>They&#8217;re nothing like Ruby symbols.</p>
+
+<p>They&#8217;re used to create unique, non-enumerable, keys that can&#8217;t be
+determined publicly unless the symbol is exported. So you could prevent
+tampering with a player&#8217;s score by storing the score on the player using
+an unshared symbol as the key:</p>
+
+<p>http://tc39wiki.calculist.org/es6/symbols/</p>
+
+<h2>ES6 === Harmony === ES.next</h2>
+
+<p>They&#8217;re all the same thing.</p>
+
+<h2>JS 1.7 vs ES6, etc</h2>
+
+<p><a href="http://ejohn.org/blog/versions-of-javascript/">jeresig clears this up a bit</a></p>
+
+<p>All modern browsers support ECMAScript; JavaScript is a variant of it
+that Mozilla&#8217;s largely been adding features to. ES3 === JS 1.5.</p>
+
+<p>So I see <code>let</code> was added to JavaScript 1.7, so why is it now being
+described as a new upcoming feature of ES6? Ah, because all browsers
+track ECMAScript standards, even if they call their enhanced language in
+the browser something else. Mozilla has been blazing ahead and trying
+new shit, but other browsers won&#8217;t pick it up until it&#8217;s actually
+standardized into ECMAScript.</p>
+
+<p>Why would Microsoft follow ECMAScript? Well, for starters, it delivered
+JScript to Ecma back in the day for standardization.</p>
+
+<blockquote><p>The name &#8220;ECMAScript&#8221; was a compromise between the organizations involved in standardizing the language, especially Netscape and Microsoft, whose disputes dominated the early standards sessions.</p></blockquote>
+
+<p>Interesting, and:</p>
+
+<blockquote><p>While both JavaScript and JScript aim to be compatible with ECMAScript, they also provide additional features not described in the ECMA specifications</p></blockquote>
+
+<p>Also, some reason I thought TC39 was part of Mozilla. I see that I am
+obviously incorrect: http://www.ecma-international.org/memento/TC39.htm</p>
+
+<p>It&#8217;s Ecma-TC39. The things I don&#8217;t know.</p>
+
+<p>W3C Tag, Ecma-TC39. W3C Tag, Ecma-TC39.</p>
+
+<h2><code>let</code></h2>
+
+<p><code>let</code> behaves like C++ declarations; the obj is only available in the
+curlies, or in for loops, or whatever, and there&#8217;s no hoisting. Outside
+of the block, the variable is undefined.</p>
+
+<h2>Cloudfront TTL</h2>
+
+<p>TTL lets you specify a min time before CF checks the origin to see if it
+has a new version of the file/response. You still need your origin
+server&#8217;s Cache-Control headers setup correctly.</p>
+
+<p><a href="http://stackoverflow.com/questions/10621099/what-is-a-ttl-0-in-cloudfront-useful-for">TTL can be 0</a>.
+Why? TTL 0 means that it delegates Cache-Control entirely to the origin.
+This means CF will always make a GET request w <code>If-Modified-Since</code>
+header to let the server return <code>304 Not Modified</code>.</p>
+
+<h2>Drag and Drop</h2>
+
+<p>Draggable elements need to be marked as <code>draggable="true"</code>.</p>
+
+<p>Then listen to the <code>ondragstart</code> event, e.g.
+<code>ondragstart="drag(event)"</code>.</p>
+
+<p>And then say what data is associated with the dragged el&#8230;</p>
+
+<pre><code>ev.dataTransfer.setData("Text", ev.target.id);
+</code></pre>
+
+<p>This seems strange.</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer</p>
+
+<p>It really is a class associated only w drag and drop.</p>
+
+<p>Should probably be reading this rather than fucking w3schools. Why do I
+still do that?
+https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop</p>
+
+<p>Ah I get it, you use dataTransfer as part of the mechanism for
+dynamically determining drop targets. You have to prevent bubbling
+(return false or preventDefault) on droppable targets, and in that fn
+they have the option of looking up the data transfer to see if they want
+to accept the data from that drag drop.</p>
+
+<p>You can also configure drag drag visual details to indicate copying,
+moving, etc. LOL such drag and drop.</p>
+
+<p>Oof apparently it&#8217;s a fucking disaster: http://www.quirksmode.org/blog/archives/2009/09/the_html5_drag.html</p>
+
+<p>Criticisms:</p>
+
+<ul>
+<li>7 fucking events, such API surface</li>
+<li>&#8220;For the drop event to fire at all, you have to cancel the defaults of both the dragover and the dragenter event.&#8221;</li>
+</ul>
+
+
+<h2>Cordova events: sticky != buffered</h2>
+
+<p>Sticky events (e.g. deviceready) just mean that once fired, they stay in
+a fired state. This means you can&#8217;t have multiple events fire if it&#8217;s a
+sticky event. I was originally thinking sticky meant all the events were
+cached until the first handler was registered.</p>
+
+<p>Ended up making this: https://gist.github.com/machty/e1cc485060f2951aeb6c</p>
+
+<h2>Why <code>-print0</code> in <code>find</code>?</h2>
+
+<p>Often you pipe the results of <code>find</code> into <code>xargs</code> to pass the results of
+a <code>find</code> so that some utility can operate on each file found. GOOD
+ENGRISH, MATCHNEER.</p>
+
+<p>But since <code>xargs</code> splits based on whitespace by default, this will break
+for files with newlines or or spaces in them, so <code>-print0</code> separates
+files w null bytes, and <code>-0</code> tells xargs to split via null bytes as
+well. Win win win. No difference if you have no files with spaces in
+them.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-16T00:40:00-04:00" pubdate data-updated="true">Jul 16<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/15/forgotten-things/">
+		
+			Forgotten Things</a>
+	</h2>
+	<div class="entry-content">
+		<p>Here&#8217;s a progressively-updated list of things I forget throughout the
+day. This is different from the list of things I&#8217;ve learned; that
+approach is useful for packing the things into my brain, hopefully; the
+purpose of this list is to pack things back in when I forget. And for
+now it&#8217;ll just be one giant progressively-updated blog.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-15T12:18:00-04:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/07/14/daily-journal/">
 		
 			Daily Journal</a>
@@ -795,560 +2608,6 @@ band.</p>
 
 
 <time datetime="2014-07-05T16:44:00-04:00" pubdate data-updated="true">Jul 5<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/01/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>window vs document events</h2>
-
-<p><code>window</code> and <code>document</code> have different events. Duh.</p>
-
-<p><code>window</code>:</p>
-
-<ul>
-<li>resize</li>
-</ul>
-
-
-<p><code>document</code>:</p>
-
-<ul>
-<li>DOMContentLoaded</li>
-</ul>
-
-
-<p>Breakdown of events and their originators:</p>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/Events</p>
-
-<p>Fun fact: DOMContentLoaded is considered a DOM mutation event.</p>
-
-<h2>Treat stubbed cordova as its own platform</h2>
-
-<p>I&#8217;m doing a Phonegap/Cordova app and it&#8217;s been tricky settling on a
-pattern for stubbing out the cordova library when I&#8217;m just running in
-Chrome or anywhere not in the actual native cordova wrapper, and I think
-I found the final solution: clone https://github.com/apache/cordova-js,
-define a new platform with a fake exec, have the fake exec look up some
-stubbed handlers that you can define in your app, (e.g.
-<code>window._stubbedCordovaHandlers[blahblah]</code>) and basically leave it up to
-your app to stub out all the native plugin services/actions. The effect
-of all of this is that your index.html always loads a cordova.js (which
-has some other conveniences like stick event handlers, pub sub channels,
-etc) but you don&#8217;t have to have a bunch of conditionals asking whether
-this is a stubbed version of the app or not.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-01T10:03:00-04:00" pubdate data-updated="true">Jul 1<span>st</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/06/29/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>DAS thangs</h2>
-
-<p>Ctrl-Z suspends a task, but you can resume a task via <code>%1</code> or <code>%2</code>, etc,
-referencing the number next to the job as displayed in <code>jobs</code>:</p>
-
-<pre><code>[1]- suspended bleh
-[2]+ suspended lol
-[3]  suspended lol
-</code></pre>
-
-<p>You can also do <code>%-</code> and <code>%+</code>.</p>
-
-<h3>Inline loops</h3>
-
-<pre><code>while true; do echo "wat"; sleep 1; done
-</code></pre>
-
-<p>ctrl-z to suspend, <code>bg</code> to convert a suspended job to a background job.</p>
-
-<p>Open the output of a command in <code>vim</code>: <code>echo woot | view -</code></p>
-
-<ul>
-<li><code>view</code> is a <code>vim -R</code> alias that opens in read-only mode</li>
-<li><code>-</code> option reads the file from stdin</li>
-</ul>
-
-
-<p>The man page for <code>vim</code> / <code>view</code> mentions that commands are read from
-stderror. So how would we run a command that reads input from stdin and
-commands from stderr? TODO: this.</p>
-
-<pre><code>machty.github.com :: &lt;(echo "wat")
--bash: /dev/fd/63: Permission denied
-machty.github.com :: echo &lt;(echo "wat")
-/dev/fd/63
-</code></pre>
-
-<p><code>&lt;()</code> will run a command and put its output in a file descriptor which
-is file-like enough to work as an input to most commands. Gary&#8217;s example
-is the &#8220;diff of diffs&#8221;, which is mostly useful to see if two branches
-(e.g. one rebased and the other not) have the same content.</p>
-
-<pre><code>diff -u &lt;(git diff master~5..master~1) &lt;(git diff master~4..master)
-</code></pre>
-
-<p>Can diff google com and fr, e.g.</p>
-
-<pre><code>diff &lt;(curl www.google.com | tidy) &lt;(curl www.google.fr | tidy) | view -
-</code></pre>
-
-<p>This is stupidly cool. Another use case is diffing localhost w deployed
-site.</p>
-
-<h2>subterfuge</h2>
-
-<p>I thought this word was a synonym for &#8220;plasma&#8221;, as in the liquid-y
-filler part of blood that&#8217;s revealed when you spin blood in a
-centrifuge. I think the centrifuge&#8217;s involvement in that tripped me up.</p>
-
-<p>http://www.merriam-webster.com/dictionary/subterfuge</p>
-
-<p>It actually just means</p>
-
-<ul>
-<li>deceit used in order to achieve one&#8217;s goal</li>
-</ul>
-
-
-<h2>Cordova My Mac 64-bit</h2>
-
-<p>This was the only thing showing up after I changed the project name in
-config.xml away from what I&#8217;d had it as when I first generated the iOS
-platform. Remember this crap; I&#8217;m sure I&#8217;ll have to fight it again.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-29T19:29:00-04:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/06/29/social-media-triggers/">
-		
-			Social Media Triggers</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;ve enjoyed about a week away from Twitter, and hope to prolong this
-hiatus. Twitter isn&#8217;t consistent with a lot of the lifestyle
-changes I&#8217;ve been nagging myself to make. Twitter is snack drawer
-positioned arms-reach away from the bed of someone trying to maintain a
-diet. It&#8217;s a total trigger for me to retrogress into class clown attention
-whore behavior I&#8217;ve been exhibiting since I was 5. So I&#8217;m on a break.</p>
-
-<p>Twitter encourages me to project a public facade of empty-headed
-buffoonery fueled by zany sarcasm and Photoshop. The last few months,
-I&#8217;ve had various opportunities to meet in person people who only know me
-by this facade, and it&#8217;s draining and depressing to keep it up in
-person.</p>
-
-<p>So I&#8217;m on a break. I&#8217;ve rediscovered distraction-free boredom. And it&#8217;s
-been glorious. I play music again. I sing. When I get frustrated in my
-endeavors to improve at my hobbies or my crafts, I have one less
-mindless outlet distracting me away from pushing through the difficult
-moments. Maybe I&#8217;ll return to Twitter when I have an album to promote.
-Or something worth talking about.</p>
-
-<p>This is where I&#8217;m supposed to apologize for a serious post.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-29T19:00:00-04:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/social-media/'>social media</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/06/20/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Push Notifications</h2>
-
-<p>Apple uses APNS (Apple Push Notification Service) and Android uses
-GCM (Google Cloud Message). Compare/contrast:</p>
-
-<p>Apple:
-- Max payload size: 256 bytes
-- When the app is inactive:
-  - Read <code>aps</code> hash:</p>
-
-<pre><code>- Display `alert`
-- Play `sound`
-- Update app's `badge` number
-</code></pre>
-
-<p>Android
-- Max payload size: 4096 bytes
-- Has no <code>badge</code> option
-- Supports <code>collapse_key</code> to collapse identical messages, like &#8220;New
-  Mail&#8221; messages, which only need to be responded to once, and require
-  only one server fetch.</p>
-
-<p>About payload size: this includes all the JSON padding. The smallest
-message is an empty message, represented by the following payload:</p>
-
-<pre><code>{"aps":{"alert":""}}
-</code></pre>
-
-<p>This is 20 chars/bytes, meaning you have 236 bytes left for a message.
-But push notification payloads often include a badge number, and an
-alert to play.</p>
-
-<p>Source: <a href="http://stackoverflow.com/a/6308462/914123">this lovely SO</a></p>
-
-<p><a href="https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html">From the docs</a>:</p>
-
-<blockquote><p>If the target application isn’t running when the notification
-arrives, the alert message, sound, or badge value is played or
-shown. If the application is running, the system delivers the
-notification to the application delegate as an NSDictionary
-object. The dictionary contains the corresponding Cocoa
-property-list objects (plus NSNull).</p></blockquote>
-
-<h2>DAS: Boundaries</h2>
-
-<p>https://www.destroyallsoftware.com/talks/boundaries</p>
-
-<p>Integration tests a scam because:
-- if 50 conditionals in your app, 2<sup>50</sup> paths, and no way to
-- as code grows, time of each test grows (due to more setup, DB stuff,
-  etc)</p>
-
-<h2><code>after_commit</code></h2>
-
-<p>This is a hook available within <code>ActiveRecord::Base</code> subclasses
-that let you run some code post-transaction. I was confused by this
-because a lot of the examples made it seem like you could just
-run a method called <code>after_commit</code> in controller code or something,
-but nay.</p>
-
-<p>Controller code isn&#8217;t run in a transaction; transactions are only
-automatic within <code>.save</code>.</p>
-
-<h2>Sidekiq serializers params via JSON.dump</h2>
-
-<p>This answers my question as to whether symbolized keys are preserved
-when passing hash args to a Sidekiq worker: JSON.dump turns string
-keys into symbols.</p>
-
-<h2>Difference between <code>Fiber#resume</code> and <code>transfer</code></h2>
-
-<p>Both will transfer control to the fiber you call it on; the difference
-is that if that new fiber calls yield, it</p>
-
-<pre><code>f0 
-  f1.resume
-    Fiber.yield
-</code></pre>
-
-<p>FUCK! i don&#8217;t know. TODO come back to this.</p>
-
-<p>Followup: transfer transfers control to another Fiber. The transfer-er
-doesn&#8217;t necessarily expect to get returned to, so if the transfer-ee
-yields, it&#8217;ll yield the value back to whoever spawned the transfer-er,
-rather than return control back to the transfer-er. It&#8217;s mega fucking
-confusing.</p>
-
-<p>Also, you have to <code>require 'fiber'</code> to even use this shit.</p>
-
-<h2>~~2.5 in js</h2>
-
-<pre><code>~~2.5  // 2
-~~2    //-3
-~~-4.2 // 4
-</code></pre>
-
-<p>Removes everything to the right of the decimal point, so it&#8217;s like
-Math.floor except Math.floor doesn&#8217;t remove stuff to the right of the
-decimal point for negative numbers.</p>
-
-<h2><code>void</code> operator</h2>
-
-<p><code>void 0</code> or <code>void(0)</code> evaluates the expression and then returns
-undefined. So I could do <code>void (anyNumberOfBullshits())</code> and it&#8217;d be
-undefined. Compared to just writing undefined, it:</p>
-
-<ul>
-<li>works even if <code>undefined</code> (a variable) has been redefined</li>
-<li>is shorter than writing <code>undefined</code></li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-20T10:44:00-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/06/03/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h3><code>&lt;base&gt;</code> tag</h3>
-
-<p>From <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base">MDN</a>:</p>
-
-<blockquote><p>The HTML Base Element (<code>&lt;base&gt;</code>) specifies the base URL to use for
-all relative URLs contained within a document. There is maximum
-one <code>&lt;base&gt;</code> element in a document.</p></blockquote>
-
-<p>You can also specify the target for all links in the base tag. Crazy?</p>
-
-<p>http://jsbin.com/tedik/1/edit</p>
-
-<p>Note that it also supports values like &#8220;../&#8221;, which is how I got my
-ember-cli tests.html to work when I got rid of the base url config.</p>
-
-<h3>bootleg</h3>
-
-<blockquote><p>(esp. of liquor, computer software, or recordings) made,
-distributed, or sold illegally: bootleg cassettes | bootleg whiskey.</p></blockquote>
-
-<h3>Ember proto CPs</h3>
-
-<p>You can get the proto of an Ember class via <code>Klass.proto()</code> and
-you can even invoke its CPs, but where are they cached? Answer: on the
-meta of the prototype, and invoking the CP on an instance of that class
-will not reuse that cache but rather use its own instance cache.</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5351/edit</p>
-
-<p>Later realization: <em>obviously</em> it had to work this way. What, would all
-instances just magically share the proto cached CP value? That&#8217;s
-idiotic.</p>
-
-<h3>CrossWalk</h3>
-
-<p>Like Cordova but you get your own browser runtime, so no platform
-browser discrepancies.</p>
-
-<p>https://crosswalk-project.org/#documentation/about</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T11:57:00-04:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/05/31/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h3>Git relative revisions</h3>
-
-<pre><code>git checkout 08h398se~1 
-</code></pre>
-
-<h3>Lazy CPs stripped down examples</h3>
-
-<p>Observing a CP requires consuming it with a get
-before its observers will fire upon change:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5200/edit</p>
-
-<p>But, for some reason, future changes to that property
-don&#8217;t fire that observer:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5203/edit</p>
-
-<p>This is because firing the observer tears down the chain
-nodes unless they&#8217;re activated again by future gets:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5204/edit</p>
-
-<p>But firing the observer tears down the chain
-nodes, so future fires also need to be preceded by
-a get to make the observer alive again:</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5201/edit</p>
-
-<p>http://emberjs.jsbin.com/ucanam/5198/edit</p>
-
-<pre><code>// CRUCIAL REALIZATION!!!! THIS IS HOW OBSERVERS
-// STAY LIVE IN VIEWS; RE-RENDERED METAMORPH TEMPLATES
-// CALL .get() to get the LATEST VALUE OF THE FUCK.
-// BUT GENERALLY SPEAKING YOU JUST NEED TO CALL .GET()
-// ON THE THING TO MAKE IT ALIVE AGAIN!
-http://emberjs.jsbin.com/ucanam/5208/edit
-
-
-
-/*
-Ember.addObserver(pojo, 'foo', function() {
-  console.log('foo observer fired');
-});
-*/
-
-
-
-// These additional changes
-// don't fire the fooAlias
-// observer, unless we continue
-// consuming (uncomment the stuff)
-//Ember.get(pojo, 'fooAlias');
-Ember.set(pojo, 'foo', 7);
-//Ember.get(pojo, 'fooAlias');
-Ember.set(pojo, 'foo', 8);
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-31T13:03:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2014</time></div>
 	
 
 

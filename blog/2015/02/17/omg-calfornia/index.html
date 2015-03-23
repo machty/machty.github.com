@@ -1,0 +1,492 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>OMG I'm in California  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">OMG I'm in California</h2>
+	<div class="entry-content"><h2>Definitive Ubuntu folder hierarchy</h2>
+
+<p>https://help.ubuntu.com/community/LinuxFilesystemTreeOverview</p>
+
+<pre><code>/bin is a place for most commonly used terminal commands, like ls, mount, rm, etc.
+
+/boot contains files needed to start up the system, including the Linux kernel, a RAM disk image and bootloader configuration files.
+
+/dev contains all device files, which are not regular files but instead refer to various hardware devices on the system, including hard drives.
+
+/etc contains system-global configuration files, which affect the system's behavior for all users.
+
+/home home sweet home, this is the place for users' home directories.
+
+/lib contains very important dynamic libraries and kernel modules
+
+/media is intended as a mount point for external devices, such as hard drives or removable media (floppies, CDs, DVDs).
+
+/mnt is also a place for mount points, but dedicated specifically to "temporarily mounted" devices, such as network filesystems.
+
+/opt can be used to store addition software for your system, which is not handled by the package manager.
+
+/proc is a virtual filesystem that provides a mechanism for kernel to send information to processes.
+
+/root is the superuser's home directory, not in /home/ to allow for booting the system even if /home/ is not available.
+
+/sbin contains important administrative commands that should generally only be employed by the superuser.
+
+/srv can contain data directories of services such as HTTP (/srv/www/) or FTP.
+
+/sys is a virtual filesystem that can be accessed to set or obtain information about the kernel's view of the system.
+
+/tmp is a place for temporary files used by applications.
+
+/usr contains the majority of user utilities and applications, and partly replicates the root directory structure, containing for instance, among others, /usr/bin/ and /usr/lib.
+
+/var is dedicated variable data that potentially changes rapidly; a notable directory it contains is /var/log where system log files are kept.
+</code></pre>
+
+<h2>init.d vs init</h2>
+
+<p><code>init.d</code> is old-school SystemV style, wherein you have executable
+scripts in <code>/etc/init.d</code> folder which have case statements matching
+<code>reload</code>, <code>start</code>, etc, and doing some behavior based on that.</p>
+
+<p><code>/etc/init</code> houses the newer Upstart format largely adopted by Ubuntu,
+and within that you have a bunch of <code>.conf</code> files for managing daemons.</p>
+
+<p>init.d / SystemV:</p>
+
+<pre><code>/etc/init.d/nginx restart
+</code></pre>
+
+<p>upstart</p>
+
+<pre><code>restart nginx 
+# looks up /etc/init/nginx.conf
+</code></pre>
+
+<h2>Apple Store Wonkery</h2>
+
+<p>Failed to upload the app, many times, provisioning profile and
+certificate shit due to know laptop. Final error within Application
+Loader was due to ITMS-4088 error, and was solved when 1) built
+everything with fresh certificates / prov profs under machty and 2)
+deployed via the other email account which shall not be publicly named
+because security.</p>
+
+<h2>File Dialog slowness on 2011 MBP Yosemite</h2>
+
+<p>Just upgraded my 2011 MBP (w SSD drive) to Yosemite and notice a bug
+that every time a file dialog closes, regardless of the app, and
+regardless of whether a file was chosen or the user cancels, there is a
+~15s hanging spinner until it unfreezes. This happens:</p>
+
+<ul>
+<li>if the view mode is anything other than Icon mode (e.g. for any list view), AND</li>
+<li>there are audio/video files in the folder (e.g. mp3, aiff, mov)</li>
+</ul>
+
+
+<p>If there&#8217;s text only files, or even pdfs or dmgs or other things with
+icons, it&#8217;s fine, but one audio/visual</p>
+
+<!--more-->
+
+
+<h2>Refresh Open With menu</h2>
+
+<pre><code>/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user 
+</code></pre>
+
+<p>http://www.tekrevue.com/tip/rebuild-launchservices-fix-duplicate-entries-os-xs-open-menu/</p>
+
+<h2>Linux Groups Flush at Login</h2>
+
+<p>http://superuser.com/a/275240</p>
+
+<p>TLDR if you change <code>/etc/group</code>, changed users will need to re-login
+to see those changes.</p>
+
+<p>If it&#8217;s a daemon whose uid has changed group memberships, then you just
+need to restart it, no need for system restart or anything like that.</p>
+
+<h2>Git only tracks executable perms</h2>
+
+<p>If you chmod changes to rw, git won&#8217;t notice, but if you change
+executable perms, it will. Reason being git is distributable and
+portable, and r/w perms don&#8217;t exist on all systems where as executables
+generally do.</p>
+
+<p>http://stackoverflow.com/questions/1071241/how-does-git-handle-folder-permission</p>
+
+<h2>Sticky bit</h2>
+
+<p>http://askubuntu.com/questions/432699/what-is-the-sticky-bit-t-permission-and-why-does-tmp-have-it</p>
+
+<p>mnemonic: <code>/tmp</code> is the canonical sticky bit example, and sticky bit
+shows up as <code>t</code>&#8230; <code>/tmp</code> <code>t</code> <code>/tmp</code> <code>t</code>.</p>
+
+<p>It means, regardless of permissions, that only a files owner can delete
+or rename a file.</p>
+
+<h2>Postgres host-based auth</h2>
+
+<p>Config for host-based authentication are in <code>pg_hba.conf</code></p>
+
+<h2>Bash/shell script: default vals</h2>
+
+<p>From ansible :</p>
+
+<pre><code>PYTHONPATH=${PYTHONPATH-""}
+</code></pre>
+
+<p>This doesn&#8217;t make noise</p>
+
+<pre><code>echo ${USER-`say wat`}
+</code></pre>
+
+<p>This doesck</p>
+
+<pre><code>echo ${USERABSDUOASBD-`say wat`}
+</code></pre>
+
+<h2>perms stored on inode, duh</h2>
+
+<p>So hard links can&#8217;t have separate permissions:</p>
+
+<pre><code>$ :: ls -l
+-rw-r--r--  2 machty  staff  0 Feb 11 06:08 a
+-rw-r--r--  2 machty  staff  0 Feb 11 06:08 b
+
+$ :: chmod 000 a
+$ :: ls -l
+----------  2 machty  staff  0 Feb 11 06:08 a
+----------  2 machty  staff  0 Feb 11 06:08 b
+</code></pre>
+
+<h2>PXE, Cobbler</h2>
+
+<p>PXE means Preboot Execution Environment, which uses UDP, DHCP, other
+basic network stuff to boot a system pulling dynamic information /
+images from some host.</p>
+
+<p>Cobbler</p>
+
+<p>http://www.cobblerd.org/about.html</p>
+
+<h2><code>.dispose()</code> in Rx</h2>
+
+<p>What has a dispose method?</p>
+
+<p>Only observers (and subjects, which is an observer+observable).
+Calling dispose on an observer immediately desubscribes any subscribers
+and prevents the delivery of any additional messages, INCLUDING
+termination messages.</p>
+
+<p>Subscriptions also have <code>.dispose</code>.</p>
+
+<p>Twist: a subscription IS an observer!</p>
+
+<p>http://jsbin.com/zufeze/3/edit?js,console,output</p>
+
+<p>TL;DR just like the <code>observer</code> passed to <code>Rx.Observable.create</code>, you can
+call <code>.onNext</code> and <code>.onCompleted</code> to a subscription!!!!!</p>
+
+<p>You push to observers/subscriptions. An observer is a subscription to a
+stream of data. It expects notifications of additional values and
+termination/error events.</p>
+
+<h2><code>dematerialize</code></h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var source = Rx.Observable
+</span><span class='line'>    .from([
+</span><span class='line'>        Rx.Notification.createOnNext(42),
+</span><span class='line'>        Rx.Notification.createOnCompleted()
+</span><span class='line'>    ])
+</span><span class='line'>    .dematerialize();
+</span><span class='line'>
+</span><span class='line'>var subscription = source.subscribe(
+</span><span class='line'>    function (x) {
+</span><span class='line'>        console.log('Next: ' + x.toString());
+</span><span class='line'>    },
+</span><span class='line'>    function (err) {
+</span><span class='line'>        console.log('Error: ' + err);
+</span><span class='line'>    },
+</span><span class='line'>    function () {
+</span><span class='line'>        console.log('Completed');
+</span><span class='line'>    });</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If <code>dematerialize</code> hadn&#8217;t been called here, you&#8217;d see
+<code>Next: onCompleted</code> show up; dematerialize makes sure onErrors
+and onCompleteds (available explicitly via <code>Rx.Notification</code>)
+are treated as actual <code>onCompleted</code> and <code>onError</code> events rather
+then <code>onNext</code> values.</p>
+
+<p>The implementation is simple:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>  observableProto.dematerialize = function () {
+</span><span class='line'>        var source = this;
+</span><span class='line'>            return new AnonymousObservable(function (o) {
+</span><span class='line'>                    return source.subscribe(function (x) { return
+</span><span class='line'>                    x.accept(o); }, function(e) { o.onError(e); },
+</span><span class='line'>                    function () { o.onCompleted(); });
+</span><span class='line'>                        }, this);
+</span><span class='line'>              };</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically, <code>observer.accept</code> will look out for onCompletes and onErrors
+and cause the recursion.</p>
+
+<h3>Pausable/stubbable promises</h3>
+
+<p>http://jsbin.com/jefawi/1/edit</p>
+
+<p>TODO:</p>
+
+<ul>
+<li>finish example</li>
+<li>stub the resolution of the promise, or replace the entire promise?</li>
+<li>maybe we want a stubbableThen?</li>
+</ul>
+
+
+<p>You can make a promise stubbable via:</p>
+
+<pre><code>new Promise.stubbable(function() {
+}, requiredLabel);
+</code></pre>
+
+<p>this will give you a chance to complete override the resolver fn.</p>
+
+<pre><code>someOtherPromise.then(..., ...);
+</code></pre>
+
+<p>you can stub in the middle of a chain via</p>
+
+<pre><code>someOtherPromise.stubbable('label').then(..., ...);
+</code></pre>
+
+<p>this means the original promise will still run through</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-17T05:45:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/02/17/omg-calfornia/';
+        var disqus_url = 'http://machty.github.com/blog/2015/02/17/omg-calfornia/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

@@ -112,6 +112,632 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/03/19/today-i-learn-top/">
+		
+			Today I Learn Top</a>
+	</h2>
+	<div class="entry-content">
+		<h2>top</h2>
+
+<p>PR is priority, which is dynamic; a running process will get less and
+less priority over time. NI is nice value; the fixed value that adds to
+priority.</p>
+
+<h2>Ruby mem</h2>
+
+<p>http://samsaffron.com/archive/2014/04/08/ruby-2-1-garbage-collection-ready-for-production</p>
+
+<ul>
+<li>Ruby tracks malloc&#8217;s</li>
+<li>classically, every <code>RUBY_GC_MALLOC_LIMIT</code> bytes,</li>
+</ul>
+
+
+<p>Heaps</p>
+
+<ul>
+<li>Ruby maintains heaps of RVALUES.</li>
+<li>RVALUES are c union structs, variable size depending on x64, x32, etc,
+that are low level representations of ruby objects</li>
+<li>require &#8216;objspace&#8217; lets you access ObjectSpace, which exposes the
+linked list of free Ruby objects.</li>
+<li>RVALUES are collected and reused; mallocs only happen when you expand
+beyong the RVALUE list.</li>
+</ul>
+
+
+<p>GC minor/major sweeps:</p>
+
+<p>Flow is this:</p>
+
+<ul>
+<li><p><code>Object.allocate</code> (in the course of calling <code>new</code>)</p>
+
+<ul>
+<li>gimme a free RVALUE
+
+<ul>
+<li>if no free RVALUES, do a sweep</li>
+<li>figure out along the way if it needs to be a major sweep</li>
+<li>blah blah blah i don&#8217;t want to keep doing this</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>major sweep: run when malloc limit is hit (used to be 8MB, now it&#8217;s a
+moving target)</p>
+
+<ul>
+<li>so you can malloc a bunch of times but once you hit malloc limit
+it&#8217;s time for a major GC</li>
+</ul>
+</li>
+<li>minor: run whenever heap slots run out
+
+<ul>
+<li>presumably, if this doesn&#8217;t free up enough mem, a malloc needs to
+happen? or maybe a malloc always happens, and the minor sweep frees
+up things for a future allocation attempts? either seem fine.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://samsaffron.com/archive/2013/11/22/demystifying-the-ruby-gc</p>
+
+
+		
+		<a href="/blog/2015/03/19/today-i-learn-top/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-19T09:18:00-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/02/21/post-with-the-most/">
+		
+			Post With the Most</a>
+	</h2>
+	<div class="entry-content">
+		<h2>DI, Clojure Components</h2>
+
+<p>https://www.youtube.com/watch?v=13cmHf_kt-Q</p>
+
+<p>A component is an object (just like in OOP) that encapsulates some state
+but really just tries to focus on behavior rather than the manipulation
+of that internal state.</p>
+
+<p>Types of Components:</p>
+
+<ul>
+<li><p>State Wrapper</p>
+
+<ul>
+<li>e.g. wrap a stateful connection to a database</li>
+<li>e.g. open expensive connection object on create, kill on destroy
+
+<ul>
+<li><code>(defrecord DB [host conn])</code>
+
+<ul>
+<li>host and conn are meant to be private fields, but privacy
+isn&#8217;t actually enforcible in clojure</li>
+</ul>
+</li>
+<li>Public API
+
+<ul>
+<li><code>(defn query [db &amp; ...] (.doStatement (:conn db)))</code></li>
+<li>these functions <em>do</em> access the conn and host fields; they&#8217;re
+the &#8220;public methods&#8221;</li>
+</ul>
+</li>
+<li>Constructor
+
+<ul>
+<li>You don&#8217;t have to just use (and maybe shouldn&#8217;t use?) the
+default defrecord constructor (e.g. ->DB)</li>
+<li>Instead you should expose more convenient constructors that
+are themselves side-effect less but return the record.</li>
+<li>e.g. <code>(defn db [host] (map-&gt;DB {:host host}))</code></li>
+<li>NOTE: <code>map-&gt;RECORDNAME</code> is something declared for you by
+the <code>defrecord</code> macro, specifically <code>(declare ~(symbol (str 'map-&gt; gname))</code></li>
+<li>Again, no side effects&#8230; a constructor just produces an object,
+but that object still needs to be kicked into gear in some way,
+let&#8217;s say, via:</li>
+</ul>
+</li>
+<li>Lifeycle Protocol
+
+<ul>
+<li>Side effects!</li>
+</ul>
+</li>
+</ul>
+
+
+<p>(defrecord DB [host conn]
+  component/Lifecycle
+  (start [this]</p>
+
+<pre><code>(assoc this   ;; returns new thing!!! don't just sideeffect the obj
+  :conn (Driver/connect host)))
+</code></pre>
+
+  (stop [this]
+
+<pre><code>(.stop conn)
+this)
+</code></pre></li>
+</ul>
+</li>
+<li><p>Service Wrapper</p>
+
+<ul>
+<li>a service like Email is initialized with, say, host and api-key,
+but after that point, everyone just needs to pass args like
+address and body to use it; that state is encapsulated.</li>
+</ul>
+</li>
+<li><p>Domain Model</p>
+
+<ul>
+<li>some subset of functionality and represent as a component</li>
+<li>as opposed to OOP where you&#8217;d have a Customer obj with both state
+for a specific customer as well as methods to control behavior and
+manipulate state, a <code>Customers</code> domain model is an aggregate of
+behavioral operations.</li>
+<li><p>behavioral dependencies are encapsulated together; a Customers
+object depends on the db state wrapper and email service</p>
+
+<p>(defrecord Customers [db email])</p>
+
+<p>;; public api:
+(defn notify [customers name message]
+  (let [{:keys [db email]} customers</p>
+
+<pre><code>    address (query db ... name)]
+(send email address message)))
+</code></pre></li>
+</ul>
+</li>
+<li><p>Domain Model (cont.)</p>
+
+<ul>
+<li>fetches db and email dependencies from customers record&#8230;</li>
+<li>&#8230; queries address from db</li>
+<li>&#8230; and uses the email service to send it to the customer</li>
+</ul>
+</li>
+<li><p>Constructing components</p>
+
+<ul>
+<li>make a <code>defn</code>, tell the name of the dependences with :keywords.</li>
+</ul>
+</li>
+<li>Associative injection
+
+<ul>
+<li>a system (container in Ember) is just a map</li>
+<li>if you want to stub dependencies, just assoc those stubs
+
+<ul>
+<li>weakness: if you base these test systems off the live one,
+if you add another component to the live one, you have to
+remember to stub it out (hence isolated containers)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Sample RxJsbin w testing</h2>
+
+<p>http://jsbin.com/colora/31/edit</p>
+
+<p>Good lord do they need help w docs.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-21T16:33:00-05:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/02/17/omg-calfornia/">
+		
+			OMG I&#8217;m in California</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Definitive Ubuntu folder hierarchy</h2>
+
+<p>https://help.ubuntu.com/community/LinuxFilesystemTreeOverview</p>
+
+<pre><code>/bin is a place for most commonly used terminal commands, like ls, mount, rm, etc.
+
+/boot contains files needed to start up the system, including the Linux kernel, a RAM disk image and bootloader configuration files.
+
+/dev contains all device files, which are not regular files but instead refer to various hardware devices on the system, including hard drives.
+
+/etc contains system-global configuration files, which affect the system's behavior for all users.
+
+/home home sweet home, this is the place for users' home directories.
+
+/lib contains very important dynamic libraries and kernel modules
+
+/media is intended as a mount point for external devices, such as hard drives or removable media (floppies, CDs, DVDs).
+
+/mnt is also a place for mount points, but dedicated specifically to "temporarily mounted" devices, such as network filesystems.
+
+/opt can be used to store addition software for your system, which is not handled by the package manager.
+
+/proc is a virtual filesystem that provides a mechanism for kernel to send information to processes.
+
+/root is the superuser's home directory, not in /home/ to allow for booting the system even if /home/ is not available.
+
+/sbin contains important administrative commands that should generally only be employed by the superuser.
+
+/srv can contain data directories of services such as HTTP (/srv/www/) or FTP.
+
+/sys is a virtual filesystem that can be accessed to set or obtain information about the kernel's view of the system.
+
+/tmp is a place for temporary files used by applications.
+
+/usr contains the majority of user utilities and applications, and partly replicates the root directory structure, containing for instance, among others, /usr/bin/ and /usr/lib.
+
+/var is dedicated variable data that potentially changes rapidly; a notable directory it contains is /var/log where system log files are kept.
+</code></pre>
+
+<h2>init.d vs init</h2>
+
+<p><code>init.d</code> is old-school SystemV style, wherein you have executable
+scripts in <code>/etc/init.d</code> folder which have case statements matching
+<code>reload</code>, <code>start</code>, etc, and doing some behavior based on that.</p>
+
+<p><code>/etc/init</code> houses the newer Upstart format largely adopted by Ubuntu,
+and within that you have a bunch of <code>.conf</code> files for managing daemons.</p>
+
+<p>init.d / SystemV:</p>
+
+<pre><code>/etc/init.d/nginx restart
+</code></pre>
+
+<p>upstart</p>
+
+<pre><code>restart nginx 
+# looks up /etc/init/nginx.conf
+</code></pre>
+
+<h2>Apple Store Wonkery</h2>
+
+<p>Failed to upload the app, many times, provisioning profile and
+certificate shit due to know laptop. Final error within Application
+Loader was due to ITMS-4088 error, and was solved when 1) built
+everything with fresh certificates / prov profs under machty and 2)
+deployed via the other email account which shall not be publicly named
+because security.</p>
+
+<h2>File Dialog slowness on 2011 MBP Yosemite</h2>
+
+<p>Just upgraded my 2011 MBP (w SSD drive) to Yosemite and notice a bug
+that every time a file dialog closes, regardless of the app, and
+regardless of whether a file was chosen or the user cancels, there is a
+~15s hanging spinner until it unfreezes. This happens:</p>
+
+<ul>
+<li>if the view mode is anything other than Icon mode (e.g. for any list view), AND</li>
+<li>there are audio/video files in the folder (e.g. mp3, aiff, mov)</li>
+</ul>
+
+
+<p>If there&#8217;s text only files, or even pdfs or dmgs or other things with
+icons, it&#8217;s fine, but one audio/visual</p>
+
+
+		
+		<a href="/blog/2015/02/17/omg-calfornia/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-17T05:45:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/02/04/i-need-ur-luv/">
+		
+			I Need Ur Luv</a>
+	</h2>
+	<div class="entry-content">
+		<h2>flatMapObserver</h2>
+
+<p>Whereas flatMap merges the elements of the observable returned from the
+mapping fn, flatMapObserver subscribes to each event of the incoming
+observable via a similar API to observers, but the return of each fn is
+an observable that gets merged/flatMapped.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/flatmapobserver.md</p>
+
+<p>NOTE: the observable returned from the onComplete handler does not
+cause the generated stream to end; it&#8217;ll be merged with any (possibly
+delayed) observables returned from onNext handler.</p>
+
+<h2>State</h2>
+
+<p>State a la Clojure/immutability separates value from
+identity, value is a consistent concept over time, and once two values
+are equal, they&#8217;re equal forever, because nothing is mutable.</p>
+
+<p>So, what about app state where event handlers are set up? Say you&#8217;ve
+done the functional/React-y thing and you have some leaf component that
+fires an event into the ethos at some point in time, and you&#8217;ve fluxed
+it into some event handler that <code>setState</code>s at the root level. This
+event could happen after 10 seconds, 1000 seconds, or possibly
+immediately. But if it&#8217;s immediately, is this fundamentally different
+from a situation where things are <em>not</em> data down actions up? How is
+this different from a two way binding with async settling?</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T05:45:00-05:00" pubdate data-updated="true">Feb 4<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/01/26/watoozy/">
+		
+			Watoozy</a>
+	</h2>
+	<div class="entry-content">
+		<h2>DAS</h2>
+
+<p>&#8220;how and why to avoid nil&#8221;</p>
+
+<p>I&#8217;d watched this before, but the last approach is most interesting:</p>
+
+<ul>
+<li>embrace immutability</li>
+<li>embrace domain objects whose non-nullable properties are part of
+their identity</li>
+</ul>
+
+
+<p>Other thoughts:</p>
+
+<p>Block-less <code>it</code> rspec specs are considered pending; useful for writing
+out a bunch of specifications at once and implementing them later.</p>
+
+<p>&#8220;pushing complexity down&#8221;</p>
+
+<p>When you&#8217;re writing a test whose behavior depends on dependencies (e.g.
+MonthlyBilling class pushes the &#8220;who-to-charge&#8221; logic into the User
+classes&#8217;s <code>charge</code> method), you&#8217;re writing a &#8220;systems test&#8221; /
+integration test.</p>
+
+<h2>Ebryn machtizzle</h2>
+
+<p>Talking about the sideways problem</p>
+
+<p>https://hackpad.com/Ebryn-Machty-Router-discussion-iRBXvKmKj5v</p>
+
+
+		
+		<a href="/blog/2015/01/26/watoozy/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T15:55:00-05:00" pubdate data-updated="true">Jan 26<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/01/13/reekris/">
+		
+			Reekris</a>
+	</h2>
+	<div class="entry-content">
+		<h2>More on Rx state machines</h2>
+
+<p>From https://github.com/logicalguess/rx-state-machine</p>
+
+<pre><code>// Pattern:
+// 1. start off with initial door state, 
+// 2. scan the UI event stream with a initial door state and a
+//    transforming function. The transforming function is the thing
+//    that runs the UI event on the current state, and returns the next state.
+//    In this case the transforming fn is `transition`.
+events.scan(door, transition).map(doorStatus)
+    .subscribe(function (value) {
+        view.render(value);
+    });
+</code></pre>
+
+<p>So what I want to do is expose an API where you can group related events
+into states, possibly share events between states, get an actions stream,
+and&#8230; somehow transition elsewhere after that?</p>
+
+<pre><code>var state = {
+  submitForm: function() {
+    // this is just a normal callback handler, just like actions api
+  },
+
+  // but maybe if you decorate your handler in some way...
+  $submitForm: function(stream) {
+    // ... you get a stream of actions instead
+    // What should this API look like? How to export another stream
+    // or property? 
+    // Goals:
+    // - make it easy/possible to
+    //   - derive flag/state from action progress
+    //   - 
+  }
+};
+
+&lt;form &gt;
+  &lt;SubmitButton action='submitForm'&gt;
+&lt;/form&gt;
+</code></pre>
+
+<h2>Harness</h2>
+
+<p>I don&#8217;t think I&#8217;ve ever grokked the word &#8220;harness&#8221; in a computer science
+context.</p>
+
+<blockquote><p>a set of straps and fittings by which a horse or other draft animal is fastened to a cart, plow, etc., and is controlled by its driver.</p></blockquote>
+
+<p>So, a horse harness, wrapped around a horse to control it. Or a
+parachute harness that wraps around a person to levitate them. Or a
+child-restraining harness.</p>
+
+<pre><code>so in this case, it takes a compiled ember CLI app that can normally run by itself, adds some bootstrap code, and runs it in a different environment
+
+wrapper is maybe a synonym
+
+but with slightly different connotations
+
+I think of a harness as "holding the software in place" so you can make modifications to it, then run it
+
+whereas wrapper implies you're trying to hide the underlying software
+</code></pre>
+
+<p>So put the otherwise self-contained / self-sufficient software in a
+harness so you can run a bunch of tests on it, run it in a different
+environment.</p>
+
+
+		
+		<a href="/blog/2015/01/13/reekris/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-13T17:06:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/01/07/a-life-of-possibilities/">
 		
 			A Life of Possibilities</a>
@@ -566,2132 +1192,6 @@ recompiling existing code, and while retaining static type safety
 
 
 <time datetime="2014-12-17T12:52:00-05:00" pubdate data-updated="true">Dec 17<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/10/xorblasm/">
-		
-			Xorblasm</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Frameless App</h2>
-
-<p>Chromeless app, nothing more than a webview really, for quick
-prototyping of mobile web apps.</p>
-
-<p>https://itunes.apple.com/us/app/frameless-full-screen-web/id933580264?mt=8</p>
-
-<h2>Servo</h2>
-
-<p>Parallel browser project written in Rust for parallel execution, memory
-safety, etc. Doesn&#8217;t intend to be a full on user-facing browser, but
-intends to have other folk build on top of it.</p>
-
-<p>http://blog.servo.org/</p>
-
-<h2>&#8220;use strict&#8221;; as opposed to sloppy</h2>
-
-<p>Non <code>"use strict";</code> mode is AKA sloppy mode.</p>
-
-<h2>Safari inspector learnings</h2>
-
-<p>There are THREE TABS:</p>
-
-<ul>
-<li>Resources (ctrl + 1)</li>
-<li>Timelines (ctrl + 2)</li>
-<li>Debugger (ctrl + 3)</li>
-</ul>
-
-
-<p>They control the middle view, but when active they can be clicked again
-to remove the left panel. THAT IS KINDA FUCKED UI, PEOPLE.</p>
-
-<p>Pressing Escape a bunch of times always yields Console, for which there
-is a full on console tab, but in Resources (1) and Debugger (2) you can
-open a debugger on the bottom, but on Timelines I guess it doesn&#8217;t make
-sense to embed that console. Alt+Command+C opens the full on console.
-Functionality on full screen console and embedded console seems the
-same.</p>
-
-<p>Filter vs Search resources:</p>
-
-<ul>
-<li>filter: filename only</li>
-<li>search: searches file contents</li>
-</ul>
-
-
-<h2>TIL <code>sessionStorage</code></h2>
-
-<p>Ridiculous, why is this useful? Why is this fundamentally different than
-a global var?</p>
-
-<h2>(Safari) Webarchive</h2>
-
-<p>http://en.wikipedia.org/wiki/Webarchive</p>
-
-<p>Save all resources associated w a document, used by Safari.</p>
-
-<p>You can go to Resources tab and click the down arrow to download a
-webarchive.</p>
-
-<h2>Tiled Rendering</h2>
-
-<p>Android and pretty much everyone uses tiled rendering.</p>
-
-<p>http://en.wikipedia.org/wiki/Tiled_rendering#cite_note-1</p>
-
-<p>&#8220;Show composited layer borders&#8221; in chrome will show you all the layers
-that get uploaded to the GPU, after which the GPU does compositing. So
-you paint w CPU and then composite on the GPU.</p>
-
-<h2>Continuous Repaint</h2>
-
-<p>Repaints don&#8217;t happen all the time, but you still might want to identify
-which parts of the page are slow to paint, so you can force the renderer
-to repaint all the things all the time by enabling this setting, showing
-and removing sections.</p>
-
-<p>https://developer.chrome.com/devtools/docs/rendering-settings</p>
-
-<h2>Chrome Timeline Counters</h2>
-
-<ul>
-<li>Listeners: [1:4]</li>
-</ul>
-
-
-<p>means that at the start of listening, there was 1 listener, and at the
-end, there were 4.</p>
-
-<h2>Sysdig</h2>
-
-<p>http://www.sysdig.org/</p>
-
-<blockquote><p>Think of it as strace + tcpdump + lsof + awesome sauce.</p></blockquote>
-
-<h2>Gradle daemon and parallel</h2>
-
-<p>Add this to your <code>gradle.properties</code>:</p>
-
-<pre><code>org.gradle.daemon=true
-org.gradle.parallel=true
-</code></pre>
-
-<p>IT DOES WHAT YOU THINK IT DOES.</p>
-
-<h2>Comme de Garcons</h2>
-
-<p>http://en.wikipedia.org/wiki/Comme_des_Gar%C3%A7ons</p>
-
-<p>Heart with eyes logo.</p>
-
-<h2>Cul-de-sac</h2>
-
-<p>http://en.wikipedia.org/wiki/Cul-de-sac</p>
-
-<p>It just means a fucking dead end. DEAD END.</p>
-
-<p>One of these shits:</p>
-
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/b/b2/Cul-de-Sac_cropped.jpg" alt="cul de sac" /></p>
-
-<h2>Live updates in Cordova</h2>
-
-<ul>
-<li>HTTP caching
-
-<ul>
-<li>Make sure the WebView is set up to cache</li>
-<li>Do we have control over that though? What if webview ejects these
-items from cache? Can we prevent that?</li>
-<li>Assuming full, non-forgetting HTTP caching is an option:
-
-<ul>
-<li>user session GET query returns assets that the user should use</li>
-<li>webview downloads them; assets are aggressively cached</li>
-</ul>
-</li>
-<li>But what about</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>HTMLBars attr interpolation</h2>
-
-<pre><code>&lt;div attr=&gt;
-</code></pre>
-
-<p>vs
-,[</p>
-
-<pre><code>&lt;div attr=""&gt;
-</code></pre>
-
-<p>The rule is that quotes ALWAYS means string interpolation. Even if the
-above evals to the same thing, the latter goes through a layer of string
-interpolation.</p>
-
-<h2>Broccoli funnel</h2>
-
-<p>subset of a tree, matched by regex.</p>
-
-<p>https://www.npmjs.com/package/broccoli-funnel</p>
-
-<h2>Ember-cli-addons</h2>
-
-<p>Hahah of course, just including an ember-cli addon doesn&#8217;t mean</p>
-
-<h2>No property syntax in ES6 class syntax</h2>
-
-<p>This is intentional. You have to set all your properties in the
-<code>constructor()</code>.</p>
-
-<h2>popState, router stuff</h2>
-
-<p>I need to fix this:</p>
-
-<p>https://github.com/emberjs/ember.js/pull/9752</p>
-
-<p>Transitions need to be undoable.</p>
-
-<ul>
-<li>pushState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
-
-<ul>
-<li>undo: popState</li>
-</ul>
-</li>
-<li>replaceState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
-
-<ul>
-<li>undo: replaceState(&#8216;bar&#8217;)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>No such support for back button w HashLocation.</p>
-
-<blockquote><p>Clicking back and then clicking forward, and aborting the transition in the willTransition is still broken. The reason is that when I hit back I now the previous route, but when I hit back and then forward again I don&#8217;t have that info.</p></blockquote>
-
-<p>You don&#8217;t have &#8220;forward&#8221;. Like, the URL you&#8217;re going to?</p>
-
-<h2>onpopstate fires for all changes?</h2>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#The_popstate_event</p>
-
-<p>Weird.</p>
-
-<p>http://jsbin.com/coxega/1#foo</p>
-
-<p>Poorly named?</p>
-
-<blockquote><p>Browsers tend to handle the popstate event differently on page load. Chrome (prior to v34) and Safari always emit a popstate event on page load, but Firefox doesn&#8217;t.</p></blockquote>
-
-<h2>.npmignore defaults to .gitignore</h2>
-
-<p>nuff said.</p>
-
-<h2>How do preview a publish?</h2>
-
-<p><code>npm pack</code></p>
-
-<p>Then inspect the tgz.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-10T11:04:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/08/808s-and-android-heartbreak/">
-		
-			808s and Android Heartbreak</a>
-	</h2>
-	<div class="entry-content">
-		<h2>TL;DR on Android WebView Form Shit</h2>
-
-<p>Here&#8217;s a list of unsurmountable barriers involved when implementing
-forms in a mobile web app in Cordova</p>
-
-<ul>
-<li>You <em>cannot</em> focus an input field on a setTimeout
-
-<ul>
-<li>It must be tied to a user input event (e.g. a touchstart/end)</li>
-<li>It might look focused but it won&#8217;t bring up the keyboard</li>
-<li>You can halfass get things working in cordova by using a plugin that
-opens the keyboard before you tell the field to focus, but it you
-lose all configurability of the keyboard (whether it&#8217;s numpad,
-whether autocorrect is enabled, etc).</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Android WebView</h2>
-
-<p>https://www.youtube.com/watch?v=HbOtn5VhGZU</p>
-
-<p>Android Browser just uses a WebView (probably not Chrome).</p>
-
-<p>Platform</p>
-
-<ul>
-<li>network, disk</li>
-<li>system integration, e.g. HTML5 Camera integration</li>
-<li>graphics and rendering; this is why differences exists b/w webkit</li>
-<li>V8 is used in Android WebView instead of default webkit</li>
-</ul>
-
-
-<p>What is +1 dependent?</p>
-
-<p>Render loop:</p>
-
-<ul>
-<li><p>Event -> Paint -> Draw</p></li>
-<li><p>Before Honeycomb (2012?)</p>
-
-<ul>
-<li>Paint loops are tight, they capture content into a Picture, and
-then render the Picture</li>
-<li>Picture is Vector representation of page, not just visible area</li>
-<li>No need to go back to webkit when
-
-<ul>
-<li>scrolling</li>
-<li>zooming</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Multithreading
-
-<ul>
-<li>UI Thread (Picture)</li>
-<li>WebCore Thread (webkit; generates a new Picture that UI thread can
-use for zooming, scrolling, etc)</li>
-</ul>
-</li>
-<li>Software rendering
-
-<ul>
-<li>Slow, risk of taking longer than 16ms</li>
-<li>CSS3D not supported in software</li>
-</ul>
-</li>
-<li>Async rendering
-
-<ul>
-<li>e.g. flash, composited on top and often lagged behind scroll</li>
-</ul>
-</li>
-<li>Software doesn&#8217;t keep up w increasing size</li>
-<li>Tiling via Hardware
-
-<ul>
-<li>Scroll event kicks off request for new tiles to render, if they
-don&#8217;t arrive in time, no big deal, everything will be fast even if
-there&#8217;s a moment where it&#8217;s blank</li>
-</ul>
-</li>
-<li>Texture Generation Thread?
-
-<ul>
-<li>the thing that splits things into tiles</li>
-</ul>
-</li>
-<li>w Hardware acceleration:
-
-<ul>
-<li>Painting slower, drawing (compositing?) faster!</li>
-<li>Precache tiles
-
-<ul>
-<li>prefetch surrounding tiles</li>
-<li>direction dependent (e.g. prefetch tiles below if you&#8217;re scrolling
-down)</li>
-</ul>
-</li>
-<li>low-res tiles when scrolling quickly&#8230; blur sharpens once it&#8217;s had
-time to settle and finish painting</li>
-<li>memory usage
-
-<ul>
-<li>limited number of tiles (device dependent)</li>
-<li>tiles are 256x256</li>
-<li>check if plain colors&#8230; JellyBean</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>AHH fuck it all it&#8217;s powered in Chromium now. Why bother.</p>
-
-<p>Android Versions</p>
-
-<p>Operating Systems:</p>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Android_Ice_Cream_Sandwich">Android 4: Ice Cream Sandwich</a></li>
-</ul>
-
-
-<h2>Android API levels</h2>
-
-<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels</p>
-
-<p>API Levels are just integers that match up w Platform versions</p>
-
-<pre><code>Platform Version    API Level   VERSION_CODE    Notes
-Android 5.0 21  LOLLIPOP    Platform Highlights
-Android 4.4W    20  KITKAT_WATCH    KitKat for Wearables Only
-Android 4.4 19  KITKAT  Platform Highlights
-Android 4.3 18  JELLY_BEAN_MR2  Platform Highlights
-Android 4.2, 4.2.2  17  JELLY_BEAN_MR1  Platform Highlights
-Android 4.1, 4.1.1  16  JELLY_BEAN  Platform Highlights
-Android 4.0.3, 4.0.4    15  ICE_CREAM_SANDWICH_MR1  Platform Highlights
-</code></pre>
-
-<h2>Android Activity / Fragment Lifestyle</h2>
-
-<p>https://plus.google.com/+StevePomeroy/posts/HsthxN21Yp1</p>
-
-<p>http://staticfree.info/~steve/complete_android_fragment_lifecycle.png</p>
-
-<p>https://github.com/xxv/android-lifecycle</p>
-
-<h2>Server-push</h2>
-
-<p>http://caniuse.com/#feat=eventsource</p>
-
-<p>Android supports SSE from 4.4 onward (since Nov 2013).</p>
-
-<h2>Android Chromium WebView since 4.4 KitKat (Nov 2013)</h2>
-
-<p>https://www.youtube.com/watch?v=IOY2UNZU9QQ</p>
-
-<p>Android Browser still uses WebView, just that it&#8217;s Chromium now.
-Snapshot of Chrome 30.</p>
-
-<p>Chrome vs Chrome WebView</p>
-
-<ul>
-<li>Graphics backend</li>
-<li>Otherwise invisible to app developer</li>
-<li>Chop out Chrome backend, replace w graphics stack compatible w android
-graphics.</li>
-<li>SurfaceFlinger</li>
-<li>Hardware accelerated layers.</li>
-</ul>
-
-
-<p>KitKat webview is way more HTML5 compliant, rather than old WebKit
-browser.</p>
-
-<p>Features:</p>
-
-<ul>
-<li>IndexedDB (ios only has shitty/buggy support in 8+)
-
-<ul>
-<li>async, non-blocking, etc</li>
-</ul>
-</li>
-<li>Websockets</li>
-<li>requestAnimationFrame</li>
-<li>SVG filters and effects, sepia, convolution blurs</li>
-<li>Hardware accelerated
-
-<ul>
-<li>everything</li>
-<li>default for all new apps is hardware accelerated on</li>
-<li>Question: hardware acceleration can be enabled for the app, but also
-the webview itself?</li>
-</ul>
-</li>
-</ul>
-
-
-<p>WebView methods must be run on UI Tthread, use <code>runOnUiThread</code> if you&#8217;re
-within a different thread&#8230;</p>
-
-<p>Compositing Thread,</p>
-
-<p>Main UI thread</p>
-
-<p><a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> since kitkat all urls
-most conform to it.</p>
-
-<p>A CSS pixel corresponds to 1, 2, 4, etc, depending on your viewport.</p>
-
-<p>There must only be one Meta Viewport tag&#8230; only the last one is
-actually used.</p>
-
-<p>Shorthand CSS can override others in KitKit+; be specific w CSS
-properties unless you really want to override many things.</p>
-
-<h2>uses-sdk</h2>
-
-<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html</p>
-
-<p>Always set target API, but you can still support min SDK versions for
-fallback.</p>
-
-<h2>lint</h2>
-
-<p>Android <code>lint</code></p>
-
-<pre><code>$ which lint
-/Users/machty/adt-bundle-mac-x86_64/sdk/tools/lint
-</code></pre>
-
-<p>seems like ADT, the Eclipse plugin suite.</p>
-
-<p>http://developer.android.com/tools/sdk/eclipse-adt.html</p>
-
-<h2>Focusing fields within Android</h2>
-
-<p>Is it actually fucking possible?</p>
-
-<p>https://code.google.com/p/android/issues/detail?id=27438</p>
-
-<p>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#toggleSoftInput(int, int)</p>
-
-<p>WTF is toggleSoftInput vs toggleSoftInputFromWindow vs</p>
-
-<p>TODO: prevent defocusing with</p>
-
-<pre><code>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#SHOW_FORCED
-</code></pre>
-
-<p>?</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-08T12:21:00-05:00" pubdate data-updated="true">Dec 8<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/01/sloggin/">
-		
-			Sloggin</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Gaslighting</h2>
-
-<p>http://en.wikipedia.org/wiki/Gaslighting</p>
-
-<p>Presenting false information to someone until they doubt their own sanity.</p>
-
-<h2>Deductible</h2>
-
-<p>http://en.wikipedia.org/wiki/Deductible</p>
-
-<p>The amount that must be paid by policy owner, out of pocket,
-before insurance kicks in.</p>
-
-<blockquote><p>Given the nature of medical treatment, the insured often faces multiple medical expenses spread over several days for a single illness or injury. Due to this reason, health insurance deductibles often tend to be imposed on a term basis (e.g. annually) as opposed to a per-visit threshold.[4] In spite of this, major medical insurance policies may have a per-visit excess which often does not cover the cost of routine visits to a GP, unless it is certified to be a part of a continuous treatment (and the bills can be collated in a single claim).</p></blockquote>
-
-<p>So it&#8217;s annual so that you&#8217;re always paying <em>something</em> out of pocket.
-Deductibles are ultimately limited by a Out-of-Pocket Maximum.</p>
-
-<p>http://www.bcbsm.com/index/health-insurance-help/faqs/topics/how-health-insurance-works/deductibles-coinsurance-copays.html</p>
-
-<ul>
-<li>If you have $1500, and you get a $2000 medical bill, you have to pay
-$1500 of that, no matter what, and then the last $500 might require
-paying coinsurance
-
-<ul>
-<li>After deductible: insurance kicks in after deductible is paid</li>
-<li>No deductible: insurance kicks in immediately without having to pay
-a deductible (there could still be coinsurance)</li>
-<li>Before deductible: you still have to pay deductible, but</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Ah ok so you&#8217;re still chipping away at a yearly deductible. After which
-you only need to think about coinsurance and copay.</p>
-
-<p>But first, deductible types:</p>
-
-<ul>
-<li>Annual: most common, chipping away at deductible throughout the year</li>
-<li>Per-episode: min deductible to pay per each type of visit, e.g. each
-time you&#8217;re hospitalized</li>
-<li>Out of network deductible: what it sounds like; sometimes paying out
-of network deductible subtracts from your regular deductible.</li>
-<li>Family deductible: multiple members chipping away at deductible</li>
-</ul>
-
-
-<p>Coinsurance: your share of health care service costs, usually a
-percentage. e.g. if you&#8217;ve paid your deductible, then you might have to
-pay 20% of whatever&#8217;s left over.</p>
-
-<p>Copay: a fixed amount you pay for a given service, each time you use it.
-Could be $40 when you buy prescription drugs, $20 every doctor visit,
-etc. Copays prevent frequent visits to the same person/service, since
-they add up, particular if the service is cheap, whereas coisurance, a
-fixed percentage, doesn&#8217;t add up if the service is cheap.</p>
-
-<ul>
-<li>Pros
-
-<ul>
-<li>You always know the fixed amount (rather than a percentage tied to
-total cost)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>So the difference is just fixed amount vs percentage?</p>
-
-<h2>Honeypot</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Honeypot_%28computing%29">wiki</a></p>
-
-<p>Hacker lure, like a bear to honey. Pretends to be some network with
-useful info, contains nothing, logs attack attempts.</p>
-
-<h2>STEM fields</h2>
-
-<p>http://en.wikipedia.org/wiki/STEM_fields</p>
-
-<p>Science, technology, engineering, math.</p>
-
-<p>http://en.wikipedia.org/wiki/Women_in_STEM_fields</p>
-
-<p>STEM equity: gender equity in STEM fields.</p>
-
-<h2>Who is logged in what are they doing?</h2>
-
-<p><code>w(1)</code>:</p>
-
-<blockquote><p>w &#8211; display who is logged in and what they are doing</p></blockquote>
-
-<pre><code>$ w
-USER     TTY      FROM              LOGIN@  IDLE WHAT
-machty   console  -                18Nov14 15days -
-machty   s000     -                18Nov14 9days tmux a
-machty   s029     -                22Nov14     - tmux a
-</code></pre>
-
-<h2>rcp, rsh, rcmd</h2>
-
-<p>Non-secure scp, ssh, and rcmd. Uses kind of a crappy auth scheme,
-wherein the server, rshd, has its <code>iruserok</code> fn called and can decide
-based on IP, etc, whether things are cool.</p>
-
-<p>TLDR use ssh.</p>
-
-<h2>hub pull-request depends on -u upstream</h2>
-
-<p>This used to create pull request from ember to ember</p>
-
-<pre><code>hub pull-request
-</code></pre>
-
-<p>I had to do</p>
-
-<pre><code>hub pull-request -h machty:some-crap
-</code></pre>
-
-<p>but if I <code>git push -u</code> then it&#8217;ll set the upstream and the original will
-work. Hooray. Thanks Robert Jackson.</p>
-
-<h2>bash hashes commands</h2>
-
-<p>Because path resolution is slow, bash will hash the location of a
-command. This broke my shit when I upgraded git from the Mac
-(/usr/bin/git) to the one from homebrew (/usr/local/bin/git).</p>
-
-<p>Bash has some built-ins <code>hash</code> and <code>type</code>. <code>type</code> tells you how a
-command resolves:</p>
-
-<pre><code>$ type git
-git is hashed (/usr/local/bin/git)
-
-$ hash
-hits    command
-   2    /usr/bin/which
-   1    /usr/local/bin/node
-   2    /Users/machty/.rvm/gems/ruby-2.0.0-p353@global/bin/bundle
-   3    /usr/local/bin/git
-   1    /Users/machty/.rvm/rubies/ruby-2.0.0-p353/bin/irb
-  12    /usr/bin/man
-   2    /bin/ls
-   2    /usr/bin/rsh
-   1    /bin/LS
-   1    /usr/bin/w
-   1    /usr/bin/dig
-   1    /bin/rcp
-</code></pre>
-
-<p>And you can invalidate a cached command via <code>hash -r COMMAND</code>.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-01T11:36:00-05:00" pubdate data-updated="true">Dec 1<span>st</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/20/stankonia/">
-		
-			Stankonia</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Zonebie</h2>
-
-<p>https://github.com/alindeman/zonebie</p>
-
-<p>Ruby gem to randomly change the current timezone to help catch bugs /
-false assumptions in your timezone-touching code.</p>
-
-<p>NOTE: trolled myself because i had a <code>_spec.rb</code> file that didn&#8217;t have
-<code>require 'spec_helper'</code> at the top and hence Zonebie magic wasn&#8217;t
-happening.</p>
-
-<h2>Hellbanning</h2>
-
-<p>http://en.wikipedia.org/wiki/Hellbanning</p>
-
-<p>Aka, shadowbanning. You don&#8217;t know you&#8217;re banned, but no one sees your
-stuff, people stuff responding to you. Used on HN.</p>
-
-<h2>Redis SLAVEOF</h2>
-
-<p>http://redis.io/commands/slaveof</p>
-
-<p>Master-slave replication. A slave has its own port, connects to parent
-with SYNC, starts a BGSAVE, shares shit, blah blahblah.</p>
-
-<p>You can even pretend to be a slave with netcat.</p>
-
-<pre><code>nc localhost 9595
-SYNC
-</code></pre>
-
-<p>And then you&#8217;ll get a stream of all the stuff a redis slave server sees.
-If you write to the master you&#8217;ll the slave being sent that same write
-request.</p>
-
-<p>Slaves can have slaves. If a master disconnects, slaves become
-masters&#8230;?</p>
-
-<p>Slaves are read only:</p>
-
-<pre><code>(error) READONLY You can't write against a read only slave.
-</code></pre>
-
-<p>If master disconnects, it&#8217;s still a slave until you tell it to
-<code>SLAVE NO ONE</code>, then it severs that connection, preserving the
-replicated data, and then the old master might connect to the new master
-and invert the master-slave relationship. PRETTY RAD. Or you could also
-tell the new master to become a slave, but that&#8217;ll mean it loses all of
-its data.</p>
-
-<p>Use slave chains if a master is overloaded w forwarding writes to all of
-its slaves. Instead of</p>
-
-<pre><code>- MASTER
-  - SLAVE 0
-  - SLAVE 1
-  - SLAVE 2
-  - SLAVE 3
-</code></pre>
-
-<p>You could do</p>
-
-<pre><code>- MASTER
-  - SLAVE 0
-    - SLAVE 1
-      - SLAVE 2
-        - SLAVE 3
-</code></pre>
-
-<h2>Git: tags are a flat hierarchy</h2>
-
-<p>You could release multiple versions of a project from different
-branches. There&#8217;s no requirement that all the versions you tag are on
-<code>master</code> or <code>release</code> or anything like that. Tags, as opposed to branch
-names, are a flattened hiearchy.</p>
-
-<p>A branch is just a pointer.</p>
-
-<p>A tag is just a pointer.</p>
-
-<p>The difference is that if you commit to a branch, the pointer moves. A
-tag on the other hand stays pointing to that commit SHA.</p>
-
-<p>A client can make sure a master write made it to slave via checking
-UUID&#8217;s, and using <code>INFO</code> command to check sync status, etc.</p>
-
-<h2>Redis Sentinel</h2>
-
-<p>http://redis.io/topics/sentinel</p>
-
-<p>Monitors master/slaves, restarts, notifies, failovers, etc.</p>
-
-<h2>Redis-cli</h2>
-
-<pre><code>-x                 Read last argument from STDIN.
-
-Example:
-cat /etc/passwd | redis-cli -x set mypasswd
-</code></pre>
-
-<p>So that sets <code>mypasswd</code> to the contents of a file.</p>
-
-<pre><code>$ echo "SOMEVALUE" | redis-cli -x set wat
-OK
-$ redis-cli get wat
-</code></pre>
-
-<h2>Redis: MULTI/EXEC doesn&#8217;t mean pipelining</h2>
-
-<p>Pipelining refers to a redis client queueing commands and then sending
-them to a Redis server all at once. The Redis server its has its own
-concept of queued commands via MULTI/EXEC, but the concepts are separate;
-you could invidually send a bunch of commands including MULTI/EXEC, and
-get responses to each, but once you&#8217;re in the MULTI/EXEC block, you
-start getting QUEUED as a response.</p>
-
-<h2>Redis: WATCH, DISCARD, MULTI</h2>
-
-<p>You can invalidate your own WATCH pretty immediately:</p>
-
-<pre><code>127.0.0.1:6379&gt; WATCH foo
-OK
-127.0.0.1:6379&gt; SET foo wat
-OK
-127.0.0.1:6379&gt; MULTI
-OK
-127.0.0.1:6379&gt; EXEC
-(nil)
-</code></pre>
-
-<p>Obviously you can&#8217;t put it in a MULTI</p>
-
-<pre><code>127.0.0.1:6379&gt; MULTI
-OK
-127.0.0.1:6379&gt; WATCH foo
-(error) ERR WATCH inside MULTI is not allowed
-</code></pre>
-
-<p>DISCARDS must take place within MULTI block.</p>
-
-<pre><code>127.0.0.1:6379&gt; DISCARD
-(error) ERR DISCARD without MULTI
-</code></pre>
-
-<h2>Optimistic Locking</h2>
-
-<p>http://en.wikipedia.org/wiki/Optimistic_concurrency_control</p>
-
-<p>Redis implements optimistic locking; it never locks a datatype and
-prevents someone from writing; rather, transactions can be aborted and
-retried if it&#8217;s detected that someone else wrote to the same data
-(detected via watch).</p>
-
-<p>Pessimistic locking would be, say, if a DB row was locked and someone
-wanting to write to it was blocked til the lock was given up, which
-apparently most databases do.</p>
-
-<p>Postgres (and other relational DBs) have other approaches:</p>
-
-<p>http://blog.2ndquadrant.com/postgresql-anti-patterns-read-modify-write-cycles/</p>
-
-<p>TL;DR Avoid read-modify-write</p>
-
-<h2>No pipelining + latency = multiplied awfulness</h2>
-
-<p>Just like w TCP or anything with roundtrips, latency is the multiplier.
-Good thing I wrote this.</p>
-
-<h2>Standard Deviation</h2>
-
-<p>http://en.wikipedia.org/wiki/Standard_deviation#History</p>
-
-<blockquote><p>The term standard deviation was first used[10] in writing by Karl Pearson[11] in 1894, following his use of it in lectures.</p></blockquote>
-
-<p>So there&#8217;s no statistical meaning behind the word &#8220;standard&#8221;. We&#8217;re all
-just talking about &#8220;deviation&#8221;, using the most basic/default/standard
-way of calculating it.</p>
-
-<h2>Ruby blocks v Python context manager</h2>
-
-<p>One thing I noticed regarding <code>return</code>s:</p>
-
-<pre><code>def foo():
-  print(1)
-  yield
-  print(2)
-
-def bar():
-  with foo():
-    print(999)
-    return "LOL"
-</code></pre>
-
-<p>In python this yields</p>
-
-<pre><code>1
-999
-2
-</code></pre>
-
-<p>and returns &#8216;LOL&#8217;. This is interesting because the <code>print(2)</code> is still
-hit, which isn&#8217;t what would happen in Ruby.</p>
-
-<pre><code>def foo
-  puts 1
-  yield
-  puts 2
-end
-
-def bar
-  foo { puts "999"; return "LOL" }
-end
-</code></pre>
-
-<p>yields</p>
-
-<pre><code>1
-999
-=&gt; "LOL"
-</code></pre>
-
-<p>The <code>2</code> isn&#8217;t printed because in Ruby, the return causes the caller to
-return.</p>
-
-<h2>Redis ZSETS sort by key when scores equal</h2>
-
-<p>That&#8217;s all.</p>
-
-<h2>Lua</h2>
-
-<p>http://en.wikipedia.org/wiki/Lua_(programming_language)</p>
-
-<p>Why use Lua:</p>
-
-<ul>
-<li>you&#8217;re building something that needs to be scriptable</li>
-<li>that shouldn&#8217;t have a heavy footprint from the interpreter</li>
-<li>that might be in an embedded system</li>
-<li>that is easy to grok</li>
-<li>that lots of people use already</li>
-</ul>
-
-
-<p><a href="http://en.wikipedia.org/wiki/Wikipedia:Lua">Wikipedia is Lua-extensible</a></p>
-
-<p>Redis offers Lua scripting now, useful in certain cases over
-pipelining/multi-exec, since (I think) it allows logic to be placed on
-the Redis server rather than having to do all logic on the application
-sides and remembering to do all the WATCH/MULTI/EXEC crap.</p>
-
-<h2>Redis: why lock?</h2>
-
-<p>Because WATCH/retry loops quickly degrade as the number of actors
-increase; particularly if the WATCH is coarse (only keys can be WATCH&#8217;d,
-not specific items in a hash).</p>
-
-<p>Instead of retrying, a lock might make sense in this case.</p>
-
-<p>Implementing locks is error-prone:</p>
-
-<ul>
-<li>a process grabs a lock, but takes too long and the lock times out, and
-process is blissfully unaware and keeps doing potentially destructive
-things</li>
-<li>process crashes, doesn&#8217;t releaes lock, and everyone wastes time
-waiting for the timeout</li>
-<li>process crashes, other blocked processes try to acquire lock at same
-time, think they each got the lock. (This is an issue in general but
-more likely to happen if many processes attempting-to-lock are blocked
-at the same time)</li>
-</ul>
-
-
-<p>SETNX only writes if not already present. It&#8217;s a test and set. Useful
-for locks. You can just spin-lock on a sleep(.001) loop.</p>
-
-<p>Increasing the granularity of lock generally improves perf.</p>
-
-<h2>Dogpiling</h2>
-
-<p>http://en.wikipedia.org/wiki/Cache_stampede</p>
-
-<p>aka cache stampede; under very high loads, multiple processes try to
-warm the cache at the same time, and performance takes a megahit.</p>
-
-<p>This book seems to suggest a more general phenomenon of the system
-taking a hit if lots of people are trying to acquire a lock. Probably
-because they&#8217;re all spin locks, and spin lock take processing time.
-Couldn&#8217;t we just implement a semaphore w BLPOP and LPUSH?</p>
-
-<h2>Horrible App Store Deploy BS</h2>
-
-<p>http://stackoverflow.com/a/26511924/914123</p>
-
-<h2>Qualcomm: Mobile Station Modem</h2>
-
-<p>http://en.wikipedia.org/wiki/Qualcomm</p>
-
-<p>MSM: The CPU on Nexus, made by Qualcomm. You see in the android source
-code a whole bunch.</p>
-
-<p>What is Qualcomm?</p>
-
-<blockquote><p>Qualcomm Incorporated is an American global semiconductor company that designs and markets wireless telecommunications products and services.</p></blockquote>
-
-<h2>ioctl</h2>
-
-<p>Swiss army knife for special io device files.</p>
-
-<h2>Dalvik</h2>
-
-<p>VM for android.</p>
-
-<h2><code>set -e</code></h2>
-
-<p>Makes it so that the shell terminates after the first unsuccessful
-command. You can kill a tmux/terminal pane by just doing</p>
-
-<pre><code>set -e
-ls somethingthatdoesnotexist
-</code></pre>
-
-<p>Boom.</p>
-
-<h2>Heroku Buildpack</h2>
-
-<p><code>compile</code> gets run and apparently passed the app root path</p>
-
-<pre><code>mkdir -p "$1/bin/server"
-cp "bin/nginx-$STACK" "$1/bin/server/nginx"
-</code></pre>
-
-<h2>Nginx logging</h2>
-
-<p>Customize via <code>error_log</code> and <code>access_log</code> directives, but keep in mind
-it&#8217;s going to expect to use <code>./logs/*.log</code> no matter what before it&#8217;s
-had time to read your config file (how else would it log a failure to
-parse a config file?).</p>
-
-<h2>Render right from config/routes.rb</h2>
-
-<pre><code>get '/horse_ass', :to =&gt; proc { |env|
-                                    [
-                                      200,
-                                      {"Content-Type" =&gt; 'text/plain'},
-                                      ["FUDGLES"]
-                                    ]
-                                  }
-</code></pre>
-
-<p>It&#8217;s just the Rack API (anything that <code>respond_to?(:call)</code>).</p>
-
-<h2>Millinery</h2>
-
-<p>Women&#8217;s hats. A Milliner is a person who sells hats.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-20T16:25:00-05:00" pubdate data-updated="true">Nov 20<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/17/redis-the-slack-jawed-yokel/">
-		
-			Redis the Slack-jawed Yokel</a>
-	</h2>
-	<div class="entry-content">
-		<p>Some stores&#8217;ll never page to disk, but then again, some stores&#8217;ll, like
-Redis, the slack-jawed yokel.</p>
-
-<h2>Transparent Huge Pages</h2>
-
-<p>https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Performance_Tuning_Guide/s-memory-transhuge.html</p>
-
-<p>Huge pages are a Linux feature whereby pages, normally 4096 bytes,
-can be 2MB or 1 GB. Useful for some applications, difficult to
-configure, hence Transparent Huge Pages is provided automagically, I
-guess. But it&#8217;s not recommended for database workloads&#8230; why not?</p>
-
-<p>Probably Redis has the answer:</p>
-
-<p>http://redis.io/topics/latency</p>
-
-<p>Redis uses forking for</p>
-
-<ul>
-<li>generating RDB snapshot</li>
-<li>rewriting AOF</li>
-</ul>
-
-
-<p>Forking is slower in certain virtual settings; EC2 old Xen instances
-could take more than a second to fork. Newer ones using HVM
-(hardware virtual machine) leverages assistive hardware to make this
-efficient.</p>
-
-<p>If you have transparent hugepages, they&#8217;ll need to be COW&#8217;d upon fork,
-which is expensive. So you can disable them entirely:</p>
-
-<pre><code>echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled
-</code></pre>
-
-<h2>Hypervisor / Virtual Machine Monitor</h2>
-
-<p>http://en.wikipedia.org/wiki/Hypervisor</p>
-
-<p>Tis what it sounds like. It&#8217;s the thing that schedules processing time
-b/w multiple virtual machines. It&#8217;s the host to the guest virtual
-machines.</p>
-
-<h2>Multiple values in sysfs</h2>
-
-<p>http://techoverflow.net/blog/2013/08/01/how-to-check-if-hugepages-are-enabled-in-linux/</p>
-
-<pre><code>$ cat /sys/kernel/mm/transparent_hugepage/enabled
-always [madvise] never
-</code></pre>
-
-<p>I thought this meant the first value (active) was the current value and
-the other two were left as documentation, but no, it means madvise is
-current value among the other two options. Kinda wacky. Who parses this?</p>
-
-<p>IRC tells me this is a common sysfs pattern.</p>
-
-<pre><code>$ cat /sys/block/xvda/queue/scheduler
-[noop]
-</code></pre>
-
-<h2>SSR</h2>
-
-<p>Server-side render.</p>
-
-<h2>InfoSec</h2>
-
-<p>Information Security. Usually refers to IT security, but sometimes
-physical backups play into it, such as off-site tape backups.</p>
-
-<h2>Which process is using which port?</h2>
-
-<pre><code>lsof -i $PORT
-# e.g.
-lsof -i :5000
-</code></pre>
-
-<p><code>-i</code> just means filter by internet address. The above supplied only a
-port, you could also provide a host name.</p>
-
-<h2>Redis Pub Sub</h2>
-
-<p>Not super common because</p>
-
-<ul>
-<li>older versions might crash system / OS if clients don&#8217;t read published
-messages fast enough, back pressure, bloating outgoing buffer. New
-versions disconnect slow readers though.</li>
-<li>Unreliable message delivery if there&#8217;s an intermittent disconnect and
-reconnect.</li>
-</ul>
-
-
-<h2>Redis Expiration</h2>
-
-<ul>
-<li>you can manually DEL or use expiration</li>
-<li>expires whole keys, i.e. can&#8217;t expire individual items in a set (hence
-more common to use ZSETs with timestamps and manual deletion based on
-a range)</li>
-</ul>
-
-
-<h2>Stripe Token Retrieval</h2>
-
-<p>https://stripe.com/docs/api#retrieve_token</p>
-
-<p>This is only interesting since it clarified that a token wraps a card
-with details that you can access before you, say, add it to a card.
-This is the only way presently to prevent attaching the same card
-to a customer twice: retrieve and then add.</p>
-
-<p>But for my purposes I can just add it twice, and check the fingerprint
-after word to prevent duplicates on my app&#8217;s Customer obj.</p>
-
-<p>Why doesn&#8217;t Stripe de-dup? https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/OzmhpQOs_SU</p>
-
-<blockquote><p>We do not check, as many people have their own policies around when
-duplicates are acceptable or aren&#8217;t.
-However, you can look at the &#8220;fingerprint&#8221; property on cards that you
-have saved in order to dedup.</p></blockquote>
-
-<h2>Ruby Enumerators are awesome</h2>
-
-<p>&#8220;Hey how come there&#8217;s <code>each_with_index</code> but not <code>map_with_index</code>?&#8221;</p>
-
-<p>Use enumerators. Lots of the Ruby Enumerables return enumerators if you
-don&#8217;t pass a block to them, and they can be chained. For instance you
-can create a 1-indexed series via:</p>
-
-<pre><code>10.times.map { |i| i+1 }
-</code></pre>
-
-<p>Does this work with lazy enumerators?</p>
-
-<pre><code>(0..Float::INFINITY).lazy.map { |i| i + 1 }.first(10)
-</code></pre>
-
-<p>So yeah, just that ranges have no <code>times</code>&#8230; probably more correct to
-think of <code>10.times</code> as a range rather than other way around.</p>
-
-<h2>Stripe Checkout is only Web</h2>
-
-<p>There&#8217;s no native ios/android version of Stripe Checkout. It&#8217;s just web.
-iOS/Android SDKs offer token exchange utilities and some widgets but
-it&#8217;s not the full tailored UI solution that Checkout is.</p>
-
-<h2>Stripe passes through failed CVVs</h2>
-
-<p>https://support.stripe.com/questions/cvc-or-avs-failed-but-payment-succeeded</p>
-
-<p>You can still process a card with the wrong CVV. Though you probably
-shouldn&#8217;t.</p>
-
-<p>Test:</p>
-
-<blockquote><p>4000000000000101: cvc_check will fail.</p></blockquote>
-
-<h2>Rx state machine</h2>
-
-<p>https://github.com/logicalguess/rx-state-machine</p>
-
-<p>Basically every transition that occurs maps to a new state machine. You
-define a state machine in a classic OO manner but it streamifies it for
-you.</p>
-
-<h2>Write amplification w SSDs</h2>
-
-<p>http://en.wikipedia.org/wiki/Write_amplification</p>
-
-<p>When the amount you write to an SSD is amplified by the fact that you
-often have to flash much more than you originally intended to write
-based on how SSD works. So you wanna be careful about abusing <code>fsync</code>.
-Ramdisks might help too.</p>
-
-<h2>MySQL installation n00bness</h2>
-
-<p>There&#8217;s <code>mysql</code> and <code>mysql-server</code>. They&#8217;re separate packages. Derp.
-One can connect to a server and issue commands, one actually installs
-the database.</p>
-
-<pre><code>/usr/bin/mysqladmin -u root password 'new-password'
-</code></pre>
-
-<p><code>mysqld_safe</code> is a script for starting up the daemon (as opposed to
-<code>service mysqld start</code>?).</p>
-
-<pre><code>cd /usr ; /usr/bin/mysqld_safe &amp;
-</code></pre>
-
-<p>Apparently it&#8217;s helpful because it:</p>
-
-<ul>
-<li>restarts the server upon error</li>
-<li>runtime logging</li>
-</ul>
-
-
-<p>Apparently MySQL on Linux stores the DB files in</p>
-
-<pre><code>/var/lib/mysql/
-</code></pre>
-
-<p>There&#8217;s a secure install script that does a few things:</p>
-
-<pre><code>sudo /usr/bin/mysql_secure_installation
-</code></pre>
-
-<ol>
-<li>Encourages you to set root password</li>
-<li>Require <code>root</code> login must come from <code>localhost</code>; disable remote
-logins.</li>
-<li>Delete test database</li>
-<li>Reload perms table.</li>
-</ol>
-
-
-<h2>PHP FPM</h2>
-
-<p>http://php-fpm.org/</p>
-
-<p>A simple and robust FastCGI Process Manager for PHP</p>
-
-<p>I think this is necessary if you do nginx + php (apache has built in
-niceties w php).</p>
-
-<p>I already wrote about this shit and forgot it again:</p>
-
-<blockquote><p>CGI applications are processes spun up by a web server to handle an
-incoming request. Unscalable since spinning up processes all the time
-takes a toll on the OS, not to mention that there&#8217;s no way to do
-resource sharing (DB connection sharing, in-memory caching (because
-the process dies at the end of request)).</p>
-
-<p>With FastCGI, there&#8217;s a persisting FastCGI server that owns all of the
-CGI programs, and webservers interact with FastCGI via a binary protocol
-(over a socket (local) or TCP connection (remote)).</p></blockquote>
-
-<p>So FPM is the thing that stays up and running, and may spawn PHP
-instances, but can do the connection sharing.</p>
-
-<h2>WordPress FPM</h2>
-
-<p>http://codingsteps.com/install-php-fpm-nginx-mysql-on-ec2-with-amazon-linux-ami/</p>
-
-<pre><code>location / {
-    root   /var/www/html;
-    index  index.php index.html index.htm;
-}
-location ~ \.php$ {
-      fastcgi_pass   unix:/var/run/php-fpm/php-fpm.sock;
-      fastcgi_index  index.php;
-      fastcgi_param  SCRIPT_FILENAME  /usr/share/nginx/
-                       html$fastcgi_script_name;
-      include        fastcgi_params;
-}
-</code></pre>
-
-<p>Why location and not server? Isn&#8217;t this gonna be required within
-nginx.conf? I guess server means a proxy.</p>
-
-<p>I&#8217;m guessing it&#8217;s expecting this include to be within a server
-directive. Which I don&#8217;t want. I want simultaneous blogs, yo.</p>
-
-<p>AH OK figured it out:</p>
-
-<ul>
-<li><code>server</code> doesn&#8217;t just mean a proxy; it means nginx will spin up such a
-server, bind to the ports, and then proxy or serve the thing itself or
-pass to FastCGI, however you&#8217;ve configured it. <code>server</code> must be
-within the <code>http</code> context.</li>
-<li><code>location</code> must be within <code>server</code> or nested within <code>location</code>
-context.</li>
-</ul>
-
-
-<p>So we have</p>
-
-<pre><code>location / { ...
-</code></pre>
-
-<p>and</p>
-
-<pre><code>location ~ \.php$ { ... 
-</code></pre>
-
-<p>So the first matches root. The second case-insensitive matches anything
-ending in .php.</p>
-
-<h2>Nginx FastCGI</h2>
-
-<p>FastCGI is a binary protocol. Nginx implements that protocol. Just in
-the same way nginx can match a URL and proxy through to an underlying
-server, nginx can match a URL and proxy through to a FastCGI server.</p>
-
-<p>There might be multiple FastCGI-speaking servers that nginx might talk
-to. PHP-FPM is an alternative implementation over the default FastCGI.</p>
-
-<p>Nginx won&#8217;t spin up a fastCGI server (in the same way it won&#8217;t spin up a
-proxy server that it proxies requests to), but rather expects it to be
-already running and answering requests from a unix socket or internet socket.</p>
-
-<p>A fast-cgi process is a process manager. It might spin up 8 worker
-instances of, say, php, and reuse these instances efficiently. It might
-feature adaptive process spawning, like PHP-FPM does, or it might just
-block one request if N+1 requests arrive at the same time. Either way,
-it&#8217;s better than:</p>
-
-<ol>
-<li>Constant process starting/stopping that plain of CGI entails</li>
-<li>Building PHP into apache (<code>mod_php</code>), which means you can&#8217;t restart
-PHP (after, say, an upgrade) without restarting Apache. Also, you
-lose permissions granularity if it&#8217;s built into Apache, which opens
-security holes that could be closed by letting PHP run at a different
-uid/group, etc.</li>
-</ol>
-
-
-<p>So what&#8217;s PHP FPM?</p>
-
-<h2>Nginx index causing internal redirect</h2>
-
-<p>http://nginx.org/en/docs/http/ngx_http_index_module.html#index</p>
-
-<p>It should be noted that using an index file causes an internal redirect, and the request can be processed in a different location. For example, with the following configuration:</p>
-
-<p>Interesting. That&#8217;s how you can make a <code>/</code> behave like a PHP and be
-processed like a PHP.</p>
-
-<h2>Configure PHP-FPM to create unix domain socket with nginx owner/user</h2>
-
-<p>http://stackoverflow.com/questions/23443398/nginx-error-connect-to-php5-fpm-sock-failed-13-permission-denied</p>
-
-<p>You can configure php-fpm to create a unix domain socket and chown it
-to a different user/group. Since nginx workers need to talk to it, it
-should be configured to their user/group, which was <code>nginx</code> for me.</p>
-
-<p>Now I&#8217;m getting &#8220;No input file specified.&#8221;</p>
-
-<p>LONG STORY SHORT I was pointing to home/some-user/sites/wordpress and
-unless you&#8217;re root, that&#8217;s inaccessible.</p>
-
-<h2>PHP config</h2>
-
-<p>https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-ubuntu-12-04</p>
-
-<p>They want me to change <code>cgi.fix_pathinfo</code> to 0, else it will be fuzzy
-match a php file for processing, a potential security risk.</p>
-
-<p>Then I have to change PHP FPM to accept requests off a unix domain
-socket:</p>
-
-<pre><code>listen = /var/run/php5-fpm.sock
-</code></pre>
-
-<p>Makes sense, otherwise it assumes the fast cgi server is localhost 9000.</p>
-
-<p>So&#8230; does nginx spin up a FastCGI server? Is it part of nginx? Is it
-just a protocol?</p>
-
-<h2>System V Services</h2>
-
-<p>You don&#8217;t directly start mysqld, you do</p>
-
-<pre><code>service mysqld start
-</code></pre>
-
-<h2>CentOS</h2>
-
-<p>http://en.wikipedia.org/wiki/CentOS</p>
-
-<p>Largely a clone of Red Hat Enterprise Linux.</p>
-
-<p>http://unix.stackexchange.com/questions/27323/is-centos-exactly-the-same-as-rhel</p>
-
-<blockquote><p>CentOS is very close to being RHEL without the branding and support. In particular, the library versions are the same, so binaries that work on one will work on the other. The administration tools are the same and configured in similar ways. However, there are a few differences, as the two distributions sometimes apply different minor patches. For example, in this question, it was apparent that RHEL 5 and CentOS 5 apply different rules to identify files under /etc/cron.d.</p>
-
-<p>In other words, at the level of your course, you can treat CentOS and RHEL as interchangeable. But if you needed to look up the precise behavior of a program in a corner of the man page, you may encounter differences.</p></blockquote>
-
-<h2>Alice in Flames</h2>
-
-<p>http://techblog.netflix.com/2014/11/nodejs-in-flames.html</p>
-
-<p>Flame chart things I didn&#8217;t know:</p>
-
-<ul>
-<li>X axis isn&#8217;t necessarily passage of time; I think it is in Chrome but
-doesn&#8217;t need to be for purposes of flame chart?</li>
-<li>Width of a box is aggregate call time;</li>
-</ul>
-
-
-<p>Ehh I guess flame charts do different things? Seems that chrome X axis
-is in order. But it doesn&#8217;t need to be, in the same way that the tree
-view of calls isn&#8217;t in time order; you care about total elapsed time,
-not passage of time.</p>
-
-<h2>Heroku one-off dynos</h2>
-
-<p>https://devcenter.heroku.com/articles/one-off-dynos</p>
-
-<p>TL;dr heroku run console (and any other run) will use a one-off dyno.</p>
-
-<h2>Sampling vs Tracing</h2>
-
-<p>https://www.jetbrains.com/profiler/webhelp/Profiling_Guidelines__Choosing_the_Right_Profiling_Mode.html</p>
-
-<p>Sampling vs Tracing.</p>
-
-<p>TL;DR tracing is more expensive, affects perf, but is more accurate than
-sampling.</p>
-
-<h2>Wordpress Admin on SSL</h2>
-
-<p>http://codex.wordpress.org/Administration_Over_SSL</p>
-
-<p>If you&#8217;re reverse-proxying, you have to prevent loops via:</p>
-
-<pre><code>define('FORCE_SSL_ADMIN', true);
-if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-       $_SERVER['HTTPS']='on';
-</code></pre>
-
-<p>Remember that wp-config.php is going to be loaded on every stupid thing.
-Right?</p>
-
-<h2>Heroku buildpacks</h2>
-
-<p>Integration-tested via <a href="https://github.com/heroku/hatchet">Hatchet</a>.</p>
-
-<p>https://devcenter.heroku.com/articles/buildpack-api</p>
-
-<ul>
-<li>detect: determines whether to apply buildpack to app</li>
-<li>compile: apply the transformations</li>
-<li>release: provides metadata back to runtime&#8230;?</li>
-</ul>
-
-
-<p>If you want both a node and ruby setup, you can do</p>
-
-<pre><code>https://github.com/ddollar/heroku-buildpack-multi
-</code></pre>
-
-<p>and point to the default heroku-provided buildpacks within a .buildpacks
-file.</p>
-
-<h2>nginx-buildpack</h2>
-
-<p>https://github.com/ryandotsmith/nginx-buildpack/blob/master/bin/start-nginx</p>
-
-<p>This is a pretty awesome file that uses lots of Linux-y IPC trickery to
-get</p>
-
-<p>You must put the following in your Procfile:</p>
-
-<pre><code>web: bin/start-nginx bundle exec unicorn -c config/unicorn.rb
-</code></pre>
-
-<p>The start-nginx script spins up processes in the background; nginx
-will wait for</p>
-
-<h2>App server</h2>
-
-<p>Unicorn, Puma, Rainbows, zbatery, etc. It&#8217;s the thing that listens to a
-socket and runs your application code for you. Rails isn&#8217;t an app
-server, but Puma running a rails app is. Rails is an app framework. Puma is
-an app server.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-17T08:02:00-05:00" pubdate data-updated="true">Nov 17<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/15/redis-b-hayes/">
-		
-			Redis B Hayes</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Redis&#8217;n</h2>
-
-<p>This and other notes based on Redis in Action.</p>
-
-<p>Questions:</p>
-
-<ul>
-<li>is it really brag-worthy to say in-memory-store? It gets persisted to
-disk anyway; don&#8217;t other DBs bring as much into memory as possible for
-fast lookups?
-
-<ul>
-<li>A: other databases are &#8220;primarily on-disk&#8221; but of course yes memory
-caching exists.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Relation to memcached:</p>
-
-<ul>
-<li>Similar efficiency based on in-memory lookups</li>
-<li>Redis features 2 persistence strategies (memcached doesn&#8217;t persist I
-guess?)</li>
-<li>Redis supports strings + 4 other data structures; memcached is strings</li>
-</ul>
-
-
-<p>ZSETs are hash of string keys to floating points, can be queried by
-order, ordered by their weight.</p>
-
-<h2>Databases: row insertion (often) fast</h2>
-
-<p>Because no need for a random read + random write; appending to a file
-(what most DBs do) is fast.</p>
-
-<h2>ACID</h2>
-
-<p>Set of properties that guarantee reliable database transactions</p>
-
-<ul>
-<li>Atomicity - all or nothing</li>
-<li>Consistency - transactions bring database from one valid state to another</li>
-<li>Isolation - are partially completed transaction visible to others?</li>
-<li>Durability - post-transaction, data is committed even in power loss</li>
-</ul>
-
-
-<h2>Fortnight</h2>
-
-<p>Two weeks.</p>
-
-<h2>Heroku database URL</h2>
-
-<pre><code>postgres://username:password@ec2-xx-xx-xx-xx-xx.compute-1.amazonaws.com:5432/d45d81ucgm3205
-</code></pre>
-
-<p>It&#8217;s just username + password at some publicly accessible EC2 URL. Your
-cherished postgres instances just live on some EC2 farm. What a crock.</p>
-
-<h2>Docker</h2>
-
-<p>Docker images are read-only templates. Use them to generate containers.
-Build other shit on top of containers.</p>
-
-<p>Docker has its own IANA port numbers for REST and secure REST API&#8230;
-what does this actually mean?</p>
-
-<p>http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=docker#DOCKER</p>
-
-<p>AH OK I have some more ideas:</p>
-
-<p>Boot2Docker is what you use to run Docker on Mac OS X. Why? Because
-docker depends on linux kernel specifics. Boot2Docker runs a Virtual Box
-instance of some Linux-y thing</p>
-
-<pre><code># within the virtual instance
-$ uname
-Linux version 3.16.4-tinycore64 (root@39d2c877bc4f) (gcc version 4.7.2 (Debian 4.7.2-5) ) #1 SMP Thu Oct 23 16:14:24 UTC 2014
-</code></pre>
-
-<p>So with the Boot2Docker setup, when you run the <code>docker</code> command on a
-Mac terminal, it has to jump through some hoops to run the docker
-instance on the Linux virtual box:</p>
-
-<pre><code>Mac `docker` command
-Proxy through to docker:tcuser@192.168.59.103
-Run `docker` command, which talks to 
-docker daemon
-</code></pre>
-
-<p>So there&#8217;s no docker daemon on OS X; the only persistent docker thing
-you&#8217;ll see is Virtual box instances running the docker virtual instance
-that the actual docker daemon lives on:</p>
-
-<pre><code> /Applications/VirtualBox.app/Contents/MacOS/VBoxHeadless --comment boot2docker-vm --startvm 798082c7-01d7-4a4f-89fc-1ebf70bc1a0a --vrde config
- /Applications/VirtualBox.app/Contents/MacOS/VBoxNetDHCP --ip-address 192.168.59.99 --lower-ip 192.168.59.103 --mac-address 08:00:27:93:D3:BC --netmask 255.255.255.0 --network HostInterfaceNetworking-vboxnet0 --trunk-name vboxnet0 --trunk-type netadp --upper-ip 192.168.59.254
-</code></pre>
-
-<p>You can ssh into the docker VM box. Either w password or reusing the key
-they generate for you when you install boot2docker; put this in
-~/.ssh/config</p>
-
-<pre><code>Host docker
-  HostName 192.168.59.103
-  User docker
-  IdentityFile "/Users/machty/.ssh/id_boot2docker"
-  IdentitiesOnly yes
-</code></pre>
-
-<p>(I realized later that there&#8217;s a convenient command for this:
-<code>boot2docker ssh</code>&#8230; whoops!)</p>
-
-<p>So with this config in place I&#8217;m guessing that I can either run
-<code>docker version</code> or <code>ssh docker docker version</code> and see the same
-thing. BOOYA both produce:</p>
-
-<pre><code>Client version: 1.3.1
-Client API version: 1.15
-Go version (client): go1.3.3
-Git commit (client): 4e9bbfa
-OS/Arch (client): linux/amd64
-Server version: 1.3.1
-Server API version: 1.15
-Go version (server): go1.3.3
-Git commit (server): 4e9bbfa
-</code></pre>
-
-<p>So anyway, you can run commands against a docker image. This spins up a
-container, runs the command, and stops the container&#8230; does it delete
-the container?</p>
-
-<pre><code>docker ps --help
-</code></pre>
-
-<p>Nevermind that I&#8217;ll figure it out later. Let&#8217;s figure out how to get a
-Redis container running:</p>
-
-<pre><code>https://registry.hub.docker.com/_/redis/
-</code></pre>
-
-<p>Use <code>docker build</code> to build from a Dockerfile, which kinda explains how
-it ends up getting mounted to the outside world. So this is how you can
-just have a docker instance of a thing that you can run commands
-against, even in a Mac OS X setting? I know nothing, Jon Snow.</p>
-
-<p>https://docs.docker.com/examples/running_redis_service/</p>
-
-<pre><code>FROM        ubuntu:12.10
-RUN         apt-get update &amp;&amp; apt-get install -y redis-server
-EXPOSE      6379
-ENTRYPOINT  ["/usr/local/bin/my-dumbass-redis-server"]
-</code></pre>
-
-<p>So this starts with the ubuntu:12.10 image, installs redis into the
-container created from that image, exposes 6379&#8230; to&#8230;? What does this
-mean?</p>
-
-<blockquote><p>The EXPOSE instructions informs Docker that the container will listen on the specified network ports at runtime. Docker uses this information to interconnect containers using links (see the Docker User Guide). Note that EXPOSE only works for inter-container links. It doesn&#8217;t make ports accessible from the host. To expose ports to the host, at runtime, use the -p flag.</p></blockquote>
-
-<p>From http://docs.docker.com/reference/builder/</p>
-
-<p>So it&#8217;s exposed if we&#8217;re linking containers but not someone exposed to
-the host app.</p>
-
-<p>Ah I tried</p>
-
-<pre><code>docker run -i --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>and then I couldn&#8217;t ctrl-C because of, something, but if i do</p>
-
-<pre><code>docker run -it --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>then the -t option will attach a pseudo TTY and I can do it. This
-stuff is so cray cray. Actually I lied ctrl-C doesn&#8217;t work for TODO
-reasons, but Ctrl-P + Ctrl-Q detaches you from it? Seems good.</p>
-
-<p>OK but if I do</p>
-
-<pre><code>docker run -it -p 9191:6379 --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>this will run in interactive mode with ctrl-p ctrl-q supporting
-detachability, mapping the container 6379 (default redis port) to the
-host port 9191, and overriding the entrypoint because I didn&#8217;t know what
-I was doing in the Dockerfile. I should have left it at the default
-/usr/bin/redis-server because that&#8217;s where apt-get will put it.</p>
-
-<p>ANYWAY the mapping works, but the problem is i have to SSH into the
-docker host VirtualBox first to see it. How do I get beyond the
-Boot2Docker wall? Wait I know I&#8217;ll just fuckin use some SSH magic.
-Tunnels n shit.</p>
-
-<pre><code>ssh docker -L 9191:localhost:9191
-</code></pre>
-
-<p>ah but this will open a login shell, which I don&#8217;t need/want for what
-I&#8217;m doing:</p>
-
-<pre><code>ssh docker -N -L 9191:localhost:9191
-</code></pre>
-
-<p>The -N stands for &#8220;Do not execute a remote command&#8221;</p>
-
-<p>After which point I could just redis-cli but since I&#8217;m brutally low
-level I&#8217;ll do</p>
-
-<pre><code>$ nc localhost 9191
-SET WAT WOOT
-+OK
-GET WAT
-$4
-WOOT
-</code></pre>
-
-<p>Booooooya. So cool.</p>
-
-<p>OK gonna be an idiot. SSH all the way. Is that possible? It means being
-able to SSH into container&#8230; sounds like you can&#8217;t do that without
-going through</p>
-
-<h2>Docker detach</h2>
-
-<p>Docker attaching/detaching is pretty weird. I don&#8217;t know the rationale
-behind it but they make it very easy to attach to a box but then not be
-able to attach. Basically you have to always pass -it to run and then
-can use ctrl-P ctrl-Q to detach.</p>
-
-<p>Or, you can <code>kill -9</code> the attached processed; if you you just do <code>kill</code>,
-that sends SIGTERM and that proxies through and closes the shitty
-process, but again Ctrl-C doesn&#8217;t use it.</p>
-
-<h2>Docker forwarding for OS X</h2>
-
-<p>This is a great article</p>
-
-<p>http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li><code>boot2docker ssh</code></li>
-<li>Add <code>dockerhost</code> to /etc/hosts</li>
-<li>Use <code>nsenter</code>
-
-<ul>
-<li><code>sudo nsenter -m -u -n -i -p -t $PID</code>
-
-<ul>
-<li><code>-m</code> use mount namespace of target process</li>
-<li><code>-u</code> use UTS namespace of target process (UTS stands for time-sharing? legacy unix thing?)</li>
-<li><code>-n</code> use network namespace of target process</li>
-<li><code>-i</code> IPC</li>
-<li><code>-i</code> IPC</li>
-<li><code>-p</code> IPC</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>LXC Containers (vs Docker)</h2>
-
-<p>https://linuxcontainers.org/</p>
-
-<p>Better chroot, comparable to docker containers. Ways of containing
-processes, resources, etc., dependent on modern linux kernel features,
-mostly on process namespacing.</p>
-
-<p>Excellent article comparing to Docker: http://www.flockport.com/lxc-vs-docker/</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li>yuno virtualization?
-
-<ul>
-<li>because of performance cost</li>
-</ul>
-</li>
-<li>LXC and Docker are fast</li>
-<li>Lightweight VMs</li>
-<li>Is Docker a lightweight VM?</li>
-</ul>
-
-
-<p>A Docker container runs a single process:</p>
-
-<blockquote><p>Docker restricts the container to a single process only. The default docker baseimage OS template is not designed to support multiple applications, processes or services like init, cron, syslog, ssh etc. As you can imagine this introduces a certain amount of complexity and has huge implications for day to day usage scenarios. Since current architectures, applications and services are designed to operate in normal multi process OS environments you would need to find a Docker way to do things or use tools that support Docker. When it comes to applications for a LAMP container you would need to build 3 containers that consume services from each other, a PHP container, an Apache container and a MySQL container. Can you build all 3 in one container? You can, but there is no way to run php-fpm, apache and mysqld in the same container without a shell script or install a separate process manager like runit or supervisor.</p></blockquote>
-
-<p>http://docs.docker.com/articles/using_supervisord/</p>
-
-<blockquote><p>Traditionally a Docker container runs a single process when it is launched, for example an Apache daemon or a SSH server daemon.</p></blockquote>
-
-<p>This is the entry point. Note that <code>ubuntu</code> has no entry point. Not sure
-if it&#8217;s possible to use <code>run</code> with a container that has an entry point,
-since the entry point is the process that gets run.</p>
-
-<p>So it should be possible for me to run an ubuntu netcat and portforward
-at the same time:</p>
-
-<p>All from Mac:</p>
-
-<pre><code>$ docker run -i -p 9292:9292 --expose=[9292] ubuntu:14.04 nc -l 0.0.0.0
-</code></pre>
-
-<p>9292</p>
-
-<p>Separate Mac terminal window:</p>
-
-<pre><code>$ nc dockerhost 9292
-</code></pre>
-
-<p>And now these two assholes talk to each other!</p>
-
-<p>Here are all the options I used</p>
-
-<ul>
-<li><code>-i</code>: run container interactively with terminal attached; without
-this, nc immediately closes once someone connects to it since STDIN is
-presumably dev null</li>
-<li><code>-p 9292:9292</code>, map docker host port 9292 to container port 9292</li>
-<li><code>--expose=[9292]</code> open the firewall since it wasn&#8217;t listed as exposed
-in the dockerfile</li>
-</ul>
-
-
-<p>Shit is SO COOL.</p>
-
-<h2>Docker vs Heroku</h2>
-
-<p>Hmm, not even worth comparing.</p>
-
-<h2>Nested SSH tunnels</h2>
-
-<p>http://superuser.com/questions/96489/ssh-tunnel-via-multiple-hops</p>
-
-<p>Map localhost:9998 to host2&#8217;s port 22.</p>
-
-<pre><code>ssh -L 9998:host2:22 -N host1
-</code></pre>
-
-<p>Map localhost:9999 to blahbalhbablh you get the picture.</p>
-
-<pre><code>ssh -L 9999:localhost:1234 -N -p 9998 localhost
-</code></pre>
-
-<p>Shit is sooooo crazy. I love this stuff.</p>
-
-<h2>ProxyCommand</h2>
-
-<p>From <code>SSH_CONFIG(5)</code>.</p>
-
-<pre><code> ProxyCommand
-         Specifies the command to use to connect to the server.  The command string
-         extends to the end of the line, and is executed with the user's shell.  In the
-         command string, any occurrence of `%h' will be substituted by the host name to
-         connect, `%p' by the port, and `%r' by the remote user name.  The command can be
-         basically anything, and should read from its standard input and write to its
-         standard output.  It should eventually connect an sshd(8) server running on some
-         machine, or execute sshd -i somewhere.  Host key management will be done using
-         the HostName of the host being connected (defaulting to the name typed by the
-         user).  Setting the command to ``none'' disables this option entirely.  Note
-         that CheckHostIP is not available for connects with a proxy command.
-
-         This directive is useful in conjunction with nc(1) and its proxy support.  For
-         example, the following directive would connect via an HTTP proxy at 192.0.2.0:
-
-            ProxyCommand /usr/bin/nc -X connect -x 192.0.2.0:8080 %h %p
-</code></pre>
-
-<p>So this proxies through an already established HTTP Connect proxy at
-192.0.2.0:8080. That&#8217;s so awesome.</p>
-
-<p>netcat even brags of this:</p>
-
-<pre><code> Common uses include:
-
-       o   simple TCP proxies
-       o   shell-script based HTTP clients and servers
-       o   network daemon testing
-       o   a SOCKS or HTTP ProxyCommand for ssh(1)
-       o   and much, much more
-</code></pre>
-
-<h2>get.docker.com</h2>
-
-<pre><code>curl https://get.docker.com
-</code></pre>
-
-<p>It returns a bootstrapping shell script for setting up docker.</p>
-
-<p>You can <code>#include</code> it when booting an EC2 instance. Pretty cool.</p>
-
-<h2>Basic Authentication</h2>
-
-<p>If I spin up a stupid netcat server</p>
-
-<pre><code>nc -l localhost 9191
-</code></pre>
-
-<p>and then query it from Chrome</p>
-
-<pre><code>http://user:password@localhost:9191
-</code></pre>
-
-<p>Here&#8217;s what I see:</p>
-
-<pre><code>GET / HTTP/1.1
-Host: localhost:9191
-Connection: keep-alive
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36
-Accept-Encoding: gzip,deflate,sdch
-Accept-Language: en-US,en;q=0.8
-Cookie: blahblah
-</code></pre>
-
-<p>No reference to <code>user</code> or <code>password</code>. Which means that this information
-isn&#8217;t sent up front unless the server requests basic authentication by
-first sending back a 401 with the <code>WWW-Authenticate</code> header, after which
-point the user and password will be sent.</p>
-
-<p>And because it&#8217;s sent as a header (user:pass in base64) it&#8217;s encrypted
-if sent over TLS. But it&#8217;ll be plaintext in your address bar :).</p>
-
-<h2>SSH randomart</h2>
-
-<p>You see it when you create a key pair. Why? Because it&#8217;s just an easy
-ass visual way to compare keys rather than some Base64 shit.</p>
-
-<p>You can see the randomart for an existing key by printing the
-fingerprint in verbose mode:</p>
-
-<pre><code>$ ssh-keygen -lv -f ~/.ssh/id_boot2docker.pub
-2048 b2:3e:e4:d3:c1:9d:1b:75:46:0b:53:aa:18:6b:c7:c6  machty@machty.home (RSA)
-+--[ RSA 2048]----+
-|             ..  |
-|            o..  |
-|        .   .+ . |
-|         * .. +  |
-|      ..S.Eo o   |
-|      .+oo+      |
-|     o.. . o     |
-|     .+ . .      |
-|      .o         |
-+-----------------+
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-15T13:16:00-05:00" pubdate data-updated="true">Nov 15<span>th</span>, 2014</time></div>
 	
 
 

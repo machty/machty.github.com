@@ -1,0 +1,309 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Watoozy  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Watoozy</h2>
+	<div class="entry-content"><h2>DAS</h2>
+
+<p>&#8220;how and why to avoid nil&#8221;</p>
+
+<p>I&#8217;d watched this before, but the last approach is most interesting:</p>
+
+<ul>
+<li>embrace immutability</li>
+<li>embrace domain objects whose non-nullable properties are part of
+their identity</li>
+</ul>
+
+
+<p>Other thoughts:</p>
+
+<p>Block-less <code>it</code> rspec specs are considered pending; useful for writing
+out a bunch of specifications at once and implementing them later.</p>
+
+<p>&#8220;pushing complexity down&#8221;</p>
+
+<p>When you&#8217;re writing a test whose behavior depends on dependencies (e.g.
+MonthlyBilling class pushes the &#8220;who-to-charge&#8221; logic into the User
+classes&#8217;s <code>charge</code> method), you&#8217;re writing a &#8220;systems test&#8221; /
+integration test.</p>
+
+<h2>Ebryn machtizzle</h2>
+
+<p>Talking about the sideways problem</p>
+
+<p>https://hackpad.com/Ebryn-Machty-Router-discussion-iRBXvKmKj5v</p>
+
+<!--more-->
+
+
+<h2>webkit-user-select screws input focusability</h2>
+
+<p><code>use-select: none</code> disables selectability, which is often desirable in
+mobile apps, hence:</p>
+
+<pre><code>* {
+  -webkit-user-select:none;
+  user-select:none;
+}
+</code></pre>
+
+<p>But on certain versions of iOS/Desktop Safari, it makes your inputs
+unfocusable, so you fix with something ugly like:</p>
+
+<pre><code>input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="user"],
+input[type="password"],
+input[type="search"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+</code></pre>
+
+<h2>Banker&#8217;s rounding</h2>
+
+<p>aka Round half to even</p>
+
+<p>Round to nearest even neighbor when equidistant (5):</p>
+
+<pre><code>$1.055 =&gt; $1.06
+$1.045 =&gt; $1.04
+</code></pre>
+
+<p>It&#8217;s one of the main rounding algos for IEEE floating point.</p>
+
+<h2>Rx Which to Use?</h2>
+
+<p>Super useful.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/gettingstarted/which-instance.md</p>
+
+<h2>SSH dev ops respect</h2>
+
+<p>Wanted a quick ssh script that a dev could use to deploy a wordpress
+site. Really I just needed them to be able to log in and run a pull.</p>
+
+<p>Solution:</p>
+
+<ol>
+<li>Use SSH Agent forwarding</li>
+<li>Make the WP staging repo share the group of the remote user</li>
+</ol>
+
+
+<p>SSH Agent forwarding proxies your local SSH agent to the remote <code>sshd</code>,
+so that remote <code>sshd</code> can use your local credentials to continue logging
+into stuff. In this case, we wanted forwarding to grant access to the
+GitHub repo we wanted to pull from.</p>
+
+<h2>iOS: changing app permissions SIGKILLs them</h2>
+
+<p>e.g. if you tell your user to grant previously-declined permissions by
+going to Settings > Privacy > App and switch permissions, then you app
+must restart. Makes sense I suppose.</p>
+
+<h2>iOS: open Settings from app</h2>
+
+<p><a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIApplication_Class/index.html#//apple_ref/c/data/UIApplicationOpenSettingsURLString">Only available in iOS 8+</a></p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T15:55:00-05:00" pubdate data-updated="true">Jan 26<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/01/26/watoozy/';
+        var disqus_url = 'http://machty.github.com/blog/2015/01/26/watoozy/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

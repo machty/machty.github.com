@@ -1,0 +1,700 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Today I learn top  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Today I Learn Top</h2>
+	<div class="entry-content"><h2>top</h2>
+
+<p>PR is priority, which is dynamic; a running process will get less and
+less priority over time. NI is nice value; the fixed value that adds to
+priority.</p>
+
+<h2>Ruby mem</h2>
+
+<p>http://samsaffron.com/archive/2014/04/08/ruby-2-1-garbage-collection-ready-for-production</p>
+
+<ul>
+<li>Ruby tracks malloc&#8217;s</li>
+<li>classically, every <code>RUBY_GC_MALLOC_LIMIT</code> bytes,</li>
+</ul>
+
+
+<p>Heaps</p>
+
+<ul>
+<li>Ruby maintains heaps of RVALUES.</li>
+<li>RVALUES are c union structs, variable size depending on x64, x32, etc,
+that are low level representations of ruby objects</li>
+<li>require &#8216;objspace&#8217; lets you access ObjectSpace, which exposes the
+linked list of free Ruby objects.</li>
+<li>RVALUES are collected and reused; mallocs only happen when you expand
+beyong the RVALUE list.</li>
+</ul>
+
+
+<p>GC minor/major sweeps:</p>
+
+<p>Flow is this:</p>
+
+<ul>
+<li><p><code>Object.allocate</code> (in the course of calling <code>new</code>)</p>
+
+<ul>
+<li>gimme a free RVALUE
+
+<ul>
+<li>if no free RVALUES, do a sweep</li>
+<li>figure out along the way if it needs to be a major sweep</li>
+<li>blah blah blah i don&#8217;t want to keep doing this</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>major sweep: run when malloc limit is hit (used to be 8MB, now it&#8217;s a
+moving target)</p>
+
+<ul>
+<li>so you can malloc a bunch of times but once you hit malloc limit
+it&#8217;s time for a major GC</li>
+</ul>
+</li>
+<li>minor: run whenever heap slots run out
+
+<ul>
+<li>presumably, if this doesn&#8217;t free up enough mem, a malloc needs to
+happen? or maybe a malloc always happens, and the minor sweep frees
+up things for a future allocation attempts? either seem fine.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://samsaffron.com/archive/2013/11/22/demystifying-the-ruby-gc</p>
+
+<!--more-->
+
+
+<h2>Over-arching question: returning memory to OS</h2>
+
+<p>If you malloc a ton, will freeing it return it back to the OS?</p>
+
+<p>Answer: prooooobably not. Alloc&#8217;d mem almost certainly won&#8217;t be returned
+until process termination.</p>
+
+<p>Why?</p>
+
+<ul>
+<li>malloc maintains an internal linked list of free data regions</li>
+<li>when it runs out of this list, it syscalls <code>sbrk</code> to get more memory
+from the OS</li>
+<li>it uses this new region of memory to add new free data regions</li>
+<li>you can&#8217;t return memory back to OS (with negative <code>sbrk</code>) unless none
+of that region on the fringe is being used</li>
+</ul>
+
+
+<p>You could potentially use <code>mmap</code> to alloc a random page to some memory
+mapped region, and it wouldn&#8217;t clash with the shared malloc linked list,
+hence it&#8217;s easier to know after some mem intensive process is done with
+the mapped region that it can be freed. But this is kind of uncommon.
+And the point&#8217;s moot for Ruby which doesn&#8217;t really expose this
+functionality for you.</p>
+
+<p>So basically, most processes will grow and grow and grow and hopefully
+plateau at some max mem usage, but won&#8217;t return mem to OS until
+termination. Ruby processes fall into that category.</p>
+
+<h2>Stripe idempotent requests</h2>
+
+<p>https://stripe.com/docs/api?lang=curl#idempotent_requests</p>
+
+<p>Awesome.</p>
+
+<p>One gotcha: the same response is returned even if you change the params
+you pass it (it doesn&#8217;t even seem to do any sort of validation of the
+params; bogus charge tokens, currency type, etc, are all igored if it
+can match idempotent id to a previous response).</p>
+
+<h2>Postgres 9.4 jsonb and Rails 4.2</h2>
+
+<p>http://robertbeene.com/rails-4-2-and-postgresql-9-4/</p>
+
+<p>This is awesome. At the time of writing Heroku supports pg 9.3 out of
+the box but has 9.4 in beta.</p>
+
+<h2>Apple push notifications</h2>
+
+<p>How does it work? Does it drain batteries? What about NAT?</p>
+
+<p>From this <a href="https://support.apple.com/en-us/HT203609">bug/issue/report</a>:</p>
+
+<ul>
+<li>APNS prefers cellular connections to deliver push notifications</li>
+<li>only if cell connection fails will it fall back to wifi</li>
+<li>wifi is less likely to work due to firewalls blocking ports:
+
+<ul>
+<li>5223: default port (cell and wifi) to receive PNs from service</li>
+<li>443: wifi-only fall back (because firewalls less likely to block SSL port)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://android.stackexchange.com/a/32116/99197</p>
+
+<p>So:</p>
+
+<ul>
+<li>push services use keep-alives</li>
+<li>a keep alive is like a duplicate ACK pack w 0 data and has no effect
+but to keep NAT caches alive.</li>
+<li>probably at ~10m intervals to undercut NAT timeouts</li>
+<li>NATs are variable depending on the network but 10m minimum on TCP
+seems safe.</li>
+<li>keep-alives will wake up the radio; all TCP reads must wake up the
+radio, but this is inexpensive given that it&#8217;s every 10 min, shared by
+entire OS.</li>
+<li>NATs are more aggressive on UDP since UDP has no concept of a closed
+connection; TCP is more forgivable since it at least tells you when
+a connection is closed and hence NATs can be cleared.</li>
+</ul>
+
+
+<h2>MVCC</h2>
+
+<p>Multi-version concurrency control</p>
+
+<ul>
+<li>reads see a snapshot of data, which may or may not be the latest</li>
+<li>writes write the data elsewhere, mark old data as obsolete</li>
+<li>reads hence don&#8217;t block writes, writes don&#8217;t block reads</li>
+<li>but transaction commits can fail</li>
+</ul>
+
+
+<p>MVCC generally provides both a consistent/simple programming and
+reasonably level of efficiency. In some cases a traditional locking
+model might behave better to avoid retry hell.</p>
+
+<p>SQL standard implements four levels of transaction isolation. The most
+strict is <em>serializable</em>: given a set of serializable transactions,
+any concurrent execution of this set produces the exact same result
+as if the transactions were executed serially (one at a time, no
+time overlap).</p>
+
+<p>Example of serializable sets of transactions:</p>
+
+<ul>
+<li>all transactions are read-only (a bunch of SELECTs)</li>
+<li>there is no overlap between what is read / written</li>
+</ul>
+
+
+<p>Other transaction levels are defined in terms of the following phenomena
+that take place when transactions start to affect each other:</p>
+
+<ul>
+<li>dirty read: read another uncommitted trx&#8217;s written data</li>
+<li>non-repeatable read: a second read within the same transaction
+produces different results because another trx has committed
+a write to that same data</li>
+<li>phantom read: the set of (themselves-unchanged) rows returned from a
+search query changes within a trx because some other since-committed
+trx&#8217;s write affected the query, e.g. you&#8217;re querying <code>people</code> table
+based on some dynamic criteria of another table, and while nothing&#8217;s
+changed about the <code>people</code> table, the other table changed, resulting
+in a second identical query returning different results
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Isolation_%28database_systems%29#Phantom_reads">actually this example is way better</a>:
+your selection criteria is static, and a committed write from
+another trx puts it into that selection criteria</li>
+<li>worth noting that this might only be possible for INSERTs performed
+by other trx&#8217;s; UPDATEs impacting a query between writes I think
+would fall under non-repeatable read protection</li>
+<li><em>Serializable</em> isolation means that the SELECT queries would
+essentially lock out matching ranges, even on INSERTs.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Given the above-defined phenomena, the other three isolation levels (in
+addition to <em>Serializable</em>) are:</p>
+
+<ul>
+<li><em>read uncommitted</em>: where the following are possible
+
+<ul>
+<li>dirty read</li>
+<li>non-repeatable read</li>
+<li>phantom read</li>
+<li>Distinguishing characteristic: it can read the writes of
+another uncommitted transaction</li>
+</ul>
+</li>
+<li><em>read committed</em>:
+
+<ul>
+<li>non-repeatable read</li>
+<li>phantom read</li>
+<li>Distinguishing characteristic: if other transaction commits writes
+between this trx&#8217;s reads, the reads might produce different results,
+but uncommitted writes will never impact this trx&#8217;s reads.</li>
+</ul>
+</li>
+<li><em>repeatable read</em>:
+
+<ul>
+<li>phantom read</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Corner case:</p>
+
+<ul>
+<li><code>SELECT * FROM users WHERE age BETWEEN 10 AND 20;</code></li>
+<li>other trx: write and commit user age 25</li>
+<li><code>SELECT * FROM users WHERE age BETWEEN 10 AND 30;</code></li>
+</ul>
+
+
+<p>If the new user shows up in the second select, is it:</p>
+
+<ul>
+<li><code>serializable</code>?
+
+<ul>
+<li>Answer: I think YES. Since the data has been fully committed by the
+time the second SELECT is performed, all <em>Serializable</em> guarantees
+are maintained. Technically speaking, the range lock hasn&#8217;t been
+acquired yet on the second INSERT.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Isolation levels in postgres</h2>
+
+<ul>
+<li>isolation levels can be set per-transaction</li>
+<li>default isolation level can be set via <code>SET SESSION CHARACTERISTICS</code>.</li>
+<li>default level is <code>read committed</code>.</li>
+<li>isolation levels only apply to what the current transaction can see of
+other transactions, rather than isolating the effects of this
+transaction from being seeable from other transactions.
+
+<ul>
+<li>metaphor: everyone chooses their own transaction goggles; they
+choose what light is let in</li>
+</ul>
+</li>
+<li>SERIALIZABLE is the only method that&#8217;ll throw an error (only in trx&#8217;s
+marked as serializable) in cases where phenomenon are produced that
+couldn&#8217;t have occurred in a one-at-a-time, serial setting.
+
+<ul>
+<li>so the other isolation modes just limit the kind of data they see
+(and probably stress the engine in different ways depending on
+how many locks/snapshots are in place) but won&#8217;t fire errors</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So when does locking / blocking occur?</p>
+
+<p>Answer: during conflicting writes.</p>
+
+<ul>
+<li>Read Committed:
+
+<ul>
+<li>selection criteria (selecting the rows to update) is same as SELECT,
+in that it&#8217;ll only see rows committed before start time</li>
+<li>but if, mid query, another uncommitted transaction writes to a given
+row, locking will occur
+
+<ul>
+<li>if other trx commits, re-check search criteria and perform update
+based on latest criteria</li>
+<li>if other trx rolls back, ignore the write and proceed</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So you still have read isolation between uncommitted trx&#8217;s, but writes
+still &#8220;see&#8221; that uncommitted trx&#8217;s have been writing, and THAT&#8217;s when
+locking occurs.</p>
+
+<p>In such a case, two update queries might update sets of data
+differently; if this is desired to be prevented, use SERIALIZABLE,
+which&#8217;ll error if this case is detected.</p>
+
+<p>By definition, then, a <code>serialization failure</code> rollback cannot happen if
+there are <code>&lt;= 1</code> SERIALIZATION transactions.  WRONG WRONG WRONG. They
+can happen for repeatable read!!!! See below!</p>
+
+<blockquote><p>Because of the above rule, it is possible for an updating command to see an inconsistent snapshot: it can see the effects of concurrent updating commands on the same rows it is trying to update, but it does not see effects of those commands on other rows in the database. This behavior makes Read Committed mode unsuitable for commands that involve complex search conditions; however, it is just right for simpler cases. For example, consider updating bank balances with transactions like:</p></blockquote>
+
+<pre><code>BEGIN;
+UPDATE accounts SET balance = balance + 100.00 WHERE acctnum = 12345;
+UPDATE accounts SET balance = balance - 100.00 WHERE acctnum = 7534;
+COMMIT;
+</code></pre>
+
+<p>This is fine and safe even if some other trx updates acctnum 12345, but
+more complex cases might troll:</p>
+
+<h2>Repeatable reads also can yield serialization failure!</h2>
+
+<blockquote><p>Applications using this level must be prepared to retry transactions due to serialization failures.</p></blockquote>
+
+<p>If a first updater commits and changes/deletes the row, then ROLLBACK
+occurs. &#8220;ERROR: could not serialize access due to concurrent update&#8221;.</p>
+
+<p>In this case, the transaction should be retried. The second round will
+see the most up to date info (unless more concurrent writes occur, in
+which case the transaction might be retried).</p>
+
+<p>So this is super rigorous (and increasingly expensive), but it is still
+possible to miss out on some newly added data that now matches a
+selection set, and some other corner cases. Only SERIALIZABLE can
+prevent these.</p>
+
+<p>These are some excellent, clear, tests from Rails that elucidate things.</p>
+
+<p>https://github.com/rails/rails/blob/master/activerecord/test/cases/transaction_isolation_test.rb#L39</p>
+
+<h2>Serialization gotcha</h2>
+
+<p>I was trying to test serialization isolation to get it to error out as
+expected w the following code (in a rake task):</p>
+
+<pre><code>class P3 &lt; ActiveRecord::Base
+  self.table_name = 'purchases'
+end
+
+Purchase.establish_connection
+P3.establish_connection
+
+Purchase.transaction(isolation: :serializable) do
+  Purchase.last.update(last_activity_at: DateTime.now)
+  P3.transaction(isolation: :serializable) do
+    # Hangs here
+    P3.last.update(last_activity_at: DateTime.now)
+  end
+  Purchase.last.update(last_activity_at: DateTime.now-5.seconds)
+end
+</code></pre>
+
+<p>Of note:</p>
+
+<p>The separate class pointing to the same table is necessary so that
+the same postgres connection/session isn&#8217;t reused/shared (connections
+on ActiveRecord classes are shared by default w
+<code>ActiveRecord::Base.connection</code>, but you can give each ActiveRecord
+class its own database connection, or point it to a separate
+database, etc, via <code>establish_connection</code>. If you didn&#8217;t do this, the
+above code would error out saying either you can&#8217;t nest transactions
+or that you can set isolation level when joining a parent
+transaction. Only MS-SQL supports true nested transactions, hence the
+rails default of nested transactions using the same database
+connection is to join them into a single transaction. Weird Shit.</p>
+
+<p>Anyway, I ran the above code and it hanged within Postgres on
+<code># Hangs here</code>. I was expecting a serialization error to fire at that
+point (and theoretically it probably could and probably still be
+consistent with the SQL standards on serializable transactions), but
+postgres will actually block on that nested write while it waits for the
+outer transaction to commit before it&#8217;ll detect the error and fire, but
+since Ruby is blocked on that inner write, the outer block never runs to
+completion, hence a deadlock. Note this wouldn&#8217;t happen under normal
+circumstances but is only happning due to the hacky way I&#8217;m testing this
+thing.</p>
+
+<p>So anyway if you put it into threads you can start seeing these
+exceptions throwing as expected:</p>
+
+<pre><code>class P3 &lt; ActiveRecord::Base
+  self.table_name = 'purchases'
+end
+
+Purchase.establish_connection
+P3.establish_connection
+
+t1 = Thread.new {
+  loop {
+    begin
+      Purchase.transaction(isolation: :serializable) do
+        Purchase.last.update(last_activity_at: DateTime.now-5.seconds)
+      end
+    rescue ActiveRecord::StatementInvalid =&gt; e
+      raise e unless e.original_exception.is_a?(PG::TRSerializationFailure)
+      retry
+    end
+    puts "t1 SUCCESS\n"
+  }
+}
+
+t2 = Thread.new {
+  loop {
+    begin
+      P3.transaction(isolation: :serializable) do
+        P3.last.update(last_activity_at: DateTime.now)
+      end
+    rescue ActiveRecord::StatementInvalid =&gt; e
+      raise e unless e.original_exception.is_a?(PG::TRSerializationFailure)
+      retry
+    end
+    puts "t2 SUCCESS\n"
+  }
+}
+</code></pre>
+
+<p>Of note: the <code>TRSerializationFailure</code> error is specific to the <code>pg</code> gem
+and adapter, and Rails doesn&#8217;t raise adapter-specific exceptions but
+instead wraps them in the general <code>ActiveRecord::StatementInvalid</code>
+error which lets you access the original <code>TRSerializationFailure</code>
+exception via <code>original_exception</code>.</p>
+
+<h2>Timezones</h2>
+
+<p>http://en.wikipedia.org/wiki/List_of_tz_database_time_zones</p>
+
+<p>List of time zone information is maintained by IANA:
+http://en.wikipedia.org/wiki/Tz_database</p>
+
+<p>Text files are provided by IANA, then <code>zic</code> is used to compile time
+zones info to binary and stored in <code>/usr/share/zoneinfo</code>, e.g.
+<code>/usr/share/zoneinfo/America/New_York</code>.</p>
+
+<p>This is how you can set a default timezone in Ruby (and Heroku, etc)</p>
+
+<pre><code>ENV['TZ']="America/New_York"
+Time.now # 2015-03-23 11:46:26 -0400
+ENV['TZ']="America/Phoenix"
+Time.now # 2015-03-23 08:48:03 -0700
+</code></pre>
+
+<p>Ultimately it just tries to resolve a TZ in <code>/usr/share/zoneinfo</code> :)</p>
+
+<p>What&#8217;s the local timezone?</p>
+
+<pre><code>$ ls -l /etc/localtime
+# lrwxr-xr-x  1 root  wheel  36 Mar 12 02:47 /etc/localtime -&gt; /usr/share/zoneinfo/America/New_York
+</code></pre>
+
+<p>Pretty cool.</p>
+
+<p>Even on Mac OS X you can change the timezone this way (such that System
+Preferences > Date &amp; Time will immediately update, as will your clock).</p>
+
+<pre><code>sudo ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+</code></pre>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-19T09:18:00-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/03/19/today-i-learn-top/';
+        var disqus_url = 'http://machty.github.com/blog/2015/03/19/today-i-learn-top/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
