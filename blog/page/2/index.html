@@ -112,6 +112,573 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/01/13/reekris/">
+		
+			Reekris</a>
+	</h2>
+	<div class="entry-content">
+		<h2>More on Rx state machines</h2>
+
+<p>From https://github.com/logicalguess/rx-state-machine</p>
+
+<pre><code>// Pattern:
+// 1. start off with initial door state, 
+// 2. scan the UI event stream with a initial door state and a
+//    transforming function. The transforming function is the thing
+//    that runs the UI event on the current state, and returns the next state.
+//    In this case the transforming fn is `transition`.
+events.scan(door, transition).map(doorStatus)
+    .subscribe(function (value) {
+        view.render(value);
+    });
+</code></pre>
+
+<p>So what I want to do is expose an API where you can group related events
+into states, possibly share events between states, get an actions stream,
+and&#8230; somehow transition elsewhere after that?</p>
+
+<pre><code>var state = {
+  submitForm: function() {
+    // this is just a normal callback handler, just like actions api
+  },
+
+  // but maybe if you decorate your handler in some way...
+  $submitForm: function(stream) {
+    // ... you get a stream of actions instead
+    // What should this API look like? How to export another stream
+    // or property? 
+    // Goals:
+    // - make it easy/possible to
+    //   - derive flag/state from action progress
+    //   - 
+  }
+};
+
+&lt;form &gt;
+  &lt;SubmitButton action='submitForm'&gt;
+&lt;/form&gt;
+</code></pre>
+
+<h2>Harness</h2>
+
+<p>I don&#8217;t think I&#8217;ve ever grokked the word &#8220;harness&#8221; in a computer science
+context.</p>
+
+<blockquote><p>a set of straps and fittings by which a horse or other draft animal is fastened to a cart, plow, etc., and is controlled by its driver.</p></blockquote>
+
+<p>So, a horse harness, wrapped around a horse to control it. Or a
+parachute harness that wraps around a person to levitate them. Or a
+child-restraining harness.</p>
+
+<pre><code>so in this case, it takes a compiled ember CLI app that can normally run by itself, adds some bootstrap code, and runs it in a different environment
+
+wrapper is maybe a synonym
+
+but with slightly different connotations
+
+I think of a harness as "holding the software in place" so you can make modifications to it, then run it
+
+whereas wrapper implies you're trying to hide the underlying software
+</code></pre>
+
+<p>So put the otherwise self-contained / self-sufficient software in a
+harness so you can run a bunch of tests on it, run it in a different
+environment.</p>
+
+
+		
+		<a href="/blog/2015/01/13/reekris/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-13T17:06:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/01/07/a-life-of-possibilities/">
+		
+			A Life of Possibilities</a>
+	</h2>
+	<div class="entry-content">
+		<h2>More actions shit</h2>
+
+<p>Scenario: mobile app, I have a back button, I don&#8217;t want it to cause
+another transition if the app is in mid-transition.</p>
+
+<p>Mid-transition means:</p>
+
+<ul>
+<li>data has already started loading for a target route, or</li>
+<li>some animation is underway, e.g. liquid fire</li>
+</ul>
+
+
+<p>Present day Ember:</p>
+
+<ul>
+<li><code>willTransition</code> hook to check some &#8220;isTransitioning&#8221; state (which you
+have to remember to properly set and unset (though ember could/should
+probably provide this for you))</li>
+<li>some other router reopen hook, override transitionTo behavior. Pretty
+crappy.</li>
+</ul>
+
+
+<p>React w react-router:</p>
+
+<pre><code>Router.run(routes, function (Handler) {
+  // custom data-loading logic, construct your own chain of promises
+  // ...
+  // maybe use flatMapLatest so that you're only responding to the
+  // most recent transition, and then eventually:
+  // React.render(&lt;Handler/&gt;, document.body);
+
+  // this could be modeled by a stream 
+});
+</code></pre>
+
+<p>Hmm so I want to be able to push values into a stream (let&#8217;s call it raw
+stream), but have it only come out the other side if some other&#8230;
+stream? predicate? allows it.</p>
+
+<h2>Rx/Bacon Diagrams</h2>
+
+<ul>
+<li>Bacon: <code>flatMapConcat</code> (or <code>flatMapWithConcurrencyLimit(1)</code>)</li>
+<li>Rx: <code>concatAll</code></li>
+</ul>
+
+
+<p>Flatten, preserve order of previously started streams (buffers later streams)</p>
+
+<pre><code>...{1}
+......{2........3}
+.........{}
+............{4}
+{...1..2........3.4}
+</code></pre>
+
+<ul>
+<li>Bacon: <code>flatMap</code> (or <code>flatMapWithConcurrencyLimit(infinity)</code>)</li>
+<li>Rx: <code>mergeAll</code></li>
+</ul>
+
+
+<p>Flatten, don&#8217;t preserve order (no buffering). (limiting concurrency
+means buffering).</p>
+
+<pre><code>...{1}
+......{2........3}
+.........{}
+............{4}
+
+produces
+{...1..2.....4..3}
+</code></pre>
+
+<ul>
+<li>Bacon: <code>flatMapLatest</code></li>
+<li>Rx: <code>switchLatest</code></li>
+</ul>
+
+
+<p>Flatten, unsubscribe from previous streams, RIGHT when the new stream
+begins, not on its first value!</p>
+
+<pre><code>...{1}
+......{2........3}
+............{4}
+
+produces
+{...1..2.....4}
+</code></pre>
+
+<p>and</p>
+
+<pre><code>...{1}
+......{2........3}
+............{.........4}
+
+produces
+{...1..2.....4}
+</code></pre>
+
+<h2>CircleCI uses ClojureScript/Om</h2>
+
+<p>http://blog.circleci.com/local-state-global-concerns/</p>
+
+<h2>MRR</h2>
+
+<p>Monthly recurring revenue: a way to calculate monthly revenue based off
+of multiple dissimilar subscription terms.</p>
+
+<h2>Observable of 1 is a promise</h2>
+
+<p>http://www.infoq.com/presentations/async-programming-netflix</p>
+
+<p>Promises can&#8217;t be cancelled.</p>
+
+<ul>
+<li>Work is already being done (in flight)</li>
+<li>No way to stop it</li>
+</ul>
+
+
+<p>Observables are lazy. You can build a giant nested logical chunk of
+observable but nothing happens until, say, a <code>forEach</code> subscribes to the
+result of an observable that all the internal logic kicks into place.
+Not true for promises (unless someone implements a lazy thennable).</p>
+
+<p>TODO: hot vs cold observables distinction? does this exist in bacon?</p>
+
+<p>This is how the <code>retry</code> operator works&#8230; in the same way you can call
+<code>forEach</code> N times on an observable and kick start all the internal
+logic/event handlers, retry will internally do this until it gets a
+non-error response.</p>
+
+<p>This is unless promises, which have the <code>.then</code> operator:</p>
+
+<ul>
+<li>Regardless of whether you call <code>.then</code>, the promise logic has already started</li>
+<li>Calling <code>.then</code> at the same time just subscribes to the single,
+already running promise, and <code>.then</code> on an already resolved promise
+just returns that.</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2015/01/07/a-life-of-possibilities/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-07T14:07:00-05:00" pubdate data-updated="true">Jan 7<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/01/04/everything-and-nothin/">
+		
+			Everything and Nothin</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Indemnity</h2>
+
+<p>http://en.wikipedia.org/wiki/Indemnity</p>
+
+<p>Where indemnitor A pays B a sum of money to cover losses suffered by B
+(regardless of whether A caused/was responsible for the loss).
+Car insurance is an example. Life insurance is not, since the payout is
+not based on any &#8220;valuation&#8221; of the life..</p>
+
+<p>HMOs basically get involved with health care options to try and secure
+efficient/cheap means of good healthcare, rather than traditional
+indemnity insurance, which would, uhh, just pay out after the fact and
+not get involved beforehand?</p>
+
+<h2>HMO act of 1973</h2>
+
+<p>http://en.wikipedia.org/wiki/Health_Maintenance_Organization_Act_of_1973</p>
+
+<ul>
+<li>signed by nixon</li>
+<li>intended to curb medical inflation</li>
+<li>provided grants/loans to start an HMO, removed certain state
+restrictions for federally qualified HMOs</li>
+<li>required employers w 25+ employees to offer federally certified HMO
+options <em>if</em> the employer was already offering traditional insurance</li>
+<li>did NOT require employers to offer health insurance</li>
+<li>established/solidied the term HMO</li>
+</ul>
+
+
+<h2>Humble Bundle</h2>
+
+<p>http://en.wikipedia.org/wiki/Humble_Bundle</p>
+
+<p>Series of collections (bundles) of digital thingers, often games,
+distributed via pay-what-you-want. The more you pay, the more that&#8217;s
+opened up. Configurable, but most pay goes to developers, some to
+charity, some to Humble.</p>
+
+<h2>What is JLD in Empire Blue?</h2>
+
+<p>JLD is a network code representing the Pathway Enhanced network of
+doctors, pharmaceuticals, etc.</p>
+
+<p>The ID number on the card is network + member ID.</p>
+
+<p>1-866-755-2680 Tech support for the website.</p>
+
+<p>Even though they don&#8217;t put it on the card this year, my co-pay is $30,
+which I always pay. After I blast through deductible, co-insurance kicks
+in. But preventative visits to PCP are freeeeee. But if it&#8217;s not
+preventative, the doctor will submit it to insurance as a different
+code, which I have to pay for out of deductible. Otherwise shit is
+freeeee.</p>
+
+<p>What&#8217;s the difference between Empire and Anthem?</p>
+
+<p>There&#8217;s Empire BlueCross BlueShield and Anthem BlueCross BlueShield?</p>
+
+<p>OK OK OK BlueCross BlueShield is a federation (bigass organization where
+smaller groups have decent autonomy). Was originally Blue Cross in 1929,
+and a separate Blue Shield in 1948, and they merged in 1982.</p>
+
+<p>Anthem is their only publicly traded company, and within New York they
+operate as &#8220;Empire&#8221; BlueCross. Jesus Christ these companies are too
+fucking huge.</p>
+
+<ul>
+<li>Blue Cross Blue Shield
+
+<ul>
+<li>Anthem (publicly traded)
+
+<ul>
+<li>Empire Blue Cross Blue Shield (operates out of New York)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Difference b/w renter&#8217;s and home owner&#8217;s insurance</h2>
+
+<p>http://coverhound.com/insurance-learning-center/homeowners-vs-renters-insurance-a-big-difference</p>
+
+<ul>
+<li>Renters
+
+<ul>
+<li>You insure belongings, not the building</li>
+</ul>
+</li>
+<li>Homeowners
+
+<ul>
+<li>You insure the building, and the belongings
+
+<ul>
+<li>Hence it&#8217;s way more expensive</li>
+</ul>
+</li>
+<li>Insurance is often mandatory if you have a mortgage, but probably
+not legally required if you straight up own the whole thing.</li>
+</ul>
+</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-04T22:26:00-05:00" pubdate data-updated="true">Jan 4<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/01/02/omnifocus-et-al/">
+		
+			OmniFocus Et Al</a>
+	</h2>
+	<div class="entry-content">
+		<h2>OmniFocus</h2>
+
+<ul>
+<li>Quick action add: ctrl+option+space</li>
+<li>Send to inbox: Ctrl+F6
+
+<ul>
+<li>Note this is a Service that some reason not all apps implement?
+But it works in Chrome so I think we&#8217;re good</li>
+</ul>
+</li>
+<li>Once you assign an inbox item to a project, it&#8217;s removed from the project</li>
+<li>Someday maybe:
+
+<ul>
+<li>Put in single action project, mark project as on hold.</li>
+</ul>
+</li>
+<li>So projects can have an On Hold status&#8230; but there&#8217;s also a waiting context?
+
+<ul>
+<li>Ah, both projects and contexts can choose what status they are&#8230;
+from the same list of possible statuses.</li>
+</ul>
+</li>
+<li>How does the repeat work? &#8220;1 week&#8221;? Why does it say multiple values?
+
+<ul>
+<li>Ah I should probably do this one at a time. The way it works is once
+you complete, it&#8217;ll immediately schedule another one.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>OmniFocus is implements GDT: <a href="http://gettingthingsdone.com/">Getting Things Done</a></p>
+
+<h2>Elephants in Trees</h2>
+
+<p>Why do you never see elephants hiding in trees?</p>
+
+<p>Because they&#8217;re very good at it.</p>
+
+
+		
+		<a href="/blog/2015/01/02/omnifocus-et-al/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-02T16:27:00-05:00" pubdate data-updated="true">Jan 2<span>nd</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/12/17/learnin-clojure/">
+		
+			Learnin Clojure</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Joy of Clojure</h2>
+
+<ul>
+<li>Imperative
+
+<ul>
+<li>a sequence of statements mutates program state</li>
+</ul>
+</li>
+<li>maenad (maenadic): wild and unrestrained: a female follower of
+Bacchus, traditionally associated with divine possession and frenzied
+rites</li>
+<li>expression problem
+
+<ul>
+<li>&#8220;The Expression Problem is a new name for an old problem. The
+goal is to define a datatype by cases, where one can add new cases
+to the datatype and new functions over the datatype, without
+recompiling existing code, and while retaining static type safety
+(e.g., no casts).&#8221;</li>
+<li>Java requires these to be declared up front, suffers</li>
+<li>Why the &#8220;expression&#8221; problem? &#8216;The label &#8220;Expression Problem&#8221; puns on expression = &#8220;how much can your language express&#8221; and expression = &#8220;the terms you are trying to represent are language expressions&#8221;.&#8217;</li>
+</ul>
+</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2014/12/17/learnin-clojure/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T12:52:00-05:00" pubdate data-updated="true">Dec 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/12/10/xorblasm/">
 		
 			Xorblasm</a>
@@ -1741,1316 +2308,6 @@ an app server.</p>
 
 
 <time datetime="2014-11-17T08:02:00-05:00" pubdate data-updated="true">Nov 17<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/15/redis-b-hayes/">
-		
-			Redis B Hayes</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Redis&#8217;n</h2>
-
-<p>This and other notes based on Redis in Action.</p>
-
-<p>Questions:</p>
-
-<ul>
-<li>is it really brag-worthy to say in-memory-store? It gets persisted to
-disk anyway; don&#8217;t other DBs bring as much into memory as possible for
-fast lookups?
-
-<ul>
-<li>A: other databases are &#8220;primarily on-disk&#8221; but of course yes memory
-caching exists.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Relation to memcached:</p>
-
-<ul>
-<li>Similar efficiency based on in-memory lookups</li>
-<li>Redis features 2 persistence strategies (memcached doesn&#8217;t persist I
-guess?)</li>
-<li>Redis supports strings + 4 other data structures; memcached is strings</li>
-</ul>
-
-
-<p>ZSETs are hash of string keys to floating points, can be queried by
-order, ordered by their weight.</p>
-
-<h2>Databases: row insertion (often) fast</h2>
-
-<p>Because no need for a random read + random write; appending to a file
-(what most DBs do) is fast.</p>
-
-<h2>ACID</h2>
-
-<p>Set of properties that guarantee reliable database transactions</p>
-
-<ul>
-<li>Atomicity - all or nothing</li>
-<li>Consistency - transactions bring database from one valid state to another</li>
-<li>Isolation - are partially completed transaction visible to others?</li>
-<li>Durability - post-transaction, data is committed even in power loss</li>
-</ul>
-
-
-<h2>Fortnight</h2>
-
-<p>Two weeks.</p>
-
-<h2>Heroku database URL</h2>
-
-<pre><code>postgres://username:password@ec2-xx-xx-xx-xx-xx.compute-1.amazonaws.com:5432/d45d81ucgm3205
-</code></pre>
-
-<p>It&#8217;s just username + password at some publicly accessible EC2 URL. Your
-cherished postgres instances just live on some EC2 farm. What a crock.</p>
-
-<h2>Docker</h2>
-
-<p>Docker images are read-only templates. Use them to generate containers.
-Build other shit on top of containers.</p>
-
-<p>Docker has its own IANA port numbers for REST and secure REST API&#8230;
-what does this actually mean?</p>
-
-<p>http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=docker#DOCKER</p>
-
-<p>AH OK I have some more ideas:</p>
-
-<p>Boot2Docker is what you use to run Docker on Mac OS X. Why? Because
-docker depends on linux kernel specifics. Boot2Docker runs a Virtual Box
-instance of some Linux-y thing</p>
-
-<pre><code># within the virtual instance
-$ uname
-Linux version 3.16.4-tinycore64 (root@39d2c877bc4f) (gcc version 4.7.2 (Debian 4.7.2-5) ) #1 SMP Thu Oct 23 16:14:24 UTC 2014
-</code></pre>
-
-<p>So with the Boot2Docker setup, when you run the <code>docker</code> command on a
-Mac terminal, it has to jump through some hoops to run the docker
-instance on the Linux virtual box:</p>
-
-<pre><code>Mac `docker` command
-Proxy through to docker:tcuser@192.168.59.103
-Run `docker` command, which talks to 
-docker daemon
-</code></pre>
-
-<p>So there&#8217;s no docker daemon on OS X; the only persistent docker thing
-you&#8217;ll see is Virtual box instances running the docker virtual instance
-that the actual docker daemon lives on:</p>
-
-<pre><code> /Applications/VirtualBox.app/Contents/MacOS/VBoxHeadless --comment boot2docker-vm --startvm 798082c7-01d7-4a4f-89fc-1ebf70bc1a0a --vrde config
- /Applications/VirtualBox.app/Contents/MacOS/VBoxNetDHCP --ip-address 192.168.59.99 --lower-ip 192.168.59.103 --mac-address 08:00:27:93:D3:BC --netmask 255.255.255.0 --network HostInterfaceNetworking-vboxnet0 --trunk-name vboxnet0 --trunk-type netadp --upper-ip 192.168.59.254
-</code></pre>
-
-<p>You can ssh into the docker VM box. Either w password or reusing the key
-they generate for you when you install boot2docker; put this in
-~/.ssh/config</p>
-
-<pre><code>Host docker
-  HostName 192.168.59.103
-  User docker
-  IdentityFile "/Users/machty/.ssh/id_boot2docker"
-  IdentitiesOnly yes
-</code></pre>
-
-<p>(I realized later that there&#8217;s a convenient command for this:
-<code>boot2docker ssh</code>&#8230; whoops!)</p>
-
-<p>So with this config in place I&#8217;m guessing that I can either run
-<code>docker version</code> or <code>ssh docker docker version</code> and see the same
-thing. BOOYA both produce:</p>
-
-<pre><code>Client version: 1.3.1
-Client API version: 1.15
-Go version (client): go1.3.3
-Git commit (client): 4e9bbfa
-OS/Arch (client): linux/amd64
-Server version: 1.3.1
-Server API version: 1.15
-Go version (server): go1.3.3
-Git commit (server): 4e9bbfa
-</code></pre>
-
-<p>So anyway, you can run commands against a docker image. This spins up a
-container, runs the command, and stops the container&#8230; does it delete
-the container?</p>
-
-<pre><code>docker ps --help
-</code></pre>
-
-<p>Nevermind that I&#8217;ll figure it out later. Let&#8217;s figure out how to get a
-Redis container running:</p>
-
-<pre><code>https://registry.hub.docker.com/_/redis/
-</code></pre>
-
-<p>Use <code>docker build</code> to build from a Dockerfile, which kinda explains how
-it ends up getting mounted to the outside world. So this is how you can
-just have a docker instance of a thing that you can run commands
-against, even in a Mac OS X setting? I know nothing, Jon Snow.</p>
-
-<p>https://docs.docker.com/examples/running_redis_service/</p>
-
-<pre><code>FROM        ubuntu:12.10
-RUN         apt-get update &amp;&amp; apt-get install -y redis-server
-EXPOSE      6379
-ENTRYPOINT  ["/usr/local/bin/my-dumbass-redis-server"]
-</code></pre>
-
-<p>So this starts with the ubuntu:12.10 image, installs redis into the
-container created from that image, exposes 6379&#8230; to&#8230;? What does this
-mean?</p>
-
-<blockquote><p>The EXPOSE instructions informs Docker that the container will listen on the specified network ports at runtime. Docker uses this information to interconnect containers using links (see the Docker User Guide). Note that EXPOSE only works for inter-container links. It doesn&#8217;t make ports accessible from the host. To expose ports to the host, at runtime, use the -p flag.</p></blockquote>
-
-<p>From http://docs.docker.com/reference/builder/</p>
-
-<p>So it&#8217;s exposed if we&#8217;re linking containers but not someone exposed to
-the host app.</p>
-
-<p>Ah I tried</p>
-
-<pre><code>docker run -i --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>and then I couldn&#8217;t ctrl-C because of, something, but if i do</p>
-
-<pre><code>docker run -it --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>then the -t option will attach a pseudo TTY and I can do it. This
-stuff is so cray cray. Actually I lied ctrl-C doesn&#8217;t work for TODO
-reasons, but Ctrl-P + Ctrl-Q detaches you from it? Seems good.</p>
-
-<p>OK but if I do</p>
-
-<pre><code>docker run -it -p 9191:6379 --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>this will run in interactive mode with ctrl-p ctrl-q supporting
-detachability, mapping the container 6379 (default redis port) to the
-host port 9191, and overriding the entrypoint because I didn&#8217;t know what
-I was doing in the Dockerfile. I should have left it at the default
-/usr/bin/redis-server because that&#8217;s where apt-get will put it.</p>
-
-<p>ANYWAY the mapping works, but the problem is i have to SSH into the
-docker host VirtualBox first to see it. How do I get beyond the
-Boot2Docker wall? Wait I know I&#8217;ll just fuckin use some SSH magic.
-Tunnels n shit.</p>
-
-<pre><code>ssh docker -L 9191:localhost:9191
-</code></pre>
-
-<p>ah but this will open a login shell, which I don&#8217;t need/want for what
-I&#8217;m doing:</p>
-
-<pre><code>ssh docker -N -L 9191:localhost:9191
-</code></pre>
-
-<p>The -N stands for &#8220;Do not execute a remote command&#8221;</p>
-
-<p>After which point I could just redis-cli but since I&#8217;m brutally low
-level I&#8217;ll do</p>
-
-<pre><code>$ nc localhost 9191
-SET WAT WOOT
-+OK
-GET WAT
-$4
-WOOT
-</code></pre>
-
-<p>Booooooya. So cool.</p>
-
-<p>OK gonna be an idiot. SSH all the way. Is that possible? It means being
-able to SSH into container&#8230; sounds like you can&#8217;t do that without
-going through</p>
-
-<h2>Docker detach</h2>
-
-<p>Docker attaching/detaching is pretty weird. I don&#8217;t know the rationale
-behind it but they make it very easy to attach to a box but then not be
-able to attach. Basically you have to always pass -it to run and then
-can use ctrl-P ctrl-Q to detach.</p>
-
-<p>Or, you can <code>kill -9</code> the attached processed; if you you just do <code>kill</code>,
-that sends SIGTERM and that proxies through and closes the shitty
-process, but again Ctrl-C doesn&#8217;t use it.</p>
-
-<h2>Docker forwarding for OS X</h2>
-
-<p>This is a great article</p>
-
-<p>http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li><code>boot2docker ssh</code></li>
-<li>Add <code>dockerhost</code> to /etc/hosts</li>
-<li>Use <code>nsenter</code>
-
-<ul>
-<li><code>sudo nsenter -m -u -n -i -p -t $PID</code>
-
-<ul>
-<li><code>-m</code> use mount namespace of target process</li>
-<li><code>-u</code> use UTS namespace of target process (UTS stands for time-sharing? legacy unix thing?)</li>
-<li><code>-n</code> use network namespace of target process</li>
-<li><code>-i</code> IPC</li>
-<li><code>-i</code> IPC</li>
-<li><code>-p</code> IPC</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>LXC Containers (vs Docker)</h2>
-
-<p>https://linuxcontainers.org/</p>
-
-<p>Better chroot, comparable to docker containers. Ways of containing
-processes, resources, etc., dependent on modern linux kernel features,
-mostly on process namespacing.</p>
-
-<p>Excellent article comparing to Docker: http://www.flockport.com/lxc-vs-docker/</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li>yuno virtualization?
-
-<ul>
-<li>because of performance cost</li>
-</ul>
-</li>
-<li>LXC and Docker are fast</li>
-<li>Lightweight VMs</li>
-<li>Is Docker a lightweight VM?</li>
-</ul>
-
-
-<p>A Docker container runs a single process:</p>
-
-<blockquote><p>Docker restricts the container to a single process only. The default docker baseimage OS template is not designed to support multiple applications, processes or services like init, cron, syslog, ssh etc. As you can imagine this introduces a certain amount of complexity and has huge implications for day to day usage scenarios. Since current architectures, applications and services are designed to operate in normal multi process OS environments you would need to find a Docker way to do things or use tools that support Docker. When it comes to applications for a LAMP container you would need to build 3 containers that consume services from each other, a PHP container, an Apache container and a MySQL container. Can you build all 3 in one container? You can, but there is no way to run php-fpm, apache and mysqld in the same container without a shell script or install a separate process manager like runit or supervisor.</p></blockquote>
-
-<p>http://docs.docker.com/articles/using_supervisord/</p>
-
-<blockquote><p>Traditionally a Docker container runs a single process when it is launched, for example an Apache daemon or a SSH server daemon.</p></blockquote>
-
-<p>This is the entry point. Note that <code>ubuntu</code> has no entry point. Not sure
-if it&#8217;s possible to use <code>run</code> with a container that has an entry point,
-since the entry point is the process that gets run.</p>
-
-<p>So it should be possible for me to run an ubuntu netcat and portforward
-at the same time:</p>
-
-<p>All from Mac:</p>
-
-<pre><code>$ docker run -i -p 9292:9292 --expose=[9292] ubuntu:14.04 nc -l 0.0.0.0
-</code></pre>
-
-<p>9292</p>
-
-<p>Separate Mac terminal window:</p>
-
-<pre><code>$ nc dockerhost 9292
-</code></pre>
-
-<p>And now these two assholes talk to each other!</p>
-
-<p>Here are all the options I used</p>
-
-<ul>
-<li><code>-i</code>: run container interactively with terminal attached; without
-this, nc immediately closes once someone connects to it since STDIN is
-presumably dev null</li>
-<li><code>-p 9292:9292</code>, map docker host port 9292 to container port 9292</li>
-<li><code>--expose=[9292]</code> open the firewall since it wasn&#8217;t listed as exposed
-in the dockerfile</li>
-</ul>
-
-
-<p>Shit is SO COOL.</p>
-
-<h2>Docker vs Heroku</h2>
-
-<p>Hmm, not even worth comparing.</p>
-
-<h2>Nested SSH tunnels</h2>
-
-<p>http://superuser.com/questions/96489/ssh-tunnel-via-multiple-hops</p>
-
-<p>Map localhost:9998 to host2&#8217;s port 22.</p>
-
-<pre><code>ssh -L 9998:host2:22 -N host1
-</code></pre>
-
-<p>Map localhost:9999 to blahbalhbablh you get the picture.</p>
-
-<pre><code>ssh -L 9999:localhost:1234 -N -p 9998 localhost
-</code></pre>
-
-<p>Shit is sooooo crazy. I love this stuff.</p>
-
-<h2>ProxyCommand</h2>
-
-<p>From <code>SSH_CONFIG(5)</code>.</p>
-
-<pre><code> ProxyCommand
-         Specifies the command to use to connect to the server.  The command string
-         extends to the end of the line, and is executed with the user's shell.  In the
-         command string, any occurrence of `%h' will be substituted by the host name to
-         connect, `%p' by the port, and `%r' by the remote user name.  The command can be
-         basically anything, and should read from its standard input and write to its
-         standard output.  It should eventually connect an sshd(8) server running on some
-         machine, or execute sshd -i somewhere.  Host key management will be done using
-         the HostName of the host being connected (defaulting to the name typed by the
-         user).  Setting the command to ``none'' disables this option entirely.  Note
-         that CheckHostIP is not available for connects with a proxy command.
-
-         This directive is useful in conjunction with nc(1) and its proxy support.  For
-         example, the following directive would connect via an HTTP proxy at 192.0.2.0:
-
-            ProxyCommand /usr/bin/nc -X connect -x 192.0.2.0:8080 %h %p
-</code></pre>
-
-<p>So this proxies through an already established HTTP Connect proxy at
-192.0.2.0:8080. That&#8217;s so awesome.</p>
-
-<p>netcat even brags of this:</p>
-
-<pre><code> Common uses include:
-
-       o   simple TCP proxies
-       o   shell-script based HTTP clients and servers
-       o   network daemon testing
-       o   a SOCKS or HTTP ProxyCommand for ssh(1)
-       o   and much, much more
-</code></pre>
-
-<h2>get.docker.com</h2>
-
-<pre><code>curl https://get.docker.com
-</code></pre>
-
-<p>It returns a bootstrapping shell script for setting up docker.</p>
-
-<p>You can <code>#include</code> it when booting an EC2 instance. Pretty cool.</p>
-
-<h2>Basic Authentication</h2>
-
-<p>If I spin up a stupid netcat server</p>
-
-<pre><code>nc -l localhost 9191
-</code></pre>
-
-<p>and then query it from Chrome</p>
-
-<pre><code>http://user:password@localhost:9191
-</code></pre>
-
-<p>Here&#8217;s what I see:</p>
-
-<pre><code>GET / HTTP/1.1
-Host: localhost:9191
-Connection: keep-alive
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36
-Accept-Encoding: gzip,deflate,sdch
-Accept-Language: en-US,en;q=0.8
-Cookie: blahblah
-</code></pre>
-
-<p>No reference to <code>user</code> or <code>password</code>. Which means that this information
-isn&#8217;t sent up front unless the server requests basic authentication by
-first sending back a 401 with the <code>WWW-Authenticate</code> header, after which
-point the user and password will be sent.</p>
-
-<p>And because it&#8217;s sent as a header (user:pass in base64) it&#8217;s encrypted
-if sent over TLS. But it&#8217;ll be plaintext in your address bar :).</p>
-
-<h2>SSH randomart</h2>
-
-<p>You see it when you create a key pair. Why? Because it&#8217;s just an easy
-ass visual way to compare keys rather than some Base64 shit.</p>
-
-<p>You can see the randomart for an existing key by printing the
-fingerprint in verbose mode:</p>
-
-<pre><code>$ ssh-keygen -lv -f ~/.ssh/id_boot2docker.pub
-2048 b2:3e:e4:d3:c1:9d:1b:75:46:0b:53:aa:18:6b:c7:c6  machty@machty.home (RSA)
-+--[ RSA 2048]----+
-|             ..  |
-|            o..  |
-|        .   .+ . |
-|         * .. +  |
-|      ..S.Eo o   |
-|      .+oo+      |
-|     o.. . o     |
-|     .+ . .      |
-|      .o         |
-+-----------------+
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-15T13:16:00-05:00" pubdate data-updated="true">Nov 15<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/11/shananananananananeeees/">
-		
-			Shananananananananeeees</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Linux hierachy layout</h2>
-
-<p><code>man hier</code> answers these questions.</p>
-
-<p>Basically, <code>/usr</code> is a secondary hierarchy for libs/bins/other things
-that aren&#8217;t strictly required for single-user mode (e.g. root).</p>
-
-<p><code>/usr/local</code> is tertiary. Things you compile yourself might belong
-there. Typically implies lower level of permissions. Rationale for
-separting from <code>/usr</code> is that <code>/usr</code> might be some read-only thing
-mounted and shared across machines, ready to be swapped out and upgraded
-at any time, but <code>/usr/local</code> is crap that you can fuck wit.</p>
-
-<p><code>brew</code> expects to install in the tertiary <code>/usr/local</code> directory:
-<code>/usr/local/Cellar</code>. So you can have multiple versions of executables
-installed via brew, but only one wins on the command line by way of
-symlinks within <code>/usr/local/bin</code> pointing to specific executables in
-<code>/usr/local/Cellar/projectname/1.23/bleh</code>. Symlinks to the rescue.</p>
-
-<pre><code>$ sudo brew install wat
-Error: Cowardly refusing to `sudo brew install`
-You can use brew with sudo, but only if the brew executable is owned by root.
-However, this is both not recommended and completely unsupported so do so at
-your own risk.
-</code></pre>
-
-<p>I guess this is nice since it prevents all the ugliness of installing
-shared executables at root privileges when they&#8217;re not needed.</p>
-
-<h2>Raptor</h2>
-
-<p>Ruby server. Apparently fast.</p>
-
-<p>http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/#zero_copy</p>
-
-<ul>
-<li>Uses nginx HTTP parser
-
-<ul>
-<li>due to battle-tested reliability</li>
-<li>could have used PicoHTTPParser, but not much community adoption
-though it claims being faster than nginc</li>
-<li>could have used Mongrel&#8217;s Ragel HTTP parser, but lots of
-Ruby-specific</li>
-</ul>
-</li>
-<li>Comes w reverse proxy buffer, such as what nginx has but hyper
-optimized to typical ruby raptor workflows</li>
-<li>Multi-process</li>
-<li>Sounds like multi-threadedness will be a paid solution that comes
-later.</li>
-</ul>
-
-
-<p>The C++ component of Raptor is the server that consists of:</p>
-
-<ul>
-<li>Buffering reverse proxy</li>
-<li>HTTP parser</li>
-<li>HTTP server</li>
-</ul>
-
-
-<p>Apparently these are all part of the same thing.</p>
-
-<h2>Puma Lopez mode</h2>
-
-<p>Puma Ruby server comes with a Lopez mode named after <code>@brianmario</code> who
-suggested it. It&#8217;s a tcp-only (no http) version of puma. To that guy&#8217;s
-knowledge Puma is the only threaded/pre-forking Ruby server that offers
-such a mode.</p>
-
-<h2>nginx Reverse proxy buffer</h2>
-
-<p>http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering</p>
-
-<p>I think it&#8217;s on by default, but you can disable it, configure buffer
-sizes, or enable with <code>X-Accel-Buffer</code>.</p>
-
-<h2>nginx in general</h2>
-
-<ul>
-<li>master process
-
-<ul>
-<li>manages worker process, reloads config files, etc</li>
-</ul>
-</li>
-<li>worker processes
-
-<ul>
-<li>process requests</li>
-</ul>
-</li>
-</ul>
-
-
-<p>conf files are directives, either one liners or blocks.</p>
-
-<ul>
-<li>Block directives
-
-<ul>
-<li>same structure as normal directives</li>
-<li>but have braces</li>
-<li>if braces allow directives inside of them, it&#8217;s called a context</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Contexts:</p>
-
-<ul>
-<li>main
-
-<ul>
-<li>events</li>
-<li>http
-
-<ul>
-<li>server
-
-<ul>
-<li>location</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Catch up or move along</h2>
-
-<p>http://unlearningeconomics.wordpress.com/2012/04/03/the-keenkrugman-debate-a-summary/</p>
-
-<h2>30s write delay</h2>
-
-<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
-
-<p>http://stackoverflow.com/questions/13650134/after-how-many-seconds-are-file-system-write-buffers-typically-flushed</p>
-
-<p>http://brad.livejournal.com/2116715.html</p>
-
-<p>Modified kernel buffers (of files on disk) wait up to 30s to be flushed
-to disk. You can &#8220;force&#8221; it was fsync. But then your disks might lie to
-you about what actually was persisted (verifiable via a test involving
-pulling the power cord).</p>
-
-<h2>Redis persistence</h2>
-
-<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
-
-<p>It&#8217;s in-memory key-value, so does it ever get saved to disk?</p>
-
-<p>Why yes it does, via:</p>
-
-<ul>
-<li>snapshotting; configure min writes since last sync, or a timeout, and
-it&#8217;ll persist a snapshot to a .rdb file. Half completed transactions
-(via MULTI/EXEC) don&#8217;t show up of course.</li>
-<li>append-only AOF files
-
-<ul>
-<li>get rewritten based on memory contents if file grows too large</li>
-<li>possible for an empty redis db (written and then deleted keys) has a
-large AOF file.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Both can be enabled; it&#8217;s nice to have rdb files that you can back up.</p>
-
-<blockquote><p>AOF rewrites are generated only using sequential I/O operations, so the whole dump process is efficient even with rotational disks (no random I/O is performed). This is also true for RDB snapshots generation. The complete lack of Random I/O accesses is a rare feature among databases, and is possible mostly because Redis serves read operations from memory, so data on disk does not need to be organized for a random access pattern, but just for a sequential loading on restart.</p></blockquote>
-
-<p>Interesting, so usually a database that stores to disk would need to
-organize data for efficient random access, but in Redis-land, everything
-is loaded into memory.</p>
-
-<p>This confused me:</p>
-
-<blockquote><p>One of the additional benefits of RDB is the fact for a given database size, the number of I/Os on the system is bound, whatever the activity on the database is. This is a property that most traditional database systems (and the Redis other persistence, the AOF) do not have.</p></blockquote>
-
-<p>In other words, AOFs can be large even for empty databases (due to
-deletions).</p>
-
-<p>appendfsync:</p>
-
-<ul>
-<li>appendfsync no
-
-<ul>
-<li>syncs at kernel whim (30 s on linux)</li>
-</ul>
-</li>
-<li>appendfsync everysec
-
-<ul>
-<li>average 1 sec, at most 2 delay before buffers sent to kernel and sync&#8217;d</li>
-</ul>
-</li>
-<li>appendfsync always
-
-<ul>
-<li>sync before each client ack</li>
-<li>slowest</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Default is <code>appendfsync everysec</code>, which is pretty good durability
-without murdering speed.</p>
-
-<blockquote><p>What Redis implements when appendfsync is set to always is usually called group commit. This means that instead of using an fsync call for every write operation performed, Redis is able to group this commits in a single write+fsync operation performed before sending the request to the group of clients that issued a write operation during the latest event loop iteration.</p></blockquote>
-
-<p>Hmm that&#8217;s interesting&#8230; Redis has an event loop that can answer
-multiple clients in a single iteration?</p>
-
-<p>http://pauladamsmith.com/articles/redis-under-the-hood.html#event-loop</p>
-
-<p>Ah, it uses epoll and the like; multiple sockets and events can have
-arrived in one go, so it loops through all of those, does the necessary
-reads, etc.</p>
-
-<pre><code>/* Include the best multiplexing layer supported by this system.
- * The following should be ordered by performances, descending. */
-#ifdef HAVE_EVPORT
-#include "ae_evport.c"
-#else
-    #ifdef HAVE_EPOLL
-    #include "ae_epoll.c"
-    #else
-        #ifdef HAVE_KQUEUE
-        #include "ae_kqueue.c"
-        #else
-        #include "ae_select.c"
-        #endif
-    #endif
-#endif
-</code></pre>
-
-<h2>UTF-8</h2>
-
-<p>http://en.wikipedia.org/wiki/UTF-8</p>
-
-<p>I can&#8217;t believe I never sat down and read this shit.</p>
-
-<ul>
-<li>backwards compat w ASCII since ascii only used the 7 bits (signed
-char) to determine character.</li>
-<li>81% of webpages use this encoding</li>
-<li>ASCII is valid UTF-8</li>
-<li>UTF-8 is variable length; the 8th bit determines length</li>
-<li>there are invalid byte sequences (that you have to look out for when
-reading files / raw shit)</li>
-</ul>
-
-
-<h2>ISO/IEC 8859</h2>
-
-<p>http://en.wikipedia.org/wiki/ISO/IEC_8859</p>
-
-<ul>
-<li>single byte</li>
-<li>all ascii is ISO</li>
-<li>Seems like standard alphabet is preserved, but other 8 bit range stuff
-differs.</li>
-</ul>
-
-
-<h2>Ruby string encoding</h2>
-
-<p>http://stackoverflow.com/questions/20521371/set-utf-8-as-default-for-ruby-1-9-3</p>
-
-<ul>
-<li>Ruby 1.8 and below didn&#8217;t knew the concept of string encodings at all. Strings were more or less byte arrays.</li>
-<li>Ruby 1.9: default string encoding is US_ASCII everywhere.</li>
-<li><p>Ruby 2.0 and above: default string encoding is UTF-8.</p>
-
-<p>  $ ruby -e &#8220;puts &#8221;.encoding&#8221;
-  UTF-8</p></li>
-</ul>
-
-
-<h2>hiredis</h2>
-
-<p>https://github.com/redis/hiredis</p>
-
-<p>Presumably stands for &#8220;high(ish) level redis lib&#8221;.</p>
-
-<p>The Ruby gem can optionally use this as a driver but it comes at the
-expense of portability (JRuby can&#8217;t use this driver). But by default
-Ruby just uses Ruby sockets to talk to redis.</p>
-
-<h2>Public wifi</h2>
-
-<p>Is there any security difference between a password-less public wifi and
-one in which literally everyone knows the password?</p>
-
-<h2>/private on os X</h2>
-
-<p>http://unix.stackexchange.com/questions/63555/what-is-darwins-private-directory-for</p>
-
-<p>fun fact: <code>/etc</code> is a symlink for <code>/private/etc</code> on OS X. Wacky.</p>
-
-<h2>WEP, WPA, WPA2</h2>
-
-<p>http://www.howtogeek.com/167783/htg-explains-the-difference-between-wep-wpa-and-wpa2-wireless-encryption-and-why-it-matters/</p>
-
-<ul>
-<li>WEP (Wired Equivalent Privacy)
-
-<ul>
-<li>oldest</li>
-<li>WEP 128 most common even though there&#8217;s 256</li>
-<li>major security vulnerabilities based on RC4 stream cipher cracking</li>
-<li>on busy network, cracking could happen within a minute; if network
-is slow, attacker can send fake packets and get replies that it can
-use to crack over time.</li>
-<li>passive attacks: you have to collect information. Gather shit.</li>
-<li>Shamir (from RSA fame) was one of the crackahs.</li>
-</ul>
-</li>
-<li>WPA
-
-<ul>
-<li>PSK (pre-shared key) is most common</li>
-<li>256 min (over 64 and 128 WEP garbage)</li>
-<li>message integrity checks (detects some MITM)</li>
-<li>TKIP (temporal key integrity protocol) is predecessor to AES</li>
-<li>too tied to WEP (meant for firmware progressive upgrades) and hence
-prone to some WEP vulnerabilities, hence:</li>
-</ul>
-</li>
-<li>WPA2
-
-<ul>
-<li>AES</li>
-<li>CCMP (replacement for TKIP? but with TKIP fallback)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Just disable a thing called WPS and you&#8217;ll be good.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-11T06:43:00-05:00" pubdate data-updated="true">Nov 11<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/08/mr-noah/">
-		
-			Mr Noah</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Root/apex/base/DNS and things finally clicking</h2>
-
-<p>They the same thing.</p>
-
-<p>http://stackoverflow.com/a/16041655/914123</p>
-
-<p>Also I like</p>
-
-<pre><code>(Note: root, base, apex domains are all the same thing. Using interchangeably for google-foo.)
-</code></pre>
-
-<p>CNAME:</p>
-
-<ul>
-<li>Canonical Name record: Aliases another name</li>
-<li>Use case: define CNAME for <code>ftp</code>, <code>www</code>, etc to point to the
-<code>example.com</code> A record so that only the A record&#8217;s IP needs to
-change</li>
-<li>Can point to any ol domain, not just within <code>example.com</code>. Heroku
-and other cloud services use this to have a CNAME pointing to
-a domain name under the control of a dynamic name server that
-can dish out different A name records (hence different IPs)</li>
-<li>Can&#8217;t define CNAMEs for apex domains (e.g. <code>example.com</code>).</li>
-<li>Can&#8217;t be shared with other records for that name, e.g. MX. CNAME wins
-and fucks over the others, I think.</li>
-</ul>
-
-
-<p>A record:</p>
-
-<ul>
-<li>Points to an IP address.</li>
-<li>Terminates DNS lookups</li>
-</ul>
-
-
-<p>ALIAS/ANAME:</p>
-
-<p>http://blog.dnsimple.com/2011/11/introducing-alias-record/</p>
-
-<p>http://support.dnsimple.com/articles/differences-between-a-cname-alias-url/</p>
-
-<blockquote><p>Before going further into the details, it’s important to know that A
-and CNAME records are standard DNS records, whilst ALIAS and URL
-records are custom DNS records provided by DNSimple. Both of them
-are translated internally into A records to ensure
-compatibility with the DNS protocol.</p></blockquote>
-
-<p>Aliases can coexist with other records at that level (so someone asking
-for MX gets MX if defined for that name rather than resolving
-elsewhere).</p>
-
-<p>Ok, so DNS hosts just returns CNAMEs and A records (and others too), and
-DNS hosts like DNSimple and DNS Made Easy can provide custom record
-types that ultimately translate to A records. Makes sense.</p>
-
-<p>So what about URL?</p>
-
-<blockquote><p>This type of record uses an HTTP redirect to redirect visitors from a domain to a web site.</p></blockquote>
-
-<p>So the A record returned from a URL record on DNSimple is going to point
-to one of DNSimple&#8217;s server IPs. I set one up for
-snaggletooth.alexmatchneer.com => http://www.example.com.</p>
-
-<pre><code>$ curl -H "Host: snaggletooth.alexmatchneer.com" 50.31.209.254
-&lt;a href="http://www.example.com"&gt;Moved Permanently&lt;/a&gt;
-</code></pre>
-
-<p>I also added a URL record for ugly.alexmatchneer.com to point to some
-random s3 image and discovered that browsers in fact follow redirects
-for images, hence this works:</p>
-
-<pre><code>&lt;img src="http://ugly.alexmatchneer.com"/&gt;
-</code></pre>
-
-<p><img src="http://ugly.alexmatchneer.com" alt="" /></p>
-
-<p>DNSimple is also nice enough to append the path to whatever its
-forwarding, so <code>ugly.alexmatchneer.com/wat</code> forwards to the destination
-specified in the URL record + <code>/wat</code>.</p>
-
-<h2><code>dig</code> recursion</h2>
-
-<p>Either you tell your DNS server to recurse for you, or you do it
-yourself.</p>
-
-<p>Name server does it for you (all these options just get rid of crufty
-shit):</p>
-
-<pre><code>dig +noall +answer +additional +recurse alexmatchneer.com
-alexmatchneer.com.      3544    IN      A       23.235.39.133
-</code></pre>
-
-<p>You do it yourself:</p>
-
-<pre><code>dig +noall +answer +additional +norecurse alexmatchneer.com
-FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
-FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
-</code></pre>
-
-<p>FWDR is a FiOS thing. These are from the additional section. So I guess
-it means I should call them. But at what point do I go through
-Verizon&#8217;s DNS? I thought I used like 4.2.2.2?</p>
-
-<pre><code>cat /etc/resolve.conf
-
-#
-# Mac OS X Notice
-#
-# This file is not used by the host name and address resolution
-# or the DNS query routing mechanisms used by most processes on
-# this Mac OS X system.
-#
-# This file is automatically generated.
-#
-domain home
-nameserver 192.168.1.1
-</code></pre>
-
-<p>I guess DNS is decided when I connect to a router. Ahhh I guess routers
-perform DNS? Ok ok ok what if I tell <code>dig</code> which name server to query?</p>
-
-<pre><code>$ dig +noall +answer +additional +norecurse @4.2.2.2 alexmatchneer.com
-i.gtld-servers.net.     109080  IN      A       192.43.172.30
-k.gtld-servers.net.     109080  IN      A       192.52.178.30
-m.gtld-servers.net.     166299  IN      A       192.55.83.30
-h.gtld-servers.net.     114566  IN      A       192.54.112.30
-b.gtld-servers.net.     133590  IN      A       192.33.14.30
-b.gtld-servers.net.     118573  IN      AAAA    2001:503:231d::2:30
-a.gtld-servers.net.     159638  IN      A       192.5.6.30
-a.gtld-servers.net.     113094  IN      AAAA    2001:503:a83e::2:30
-e.gtld-servers.net.     113091  IN      A       192.12.94.30
-f.gtld-servers.net.     166299  IN      A       192.35.51.30
-j.gtld-servers.net.     166299  IN      A       192.48.79.30
-g.gtld-servers.net.     109080  IN      A       192.42.93.30
-d.gtld-servers.net.     101447  IN      A       192.31.80.30
-l.gtld-servers.net.     136989  IN      A       192.41.162.30
-</code></pre>
-
-<p>WORD ok top level domains, makes sense. I bet if I let it recurse for me
-it&#8217;ll gimme what I want:</p>
-
-<pre><code>$ dig +noall +answer +additional +recurse @4.2.2.2 alexmatchneer.com
-alexmatchneer.com.      3600    IN      A       23.235.46.133
-</code></pre>
-
-<p>Word. And if I use my router&#8217;s IP:</p>
-
-<pre><code>dig +noall +answer +additional +norecurse @192.168.1.1 alexmatchneer.com
-FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
-FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
-</code></pre>
-
-<p>It refers me to some Verizon name server shit. Which is why if I type in
-some nonsense domain name, I get redirected to some shitty Verizon
-search page. Regardless of whether I&#8217;m in Chrome or in curl:</p>
-
-<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
-&lt;!DOCTYPE ... blah blah http://searchassist.verizon.com/
-</code></pre>
-
-<p>So what if I enable VPN? Prediction: my VPN provider will be making
-queries on my behalf, presumably not behind some Verizon name server
-shit.</p>
-
-<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
-curl: (6) Could not resolve host: oinasiodasd.asdasiodasod.asdoi
-</code></pre>
-
-<p>Basically (annoying caching hangover aside) dig will skip the FiOS
-forwarding/recursing if I&#8217;m on VPN. All this makes sense. Perfect
-sense. COMPLICATED THOUGH JESUS.</p>
-
-<h2>VPNs and private network IPs</h2>
-
-<p>ICANN set aside numbers like 192.168&#8230; and 10&#8230; for private networks.
-VPN doesn&#8217;t interfere with that shit because it&#8217;s within that range.
-Derp.</p>
-
-<p>Ahhhh that does though that I could still use my router as a DNS, no?</p>
-
-<p>VPN enabled:</p>
-
-<pre><code>$ dig .
-;; SERVER: 8.8.4.4#53(8.8.4.4)
-</code></pre>
-
-<p>VPN disabled:</p>
-
-<pre><code>$ dig .
-;; SERVER: 192.168.1.1#53(192.168.1.1)
-</code></pre>
-
-<p>And even w VPN enabled I could still query my Verizon router&#8217;s DNS</p>
-
-<pre><code>$ dig +norecurse @192.168.1.1 .
-FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
-FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
-</code></pre>
-
-<p>So who the hell decides where I query from?</p>
-
-<h2>DHCP</h2>
-
-<p>Dynamic Host Configuration Protocol.</p>
-
-<p>When you connect to a network, this tells you all sorts of useful
-defaults:</p>
-
-<blockquote><p>The DHCP server manages a pool of IP addresses and information about client configuration parameters such as default gateway, domain name, the name servers, and time servers.</p></blockquote>
-
-<p>When you connect to a network, the DHCP broadcasting stuff happens and
-you wind up with an IP, bingo bango bongo. When you connect to a network
-but can&#8217;t establish an IP, it&#8217;s probably because DHCP hasn&#8217;t finished
-yet.</p>
-
-<p>But this is where 192.168.1.1 as a name server comes from; the Verizon
-router will use DHCP to tell you to use it. Other routers might do other
-things. When I tether to my phone it gives a different DNS.</p>
-
-<h2>TXT Records</h2>
-
-<pre><code>$ dig +short borflex.alexmatchneer.com TXT
-"Another dumb thing"
-"I am a big dumb ridiculous idiot!"
-</code></pre>
-
-<h2>Nested subdomains</h2>
-
-<p>For the <code>alexmatchneer.com</code> domain, I added a CNAME for
-<code>e.x.c.alexmatchneer.com</code> to point to expresscheckoutapp.com
-and now it just works to nav to http://e.x.c.alexmatchneer.com</p>
-
-<h2>Route 53</h2>
-
-<p>Heyyyy that&#8217;s the port that DNS servers use.</p>
-
-<h2>Rubydns</h2>
-
-<p>https://github.com/ioquatix/rubydns</p>
-
-<p>Pretty cool. You can make your own DNS server. I got mine to tell me I
-was an idiot:</p>
-
-<pre><code>$ dig +short @54.165.102.18 barflonkula TXT
-"You are a big idiot"
-</code></pre>
-
-<h2>SOA Records</h2>
-
-<h2>Pointilism</h2>
-
-<p>Painting with dots. Like that Ferris Bueller painting, or some of Van
-Gogh&#8217;s self portraits.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-08T08:29:00-05:00" pubdate data-updated="true">Nov 8<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/06/jaily-dournal/">
-		
-			Jaily Dournal</a>
-	</h2>
-	<div class="entry-content">
-		<h2><code>rails c --sandbox</code></h2>
-
-<p>Rolls back changes on exit.</p>
-
-<pre><code>(0.4ms)  SAVEPOINT active_record_1
-(0.2ms)  ROLLBACK TO SAVEPOINT active_record_1
-</code></pre>
-
-<p>Wraps in a transaction which is why you see the above rather than BEGIN
-statements</p>
-
-<h2>Temporarily change $stdout</h2>
-
-<p>I wanted to get pretty-print output in Ruby. Solution, using <code>rails c</code>:</p>
-
-<pre><code>f = File.open('tmp', 'w')
-stdout_old = $stdout
-$stdout = f
-pp hash
-$stdout = $stdout_old # could also do File.open(1)
-</code></pre>
-
-<h2>Review: difference between pipes and sockets</h2>
-
-<ul>
-<li>pipes came first in early 70s</li>
-<li>pipes are always stream oriented; sockets can also be datagram
-oriented.</li>
-<li>pipes are unidirectional (and require two pipes for back and forth).
-sockets are bi-directional.</li>
-</ul>
-
-
-<h2>FAT doesn&#8217;t support hardlinking</h2>
-
-<p>I was going to try ember-cli-ramdisk mounting on file systems other than
-HFS+, hoping that one FS would support more efficient reuse of freed
-blocks, which might minimize paging on the grounds that if ramdisks
-blocks are being reused, then additional ramdisk file allocations won&#8217;t
-occur, hence memory lookups won&#8217;t occur, hence paging can&#8217;t happen.</p>
-
-<p>Anyway, got initial builds working in FAT32, but incremental rebuilds
-didn&#8217;t work due to hard-linking:</p>
-
-<p>https://github.com/rlivsey/broccoli-concat/blob/master/index.js#L86</p>
-
-<p>I thought we got rid of those, but then again the above use case is
-fine, since hardlinks are only used concat output and not root files.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-06T16:00:00-05:00" pubdate data-updated="true">Nov 6<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/05/oss-cards-against-humanity/">
-		
-			OSS Cards Against Humanity</a>
-	</h2>
-	<div class="entry-content">
-		<p>Why not.</p>
-
-<h2>Black Cards</h2>
-
-<ul>
-<li>&#8220;GamerGate: it&#8217;s actually about <code>__________</code>&#8221;</li>
-<li>&#8220;Ember.js: a framework for creating <code>_________</code>&#8221;</li>
-</ul>
-
-
-<h2>White Cards</h2>
-
-<ul>
-<li>Ethics in video game journalism</li>
-<li><h1>GamerGate</h1></li>
-<li>Thought Leadership</li>
-<li>Brogrammers</li>
-<li>Cracking the Nut</li>
-<li>Destroy All Software</li>
-<li>Ember.js</li>
-<li>AngularJS</li>
-<li>React</li>
-<li>Two-way data-binding</li>
-<li>Unidirectional Data Flow</li>
-<li>Handlebars templates</li>
-<li>Functional reactive programming</li>
-<li>Hacker News</li>
-<li>Stability without Stagnation</li>
-<li>Ambitious Web Applications</li>
-<li>Thirsty Randos</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-05T12:40:00-05:00" pubdate data-updated="true">Nov 5<span>th</span>, 2014</time></div>
 	
 
 

@@ -112,6 +112,624 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/12/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Ruby <code>Module#===</code></h2>
+
+<p>Ran into <a href="https://github.com/hassox/warden/blob/master/lib/warden.rb#L33-L34">this piece of
+code</a>
+from the Warden repo:</p>
+
+<pre><code>def self.test_mode!
+  unless Warden::Test::WardenHelpers === Warden
+    Warden.extend Warden::Test::WardenHelpers
+    Warden::Manager.on_request do |proxy|
+      unless proxy.asset_request?
+        while blk = Warden._on_next_request.shift
+          blk.call(proxy)
+        end
+      end
+    end
+  end
+  true
+end
+</code></pre>
+
+<p>I hadn&#8217;t seen this usage of <code>===</code> before; I&#8217;m mostly familiar with it as
+an unidiomatic alias of <code>is_a?</code>, e.g.:</p>
+
+<pre><code>Array === []    #=&gt; true
+[].is_a?(Array) #=&gt; true
+</code></pre>
+
+<p><code>#===</code> is the Case Equality operator or
+<a href="http://stackoverflow.com/questions/4527220/3-equals-or-case-equality-operator"><em>subsumption</em> operator</a>;
+it is overridden by subclasses to provide context-specific / semantic
+meaning, for example:</p>
+
+<ul>
+<li><code>Regexp === /asd/</code> #=> true</li>
+<li><code>Fixnum === 5</code> #=> true</li>
+<li><code>Object === {}</code> #=> true</li>
+</ul>
+
+
+<p>Important things to keep in mind about <code>===</code>:</p>
+
+<ol>
+<li>It is not commutative (A===B does not imply B===A)</li>
+<li>It is a method of the object on the left side of an expression,
+e.g. <code>A===B</code> is shorthand for <code>A.===B</code> or <code>A.send(:===, //)</code></li>
+<li>It has nothing to do with equality; beware, JavaScripters.</li>
+</ol>
+
+
+<p>ANYWAY: back to the Warden example: in this case, the <code>Module</code> class has
+an instance method <code>===</code> that returns if the object on the right side
+has extended the methods on the Module that <code>===</code> is called on, so:</p>
+
+<pre><code>module M; end
+class Foo; end
+
+f = Foo.new
+M === f #=&gt; false
+
+# reopen
+class Foo
+  include M
+end
+
+M === f #=&gt; true
+</code></pre>
+
+<p>So we turned <code>===</code> from false to true by including <code>M</code> on class <code>Foo</code>.
+The Warden example is similar, except that the way the module&#8217;s methods
+were mixed in was via <code>extend</code> vs <code>include</code>. <code>extend</code> is a somewhat more
+direct form of <code>include</code> in that it can be called on instances to put
+methods directly on that instance, rather than having to open an
+instance&#8217;s class and add an <code>include</code> statement, which adds all of those
+methods to subclasses.</p>
+
+<p>So when we check</p>
+
+<pre><code>  Warden::Test::WardenHelpers === Warden
+</code></pre>
+
+<p>this is the same as <code>WardenHelpers.=== Warden</code>, which translates to
+&#8220;return true if Warden has all of WardenHelpers&#8217; methods&#8221;.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-12T13:14:00-04:00" pubdate data-updated="true">May 12<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ruby/'>Ruby</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/04/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Vim surround</h2>
+
+<p>https://github.com/tpope/vim-surround</p>
+
+<ul>
+<li>ysiw] : surround a word in ]</li>
+<li>ysiW] : surround a chunk word in ]</li>
+<li>cs&#8221;&#8217; : change surrounding &#8221; to &#8217;</li>
+<li>ds&#8221; : delete surrounding &#8221;</li>
+<li>yss( : wrap line in parens</li>
+</ul>
+
+
+<h2>DAS: Conflicting Principles</h2>
+
+<ul>
+<li>User/profile/account
+
+<ul>
+<li>All this other stuff that relates to that single giant model</li>
+</ul>
+</li>
+<li>User
+
+<ul>
+<li><code>disable!</code></li>
+<li><code>send_disable_notication</code></li>
+</ul>
+</li>
+<li>Law of demeter
+
+<ul>
+<li>Motivation for decomposition</li>
+<li>move controller logic to model <code>enforce_good_standing!</code></li>
+</ul>
+</li>
+<li>User model will get huge; lots of complexity there.</li>
+<li>Pull out service classes, e.g. GoodStandingPolicy, or
+AccountStandingPolicy
+
+<ul>
+<li><code>#initialize(user)</code></li>
+<li><code>enforce!</code>
+
+<ul>
+<li>still breaks law of demeter.</li>
+<li>change <code>cards.all?(&amp;:invalid?)</code> to <code>all_cards_invalid?</code></li>
+<li>but this breaks Tell Don&#8217;t Ask
+
+<ul>
+<li>TDA means asking an object about properties and deciding what to
+do instead of telling it to do things and giving it enough info
+to do so.</li>
+</ul>
+</li>
+<li>TDA vs Single Responsibility Principle (SRP)?
+
+<ul>
+<li>If you follow TDA, you end up putting responsibility back into
+User class, but now User class has much responsibility</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Pick one: SRP often makes sense</li>
+</ul>
+
+
+<h2>DAS: Wrapping Third Party APIs</h2>
+
+<ul>
+<li>e.g. accepting Braintree payment from secure redirect back to your
+site with data in QPs</li>
+<li>BrainTree API objects are deeply nested, causes handling code to suffer</li>
+<li>Goal: move traversal of these objs to a different class.</li>
+<li>Spec
+
+<ul>
+<li>Had to stub deeply nested crap</li>
+</ul>
+</li>
+<li>TDD
+
+<ul>
+<li>it &#8220;konws the newest credit card&#8221;</li>
+<li>qp is a stub</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Pend-out an Rspec test</h2>
+
+<pre><code>it "does something" {}
+</code></pre>
+
+<p>can be made pending via <code>xit</code></p>
+
+<pre><code>xit "does something" {}
+</code></pre>
+
+<h2>Cisgender</h2>
+
+<p>http://en.wikipedia.org/wiki/Cisgender</p>
+
+<blockquote><p>Cisgender and cissexual (often abbreviated to simply cis) describe
+related types of gender identity where an individual&#8217;s experience of
+their own gender matches the sex they were assigned at birth.</p></blockquote>
+
+<h2>Hypermedia API</h2>
+
+<p>Hyper = above</p>
+
+<p>Media = well, media, but not just hypertext because more things than
+just text can be conveyed</p>
+
+<p>Examples:</p>
+
+<ul>
+<li>http://jsonapi.org/</li>
+<li>HAL - Hypermedia Application Language</li>
+</ul>
+
+
+<p>Why JSON API over HAL? http://jsonapi.org/faq/</p>
+
+<ul>
+<li>HAL embeds child docs recursively; JSON API flattens the entire graph
+at the top level.</li>
+<li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
+<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
+https://github.com/json-api/json-api/pull/123/files#r12265234</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-04T10:11:00-04:00" pubdate data-updated="true">May 4<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/das/'>DAS</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/01/daily-journal-2/">
+		
+			Daily Journal 2</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Cryptoballs</h2>
+
+<pre><code>openssl speed rsa
+openssl speed aes
+</code></pre>
+
+<h3>RSA</h3>
+
+<p>Encryption key is public. Decryption key is secret.
+Used for generating symmetric key in TLS.</p>
+
+<p>AES is way faster (TODO: wat?).</p>
+
+<h2>Active-model serializers</h2>
+
+<p>How do tell an attribute to use a serializer?</p>
+
+<p>Trick question: you don&#8217;t; rather, if it has a serializer, it&#8217;s probably
+an association, not an attribute, so you probably want something like</p>
+
+<pre><code>has_many :action_items, serializer: ActionItemSerializer
+has_one :originator, serializer: OriginatorSerializer
+</code></pre>
+
+<p>and in both cases you can probably remove <code>serializer</code> once you de-stub
+<code>action_items</code> and <code>originator</code>.</p>
+
+<h2>QUnit filter</h2>
+
+<p>In Mocha JS test suites if you click a suite header, it&#8217;ll run tests
+only from that module or children by way of a <code>grep=blahlbahbl</code> query
+param. I&#8217;m using <a href="https://github.com/square/qunit-bdd">qunit-bdd</a>, which
+is a layer over QUnit, which generates a bunch of concatenated module
+names based on the nested <code>describe</code>s and <code>context</code>s, which doesn&#8217;t let
+you easily run all the nested child modules of a top-level describe if
+you&#8217;re used to using the Module dropdown on the upper right.</p>
+
+<p>If you want to run a family of describe modules, you can manually
+provide a <code>filter</code> query param, e.g.:</p>
+
+<pre><code>http://localhost:4200/tests?filter=LiveQuery
+</code></pre>
+
+<p>This runs all modules w &#8220;LiveQuery&#8221; is part of their name.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-01T22:46:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/01/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Normalize / Denormalize</h2>
+
+<p>From <a href="http://en.wikipedia.org/wiki/Database_normalization">Wikipedia</a>:</p>
+
+<p>Database normalization is the process of organizing the fields and
+tables of a relational database to minimize redundancy.</p>
+
+<p>Source: Gary Bernhardt saying &#8220;we denormalize by passing in
+<code>person_name</code> in addition to the person object&#8221;. Normalizing means
+keeping all the data in one place, reducing redundancy. Denormalizing
+means redundancy, which normally affords</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Denormalization">Denormalization</a>:</p>
+
+<blockquote><p>In computing, denormalization is the process of attempting to
+optimize the read performance of a database by adding redundant
+data or by grouping data. In some cases, denormalization
+is a means of addressing performance or scalability in relational
+database software.</p></blockquote>
+
+<p>Generally speaking, denormalizing means you&#8217;ve duplicated some piece of
+data for some reason, probably optimization.</p>
+
+<h2>Stub a method in ruby</h2>
+
+<p>As simple as</p>
+
+<pre><code>def stubbed_method(*args)
+  # accept any number of args, do nothing with them.
+end
+</code></pre>
+
+<h2>Use <code>fetch</code>, not <code>[]</code> for <code>Hash</code> / <code>Array</code></h2>
+
+<p>I already know this, just keep on forgetting to use it;</p>
+
+<pre><code>{}[123] # =&gt; nil
+{}.fetch(123) # =&gt; KeyError: key not found: 123
+</code></pre>
+
+<h2>Directory stack: <code>pushd</code> / <code>popd</code></h2>
+
+<p>Forgot about this from my Bloomberg days; use <code>pushd</code> and <code>popd</code> for
+saving which directory you&#8217;re in (<code>pushd</code>) so that you can screw around,
+change directories, and then ultimately <code>popd</code> back to whichever directory
+you were in before you ran <code>pushd</code>.</p>
+
+<pre><code>cd /foo/bar/baz
+pushd /some/other/dir
+pwd # =&gt; /some/other/dir
+cd /go/to/some/strange/land
+popd
+pwd # =&gt; /foo/bar/baz
+</code></pre>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-01T08:59:00-04:00" pubdate data-updated="true">May 1<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/04/28/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2><code>npm install</code> git repos</h2>
+
+<p>NOTE: this section is not complete; placeholding for later.</p>
+
+<p>After many abortive attempts to find the right syntax for running
+<code>npm install</code>, I figured I&#8217;d delve into what URL syntax it actually
+expected, and why.</p>
+
+<p>Here&#8217;s a bunch of stuff that didn&#8217;t work:</p>
+
+<pre><code>npm install git+ssh@github.com:stefanpenner/ember-cli.git
+npm install https://github.com/stefanpenner/ember-cli.git
+</code></pre>
+
+<p>Why couldn&#8217;t <code>npm install</code> just figure out what I meant? Well, I don&#8217;t
+know, but here&#8217;s a breakdown of the above.</p>
+
+<p><em>This is a helpful resoure: https://help.github.com/articles/which-remote-url-should-i-use</em></p>
+
+<p>Basically, you can clone GitHub repos either with HTTPS or SSH urls. SSH
+urls require an SSH keypair to generated on your computer and registered
+to your GitHub accounts.</p>
+
+<p>So here&#8217;s the first thing I tried:</p>
+
+<pre><code>https://help.github.com/articles/using-ssh-agent-forwarding
+</code></pre>
+
+<p>This is an HTTPS url.</p>
+
+<p>Q: Why does/did GitHub even require a password for cloning a repo?
+What&#8217;s insecure about that read info? Possible answer: even if you don&#8217;t
+have read access to a repo, a man in the middle might tell you you do,
+and then you&#8217;re sending priv data, blah blah blah.</p>
+
+<h2><code>Gdiff</code>, diffing in vim</h2>
+
+<p>This was a very helpful resource:</p>
+
+<p>http://vimcasts.org/episodes/fugitive-vim-resolving-merge-conflicts-with-vimdiff/</p>
+
+<pre><code>:Gdiff
+:ls # list all the open buffers in their names
+:diffget BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:diffput BUFSPEC # when inside a conflict region,
+                 # say which buffer to get content from
+:only # close all buffer except this one
+</code></pre>
+
+<p>I ended up adding the following to my <code>.vimrc.after</code>:</p>
+
+<pre><code>:nnoremap &lt;Leader&gt;dg :diffget &lt;CR&gt;
+:nnoremap &lt;Leader&gt;dp :diffput &lt;CR&gt;
+</code></pre>
+
+<p>Note that this arg-less form is useful when diffing between local
+changes and your last checkin; I use it a bunch for <code>ember-cli</code> when I
+call <code>ember init</code> to reset my app structure to the latest <code>ember-cli</code>
+blueprint (note that this process is still pretty miserable).</p>
+
+<h2>Broccoli <code>ignoredModules</code> and <code>legacyFilesToAppend</code></h2>
+
+<p>These options come from the <code>broccoli-es6-concatenator</code>.</p>
+
+<ul>
+<li><code>ignoredModules</code>: don&#8217;t transpile this module or add it to the list of
+importable modules. This is useful when you have a file that&#8217;s already
+in AMD format (not ES6), and you want to be able to es6 <code>import</code> that
+module, so you put it in <code>ignoredModules</code> so it&#8217;s not treated as an
+es6 file that needs to be imported.</li>
+<li><code>legacyFilesToAppend</code>: non-es6 files (global libraries) that should be
+appended to the end of the final output JS file.</li>
+</ul>
+
+
+<p>Note: <code>loaderFile</code> is automatically added as a legacy files, why, duh,
+because the loader file obviously needs to be a global, non-module file.</p>
+
+<p>So, wtf does this mean (the latest iteration of the blueprint
+Brocfile.js from ember-cli):</p>
+
+<pre><code>if (app.env !== 'production') {
+  push.apply(app.ignoredModules, [
+    'qunit',
+    'ember-qunit'
+  ]);
+
+  push.apply(app.legacyFilesToAppend, [
+    'test-shims.js',
+    'ember-qunit/dist/named-amd/main.js'
+  ]);
+}
+</code></pre>
+
+<p>Well, thanks to the geniuses in freenode IRC <code>#ember-cli</code>, I&#8217;ve learned
+that:</p>
+
+<ul>
+<li>This shouldn&#8217;t be in the blueprint Brocfile.js, but rather should be
+in the ember-cli lib <code>EmberApp</code> abstraction over the Brocfile.js, but
+anyway:</li>
+<li>The intent is that by specifying an <code>ignoredModules</code> item, you&#8217;re
+basically saying &#8220;I intent to import a module with this name, and
+because I&#8217;m opting out of generating it now via an ES6 file, I&#8217;ll be
+adding an AMD module for this file later&#8221;</li>
+</ul>
+
+
+<p>And if you try to <code>import something from 'nonexistent-module'</code>, you&#8217;ll
+get a loader error.</p>
+
+<p>This all seems really obvious, right? Naw, it&#8217;s really freaking hard for
+me to keep in my dumb brain. :(</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-28T14:11:00-04:00" pubdate data-updated="true">Apr 28<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/04/26/daily-journal/">
 		
 			Daily Journal</a>
@@ -507,255 +1125,6 @@ files from a half-compiled project folder)</li>
 
 <time datetime="2014-04-12T18:30:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
 	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/12/daily-thoughts/">
-		
-			Daily Thoughts</a>
-	</h2>
-	<div class="entry-content">
-		<p>Long time no blog, been busy with Ember stuff. Much has transpired since
-the last post, including getting added to Ember Core, making the Ember
-router reasonable, and other things. About time I get back into the
-blog-groove. Don&#8217;t expect quality; I&#8217;m probably gonna use this to jot
-down daily learnings because I am immensely forgetful, which rears its
-ugly head when I spend hours / days on a hard problem, only to forget
-the various realizations that would prevent me from having to solve the
-same shit over and over again. It&#8217;s gotten pretty bad; hopefully this
-will help.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-12T18:16:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/03/29/ember-jeopardy/">
-		
-			Ember Jeopardy</a>
-	</h2>
-	<div class="entry-content">
-		<p>At last night&#8217;s <a href="http://www.meetup.com/EmberJS-NYC/events/106490682/">NYC Ember Meetup</a>,
-I led the gang through a somewhat enduring session of Jeopardy,
-featuring a ton of different Ember.js trivia questions. The app itself
-was written in Ember.js and the source code is mostly good, and
-certainly well-commented. Have a look see:</p>
-
-<p><a href="http://ember-jeopardy.herokuapp.com/">Ember Jeopardy</a></p>
-
-<p><a href="https://github.com/machty/ember-jeopardy">Source code</a></p>
-
-<p>It&#8217;s (somewhat needlessly) hosted within a Rails app, but you can find the
-Ember-specific code in <code>app/assets/javascripts/</code>. It presently only
-works on non-retina Safari/Chrome, given all the 3D stuff going on, but
-if you can figure out how to slay the remaining CSS3 demons, I&#8217;d
-definitely appreciate a pull request.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-29T15:36:00-04:00" pubdate data-updated="true">Mar 29<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember-js/'>Ember.js</a>, <a class='category' href='/blog/categories/jeopardy/'>Jeopardy</a>, <a class='category' href='/blog/categories/meetup/'>Meetup</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/">
-		
-			Stubbing Date::valueOf for Benefit of Make Great Good Determinism</a>
-	</h2>
-	<div class="entry-content">
-		<p>Quick thing: if you ever find yourself in the situation of writing
-JavaScript test cases that involve <code>setTimeout</code> or some other timer
-logic where the order of timers firing is the subject of testing, you
-might find this trick handy to get rid of brittle, non-deterministic
-test cases.</p>
-
-<p>In short, you can stub out the <code>Date</code> class&#8217;s <code>valueOf</code> method to return
-a value you expect for the duration of the test case.</p>
-
-
-		
-		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-24T13:20:00-04:00" pubdate data-updated="true">Mar 24<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/javascript/'>JavaScript</a>, <a class='category' href='/blog/categories/determinism/'>determinism</a>, <a class='category' href='/blog/categories/testing/'>testing</a>, <a class='category' href='/blog/categories/valueof/'>valueOf</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/">
-		
-			NYC Ember.js Meetup Run Loop Slides</a>
-	</h2>
-	<div class="entry-content">
-		<p>Just did a talk on the Ember run loop at the
-<a href="http://www.meetup.com/EmberJS-NYC/">NYC Ember.js Meetup</a>.
-You can check them out
-<a href="http://machty.github.com/blog/ember_run_loop_talk">here</a>.
-There&#8217;s also a blurb on the <code>ember-source</code>, <code>handlebars-source</code> stuff
-I <a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">wrote about
-yesterday</a>.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-28T21:22:00-05:00" pubdate data-updated="true">Feb 28<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>, <a class='category' href='/blog/categories/nyc-meetup/'>nyc meetup</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">
-		
-			Slaying the Ember/Handlebars JS-RB Dependency Demons With Gem Wrappers</a>
-	</h2>
-	<div class="entry-content">
-		<p>Ember.js devotees may have noticed a series of related commits that I
-put in recently with reference to &#8220;removing vendored .js files in favor
-of ember-source, handlebars-source, etc&#8221;, or something of the like.
-They&#8217;re all checked in now, and I think they&#8217;ve gone a long way towards
-alleviating the dependency hell stemming from multiple gems packaging
-vendored .js files.</p>
-
-<p>For a better understanding of the motivation behind these
-changes and how they might affect you, read on.</p>
-
-
-		
-		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-27T23:28:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/emblem-source/'>emblem-source</a>, <a class='category' href='/blog/categories/gemifying/'>gemifying</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>
-
-</div>
 
 
 	

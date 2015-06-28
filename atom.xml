@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2015-03-23T16:12:44-04:00</updated>
+  <updated>2015-06-28T16:51:55-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,1770 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Anermic]]></title>
+    <link href="http://machty.github.com/blog/2015/06/11/anermic/"/>
+    <updated>2015-06-11T11:39:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/06/11/anermic</id>
+    <content type="html"><![CDATA[<h2>Nils nils nils</h2>
+
+<p>Yes, use <code>.fetch()</code> over <code>[]</code> if you&#8217;re working with an options hash
+where all fields are expected/required so that you don&#8217;t accidentally
+leak nils. But <code>.fetch(:wat, nil)</code> is the
+most pointless thing of all time. It adds no value over <code>[:wat]</code>. So
+stop thinking about it, Matchnozzle!</p>
+
+<h2>JSON Pointer</h2>
+
+<p>RFC: https://tools.ietf.org/html/rfc6901</p>
+
+<p>TL;DR defines how to reference values within a JSON doc in a
+standardized way, including via normal URIs. So potentially you could
+cite a value in an API request from Wikipedia I guess.</p>
+
+<p>Also used in JSON Patch to describe the path to changed things.</p>
+
+<h2>Persistent Data Structure</h2>
+
+<p>https://en.wikipedia.org/wiki/Persistent_data_structure</p>
+
+<p>Preserves a previous version of itself when modified; often intertwined
+with &#8220;immutable&#8221; since in some languages/libraries like Clojure data
+structures internally share structure with others between operations.</p>
+
+<h2>Racket</h2>
+
+<p>Lispy language that compiles down to bytecode run on a proprietary
+runtime.</p>
+
+<p>Excellent article: http://programming-puzzler.blogspot.com/2010/08/racket-vs-clojure.html</p>
+
+<p>In short, Clojure wins because of data structures (but is still
+annoyingly limited by Java ties; no tail recursion, poor performance w
+numbers sometimes, etc).</p>
+
+<h2>Bottom line</h2>
+
+<p>Literally the bottom line of a statement, where the total is calculated.
+That&#8217;s what the saying&#8217;s referring to when folk say how&#8217;s this affect
+our bottom line.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[brooch]]></title>
+    <link href="http://machty.github.com/blog/2015/05/25/brooch/"/>
+    <updated>2015-05-25T01:51:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/05/25/brooch</id>
+    <content type="html"><![CDATA[<h2>Brooch</h2>
+
+<p>wtf is a brooch.</p>
+
+<p>http://en.wikipedia.org/wiki/Brooch</p>
+
+<p>Decorative jewelry that can be attached to garments, often to hold them
+closed. Could be collars to shirt, could be holding together a robe-ish
+thing. Brooch brooch brooch. Remember that shit.</p>
+
+<h2>Android HW Accel</h2>
+
+<p>There&#8217;s hardware acceleration in the Android rendering pipeline since
+Honeycomb, Android 3.0, which came out Feb 2011. By default,
+the manifest attr that controls this is set to false:</p>
+
+<pre><code>&lt;application ... android:hardwareAccelerated="false"&gt;
+</code></pre>
+
+<p>So you&#8217;d have to set that to true to enable hw accel globally. Then
+there&#8217;s finer granularity for <code>window</code> and <code>View</code> via setFlags and
+setLayerType.</p>
+
+<h2>Amazon Local</h2>
+
+<p>What it is? Google autocomplete search elucidates:</p>
+
+<p>&#8220;amazon local vs&#8221;</p>
+
+<ul>
+<li>groupon</li>
+<li>livingsocial</li>
+<li>square</li>
+</ul>
+
+
+<p>Seems to promote your business via groupon-esque deals.</p>
+
+<h2>Java Anonymous Classes</h2>
+
+<p>Weird syntax I didn&#8217;t recognize. Basically lets you instantiate an
+anonymous class assuming you don&#8217;t need to share the class. The cool
+thing about this is that you can implement/instantiate an instance of a
+class based entirely on an Interface (this was weird for me since
+Interfaces in Java seem like these ephemeral ghostly non-existent things
+that normally take a lot of verbose code to instantiate).</p>
+
+<p>https://docs.oracle.com/javase/tutorial/java/javaOO/anonymousclasses.html</p>
+
+<pre><code>public class HelloWorldAnonymousClasses {
+
+    interface HelloWorld {
+        public void greet();
+        public void greetSomeone(String someone);
+    }
+
+    public void sayHello() {
+        // this a function body!
+
+        // this is a "local" class... which means you define it,
+        // and...
+        class EnglishGreeting implements HelloWorld {
+            String name = "world";
+            public void greet() {
+                greetSomeone("world");
+            }
+            public void greetSomeone(String someone) {
+                name = someone;
+                System.out.println("Hello " + name);
+            }
+        }
+
+        // ... THEN you instantiate it
+        HelloWorld englishGreeting = new EnglishGreeting();
+
+        // This is an anonymous class; define it at the same time
+        // you instantiate it.
+        HelloWorld frenchGreeting = new HelloWorld() {
+            String name = "tout le monde";
+            public void greet() {
+                greetSomeone("tout le monde");
+            }
+            public void greetSomeone(String someone) {
+                name = someone;
+                System.out.println("Salut " + name);
+            }
+        };
+</code></pre>
+
+<h2>Wadsworth Constant</h2>
+
+<p>http://www.urbandictionary.com/define.php?term=Wadsworth+Constant</p>
+
+<blockquote><p>The Wadsworth Constant is the fundamental idea that the true meaning of a video, conversation, or comment approaches importance after approximately 30% of it has been skipped over.</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[cransible]]></title>
+    <link href="http://machty.github.com/blog/2015/05/11/cransible/"/>
+    <updated>2015-05-11T23:38:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/05/11/cransible</id>
+    <content type="html"><![CDATA[<h2>ControlPersist</h2>
+
+<p>A feature of SSH that multiplexes ssh sessions over one TCP connection,
+cuts down TCP connection overhead, etc. Ansible benefits from it.</p>
+
+<h2>Host-based authentication</h2>
+
+<p>hence <code>pg_hba.conf</code>.</p>
+
+<h2>binstubs and gem</h2>
+
+<p>here&#8217;s a binstub</p>
+
+<pre><code>require 'rubygems'
+gem 'bundler'
+load Gem.bin_path('bundler', 'bundle')
+</code></pre>
+
+<p>binstubs prep <code>$LOAD_PATH</code> (<code>$:</code> is the same thing) before a gem is run.</p>
+
+<p>The <code>gem 'bundler'</code> command prepends <code>LOAD_PATH</code> with the specified
+gem&#8217;s load paths. Additional calls to gem append after the load paths of
+earlier gems.</p>
+
+<h2>fail2ban</h2>
+
+<p>scans your logfiles, looks for malicious activity, bans bad guys for a
+while.</p>
+
+<h2>Digital Ocean droplets have public IPs, ec2s are priv</h2>
+
+<p>ec2 <em>does</em> expose public url but it has to go through a firewall defined
+by your security group. Note that this is obvious because, within an ec2
+instance, its IP is in one of the private IP address ranges
+(10.something, 192.168.something, and i think 172.something).
+So <em>can</em> you use a private IP publicly?</p>
+
+<p>http://serverfault.com/questions/57155/can-an-ip-address-in-the-private-range-be-used-as-a-public-address</p>
+
+<p>You <em>could</em>, but any network admin/ISP is going to block egress and
+ingress packets sourced/destined for any of these ranges. This prevents
+IP spoofing among other things, e.g. you can&#8217;t forge a fake packet and
+expect it to be routed to some internal server, which might read and
+respond to the packet and cause damage&#8230; all of this is avoided by
+internal servers using private IPs.</p>
+
+<h2>Ansible: modules vs playbooks vs rules</h2>
+
+<ul>
+<li>playbook
+
+<ul>
+<li>list of &#8220;plays&#8221;</li>
+</ul>
+</li>
+<li>play
+
+<ul>
+<li>map a group of hosts to some well-defined roles</li>
+</ul>
+</li>
+<li><h2>roles</h2></li>
+<li>tasks
+
+<ul>
+<li>call to an ansible module (which can directly be done via something
+like <code>ansible somehost -m ping</code></li>
+<li>tasks are performed one at a time (though they probably branch out
+simultaneously on multiple hosts)</li>
+</ul>
+</li>
+<li>module
+
+<ul>
+<li>can be executed directly via <code>ansible</code> or via playbooks</li>
+<li>a specific command, can make changes to a variety of server types</li>
+<li>e.g.
+
+<ul>
+<li>ansible webservers -m service -a &#8220;name=httpd state=started&#8221;</li>
+<li>ansible webservers -m ping</li>
+<li>ansible webservers -m command -a &#8220;/sbin/reboot -t now&#8221;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Ansible tags</h2>
+
+<p>http://docs.ansible.com/playbooks_tags.html</p>
+
+<p>Use tags to run subsets of a playbook.</p>
+
+<ul>
+<li>tag certain tasks</li>
+<li>specify at run time a tag of which tasks to run</li>
+<li>you can also tag includes
+
+<ul>
+<li>such that if you specify tags to ansible-playbook, it won&#8217;t include
+those rules unless tagged</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Sudo password is yours, not roots!!!!</h2>
+
+<p>http://www.howtogeek.com/111479/htg-explains-whats-the-difference-between-sudo-su/</p>
+
+<blockquote><p>When you execute sudo command, the system prompts you for your current user account’s password before running command as the root user. By default, Ubuntu remembers the password for fifteen minutes and won’t ask for a password again until the fifteen minutes are up.</p></blockquote>
+
+<p>This is why you have a sudoers file! You define who&#8217;s allowed to run as
+root user and let them run as sudo.</p>
+
+<p><code>su -c 'some command'</code> on the other hand asks for root&#8217;s password.</p>
+
+<h2>Debian Hosts file</h2>
+
+<p>https://www.debian.org/doc/manuals/debian-reference/ch05.en.html#_the_hostname_resolution</p>
+
+<blockquote><p>The IP address 127.0.1.1 in the second line of this example may not be found on some other Unix-like systems. The Debian Installer creates this entry for a system without a permanent IP address as a workaround for some software (e.g., GNOME) as documented in the bug #719621.</p>
+
+<p>The <host_name> matches the hostname defined in the &#8220;/etc/hostname&#8221;.</p>
+
+<p>For a system with a permanent IP address, that permanent IP address should be used here instead of 127.0.1.1.</p>
+
+<p>For a system with a permanent IP address and a fully qualified domain name (FQDN) provided by the Domain Name System (DNS), that canonical <host_name>.<domain_name> should be used instead of just <host_name>.</p></blockquote>
+
+<h2>Loopback</h2>
+
+<p>e.g. localhost; it&#8217;s a way to access a computer&#8217;s own network services
+via a network interface. I guess I knew this, but I just didn&#8217;t think
+about how it unifies the interface&#8230; e.g. whether it&#8217;s local or remote,
+just use IP all the time.</p>
+
+<h2>ifconfig</h2>
+
+<p>&#8220;interface config&#8221;</p>
+
+<h2>debops: run site.yml first</h2>
+
+<p>Don&#8217;t skip this step!</p>
+
+<p>I used <code>rails_deploy</code> before site.yml and things were just ambiguously
+missing and I had to patch them up.</p>
+
+<h2>/etc/shadow</h2>
+
+<p>It&#8217;s where all the encrypted passwords live. <code>/etc/passwd</code> is all the
+user names, but lots of applications need access to it, so it can&#8217;t be
+plaintext. SO in <code>passwd</code> you put &#8216;x&#8217; for password and that causes
+<code>/etc/shadow</code> to be looked up.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ember Streams]]></title>
+    <link href="http://machty.github.com/blog/2015/04/15/ember-streams/"/>
+    <updated>2015-04-15T14:13:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/04/15/ember-streams</id>
+    <content type="html"><![CDATA[<h2>Ember Streams</h2>
+
+<p>My goal is to tease out the differences between Ember Streams and Rx.</p>
+
+<p><code>ember-metal/lib/streams/stream.js</code></p>
+
+<p>A stream has subscribers.</p>
+
+<h2>ConnectableObservable</h2>
+
+<p>Wraps a single subscription. Broadcasts events from this single
+subscription to all subscribers.</p>
+
+<h2>Rx Disposable</h2>
+
+<p>Anything with a <code>.dispose</code> method. So, what&#8217;s disposable in Rx?</p>
+
+<ul>
+<li>subscriptions</li>
+<li>observers</li>
+</ul>
+
+
+<p>What&#8217;s it used for?</p>
+
+<ul>
+<li>cleaning up some resource after subscriptions no longer need it</li>
+<li>generic disposal of no-longer needed objects
+
+<ul>
+<li>e.g. internal (non-detach) observers are disposable, but not really
+for the purpose of cleaning up some resource, but just making sure
+that no more events make it through</li>
+</ul>
+</li>
+</ul>
+
+
+<p>There isn&#8217;t a Subscription object in Rx, but you can think of the return
+value of <code>observable.subscribe</code> to be a &#8220;subscription&#8221;. Technically it&#8217;s
+an &#8220;auto-detach&#8221; observer; an auto-detach observer proxies to an
+underlying observer. When an auto-detach observer is disposed of, it
+disposed of the underyling subscribed observables&#8230; except that an
+observable isn&#8217;t a disposable; observables return disposables from their
+subscribe methods.</p>
+
+<p>Another way of thinking about this is that, on their own, observables
+don&#8217;t act/exist/do anything until they&#8217;re brought to life by a
+subscription. There&#8217;s nothing to &#8220;dispose&#8221; of until there is a
+subscription. Once someone subscribes, <em>then</em> you have a bunch of stuff
+that needs to be cleaned up at some point, hence disposables.</p>
+
+<p>Disposables have their use beyond Rx; <code>dispose</code> is kind of like a
+destructor; JavaScript doesn&#8217;t have destructors. Destructors don&#8217;t make
+<em>as</em> much sense in garbage-collected languages because their timing is
+non-deterministic (often it ends up being more practical to manually
+manage this yourself).</p>
+
+<h2>Ember <code>destroy</code></h2>
+
+<p>Ember&#8217;s got &#8220;destroy&#8221;-ables&#8230; <code>destroy</code> methods on objects, and
+<code>isDestroyed</code> properties that get set and checked, assertions if things
+are called on destroyed objects, etc.</p>
+
+<h3>Ember Object destroy</h3>
+
+<ul>
+<li>schedules call to <code>willDestroy</code> hook, meant for subclasses to
+implement</li>
+<li>aggressively tears down meta object
+
+<ul>
+<li>destroys bindings/observers
+
+<ul>
+<li>hence anyone listening to events on the obj or binding to values
+won&#8217;t get any more updates.</li>
+</ul>
+</li>
+<li>enables eager GC of metadata (it&#8217;s pretty easy in JS/any dynamic
+language to keep around references to stuff you don&#8217;t care about any
+more; at least with destroy you can eagerly remove things)</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>EventDispatcher destroy</h3>
+
+<p>Removes all dispatcher-added jQuery event listeners. Calls super.</p>
+
+<h3>Collection View</h3>
+
+<p>Calls super, removes array observers (which live on the content array
+and delegate to the collection view), destroy empty view.</p>
+
+<h3>Core View</h3>
+
+<p>First off, CoreView is &#8220;deprecated&#8221; in that it shouldn&#8217;t be used
+directly, but Ember.View still extends it.</p>
+
+<p>Calls super, destroys the DOM el (?), some other crap.</p>
+
+<p>Probably doesn&#8217;t make sense to write about until Glimmer.</p>
+
+<h2>Rx Observers</h2>
+
+<p>Class hierarchy</p>
+
+<ul>
+<li>Observer
+
+<ul>
+<li>AbstractObserver
+
+<ul>
+<li>AnonymousObserver</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>You can fulfill the Observer contract without using an Rx Observer
+class:</p>
+
+<p>http://jsbin.com/nupafu/11/edit?js,console</p>
+
+<pre><code>console.clear();
+
+var onNext      = () =&gt; { console.log('next'); };
+var onError     = () =&gt; { console.log('error'); };
+var onCompleted = () =&gt; { console.log('completed'); };
+
+var pojo = { onNext, onError, onCompleted };
+
+var legitObserver = Rx.Observer.create(onNext, onError, onCompleted);
+// same thing:
+// var legitObserver = new Rx.AnonymousObserver(onNext, onError, onCompleted);
+
+Rx.Observable.range(1,5).subscribe(pojo);
+Rx.Observable.range(1,5).subscribe(pojo);
+
+Rx.Observable.range(1,5).subscribe(legitObserver);
+Rx.Observable.range(1,5).subscribe(legitObserver);
+</code></pre>
+
+<p>The difference is that <code>legitObserver</code>&#8217;s hooks only fire for the first
+subscription, and nothing fires for the second; the pojo on the other
+hand runs through the range twice. Why? Because <code>Rx.Observer.create</code>
+creates an AnonymousObserver, which is an AbstractObserver, and
+AbstractObserver sets an <code>isStopped=true</code> flag to prevent further events
+from coming through. In other words, generally speaking an observer is
+only meant to be attached to one subscription, but if you want the same
+object to receive events from multiple observables (and for some stupid
+reason you don&#8217;t want to call <code>Observable.prototype.merge</code> then you can
+just pass <code>subscribe</code> some pojo with the necessary <code>onNext</code>, <code>onError</code>,
+<code>onCompleted</code> methods defined.</p>
+
+<p>Of course you can subscribe the same handler fns and internally two
+separate AnonymousObservers will get created, so events from both
+subscriptions will fire:</p>
+
+<pre><code>Rx.Observable.range(1,5).subscribe(onNext, onError, onCompleted);
+Rx.Observable.range(1,5).subscribe(onNext, onError, onCompleted);
+</code></pre>
+
+<h2>JS <code>_super</code> pattern</h2>
+
+<p>Seems obvious, but a decently nice pattern for calling a superclass&#8217;s
+method, taken from Ember&#8217;s streams:</p>
+
+<pre><code>merge(SomeSubclass.prototype, {
+  /* ... */
+
+  _super$destroy: SomeSuperclass.prototype.destroy,
+
+  destroy() {
+    this._super$destroy();
+
+    // do subclass-specific stuff
+  }
+});
+</code></pre>
+
+<h2>Routeable components / attrs / query params</h2>
+
+<pre><code>export default Ember.Route.extend({
+  queryParams: {
+    page: {
+      default: 1,
+      // refresh: true,
+      // API: infer/generate action name based on param?
+    }
+  },
+
+  model(params) {
+    // params has all params, including QPs
+  },
+
+  attrs() {
+    return {
+      model: this.model(),
+      updatePage: this.actions.updatePage
+    }
+  },
+
+  actions: {
+    updatePage(newPage) {
+      // this is a manual implementation of the inferred action
+      // based on page QP
+
+      // default implementation:
+      // when refresh: false (default)
+      this.component.set('page', newPage);
+
+      //this.component.set('page', newPage);
+    },
+  },
+});
+
+// articles template
+// 
+
+
+
+// articles component
+export default Ember.Component.extend({
+  // implicit attrs
+
+  //attrTypes: {
+  //  page: number,
+  //},
+
+  page: null,
+
+  // this is called initial render and prop updates
+  // (willReceiveAttrs called re-render only)
+  willRender(attrs) {
+    this.set('page', attrs.page);
+  },
+});
+</code></pre>
+
+<p>Lessons Learned:</p>
+
+<ul>
+<li>Route passes in read-only (non-mut) attrs to routeable component</li>
+<li><p>This prevents type-writer query params</p>
+
+<p>  // my-input component
+  export default Ember.Component.extend({</p>
+
+<pre><code>actions: {
+  doSomethingThatChangesValue() {
+    // TODO: mut api for changing thing
+    attrs.setValue...??
+  },
+},
+</code></pre>
+
+<p>  });</p></li>
+</ul>
+
+
+<h2><code>bashrc</code> and <code>bash_profile</code></h2>
+
+<p>ALWAYS forget the difference between these things. One of them is for
+login shells, one is both. Blurg.</p>
+
+<p>Answer:</p>
+
+<ul>
+<li><code>.bashrc</code> is read for interactive, non-login shells</li>
+<li><code>.bash_profile</code> is read for login shells</li>
+<li>Mac OS X uses login shells for its terminals, iTerm included</li>
+<li>hence, might make sense to just source <code>.bashrc</code> from <code>.bash_profile</code></li>
+</ul>
+
+
+<p>Also, the meaning of <code>rc</code> isn&#8217;t totally known; it could be &#8220;run
+commands&#8221; or &#8220;runtime configuration&#8221; but no one really agrees.</p>
+
+<h2>Glimmer Streams</h2>
+
+<p>KeyStream takes a source obj stream and a path and streams property values
+based on the provided key. Can be generated via sourceStream.get(&#8216;wat&#8217;).
+A source stream is just a stream of objects. KeyStreams stream property
+changes on objects. Changing the underlying object of the source stream
+will fire a change event on the KeyStream. KeyStreams watch for changes
+using Ember Observers (addObserver/removeObserver)</p>
+
+<p>KeyStreams (among others) have a setSource that changes the underyling
+stream of objects; calling setSource will always cause a notify().</p>
+
+<p>Why? mmun says:</p>
+
+<blockquote><p>in order to not notify we would have to eagerly compute the stream value
+and compare to the last value</p></blockquote>
+
+<p>So it&#8217;s a tradeoff between minimizing notify spam and losing value laziness.</p>
+
+<p>TODO: how do views use baseContext?</p>
+
+<p>ContextStream is a</p>
+
+<h2>Bash Completion</h2>
+
+<p>http://tldp.org/LDP/abs/html/tabexpansion.html</p>
+
+<ul>
+<li>works w Env vars, e.g. <code>$BASH_[tab]</code></li>
+<li>use <code>complete</code> to specify rules for a command, e.g. match
+filenames, filter by this regex, etc</li>
+<li>use <code>compgen</code> to pass shit to a filter fn written in bash
+(prefixed by underscore by convention)</li>
+</ul>
+
+
+<h2>why nom/bom/nombom</h2>
+
+<p>Most ember devs have to do something like this due to NPM fidgetries:</p>
+
+<pre><code>alias nombom='npm cache clear &amp;&amp; bower cache clean &amp;&amp; rm -rf node_modules bower_components &amp;&amp; npm install &amp;&amp; bower install'
+alias nom='npm cache clear &amp;&amp; rm -rf node_modules &amp;&amp; npm install'
+alias bom='bower cache clean &amp;&amp; rm -rf bower_components &amp;&amp; bower install'
+</code></pre>
+
+<p>Why is this necessary? Because:</p>
+
+<ol>
+<li>Even though npm will take into consideration your project&#8217;s
+dependency versions when choosing the version of dependencies of
+dependencies, once that package has been installed in <code>node_modules</code>,
+even if you bump your project&#8217;s dependencies, that old version will
+be cached in deep nestings of <code>node_modules</code>, hence it&#8217;s safest to
+nuke <code>node_modules</code>. Afaik only explains the <code>rm -rf node_modules</code>
+side of things.</li>
+<li>NPM won&#8217;t install a newer version of a dependency if a matching one
+exists in the NPM cache (<code>~/.npm/...</code>). Wait, isn&#8217;t this desirable?
+Shouldn&#8217;t this be a cue to bump your dependency version?</li>
+</ol>
+
+
+<p>This seems to be the chief reason why nombom is the only way to sane
+dependency installation:</p>
+
+<ul>
+<li>NPM caches modules by their version, e.g. <code>fstream@1.0.4</code> (these gets
+stored in <code>~/.npm/fstream/1.0.4/package.tgz</code></li>
+</ul>
+
+
+<h2>Bash + vim (or whatever)</h2>
+
+<ol>
+<li><code>set -o vi</code> so that bash is in Vim mode</li>
+<li>Type out a command</li>
+<li>Press escape (to leave &#8220;insert mode&#8221;)</li>
+<li>press <code>v</code> to open vim w the current command</li>
+<li>Save and quit to execute the command</li>
+</ol>
+
+
+<h2>Anamorphism</h2>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/05_Filtering.html</p>
+
+<p>Generating a (potentially infinite) vector from a scalar. Also known as
+an unfold.</p>
+
+<p>Actually this is better:</p>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/08_Transformation.html</p>
+
+<ul>
+<li>Ana(morphism) T &#8211;> IObservable<T></li>
+<li>Cata(morphism) IObservable<T> &#8211;> T</li>
+<li>Bind IObservable<T1> &#8211;> IObservable<T2></li>
+</ul>
+
+
+<h2>Hot observables, connect vs refCount vs singleInstance</h2>
+
+<p>http://jsbin.com/nupafu/20/edit?html,js,console,output</p>
+
+<p>I haven&#8217;t done <code>singleInstance</code> yet, but basically it&#8217;s like
+<code>publish().refCount()</code> except it&#8217;ll resubscribe if refcount goes to 0
+and then back to 1.</p>
+
+<h2>The ultimate nom nuance</h2>
+
+<p><code>npm</code> will assemble/download all project dependencies with the following
+rule:</p>
+
+<ul>
+<li>dependencies are installed only into the rootmost dependencies that
+specifies that dependency, e.g.</li>
+</ul>
+
+
+<p>If</p>
+
+<pre><code>proj
+  - foo
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p>The <code>npm</code> will <em>NOT</em> install a <code>baz/node_modules/foo</code> but will rather
+install a single foo at the root <code>node_modules</code>; the reason this works
+in Node land is that <code>require</code> always starts at the current dir and
+traverses upward.</p>
+
+<p>Shitty example: start with</p>
+
+<pre><code>proj
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p>then install at top level foo</p>
+
+<pre><code>proj
+  - foo
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p><code>npm</code> will not remove <code>foo</code> from <code>baz</code>&#8230; you wind up with two different
+versions of <code>foo</code>, shadowing each other. Holy shit!!!!!</p>
+
+<p>NPM <code>dedupe</code> would remove the second foo. NPM 3 will probably call
+dedupe automatically when you do <code>npm install</code>. But dedupe has its own
+issues, not the least of which is that no one knows about it and it&#8217;s
+one more thing to tell your team about.</p>
+
+<p>MAIN POINT OF LEARNING:</p>
+
+<p><code>npm</code> delicately stitches things together such that Node&#8217;s folder-bubbling
+<code>require</code> resolution semantics can find the packages installed by <code>npm</code>.
+It doesn&#8217;t override <code>$LOAD_PATH</code> like Bundler does or anything like
+that.</p>
+
+<h2>NPM cherry-pick</h2>
+
+<pre><code>git cherry-pick -x f2c270e8d76e81a1921bbc31777aa3ac570ca87a
+</code></pre>
+
+<p>This is how I pulled in a change on an already-merged
+<code>idempotent-rerender</code>.</p>
+
+<h2>OnErrorResumeNext</h2>
+
+<p>What a horrible name!</p>
+
+<p>Basically, it&#8217;s <code>concat</code> that automatically recovers from errors.</p>
+
+<p>http://jsbin.com/nupafu/22/edit</p>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/11_AdvancedErrorHandling.html</p>
+
+<blockquote><p>Just the title of this section will send a shudder down the spines of old VB developers! In Rx, there is an extension method called OnErrorResumeNext that has similar semantics to the VB keywords/statement that share the same name.</p>
+
+<p>Just as the OnErrorResumeNext keyword warranted mindful use in VB, so should it be used with caution in Rx. It will swallow exceptions quietly and can leave your program in an unknown state.</p></blockquote>
+
+<h2>Observable#finally invoked even on dispose</h2>
+
+<p>http://jsbin.com/nupafu/24/edit?html,js,console,output</p>
+
+<h2>ConnectableObservables can reconnect</h2>
+
+<p>http://jsbin.com/nupafu/25/edit?html,js,console,output</p>
+
+<pre><code>var c = Rx.Observable.interval(500).publish();
+
+c.subscribe((v) =&gt; {
+  console.log(v);
+});
+
+// returns a disposable that disconnects.
+var s = c.connect();
+
+setTimeout(() =&gt; {
+  s.dispose();
+  s = c.connect();
+}, 1200);
+</code></pre>
+
+<h2>Multicast</h2>
+
+<p>Didn&#8217;t understand this til I understood <code>publishLast()</code> and <code>replay()</code>,
+which basically apply <code>multicast</code> functionality through async subject
+and replay subject, respectively. Basically replay and async subjects
+just define different forms of caching, and if you want to share that
+functionality with connectable observable then you wanna use multicast.</p>
+
+<pre><code>.Publish() = .Multicast(new Subject&lt;T&gt;)
+.PublishLast() = .Multicast(new AsyncSubject&lt;T&gt;)
+.Replay() = .Multicast(new ReplaySubject&lt;T&gt;)
+</code></pre>
+
+<h2>Windows</h2>
+
+<p>I&#8217;ve talked about before, grokking it better now:</p>
+
+<p>http://jsbin.com/nupafu/27/edit?js,console,output</p>
+
+<pre><code>var o = Rx.Observable.range(5, 20);
+
+// HOT 
+var shared = o.publish().refCount();
+
+var openings = shared;//.filter((_, idx) =&gt; idx % 3 === 0);
+
+shared.window(openings, () =&gt; 
+  shared.filter((v, idx) =&gt; v % 5 === 0)
+).selectMany((obs) =&gt; {
+  return obs.toArray();
+}).subscribe((arr) =&gt; {
+  console.log(arr);
+});
+</code></pre>
+
+<p>Takeaways:</p>
+
+<ul>
+<li>closing selector gets passed the value emitted by windowOpenings that
+caused it to be opened in the first place.</li>
+<li>if the closing selector is based on the same source data stream, you
+almost certainly want to use <code>publish().refCount()</code>, or at least make
+sure the source stream is hot, or if it&#8217;s cold it doesn&#8217;t expensively
+re-create / duplicate some underlying resource</li>
+</ul>
+
+
+<h2>Subscribing inside Observer.create()</h2>
+
+<p>The contract for Observer.create is to</p>
+
+<ul>
+<li>fire <code>onNext*(onComplete|OnError)?</code> on the observer passed in</li>
+<li>return a disposable</li>
+</ul>
+
+
+<p>Based on that, the following is a perfectly valid way to alias an
+observable:</p>
+
+<p>http://jsbin.com/nupafu/30/edit</p>
+
+<pre><code>var proxy = Rx.Observable.create((o) =&gt; {
+  return Rx.Observable.interval(200).subscribe(o);
+});
+
+proxy.subscribe((v) =&gt; {
+  console.log(v);
+});
+</code></pre>
+
+<p><code>proxy</code> behaves just like <code>interval</code>.</p>
+
+<h2>C# <code>+=</code> and <code>-=</code> event subscription syntax</h2>
+
+<pre><code>this.Click += (s,e) =&gt; { MessageBox.Show(
+   ((MouseEventArgs)e).Location.ToString());};
+</code></pre>
+
+<h2><code>Either&lt;LeftT, RightT&gt;</code></h2>
+
+<p>In Rxx, <code>Either</code> is used a bunch to imply a broadcast of data from
+either source sequence A or source sequence B; one nice use case of it
+is how their <code>Retry</code> method works.</p>
+
+<p>http://rxx.codeplex.com/discussions/401272</p>
+
+<p>Basically, vanilla Rx retry disposes of the error that causes the retry
+to happen, which means it&#8217;s trick to do logging in a nice composable
+way.</p>
+
+<h2>Apple IP is <code>17.***.***.***</code></h2>
+
+<p>http://tapity.com/17-the-secret-to-finding-out-how-many-apple-employees-dig-your-stuff/</p>
+
+<p>https://support.apple.com/en-us/HT203609</p>
+
+<blockquote><p>The entire 17.0.0.0/8 address block is assigned to Apple</p></blockquote>
+
+<p>So you can check your logs to see if Apple&#8217;s snooping your shit.</p>
+
+<h2><code>embedded.mobileprovision</code></h2>
+
+<p>It is present in ALL <code>.ipa</code>s generated by XCode <em>including App Store
+builds</em>, but by the time you download <em>from the App Store</em>, it has been
+stripped out.</p>
+
+<h2>RxJava lifts, other things</h2>
+
+<p>https://speakerdeck.com/dlew/reactive-extensions-beyond-the-basics</p>
+
+<ul>
+<li>hot sequences have no subscription side effects</li>
+<li><p>cold sequences may have subscription side effects</p></li>
+<li><p>Observable.just(&#8220;1&#8221;)</p>
+
+<ul>
+<li>cold, because generates that string every subscription</li>
+</ul>
+</li>
+<li>Observable.interval()
+
+<ul>
+<li>cold, no duh</li>
+</ul>
+</li>
+<li>ReplaySubject
+
+<ul>
+<li>cold???</li>
+<li>hot if you&#8217;re first subscriber</li>
+<li>cold if there are items to replay, and then hot thereafter</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Redis: why use hash?</h2>
+
+<p>Why do</p>
+
+<pre><code>HSET somehash key val
+</code></pre>
+
+<p>when you can do HGET</p>
+
+<h2>redistogo disables <code>CONFIG</code> command</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1:39 PM &lt;machty&gt; any idea why on redis 2.8.11 i'm getting ERR unknown command 'config' ? docs say config command exists since 2.0.0
+</span><span class='line'>1:48 PM &lt;machty&gt; actually i think it's because CONFIG is disabled by redistogo service... unfortunately both CONFIG GET and CONFIG SET :/
+</span><span class='line'>1:55 PM &lt;xxxx&gt; machty: I actually work for Redistogo
+</span><span class='line'>1:55 PM &lt;xxxx&gt; We do disable it indeed
+</span><span class='line'>1:56 PM &lt;machty&gt; xxxx: ah, i guess there's no way to dynamically get maxmemory? was thinking of using it for alerts
+</span><span class='line'>1:56 PM &lt;xxxx&gt; Unfortunately not, there was talk of working on API for it but that development kind of got halted</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Apparently a lot of effort is being shifted from redistogo to
+ObjectRocket redis, which:</p>
+
+<ul>
+<li>doesn&#8217;t disable CONFIG</li>
+<li>has high availability (HA) enabled by default via sentinels</li>
+<li>http://redis.io/topics/sentinel</li>
+</ul>
+
+
+<h2>nethack</h2>
+
+<p>What is it?</p>
+
+<h2>Logstash</h2>
+
+<p>https://www.youtube.com/watch?v=RuUFnog29M4</p>
+
+<ul>
+<li><a href="http://www.nagios.org/">nagios</a>: infrastructure monitoring</li>
+<li>log = timestamp + data</li>
+<li>Logstash
+
+<ul>
+<li>open source</li>
+<li>config file is nginx-ish</li>
+<li>output graphs and a bunch of other things</li>
+<li>use grok
+
+<ul>
+<li>write patterns, and give them name</li>
+<li>reusable regex</li>
+<li>comes w 100 patterns</li>
+<li>no need for regex skills</li>
+</ul>
+</li>
+<li>data filter included to handle all varieties of timestamp format</li>
+<li>stop inventing time formats</li>
+<li>multiline filter for errors w stack trace</li>
+<li>gettimeofday</li>
+<li>NTP
+
+<ul>
+<li>network time protocol, used for syncing servers</li>
+<li>if apache uses gettimeofday</li>
+</ul>
+</li>
+<li>feature
+
+<ul>
+<li>transport and process logs to and from anywhere
+
+<ul>
+<li>get them in analyzable format</li>
+</ul>
+</li>
+<li>provide search and analytics</li>
+</ul>
+</li>
+<li>community
+
+<ul>
+<li>kibana: web interface for logstache</li>
+<li>logstash-cli: search / analytics from commandline</li>
+</ul>
+</li>
+<li>dreamhost deployment
+
+<ul>
+<li>20k apache events/sec peak</li>
+<li>250 mil events/day</li>
+<li>75gb day</li>
+<li>160 web servers</li>
+<li>7 logstach / elasticsearch servers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ELK</h2>
+
+<p>http://blog.qbox.io/indexing-heroku-logs-into-elasticsearch-with-logstash</p>
+
+<ul>
+<li>elastic search
+
+<ul>
+<li>searchable database</li>
+</ul>
+</li>
+<li>logstash
+
+<ul>
+<li>parses/processes logs from many sources, stores in centralized location</li>
+</ul>
+</li>
+<li>kibana</li>
+</ul>
+
+
+<p>https://www.elastic.co/webinars/elk-stack-devops-environment</p>
+
+<ul>
+<li>installation
+
+<ul>
+<li>download, untar, and run</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So who the fuck uses ELK stack? Just enormous companies that manage
+their own custom infrastructures?</p>
+
+<p>Answer: anyone who does enough devops to</p>
+
+<ul>
+<li>be smart enough to set it up</li>
+<li>know the pain of living without it</li>
+</ul>
+
+
+<p>Logstash is generally meant to live on the machine that&#8217;s producing the
+logs, and then it can forward it on to an elasticsearch cluster..</p>
+
+<h2>Ruby logging</h2>
+
+<blockquote><p>A flexible logging library for use in Ruby programs based on the design of Java&#8217;s log4j library.</p></blockquote>
+
+<p>https://github.com/TwP/logging</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Shiggity wat]]></title>
+    <link href="http://machty.github.com/blog/2015/03/25/shiggity-wat/"/>
+    <updated>2015-03-25T11:15:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/03/25/shiggity-wat</id>
+    <content type="html"><![CDATA[<h2>IP Spoofing</h2>
+
+<p>What&#8217;s to stop you from sending out packets with someone else&#8217;s IP as
+the source?</p>
+
+<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
+
+<ul>
+<li>packet filtering
+
+<ul>
+<li>ingress: gateway blocks incoming packets with source IP that can
+only belong to someone inside of the network</li>
+<li>egress: gateway blocking outgoing packets with source IP from
+outside of the network (altruistic since it prevents hackers from
+hacking folk outside of the network)</li>
+</ul>
+</li>
+<li>upper layer protocol
+
+<ul>
+<li>TCP prevents IP spoofing by use of sequence numbers; an attacker
+would have to guess at a correct sequence number in order for it to
+be considered valid</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>RxJS</h2>
+
+<h3>generate</h3>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, // terminate condition
+    function (x) { return x + 1; }, // step fn
+    function (x) { return x*2; }    // map fn for values emitted...?
+);
+</code></pre>
+
+<p>The last fn is weird&#8230; seems like the above is the equivalent of:</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, 
+    function (x) { return x + 1; },
+    function (x) { return x; }    
+).map(x =&gt; x*2);
+</code></pre>
+
+<p>So why embed the <code>map</code> operator? or as they call it the select.</p>
+
+<pre><code>Rx.Observable.prototype.map === Rx.Observable.prototype.select // true
+</code></pre>
+
+<h3>generateWith relative/absolute time</h3>
+
+<p>Like <code>generate</code> but adds a time selector fn: for each value you can
+decide when it should fire. So you could feasible reverse the firing
+time of a series of events, e.g. 1,2,3,4,5 fires in the reverse order:</p>
+
+<pre><code>var source = Rx.Observable.generateWithRelativeTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return 100 * (5-x); }
+);
+
+"Next: 1"
+"Next: 2"
+"Next: 3"
+"Completed"
+</code></pre>
+
+<p>NOPE I was wrong; the time selector generates the time <em>between</em> events,
+not the time relative to the start of observation. I&#8217;m guessing that can
+be accomplished via the absolute form:</p>
+
+<pre><code>var now = Date.now();
+var source = Rx.Observable.generateWithAbsoluteTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return now + 100 * (5-x); }
+).timeInterval();
+
+"Next: 1:402"
+"Next: 2:6"
+"Next: 3:2"
+"Completed"
+</code></pre>
+
+<p>WRONG AGAIN! Order is preserved, with the already-elapsed events firing
+immediately once the first one fires.</p>
+
+<h3>generate as for loops:</h3>
+
+<p>Instead of</p>
+
+<pre><code>for (var x = 0; x &lt; 10; ++x) {
+  console.log(x*2);
+}
+</code></pre>
+
+<p>you do</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 10; }, 
+    function (x) { return x + 1; },  // ++x
+    function (x) { return x*2; }  
+);
+
+// or source.subscribe
+source.forEach((val) =&gt; {
+  console.log(val);
+});
+</code></pre>
+
+<p>Keep in mind that</p>
+
+<pre><code>Rx.Observable.prototype.forEach === Rx.Observable.prototype.subscribe
+</code></pre>
+
+<p>They&#8217;re aliases of each other, they both:</p>
+
+<ul>
+<li>activate an observable</li>
+<li>are intended to cause some sort of side effects</li>
+</ul>
+
+
+<p>Why write in observable form?</p>
+
+<ul>
+<li>composability</li>
+<li>much harder to troll yourself w &#8220;global&#8221; mutable vars used for iteration</li>
+<li>you&#8217;re writing in a way that can effortlessly handle the dimension of time</li>
+</ul>
+
+
+<h2>Subscriber stack</h2>
+
+<p>How would you get more explicit bubbling behavior that we&#8217;re familiar
+with from bubbling actions in Ember?</p>
+
+<p>Basically I want there to be some root subject/observable on a parent
+route, and then child routes can push their subscription onto that
+observable&#8217;s stack of subscriptions, and only the subscription at the
+top of the stack.</p>
+
+<p>This doesn&#8217;t accomplish bubbling per se; it&#8217;s a non-bubbling form of
+first-responder. Do we want bubbling?</p>
+
+<p>Actually yeah I think we want bubbling; what we don&#8217;t want is routes
+accidentally getting actions invoked on them because at some point later
+in the game a child route invokes an action (just string names) and it
+accidentally leaks out, causing havoc on parent routes, etc.</p>
+
+<p>But to be able to pass on the action is probably nice.</p>
+
+<pre><code>// within child route
+someParentRoute.observableStack.subscribe((e) =&gt; {
+  if (canHandle(e.value)) {
+    // do stuff
+  } else {
+    e.bubble();
+  }
+});
+</code></pre>
+
+<p>and this subscription would be <code>dispose</code>d upon route deactivation so it
+cleans itself up.</p>
+
+<p>The problem with this is once you start needing to apply operators, you
+need some way of signalling the bubble later on?</p>
+
+<pre><code>someParentRoute.observableStack
+               .delay(1000)
+               .map((e) =&gt; someCopyThatStillPreservesBubbleFn})
+               .subscribe((e) =&gt; {
+                 if (canHandle(e.value)) {
+                   // do stuff
+                 } else {
+                   e.bubble();
+                 }
+               });
+</code></pre>
+
+<h2>Alex versus invalidation</h2>
+
+<p>https://github.com/ef4/liquid-fire/issues/222</p>
+
+<h2>iOS 7 and 8 usage</h2>
+
+<p>As of 3/29/2015:</p>
+
+<ul>
+<li>iOS 8: 77%</li>
+<li>iOS 7: 20%</li>
+<li>Earlier: 3%</li>
+</ul>
+
+
+<h2>WKWebView</h2>
+
+<p>Only in iOS 8, comes with Nitro engine and bunch of other things.</p>
+
+<p>http://nshipster.com/wkwebkit/</p>
+
+<ul>
+<li>https://github.com/Telerik-Verified-Plugins/WKWebView
+
+<ul>
+<li>probably the best stab at a working plugin</li>
+<li>there are many issues (i would not use it at this point)</li>
+<li>spins up an embedded server in order to:
+
+<ul>
+<li>bypass CORS</li>
+<li>allow querying file:// protocol</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>It&#8217;s also only iOS8+; the plugin is smart enough to fall back to
+UIWebView, but then you&#8217;ve just bumped an exponent on complexity, more
+shit to test.</p>
+
+<p>There is also Ludei Cocoonjs. But Iiiii couldn&#8217;t get it to work. :)</p>
+
+<h2>Rx: switch</h2>
+
+<p>When you already have an Observable of Observables, you can call
+<code>.switch()</code> to produce an Observable that only emits values from the
+most recent observable :) isn&#8217;t terminology fun.</p>
+
+<p>So this:</p>
+
+<pre><code>obs.map((val) =&gt; someObservableBasedOnVal)
+   .switch();
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>obs.flatMapLatest((val) =&gt; someObservableBasedOnVal);
+</code></pre>
+
+<h2>Multiple cursors, DevTools and Vim</h2>
+
+<p>Command click: multiple cursors</p>
+
+<p>Cmd+D selects the next instance (effectively adding a multiple cursor).
+Really a cursor is a selection with zero chars selected.</p>
+
+<p>Just downloaded https://github.com/terryma/vim-multiple-cursors</p>
+
+<p>Ctrl-n: select next occurrence of hovered word</p>
+
+<p>Ctrl-p: undo most recent selection</p>
+
+<p>Ctrl-x: skip current selection</p>
+
+<p>MultipleCursorsFind: optionally select range in v mode, then type a
+regex to select them shits as multiple cursors.</p>
+
+<p>NOTE: in visual mode, <code>o</code> swaps the cursor to the other side to let you
+modify the selection from the other end.</p>
+
+<h2>Why flatMapLatest always trips me up</h2>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>console.clear();
+
+Rx.Observable.just(1)
+  .takeUntil(Rx.Observable.timer(10))
+  .doOnCompleted(() =&gt; console.log("doOnCompleted"))
+  .flatMapLatest(() =&gt; {
+    return Rx.Observable.timer(500);
+  })
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"doOnCompleted"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>This sequence might seem obvious here but I ALWAYS make the mistake of
+thinking that because there&#8217;s a takeUntil on the source observable,
+that&#8217;ll somehow cause all subscribing observables to immediately
+complete. NOPE. If that were the case, then promise chains wouldn&#8217;t work
+since they&#8217;re just single value observables that complete after their
+first value, and if completion force completed any subscribers then you
+couldn&#8217;t have async chains of logic. Anyway.</p>
+
+<p>So I guess that means you really need to gate at every potential side
+effect via takeUntil? e.g.</p>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"one"
+"two"
+"three"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>I guess I could dispose the sub, but then no onCompletes get fired
+(and it&#8217;s also just bad style).</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.dispose();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+</code></pre>
+
+<p>WHOA if I do onCompleted, then it skips all the shit in the middle
+and still runs the completion handler!</p>
+
+<p>http://jsbin.com/nupafu/4/edit</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.onCompleted();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"COMPLETE"
+</code></pre>
+
+<p>Question: is there a way to construct your observables, without
+resorting to chaining takeUntil&#8217;s before every side-effect, such that
+some onComplete along the way skips everyone else&#8217;s?</p>
+
+<p>http://jsbin.com/nupafu/6/edit</p>
+
+<pre><code>console.clear();
+var o = Rx.Observable.interval(200)
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"));
+
+o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    console.log("EVENT " + v);
+    if (v === false) {
+      this.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+"start"
+"EVENT false"
+"COMPLETE"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+...
+</code></pre>
+
+<p>Why? Does <code>this.onCompleted()</code> not kill the current subscription?</p>
+
+<p>This works:</p>
+
+<pre><code>var sub = o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    if (v === false) {
+      sub.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Apparently sub !== this. sub is an auto-detach observer, this is an
+anonymous observer. Some rxjs internals I don&#8217;t wanna go into right now.</p>
+
+<p>Maybe there&#8217;s a merge first operator that&#8217;ll work here.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/amb.md</p>
+
+<p><code>amb</code> is close, but once a value is produced from the flatMapChain, then
+the terminating observable is ignored. I want something that stops on
+the first completed thing.</p>
+
+<p>Note that <code>amb</code> has <a href="http://www.randomhacks.net/2005/10/11/amb-operator/">roots in Lisp</a>.
+The base functionality in RxJS I guess can be used to approximate
+something like</p>
+
+<p>Oh man, I might be a HUGE idiot&#8230; I JUST NEED TO FUCKING PUT THE
+TAKEUNTIL AT THE END OMG</p>
+
+<h2>I&#8217;m waiting</h2>
+
+<p>http://i.imgur.com/4ETXzun.webm</p>
+
+<h2>Observable.using</h2>
+
+<p>Resource/disposable + observable = using</p>
+
+<pre><code>Rx.Observable.
+  using(
+    function () { return openFile('temp.txt', 'w+'); },
+    function (fd) {
+      return Rx.Observable.range(0, 10000)
+        .map(function (v) { return Buffer(v); })
+        .flatMap(function (buffer) {
+          return appendAsync(fd, buffer);
+        });
+    }
+  )
+  .subscribe();
+</code></pre>
+
+<p><code>using</code> makes it clear what the resource/disposable. Otherwise you might
+mix the two awkwardly in the body of the fn passed to
+<code>Observable.create</code>.</p>
+
+<h2>Rx grammar</h2>
+
+<p>Observable sequences have the following grammar:</p>
+
+<pre><code>onNext* (onCompleted|onError)?
+</code></pre>
+
+<p>0 or more <code>onNext</code>s followed by an optional <code>onCompleted</code> OR <code>onError</code>.
+Infinite sequences or disposed sequences might never see <code>onCompleted</code>
+or <code>onError</code>.</p>
+
+<h2>Observable.defer vs Observable.create</h2>
+
+<p>Defer wraps another underlying observable in a factory function and
+guarantees that each subscription to the outer observable gets a fresh
+subscription to a totally newly-generated inner observable&#8230; but how is
+this different from cold observables in general?</p>
+
+<p>Well before I say that, lemme just say <code>defer</code> is a useful pattern for
+when you want to kick off a sequence but don&#8217;t really know which
+observable to start with; a lame attempt to do this is via</p>
+
+<pre><code>Rx.Observable.just()
+  .flatMap(() =&gt; {
+    if (wat) {
+      return oneObservable;
+    } else {
+      return anotherObservable;
+    }
+  })
+</code></pre>
+
+<p>This could more clearly be written as</p>
+
+<pre><code>Rx.Observable.defer(() =&gt; {
+  if (wat) {
+    return oneObservable;
+  } else {
+    return anotherObservable;
+  }
+});
+</code></pre>
+
+<p>But hey, observables are cold&#8230; how is this different than writing</p>
+
+<pre><code>var obs = wat ? oneObservable : anotherObservable;
+return obs; // someone will subscribe to it
+</code></pre>
+
+<p>The difference is the decision as to which observable to use is set once
+and for all for all future subscribers. HORRIBLE ENGRISH MR MATCHNEER.
+In other words: either all subscribers get oneObservable or they get
+anotherObservable. If you wanted to <em>defer</em> that decision until each
+subscription, that&#8217;s when you use defer.</p>
+
+<p>So why not just use a factory function without using <code>defer</code>, e.g.</p>
+
+<pre><code>function getObservable() {
+  var obs = wat ? oneObservable : anotherObservable;
+}
+
+// then anyone who wants to subscribe:
+getObservable().subscribe();
+getObservable().subscribe();
+getObservable().subscribe();
+</code></pre>
+
+<p>These all get fresh observables. But then if you did</p>
+
+<pre><code>var obs = getObservable();
+obs.subscribe();
+obs.subscribe();
+obs.subscribe();
+</code></pre>
+
+<p>then these would all get the same observable decided by the single  call
+to getObservable.</p>
+
+<p>TL;DR, Rx is REALLY HARD. You have seemingly simple primitives of
+observers and observables (saying nothing of that
+almost-namespace-collision), but the way scalar things become vectors,
+merged back into scalars, and not just at the events level but in the
+primitives themselves, and how things are hot and cold. Jesus Christ.</p>
+
+<h2>iOS Permissions</h2>
+
+<ul>
+<li>iOS7
+
+<ul>
+<li>no camera permissions</li>
+<li>location permissions, but doesn&#8217;t distinguish b/w foreground/background</li>
+<li>once denied, permissions dialog won&#8217;t show up</li>
+</ul>
+</li>
+<li>iOS8
+
+<ul>
+<li>permissions for audio and video, separately</li>
+<li>location
+
+<ul>
+<li>global location shutdown in addition to</li>
+<li>app-specific:
+
+<ul>
+<li>authorized for &#8220;When in use&#8221;</li>
+<li>authorized for background</li>
+<li>denied</li>
+</ul>
+</li>
+<li>if you change permissions
+
+<ul>
+<li>app will NOT restart</li>
+<li>if you&#8217;re disabling geolocation, when you come back
+into the app, you won&#8217;t get an error code about lack</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>for all permissions:
+
+<ul>
+<li>once denied, permissions dialog won&#8217;t show up
+
+<ul>
+<li>You can open Settings via settings url w some instructions
+telling user to reset</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Today I learn top]]></title>
@@ -6942,1181 +8706,6 @@ will wait for</p>
 socket and runs your application code for you. Rails isn&#8217;t an app
 server, but Puma running a rails app is. Rails is an app framework. Puma is
 an app server.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Redis B Hayes]]></title>
-    <link href="http://machty.github.com/blog/2014/11/15/redis-b-hayes/"/>
-    <updated>2014-11-15T13:16:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/11/15/redis-b-hayes</id>
-    <content type="html"><![CDATA[<h2>Redis&#8217;n</h2>
-
-<p>This and other notes based on Redis in Action.</p>
-
-<p>Questions:</p>
-
-<ul>
-<li>is it really brag-worthy to say in-memory-store? It gets persisted to
-disk anyway; don&#8217;t other DBs bring as much into memory as possible for
-fast lookups?
-
-<ul>
-<li>A: other databases are &#8220;primarily on-disk&#8221; but of course yes memory
-caching exists.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Relation to memcached:</p>
-
-<ul>
-<li>Similar efficiency based on in-memory lookups</li>
-<li>Redis features 2 persistence strategies (memcached doesn&#8217;t persist I
-guess?)</li>
-<li>Redis supports strings + 4 other data structures; memcached is strings</li>
-</ul>
-
-
-<p>ZSETs are hash of string keys to floating points, can be queried by
-order, ordered by their weight.</p>
-
-<h2>Databases: row insertion (often) fast</h2>
-
-<p>Because no need for a random read + random write; appending to a file
-(what most DBs do) is fast.</p>
-
-<h2>ACID</h2>
-
-<p>Set of properties that guarantee reliable database transactions</p>
-
-<ul>
-<li>Atomicity - all or nothing</li>
-<li>Consistency - transactions bring database from one valid state to another</li>
-<li>Isolation - are partially completed transaction visible to others?</li>
-<li>Durability - post-transaction, data is committed even in power loss</li>
-</ul>
-
-
-<h2>Fortnight</h2>
-
-<p>Two weeks.</p>
-
-<h2>Heroku database URL</h2>
-
-<pre><code>postgres://username:password@ec2-xx-xx-xx-xx-xx.compute-1.amazonaws.com:5432/d45d81ucgm3205
-</code></pre>
-
-<p>It&#8217;s just username + password at some publicly accessible EC2 URL. Your
-cherished postgres instances just live on some EC2 farm. What a crock.</p>
-
-<h2>Docker</h2>
-
-<p>Docker images are read-only templates. Use them to generate containers.
-Build other shit on top of containers.</p>
-
-<p>Docker has its own IANA port numbers for REST and secure REST API&#8230;
-what does this actually mean?</p>
-
-<p>http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=docker#DOCKER</p>
-
-<p>AH OK I have some more ideas:</p>
-
-<p>Boot2Docker is what you use to run Docker on Mac OS X. Why? Because
-docker depends on linux kernel specifics. Boot2Docker runs a Virtual Box
-instance of some Linux-y thing</p>
-
-<pre><code># within the virtual instance
-$ uname
-Linux version 3.16.4-tinycore64 (root@39d2c877bc4f) (gcc version 4.7.2 (Debian 4.7.2-5) ) #1 SMP Thu Oct 23 16:14:24 UTC 2014
-</code></pre>
-
-<p>So with the Boot2Docker setup, when you run the <code>docker</code> command on a
-Mac terminal, it has to jump through some hoops to run the docker
-instance on the Linux virtual box:</p>
-
-<pre><code>Mac `docker` command
-Proxy through to docker:tcuser@192.168.59.103
-Run `docker` command, which talks to 
-docker daemon
-</code></pre>
-
-<p>So there&#8217;s no docker daemon on OS X; the only persistent docker thing
-you&#8217;ll see is Virtual box instances running the docker virtual instance
-that the actual docker daemon lives on:</p>
-
-<pre><code> /Applications/VirtualBox.app/Contents/MacOS/VBoxHeadless --comment boot2docker-vm --startvm 798082c7-01d7-4a4f-89fc-1ebf70bc1a0a --vrde config
- /Applications/VirtualBox.app/Contents/MacOS/VBoxNetDHCP --ip-address 192.168.59.99 --lower-ip 192.168.59.103 --mac-address 08:00:27:93:D3:BC --netmask 255.255.255.0 --network HostInterfaceNetworking-vboxnet0 --trunk-name vboxnet0 --trunk-type netadp --upper-ip 192.168.59.254
-</code></pre>
-
-<p>You can ssh into the docker VM box. Either w password or reusing the key
-they generate for you when you install boot2docker; put this in
-~/.ssh/config</p>
-
-<pre><code>Host docker
-  HostName 192.168.59.103
-  User docker
-  IdentityFile "/Users/machty/.ssh/id_boot2docker"
-  IdentitiesOnly yes
-</code></pre>
-
-<p>(I realized later that there&#8217;s a convenient command for this:
-<code>boot2docker ssh</code>&#8230; whoops!)</p>
-
-<p>So with this config in place I&#8217;m guessing that I can either run
-<code>docker version</code> or <code>ssh docker docker version</code> and see the same
-thing. BOOYA both produce:</p>
-
-<pre><code>Client version: 1.3.1
-Client API version: 1.15
-Go version (client): go1.3.3
-Git commit (client): 4e9bbfa
-OS/Arch (client): linux/amd64
-Server version: 1.3.1
-Server API version: 1.15
-Go version (server): go1.3.3
-Git commit (server): 4e9bbfa
-</code></pre>
-
-<p>So anyway, you can run commands against a docker image. This spins up a
-container, runs the command, and stops the container&#8230; does it delete
-the container?</p>
-
-<pre><code>docker ps --help
-</code></pre>
-
-<p>Nevermind that I&#8217;ll figure it out later. Let&#8217;s figure out how to get a
-Redis container running:</p>
-
-<pre><code>https://registry.hub.docker.com/_/redis/
-</code></pre>
-
-<p>Use <code>docker build</code> to build from a Dockerfile, which kinda explains how
-it ends up getting mounted to the outside world. So this is how you can
-just have a docker instance of a thing that you can run commands
-against, even in a Mac OS X setting? I know nothing, Jon Snow.</p>
-
-<p>https://docs.docker.com/examples/running_redis_service/</p>
-
-<pre><code>FROM        ubuntu:12.10
-RUN         apt-get update &amp;&amp; apt-get install -y redis-server
-EXPOSE      6379
-ENTRYPOINT  ["/usr/local/bin/my-dumbass-redis-server"]
-</code></pre>
-
-<p>So this starts with the ubuntu:12.10 image, installs redis into the
-container created from that image, exposes 6379&#8230; to&#8230;? What does this
-mean?</p>
-
-<blockquote><p>The EXPOSE instructions informs Docker that the container will listen on the specified network ports at runtime. Docker uses this information to interconnect containers using links (see the Docker User Guide). Note that EXPOSE only works for inter-container links. It doesn&#8217;t make ports accessible from the host. To expose ports to the host, at runtime, use the -p flag.</p></blockquote>
-
-<p>From http://docs.docker.com/reference/builder/</p>
-
-<p>So it&#8217;s exposed if we&#8217;re linking containers but not someone exposed to
-the host app.</p>
-
-<p>Ah I tried</p>
-
-<pre><code>docker run -i --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>and then I couldn&#8217;t ctrl-C because of, something, but if i do</p>
-
-<pre><code>docker run -it --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>then the -t option will attach a pseudo TTY and I can do it. This
-stuff is so cray cray. Actually I lied ctrl-C doesn&#8217;t work for TODO
-reasons, but Ctrl-P + Ctrl-Q detaches you from it? Seems good.</p>
-
-<p>OK but if I do</p>
-
-<pre><code>docker run -it -p 9191:6379 --entrypoint=/usr/bin/redis-server dcf91
-</code></pre>
-
-<p>this will run in interactive mode with ctrl-p ctrl-q supporting
-detachability, mapping the container 6379 (default redis port) to the
-host port 9191, and overriding the entrypoint because I didn&#8217;t know what
-I was doing in the Dockerfile. I should have left it at the default
-/usr/bin/redis-server because that&#8217;s where apt-get will put it.</p>
-
-<p>ANYWAY the mapping works, but the problem is i have to SSH into the
-docker host VirtualBox first to see it. How do I get beyond the
-Boot2Docker wall? Wait I know I&#8217;ll just fuckin use some SSH magic.
-Tunnels n shit.</p>
-
-<pre><code>ssh docker -L 9191:localhost:9191
-</code></pre>
-
-<p>ah but this will open a login shell, which I don&#8217;t need/want for what
-I&#8217;m doing:</p>
-
-<pre><code>ssh docker -N -L 9191:localhost:9191
-</code></pre>
-
-<p>The -N stands for &#8220;Do not execute a remote command&#8221;</p>
-
-<p>After which point I could just redis-cli but since I&#8217;m brutally low
-level I&#8217;ll do</p>
-
-<pre><code>$ nc localhost 9191
-SET WAT WOOT
-+OK
-GET WAT
-$4
-WOOT
-</code></pre>
-
-<p>Booooooya. So cool.</p>
-
-<p>OK gonna be an idiot. SSH all the way. Is that possible? It means being
-able to SSH into container&#8230; sounds like you can&#8217;t do that without
-going through</p>
-
-<h2>Docker detach</h2>
-
-<p>Docker attaching/detaching is pretty weird. I don&#8217;t know the rationale
-behind it but they make it very easy to attach to a box but then not be
-able to attach. Basically you have to always pass -it to run and then
-can use ctrl-P ctrl-Q to detach.</p>
-
-<p>Or, you can <code>kill -9</code> the attached processed; if you you just do <code>kill</code>,
-that sends SIGTERM and that proxies through and closes the shitty
-process, but again Ctrl-C doesn&#8217;t use it.</p>
-
-<h2>Docker forwarding for OS X</h2>
-
-<p>This is a great article</p>
-
-<p>http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li><code>boot2docker ssh</code></li>
-<li>Add <code>dockerhost</code> to /etc/hosts</li>
-<li>Use <code>nsenter</code>
-
-<ul>
-<li><code>sudo nsenter -m -u -n -i -p -t $PID</code>
-
-<ul>
-<li><code>-m</code> use mount namespace of target process</li>
-<li><code>-u</code> use UTS namespace of target process (UTS stands for time-sharing? legacy unix thing?)</li>
-<li><code>-n</code> use network namespace of target process</li>
-<li><code>-i</code> IPC</li>
-<li><code>-i</code> IPC</li>
-<li><code>-p</code> IPC</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>LXC Containers (vs Docker)</h2>
-
-<p>https://linuxcontainers.org/</p>
-
-<p>Better chroot, comparable to docker containers. Ways of containing
-processes, resources, etc., dependent on modern linux kernel features,
-mostly on process namespacing.</p>
-
-<p>Excellent article comparing to Docker: http://www.flockport.com/lxc-vs-docker/</p>
-
-<p>Things learned:</p>
-
-<ul>
-<li>yuno virtualization?
-
-<ul>
-<li>because of performance cost</li>
-</ul>
-</li>
-<li>LXC and Docker are fast</li>
-<li>Lightweight VMs</li>
-<li>Is Docker a lightweight VM?</li>
-</ul>
-
-
-<p>A Docker container runs a single process:</p>
-
-<blockquote><p>Docker restricts the container to a single process only. The default docker baseimage OS template is not designed to support multiple applications, processes or services like init, cron, syslog, ssh etc. As you can imagine this introduces a certain amount of complexity and has huge implications for day to day usage scenarios. Since current architectures, applications and services are designed to operate in normal multi process OS environments you would need to find a Docker way to do things or use tools that support Docker. When it comes to applications for a LAMP container you would need to build 3 containers that consume services from each other, a PHP container, an Apache container and a MySQL container. Can you build all 3 in one container? You can, but there is no way to run php-fpm, apache and mysqld in the same container without a shell script or install a separate process manager like runit or supervisor.</p></blockquote>
-
-<p>http://docs.docker.com/articles/using_supervisord/</p>
-
-<blockquote><p>Traditionally a Docker container runs a single process when it is launched, for example an Apache daemon or a SSH server daemon.</p></blockquote>
-
-<p>This is the entry point. Note that <code>ubuntu</code> has no entry point. Not sure
-if it&#8217;s possible to use <code>run</code> with a container that has an entry point,
-since the entry point is the process that gets run.</p>
-
-<p>So it should be possible for me to run an ubuntu netcat and portforward
-at the same time:</p>
-
-<p>All from Mac:</p>
-
-<pre><code>$ docker run -i -p 9292:9292 --expose=[9292] ubuntu:14.04 nc -l 0.0.0.0
-</code></pre>
-
-<p>9292</p>
-
-<p>Separate Mac terminal window:</p>
-
-<pre><code>$ nc dockerhost 9292
-</code></pre>
-
-<p>And now these two assholes talk to each other!</p>
-
-<p>Here are all the options I used</p>
-
-<ul>
-<li><code>-i</code>: run container interactively with terminal attached; without
-this, nc immediately closes once someone connects to it since STDIN is
-presumably dev null</li>
-<li><code>-p 9292:9292</code>, map docker host port 9292 to container port 9292</li>
-<li><code>--expose=[9292]</code> open the firewall since it wasn&#8217;t listed as exposed
-in the dockerfile</li>
-</ul>
-
-
-<p>Shit is SO COOL.</p>
-
-<h2>Docker vs Heroku</h2>
-
-<p>Hmm, not even worth comparing.</p>
-
-<h2>Nested SSH tunnels</h2>
-
-<p>http://superuser.com/questions/96489/ssh-tunnel-via-multiple-hops</p>
-
-<p>Map localhost:9998 to host2&#8217;s port 22.</p>
-
-<pre><code>ssh -L 9998:host2:22 -N host1
-</code></pre>
-
-<p>Map localhost:9999 to blahbalhbablh you get the picture.</p>
-
-<pre><code>ssh -L 9999:localhost:1234 -N -p 9998 localhost
-</code></pre>
-
-<p>Shit is sooooo crazy. I love this stuff.</p>
-
-<h2>ProxyCommand</h2>
-
-<p>From <code>SSH_CONFIG(5)</code>.</p>
-
-<pre><code> ProxyCommand
-         Specifies the command to use to connect to the server.  The command string
-         extends to the end of the line, and is executed with the user's shell.  In the
-         command string, any occurrence of `%h' will be substituted by the host name to
-         connect, `%p' by the port, and `%r' by the remote user name.  The command can be
-         basically anything, and should read from its standard input and write to its
-         standard output.  It should eventually connect an sshd(8) server running on some
-         machine, or execute sshd -i somewhere.  Host key management will be done using
-         the HostName of the host being connected (defaulting to the name typed by the
-         user).  Setting the command to ``none'' disables this option entirely.  Note
-         that CheckHostIP is not available for connects with a proxy command.
-
-         This directive is useful in conjunction with nc(1) and its proxy support.  For
-         example, the following directive would connect via an HTTP proxy at 192.0.2.0:
-
-            ProxyCommand /usr/bin/nc -X connect -x 192.0.2.0:8080 %h %p
-</code></pre>
-
-<p>So this proxies through an already established HTTP Connect proxy at
-192.0.2.0:8080. That&#8217;s so awesome.</p>
-
-<p>netcat even brags of this:</p>
-
-<pre><code> Common uses include:
-
-       o   simple TCP proxies
-       o   shell-script based HTTP clients and servers
-       o   network daemon testing
-       o   a SOCKS or HTTP ProxyCommand for ssh(1)
-       o   and much, much more
-</code></pre>
-
-<h2>get.docker.com</h2>
-
-<pre><code>curl https://get.docker.com
-</code></pre>
-
-<p>It returns a bootstrapping shell script for setting up docker.</p>
-
-<p>You can <code>#include</code> it when booting an EC2 instance. Pretty cool.</p>
-
-<h2>Basic Authentication</h2>
-
-<p>If I spin up a stupid netcat server</p>
-
-<pre><code>nc -l localhost 9191
-</code></pre>
-
-<p>and then query it from Chrome</p>
-
-<pre><code>http://user:password@localhost:9191
-</code></pre>
-
-<p>Here&#8217;s what I see:</p>
-
-<pre><code>GET / HTTP/1.1
-Host: localhost:9191
-Connection: keep-alive
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 Safari/537.36
-Accept-Encoding: gzip,deflate,sdch
-Accept-Language: en-US,en;q=0.8
-Cookie: blahblah
-</code></pre>
-
-<p>No reference to <code>user</code> or <code>password</code>. Which means that this information
-isn&#8217;t sent up front unless the server requests basic authentication by
-first sending back a 401 with the <code>WWW-Authenticate</code> header, after which
-point the user and password will be sent.</p>
-
-<p>And because it&#8217;s sent as a header (user:pass in base64) it&#8217;s encrypted
-if sent over TLS. But it&#8217;ll be plaintext in your address bar :).</p>
-
-<h2>SSH randomart</h2>
-
-<p>You see it when you create a key pair. Why? Because it&#8217;s just an easy
-ass visual way to compare keys rather than some Base64 shit.</p>
-
-<p>You can see the randomart for an existing key by printing the
-fingerprint in verbose mode:</p>
-
-<pre><code>$ ssh-keygen -lv -f ~/.ssh/id_boot2docker.pub
-2048 b2:3e:e4:d3:c1:9d:1b:75:46:0b:53:aa:18:6b:c7:c6  machty@machty.home (RSA)
-+--[ RSA 2048]----+
-|             ..  |
-|            o..  |
-|        .   .+ . |
-|         * .. +  |
-|      ..S.Eo o   |
-|      .+oo+      |
-|     o.. . o     |
-|     .+ . .      |
-|      .o         |
-+-----------------+
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Shananananananananeeees]]></title>
-    <link href="http://machty.github.com/blog/2014/11/11/shananananananananeeees/"/>
-    <updated>2014-11-11T06:43:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/11/11/shananananananananeeees</id>
-    <content type="html"><![CDATA[<h2>Linux hierachy layout</h2>
-
-<p><code>man hier</code> answers these questions.</p>
-
-<p>Basically, <code>/usr</code> is a secondary hierarchy for libs/bins/other things
-that aren&#8217;t strictly required for single-user mode (e.g. root).</p>
-
-<p><code>/usr/local</code> is tertiary. Things you compile yourself might belong
-there. Typically implies lower level of permissions. Rationale for
-separting from <code>/usr</code> is that <code>/usr</code> might be some read-only thing
-mounted and shared across machines, ready to be swapped out and upgraded
-at any time, but <code>/usr/local</code> is crap that you can fuck wit.</p>
-
-<p><code>brew</code> expects to install in the tertiary <code>/usr/local</code> directory:
-<code>/usr/local/Cellar</code>. So you can have multiple versions of executables
-installed via brew, but only one wins on the command line by way of
-symlinks within <code>/usr/local/bin</code> pointing to specific executables in
-<code>/usr/local/Cellar/projectname/1.23/bleh</code>. Symlinks to the rescue.</p>
-
-<pre><code>$ sudo brew install wat
-Error: Cowardly refusing to `sudo brew install`
-You can use brew with sudo, but only if the brew executable is owned by root.
-However, this is both not recommended and completely unsupported so do so at
-your own risk.
-</code></pre>
-
-<p>I guess this is nice since it prevents all the ugliness of installing
-shared executables at root privileges when they&#8217;re not needed.</p>
-
-<h2>Raptor</h2>
-
-<p>Ruby server. Apparently fast.</p>
-
-<p>http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/#zero_copy</p>
-
-<ul>
-<li>Uses nginx HTTP parser
-
-<ul>
-<li>due to battle-tested reliability</li>
-<li>could have used PicoHTTPParser, but not much community adoption
-though it claims being faster than nginc</li>
-<li>could have used Mongrel&#8217;s Ragel HTTP parser, but lots of
-Ruby-specific</li>
-</ul>
-</li>
-<li>Comes w reverse proxy buffer, such as what nginx has but hyper
-optimized to typical ruby raptor workflows</li>
-<li>Multi-process</li>
-<li>Sounds like multi-threadedness will be a paid solution that comes
-later.</li>
-</ul>
-
-
-<p>The C++ component of Raptor is the server that consists of:</p>
-
-<ul>
-<li>Buffering reverse proxy</li>
-<li>HTTP parser</li>
-<li>HTTP server</li>
-</ul>
-
-
-<p>Apparently these are all part of the same thing.</p>
-
-<h2>Puma Lopez mode</h2>
-
-<p>Puma Ruby server comes with a Lopez mode named after <code>@brianmario</code> who
-suggested it. It&#8217;s a tcp-only (no http) version of puma. To that guy&#8217;s
-knowledge Puma is the only threaded/pre-forking Ruby server that offers
-such a mode.</p>
-
-<h2>nginx Reverse proxy buffer</h2>
-
-<p>http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering</p>
-
-<p>I think it&#8217;s on by default, but you can disable it, configure buffer
-sizes, or enable with <code>X-Accel-Buffer</code>.</p>
-
-<h2>nginx in general</h2>
-
-<ul>
-<li>master process
-
-<ul>
-<li>manages worker process, reloads config files, etc</li>
-</ul>
-</li>
-<li>worker processes
-
-<ul>
-<li>process requests</li>
-</ul>
-</li>
-</ul>
-
-
-<p>conf files are directives, either one liners or blocks.</p>
-
-<ul>
-<li>Block directives
-
-<ul>
-<li>same structure as normal directives</li>
-<li>but have braces</li>
-<li>if braces allow directives inside of them, it&#8217;s called a context</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Contexts:</p>
-
-<ul>
-<li>main
-
-<ul>
-<li>events</li>
-<li>http
-
-<ul>
-<li>server
-
-<ul>
-<li>location</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Catch up or move along</h2>
-
-<p>http://unlearningeconomics.wordpress.com/2012/04/03/the-keenkrugman-debate-a-summary/</p>
-
-<h2>30s write delay</h2>
-
-<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
-
-<p>http://stackoverflow.com/questions/13650134/after-how-many-seconds-are-file-system-write-buffers-typically-flushed</p>
-
-<p>http://brad.livejournal.com/2116715.html</p>
-
-<p>Modified kernel buffers (of files on disk) wait up to 30s to be flushed
-to disk. You can &#8220;force&#8221; it was fsync. But then your disks might lie to
-you about what actually was persisted (verifiable via a test involving
-pulling the power cord).</p>
-
-<h2>Redis persistence</h2>
-
-<p>http://oldblog.antirez.com/post/redis-persistence-demystified.html</p>
-
-<p>It&#8217;s in-memory key-value, so does it ever get saved to disk?</p>
-
-<p>Why yes it does, via:</p>
-
-<ul>
-<li>snapshotting; configure min writes since last sync, or a timeout, and
-it&#8217;ll persist a snapshot to a .rdb file. Half completed transactions
-(via MULTI/EXEC) don&#8217;t show up of course.</li>
-<li>append-only AOF files
-
-<ul>
-<li>get rewritten based on memory contents if file grows too large</li>
-<li>possible for an empty redis db (written and then deleted keys) has a
-large AOF file.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Both can be enabled; it&#8217;s nice to have rdb files that you can back up.</p>
-
-<blockquote><p>AOF rewrites are generated only using sequential I/O operations, so the whole dump process is efficient even with rotational disks (no random I/O is performed). This is also true for RDB snapshots generation. The complete lack of Random I/O accesses is a rare feature among databases, and is possible mostly because Redis serves read operations from memory, so data on disk does not need to be organized for a random access pattern, but just for a sequential loading on restart.</p></blockquote>
-
-<p>Interesting, so usually a database that stores to disk would need to
-organize data for efficient random access, but in Redis-land, everything
-is loaded into memory.</p>
-
-<p>This confused me:</p>
-
-<blockquote><p>One of the additional benefits of RDB is the fact for a given database size, the number of I/Os on the system is bound, whatever the activity on the database is. This is a property that most traditional database systems (and the Redis other persistence, the AOF) do not have.</p></blockquote>
-
-<p>In other words, AOFs can be large even for empty databases (due to
-deletions).</p>
-
-<p>appendfsync:</p>
-
-<ul>
-<li>appendfsync no
-
-<ul>
-<li>syncs at kernel whim (30 s on linux)</li>
-</ul>
-</li>
-<li>appendfsync everysec
-
-<ul>
-<li>average 1 sec, at most 2 delay before buffers sent to kernel and sync&#8217;d</li>
-</ul>
-</li>
-<li>appendfsync always
-
-<ul>
-<li>sync before each client ack</li>
-<li>slowest</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Default is <code>appendfsync everysec</code>, which is pretty good durability
-without murdering speed.</p>
-
-<blockquote><p>What Redis implements when appendfsync is set to always is usually called group commit. This means that instead of using an fsync call for every write operation performed, Redis is able to group this commits in a single write+fsync operation performed before sending the request to the group of clients that issued a write operation during the latest event loop iteration.</p></blockquote>
-
-<p>Hmm that&#8217;s interesting&#8230; Redis has an event loop that can answer
-multiple clients in a single iteration?</p>
-
-<p>http://pauladamsmith.com/articles/redis-under-the-hood.html#event-loop</p>
-
-<p>Ah, it uses epoll and the like; multiple sockets and events can have
-arrived in one go, so it loops through all of those, does the necessary
-reads, etc.</p>
-
-<pre><code>/* Include the best multiplexing layer supported by this system.
- * The following should be ordered by performances, descending. */
-#ifdef HAVE_EVPORT
-#include "ae_evport.c"
-#else
-    #ifdef HAVE_EPOLL
-    #include "ae_epoll.c"
-    #else
-        #ifdef HAVE_KQUEUE
-        #include "ae_kqueue.c"
-        #else
-        #include "ae_select.c"
-        #endif
-    #endif
-#endif
-</code></pre>
-
-<h2>UTF-8</h2>
-
-<p>http://en.wikipedia.org/wiki/UTF-8</p>
-
-<p>I can&#8217;t believe I never sat down and read this shit.</p>
-
-<ul>
-<li>backwards compat w ASCII since ascii only used the 7 bits (signed
-char) to determine character.</li>
-<li>81% of webpages use this encoding</li>
-<li>ASCII is valid UTF-8</li>
-<li>UTF-8 is variable length; the 8th bit determines length</li>
-<li>there are invalid byte sequences (that you have to look out for when
-reading files / raw shit)</li>
-</ul>
-
-
-<h2>ISO/IEC 8859</h2>
-
-<p>http://en.wikipedia.org/wiki/ISO/IEC_8859</p>
-
-<ul>
-<li>single byte</li>
-<li>all ascii is ISO</li>
-<li>Seems like standard alphabet is preserved, but other 8 bit range stuff
-differs.</li>
-</ul>
-
-
-<h2>Ruby string encoding</h2>
-
-<p>http://stackoverflow.com/questions/20521371/set-utf-8-as-default-for-ruby-1-9-3</p>
-
-<ul>
-<li>Ruby 1.8 and below didn&#8217;t knew the concept of string encodings at all. Strings were more or less byte arrays.</li>
-<li>Ruby 1.9: default string encoding is US_ASCII everywhere.</li>
-<li><p>Ruby 2.0 and above: default string encoding is UTF-8.</p>
-
-<p>  $ ruby -e &#8220;puts &#8221;.encoding&#8221;
-  UTF-8</p></li>
-</ul>
-
-
-<h2>hiredis</h2>
-
-<p>https://github.com/redis/hiredis</p>
-
-<p>Presumably stands for &#8220;high(ish) level redis lib&#8221;.</p>
-
-<p>The Ruby gem can optionally use this as a driver but it comes at the
-expense of portability (JRuby can&#8217;t use this driver). But by default
-Ruby just uses Ruby sockets to talk to redis.</p>
-
-<h2>Public wifi</h2>
-
-<p>Is there any security difference between a password-less public wifi and
-one in which literally everyone knows the password?</p>
-
-<h2>/private on os X</h2>
-
-<p>http://unix.stackexchange.com/questions/63555/what-is-darwins-private-directory-for</p>
-
-<p>fun fact: <code>/etc</code> is a symlink for <code>/private/etc</code> on OS X. Wacky.</p>
-
-<h2>WEP, WPA, WPA2</h2>
-
-<p>http://www.howtogeek.com/167783/htg-explains-the-difference-between-wep-wpa-and-wpa2-wireless-encryption-and-why-it-matters/</p>
-
-<ul>
-<li>WEP (Wired Equivalent Privacy)
-
-<ul>
-<li>oldest</li>
-<li>WEP 128 most common even though there&#8217;s 256</li>
-<li>major security vulnerabilities based on RC4 stream cipher cracking</li>
-<li>on busy network, cracking could happen within a minute; if network
-is slow, attacker can send fake packets and get replies that it can
-use to crack over time.</li>
-<li>passive attacks: you have to collect information. Gather shit.</li>
-<li>Shamir (from RSA fame) was one of the crackahs.</li>
-</ul>
-</li>
-<li>WPA
-
-<ul>
-<li>PSK (pre-shared key) is most common</li>
-<li>256 min (over 64 and 128 WEP garbage)</li>
-<li>message integrity checks (detects some MITM)</li>
-<li>TKIP (temporal key integrity protocol) is predecessor to AES</li>
-<li>too tied to WEP (meant for firmware progressive upgrades) and hence
-prone to some WEP vulnerabilities, hence:</li>
-</ul>
-</li>
-<li>WPA2
-
-<ul>
-<li>AES</li>
-<li>CCMP (replacement for TKIP? but with TKIP fallback)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Just disable a thing called WPS and you&#8217;ll be good.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Mr Noah]]></title>
-    <link href="http://machty.github.com/blog/2014/11/08/mr-noah/"/>
-    <updated>2014-11-08T08:29:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/11/08/mr-noah</id>
-    <content type="html"><![CDATA[<h2>Root/apex/base/DNS and things finally clicking</h2>
-
-<p>They the same thing.</p>
-
-<p>http://stackoverflow.com/a/16041655/914123</p>
-
-<p>Also I like</p>
-
-<pre><code>(Note: root, base, apex domains are all the same thing. Using interchangeably for google-foo.)
-</code></pre>
-
-<p>CNAME:</p>
-
-<ul>
-<li>Canonical Name record: Aliases another name</li>
-<li>Use case: define CNAME for <code>ftp</code>, <code>www</code>, etc to point to the
-<code>example.com</code> A record so that only the A record&#8217;s IP needs to
-change</li>
-<li>Can point to any ol domain, not just within <code>example.com</code>. Heroku
-and other cloud services use this to have a CNAME pointing to
-a domain name under the control of a dynamic name server that
-can dish out different A name records (hence different IPs)</li>
-<li>Can&#8217;t define CNAMEs for apex domains (e.g. <code>example.com</code>).</li>
-<li>Can&#8217;t be shared with other records for that name, e.g. MX. CNAME wins
-and fucks over the others, I think.</li>
-</ul>
-
-
-<p>A record:</p>
-
-<ul>
-<li>Points to an IP address.</li>
-<li>Terminates DNS lookups</li>
-</ul>
-
-
-<p>ALIAS/ANAME:</p>
-
-<p>http://blog.dnsimple.com/2011/11/introducing-alias-record/</p>
-
-<p>http://support.dnsimple.com/articles/differences-between-a-cname-alias-url/</p>
-
-<blockquote><p>Before going further into the details, it’s important to know that A
-and CNAME records are standard DNS records, whilst ALIAS and URL
-records are custom DNS records provided by DNSimple. Both of them
-are translated internally into A records to ensure
-compatibility with the DNS protocol.</p></blockquote>
-
-<p>Aliases can coexist with other records at that level (so someone asking
-for MX gets MX if defined for that name rather than resolving
-elsewhere).</p>
-
-<p>Ok, so DNS hosts just returns CNAMEs and A records (and others too), and
-DNS hosts like DNSimple and DNS Made Easy can provide custom record
-types that ultimately translate to A records. Makes sense.</p>
-
-<p>So what about URL?</p>
-
-<blockquote><p>This type of record uses an HTTP redirect to redirect visitors from a domain to a web site.</p></blockquote>
-
-<p>So the A record returned from a URL record on DNSimple is going to point
-to one of DNSimple&#8217;s server IPs. I set one up for
-snaggletooth.alexmatchneer.com => http://www.example.com.</p>
-
-<pre><code>$ curl -H "Host: snaggletooth.alexmatchneer.com" 50.31.209.254
-&lt;a href="http://www.example.com"&gt;Moved Permanently&lt;/a&gt;
-</code></pre>
-
-<p>I also added a URL record for ugly.alexmatchneer.com to point to some
-random s3 image and discovered that browsers in fact follow redirects
-for images, hence this works:</p>
-
-<pre><code>&lt;img src="http://ugly.alexmatchneer.com"/&gt;
-</code></pre>
-
-<p><img src="http://ugly.alexmatchneer.com" alt="" /></p>
-
-<p>DNSimple is also nice enough to append the path to whatever its
-forwarding, so <code>ugly.alexmatchneer.com/wat</code> forwards to the destination
-specified in the URL record + <code>/wat</code>.</p>
-
-<h2><code>dig</code> recursion</h2>
-
-<p>Either you tell your DNS server to recurse for you, or you do it
-yourself.</p>
-
-<p>Name server does it for you (all these options just get rid of crufty
-shit):</p>
-
-<pre><code>dig +noall +answer +additional +recurse alexmatchneer.com
-alexmatchneer.com.      3544    IN      A       23.235.39.133
-</code></pre>
-
-<p>You do it yourself:</p>
-
-<pre><code>dig +noall +answer +additional +norecurse alexmatchneer.com
-FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
-FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
-</code></pre>
-
-<p>FWDR is a FiOS thing. These are from the additional section. So I guess
-it means I should call them. But at what point do I go through
-Verizon&#8217;s DNS? I thought I used like 4.2.2.2?</p>
-
-<pre><code>cat /etc/resolve.conf
-
-#
-# Mac OS X Notice
-#
-# This file is not used by the host name and address resolution
-# or the DNS query routing mechanisms used by most processes on
-# this Mac OS X system.
-#
-# This file is automatically generated.
-#
-domain home
-nameserver 192.168.1.1
-</code></pre>
-
-<p>I guess DNS is decided when I connect to a router. Ahhh I guess routers
-perform DNS? Ok ok ok what if I tell <code>dig</code> which name server to query?</p>
-
-<pre><code>$ dig +noall +answer +additional +norecurse @4.2.2.2 alexmatchneer.com
-i.gtld-servers.net.     109080  IN      A       192.43.172.30
-k.gtld-servers.net.     109080  IN      A       192.52.178.30
-m.gtld-servers.net.     166299  IN      A       192.55.83.30
-h.gtld-servers.net.     114566  IN      A       192.54.112.30
-b.gtld-servers.net.     133590  IN      A       192.33.14.30
-b.gtld-servers.net.     118573  IN      AAAA    2001:503:231d::2:30
-a.gtld-servers.net.     159638  IN      A       192.5.6.30
-a.gtld-servers.net.     113094  IN      AAAA    2001:503:a83e::2:30
-e.gtld-servers.net.     113091  IN      A       192.12.94.30
-f.gtld-servers.net.     166299  IN      A       192.35.51.30
-j.gtld-servers.net.     166299  IN      A       192.48.79.30
-g.gtld-servers.net.     109080  IN      A       192.42.93.30
-d.gtld-servers.net.     101447  IN      A       192.31.80.30
-l.gtld-servers.net.     136989  IN      A       192.41.162.30
-</code></pre>
-
-<p>WORD ok top level domains, makes sense. I bet if I let it recurse for me
-it&#8217;ll gimme what I want:</p>
-
-<pre><code>$ dig +noall +answer +additional +recurse @4.2.2.2 alexmatchneer.com
-alexmatchneer.com.      3600    IN      A       23.235.46.133
-</code></pre>
-
-<p>Word. And if I use my router&#8217;s IP:</p>
-
-<pre><code>dig +noall +answer +additional +norecurse @192.168.1.1 alexmatchneer.com
-FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
-FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
-</code></pre>
-
-<p>It refers me to some Verizon name server shit. Which is why if I type in
-some nonsense domain name, I get redirected to some shitty Verizon
-search page. Regardless of whether I&#8217;m in Chrome or in curl:</p>
-
-<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
-&lt;!DOCTYPE ... blah blah http://searchassist.verizon.com/
-</code></pre>
-
-<p>So what if I enable VPN? Prediction: my VPN provider will be making
-queries on my behalf, presumably not behind some Verizon name server
-shit.</p>
-
-<pre><code>$ curl oinasiodasd.asdasiodasod.asdoi
-curl: (6) Could not resolve host: oinasiodasd.asdasiodasod.asdoi
-</code></pre>
-
-<p>Basically (annoying caching hangover aside) dig will skip the FiOS
-forwarding/recursing if I&#8217;m on VPN. All this makes sense. Perfect
-sense. COMPLICATED THOUGH JESUS.</p>
-
-<h2>VPNs and private network IPs</h2>
-
-<p>ICANN set aside numbers like 192.168&#8230; and 10&#8230; for private networks.
-VPN doesn&#8217;t interfere with that shit because it&#8217;s within that range.
-Derp.</p>
-
-<p>Ahhhh that does though that I could still use my router as a DNS, no?</p>
-
-<p>VPN enabled:</p>
-
-<pre><code>$ dig .
-;; SERVER: 8.8.4.4#53(8.8.4.4)
-</code></pre>
-
-<p>VPN disabled:</p>
-
-<pre><code>$ dig .
-;; SERVER: 192.168.1.1#53(192.168.1.1)
-</code></pre>
-
-<p>And even w VPN enabled I could still query my Verizon router&#8217;s DNS</p>
-
-<pre><code>$ dig +norecurse @192.168.1.1 .
-FWDR-68.FWDR-237.FWDR-161.FWDR-12. 3600 IN A    68.237.161.12
-FWDR-71.FWDR-243.FWDR-0.FWDR-12. 3600 IN A      71.243.0.12
-</code></pre>
-
-<p>So who the hell decides where I query from?</p>
-
-<h2>DHCP</h2>
-
-<p>Dynamic Host Configuration Protocol.</p>
-
-<p>When you connect to a network, this tells you all sorts of useful
-defaults:</p>
-
-<blockquote><p>The DHCP server manages a pool of IP addresses and information about client configuration parameters such as default gateway, domain name, the name servers, and time servers.</p></blockquote>
-
-<p>When you connect to a network, the DHCP broadcasting stuff happens and
-you wind up with an IP, bingo bango bongo. When you connect to a network
-but can&#8217;t establish an IP, it&#8217;s probably because DHCP hasn&#8217;t finished
-yet.</p>
-
-<p>But this is where 192.168.1.1 as a name server comes from; the Verizon
-router will use DHCP to tell you to use it. Other routers might do other
-things. When I tether to my phone it gives a different DNS.</p>
-
-<h2>TXT Records</h2>
-
-<pre><code>$ dig +short borflex.alexmatchneer.com TXT
-"Another dumb thing"
-"I am a big dumb ridiculous idiot!"
-</code></pre>
-
-<h2>Nested subdomains</h2>
-
-<p>For the <code>alexmatchneer.com</code> domain, I added a CNAME for
-<code>e.x.c.alexmatchneer.com</code> to point to expresscheckoutapp.com
-and now it just works to nav to http://e.x.c.alexmatchneer.com</p>
-
-<h2>Route 53</h2>
-
-<p>Heyyyy that&#8217;s the port that DNS servers use.</p>
-
-<h2>Rubydns</h2>
-
-<p>https://github.com/ioquatix/rubydns</p>
-
-<p>Pretty cool. You can make your own DNS server. I got mine to tell me I
-was an idiot:</p>
-
-<pre><code>$ dig +short @54.165.102.18 barflonkula TXT
-"You are a big idiot"
-</code></pre>
-
-<h2>SOA Records</h2>
-
-<h2>Pointilism</h2>
-
-<p>Painting with dots. Like that Ferris Bueller painting, or some of Van
-Gogh&#8217;s self portraits.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Jaily Dournal]]></title>
-    <link href="http://machty.github.com/blog/2014/11/06/jaily-dournal/"/>
-    <updated>2014-11-06T16:00:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/11/06/jaily-dournal</id>
-    <content type="html"><![CDATA[<h2><code>rails c --sandbox</code></h2>
-
-<p>Rolls back changes on exit.</p>
-
-<pre><code>(0.4ms)  SAVEPOINT active_record_1
-(0.2ms)  ROLLBACK TO SAVEPOINT active_record_1
-</code></pre>
-
-<p>Wraps in a transaction which is why you see the above rather than BEGIN
-statements</p>
-
-<h2>Temporarily change $stdout</h2>
-
-<p>I wanted to get pretty-print output in Ruby. Solution, using <code>rails c</code>:</p>
-
-<pre><code>f = File.open('tmp', 'w')
-stdout_old = $stdout
-$stdout = f
-pp hash
-$stdout = $stdout_old # could also do File.open(1)
-</code></pre>
-
-<h2>Review: difference between pipes and sockets</h2>
-
-<ul>
-<li>pipes came first in early 70s</li>
-<li>pipes are always stream oriented; sockets can also be datagram
-oriented.</li>
-<li>pipes are unidirectional (and require two pipes for back and forth).
-sockets are bi-directional.</li>
-</ul>
-
-
-<h2>FAT doesn&#8217;t support hardlinking</h2>
-
-<p>I was going to try ember-cli-ramdisk mounting on file systems other than
-HFS+, hoping that one FS would support more efficient reuse of freed
-blocks, which might minimize paging on the grounds that if ramdisks
-blocks are being reused, then additional ramdisk file allocations won&#8217;t
-occur, hence memory lookups won&#8217;t occur, hence paging can&#8217;t happen.</p>
-
-<p>Anyway, got initial builds working in FAT32, but incremental rebuilds
-didn&#8217;t work due to hard-linking:</p>
-
-<p>https://github.com/rlivsey/broccoli-concat/blob/master/index.js#L86</p>
-
-<p>I thought we got rid of those, but then again the above use case is
-fine, since hardlinks are only used concat output and not root files.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[OSS Cards Against Humanity]]></title>
-    <link href="http://machty.github.com/blog/2014/11/05/oss-cards-against-humanity/"/>
-    <updated>2014-11-05T12:40:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/11/05/oss-cards-against-humanity</id>
-    <content type="html"><![CDATA[<p>Why not.</p>
-
-<h2>Black Cards</h2>
-
-<ul>
-<li>&#8220;GamerGate: it&#8217;s actually about <code>__________</code>&#8221;</li>
-<li>&#8220;Ember.js: a framework for creating <code>_________</code>&#8221;</li>
-</ul>
-
-
-<h2>White Cards</h2>
-
-<ul>
-<li>Ethics in video game journalism</li>
-<li><h1>GamerGate</h1></li>
-<li>Thought Leadership</li>
-<li>Brogrammers</li>
-<li>Cracking the Nut</li>
-<li>Destroy All Software</li>
-<li>Ember.js</li>
-<li>AngularJS</li>
-<li>React</li>
-<li>Two-way data-binding</li>
-<li>Unidirectional Data Flow</li>
-<li>Handlebars templates</li>
-<li>Functional reactive programming</li>
-<li>Hacker News</li>
-<li>Stability without Stagnation</li>
-<li>Ambitious Web Applications</li>
-<li>Thirsty Randos</li>
-</ul>
-
 ]]></content>
   </entry>
   

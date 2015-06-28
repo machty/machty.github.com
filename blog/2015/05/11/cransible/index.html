@@ -1,0 +1,360 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>cransible  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Cransible</h2>
+	<div class="entry-content"><h2>ControlPersist</h2>
+
+<p>A feature of SSH that multiplexes ssh sessions over one TCP connection,
+cuts down TCP connection overhead, etc. Ansible benefits from it.</p>
+
+<h2>Host-based authentication</h2>
+
+<p>hence <code>pg_hba.conf</code>.</p>
+
+<h2>binstubs and gem</h2>
+
+<p>here&#8217;s a binstub</p>
+
+<pre><code>require 'rubygems'
+gem 'bundler'
+load Gem.bin_path('bundler', 'bundle')
+</code></pre>
+
+<p>binstubs prep <code>$LOAD_PATH</code> (<code>$:</code> is the same thing) before a gem is run.</p>
+
+<p>The <code>gem 'bundler'</code> command prepends <code>LOAD_PATH</code> with the specified
+gem&#8217;s load paths. Additional calls to gem append after the load paths of
+earlier gems.</p>
+
+<h2>fail2ban</h2>
+
+<p>scans your logfiles, looks for malicious activity, bans bad guys for a
+while.</p>
+
+<h2>Digital Ocean droplets have public IPs, ec2s are priv</h2>
+
+<p>ec2 <em>does</em> expose public url but it has to go through a firewall defined
+by your security group. Note that this is obvious because, within an ec2
+instance, its IP is in one of the private IP address ranges
+(10.something, 192.168.something, and i think 172.something).
+So <em>can</em> you use a private IP publicly?</p>
+
+<p>http://serverfault.com/questions/57155/can-an-ip-address-in-the-private-range-be-used-as-a-public-address</p>
+
+<p>You <em>could</em>, but any network admin/ISP is going to block egress and
+ingress packets sourced/destined for any of these ranges. This prevents
+IP spoofing among other things, e.g. you can&#8217;t forge a fake packet and
+expect it to be routed to some internal server, which might read and
+respond to the packet and cause damage&#8230; all of this is avoided by
+internal servers using private IPs.</p>
+
+<h2>Ansible: modules vs playbooks vs rules</h2>
+
+<ul>
+<li>playbook
+
+<ul>
+<li>list of &#8220;plays&#8221;</li>
+</ul>
+</li>
+<li>play
+
+<ul>
+<li>map a group of hosts to some well-defined roles</li>
+</ul>
+</li>
+<li><h2>roles</h2></li>
+<li>tasks
+
+<ul>
+<li>call to an ansible module (which can directly be done via something
+like <code>ansible somehost -m ping</code></li>
+<li>tasks are performed one at a time (though they probably branch out
+simultaneously on multiple hosts)</li>
+</ul>
+</li>
+<li>module
+
+<ul>
+<li>can be executed directly via <code>ansible</code> or via playbooks</li>
+<li>a specific command, can make changes to a variety of server types</li>
+<li>e.g.
+
+<ul>
+<li>ansible webservers -m service -a &#8220;name=httpd state=started&#8221;</li>
+<li>ansible webservers -m ping</li>
+<li>ansible webservers -m command -a &#8220;/sbin/reboot -t now&#8221;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Ansible tags</h2>
+
+<p>http://docs.ansible.com/playbooks_tags.html</p>
+
+<p>Use tags to run subsets of a playbook.</p>
+
+<ul>
+<li>tag certain tasks</li>
+<li>specify at run time a tag of which tasks to run</li>
+<li>you can also tag includes
+
+<ul>
+<li>such that if you specify tags to ansible-playbook, it won&#8217;t include
+those rules unless tagged</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Sudo password is yours, not roots!!!!</h2>
+
+<p>http://www.howtogeek.com/111479/htg-explains-whats-the-difference-between-sudo-su/</p>
+
+<blockquote><p>When you execute sudo command, the system prompts you for your current user account’s password before running command as the root user. By default, Ubuntu remembers the password for fifteen minutes and won’t ask for a password again until the fifteen minutes are up.</p></blockquote>
+
+<p>This is why you have a sudoers file! You define who&#8217;s allowed to run as
+root user and let them run as sudo.</p>
+
+<p><code>su -c 'some command'</code> on the other hand asks for root&#8217;s password.</p>
+
+<h2>Debian Hosts file</h2>
+
+<p>https://www.debian.org/doc/manuals/debian-reference/ch05.en.html#_the_hostname_resolution</p>
+
+<blockquote><p>The IP address 127.0.1.1 in the second line of this example may not be found on some other Unix-like systems. The Debian Installer creates this entry for a system without a permanent IP address as a workaround for some software (e.g., GNOME) as documented in the bug #719621.</p>
+
+<p>The <host_name> matches the hostname defined in the &#8220;/etc/hostname&#8221;.</p>
+
+<p>For a system with a permanent IP address, that permanent IP address should be used here instead of 127.0.1.1.</p>
+
+<p>For a system with a permanent IP address and a fully qualified domain name (FQDN) provided by the Domain Name System (DNS), that canonical <host_name>.<domain_name> should be used instead of just <host_name>.</p></blockquote>
+
+<h2>Loopback</h2>
+
+<p>e.g. localhost; it&#8217;s a way to access a computer&#8217;s own network services
+via a network interface. I guess I knew this, but I just didn&#8217;t think
+about how it unifies the interface&#8230; e.g. whether it&#8217;s local or remote,
+just use IP all the time.</p>
+
+<h2>ifconfig</h2>
+
+<p>&#8220;interface config&#8221;</p>
+
+<h2>debops: run site.yml first</h2>
+
+<p>Don&#8217;t skip this step!</p>
+
+<p>I used <code>rails_deploy</code> before site.yml and things were just ambiguously
+missing and I had to patch them up.</p>
+
+<h2>/etc/shadow</h2>
+
+<p>It&#8217;s where all the encrypted passwords live. <code>/etc/passwd</code> is all the
+user names, but lots of applications need access to it, so it can&#8217;t be
+plaintext. SO in <code>passwd</code> you put &#8216;x&#8217; for password and that causes
+<code>/etc/shadow</code> to be looked up.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-11T23:38:00-04:00" pubdate data-updated="true">May 11<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/05/11/cransible/';
+        var disqus_url = 'http://machty.github.com/blog/2015/05/11/cransible/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

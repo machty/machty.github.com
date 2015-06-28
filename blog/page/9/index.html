@@ -112,6 +112,255 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/04/12/daily-thoughts/">
+		
+			Daily Thoughts</a>
+	</h2>
+	<div class="entry-content">
+		<p>Long time no blog, been busy with Ember stuff. Much has transpired since
+the last post, including getting added to Ember Core, making the Ember
+router reasonable, and other things. About time I get back into the
+blog-groove. Don&#8217;t expect quality; I&#8217;m probably gonna use this to jot
+down daily learnings because I am immensely forgetful, which rears its
+ugly head when I spend hours / days on a hard problem, only to forget
+the various realizations that would prevent me from having to solve the
+same shit over and over again. It&#8217;s gotten pretty bad; hopefully this
+will help.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-12T18:16:00-04:00" pubdate data-updated="true">Apr 12<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/03/29/ember-jeopardy/">
+		
+			Ember Jeopardy</a>
+	</h2>
+	<div class="entry-content">
+		<p>At last night&#8217;s <a href="http://www.meetup.com/EmberJS-NYC/events/106490682/">NYC Ember Meetup</a>,
+I led the gang through a somewhat enduring session of Jeopardy,
+featuring a ton of different Ember.js trivia questions. The app itself
+was written in Ember.js and the source code is mostly good, and
+certainly well-commented. Have a look see:</p>
+
+<p><a href="http://ember-jeopardy.herokuapp.com/">Ember Jeopardy</a></p>
+
+<p><a href="https://github.com/machty/ember-jeopardy">Source code</a></p>
+
+<p>It&#8217;s (somewhat needlessly) hosted within a Rails app, but you can find the
+Ember-specific code in <code>app/assets/javascripts/</code>. It presently only
+works on non-retina Safari/Chrome, given all the 3D stuff going on, but
+if you can figure out how to slay the remaining CSS3 demons, I&#8217;d
+definitely appreciate a pull request.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-29T15:36:00-04:00" pubdate data-updated="true">Mar 29<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-js/'>Ember.js</a>, <a class='category' href='/blog/categories/jeopardy/'>Jeopardy</a>, <a class='category' href='/blog/categories/meetup/'>Meetup</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/">
+		
+			Stubbing Date::valueOf for Benefit of Make Great Good Determinism</a>
+	</h2>
+	<div class="entry-content">
+		<p>Quick thing: if you ever find yourself in the situation of writing
+JavaScript test cases that involve <code>setTimeout</code> or some other timer
+logic where the order of timers firing is the subject of testing, you
+might find this trick handy to get rid of brittle, non-deterministic
+test cases.</p>
+
+<p>In short, you can stub out the <code>Date</code> class&#8217;s <code>valueOf</code> method to return
+a value you expect for the duration of the test case.</p>
+
+
+		
+		<a href="/blog/2013/03/24/stubbing-date-valueof-for-benefit-of-make-great-good-determinism/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-24T13:20:00-04:00" pubdate data-updated="true">Mar 24<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/javascript/'>JavaScript</a>, <a class='category' href='/blog/categories/determinism/'>determinism</a>, <a class='category' href='/blog/categories/testing/'>testing</a>, <a class='category' href='/blog/categories/valueof/'>valueOf</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/02/28/nyc-ember-dot-js-meetup-run-loop-slides/">
+		
+			NYC Ember.js Meetup Run Loop Slides</a>
+	</h2>
+	<div class="entry-content">
+		<p>Just did a talk on the Ember run loop at the
+<a href="http://www.meetup.com/EmberJS-NYC/">NYC Ember.js Meetup</a>.
+You can check them out
+<a href="http://machty.github.com/blog/ember_run_loop_talk">here</a>.
+There&#8217;s also a blurb on the <code>ember-source</code>, <code>handlebars-source</code> stuff
+I <a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">wrote about
+yesterday</a>.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-28T21:22:00-05:00" pubdate data-updated="true">Feb 28<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>, <a class='category' href='/blog/categories/nyc-meetup/'>nyc meetup</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/">
+		
+			Slaying the Ember/Handlebars JS-RB Dependency Demons With Gem Wrappers</a>
+	</h2>
+	<div class="entry-content">
+		<p>Ember.js devotees may have noticed a series of related commits that I
+put in recently with reference to &#8220;removing vendored .js files in favor
+of ember-source, handlebars-source, etc&#8221;, or something of the like.
+They&#8217;re all checked in now, and I think they&#8217;ve gone a long way towards
+alleviating the dependency hell stemming from multiple gems packaging
+vendored .js files.</p>
+
+<p>For a better understanding of the motivation behind these
+changes and how they might affect you, read on.</p>
+
+
+		
+		<a href="/blog/2013/02/27/gemifying-ember-dot-js-slash-handlebars-dot-js-slash-etc-dot-js/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-27T23:28:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2013</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/ember-source/'>ember-source</a>, <a class='category' href='/blog/categories/emblem-source/'>emblem-source</a>, <a class='category' href='/blog/categories/gemifying/'>gemifying</a>, <a class='category' href='/blog/categories/handlebars-source/'>handlebars-source</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2013/01/27/emblem-dot-js-indented-templating-targeting-handlebars-dot-js-and-ember-dot-js/">
 		
 			Emblem.js - Indented Templating Targeting Handlebars.js and Ember.js</a>
@@ -370,263 +619,6 @@ and here&#8217;s what I learned&#8230;</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/hover/'>hover</a>, <a class='category' href='/blog/categories/jquery/'>jquery</a>, <a class='category' href='/blog/categories/plugin/'>plugin</a>, <a class='category' href='/blog/categories/scroll/'>scroll</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/">
-		
-			Transferring S3-Enabled Heroku Apps Between Dev/Staging/Prod</a>
-	</h2>
-	<div class="entry-content">
-		<p>You know, I could just write this in my Evernote and reference as
-needed, but I&#8217;m writing it here, because I love you. But I&#8217;m in a hurry.</p>
-
-<p>Here are the steps I take for transferring apps from my development
-server to Heroku staging/production servers, which can get somewhat
-complicated if Amazon S3 is involved.</p>
-
-
-		
-		<a href="/blog/2012/11/05/transferring-s3-enabled-heroku-apps-between-dev-slash-staging-slash-prod/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-05T00:01:00-05:00" pubdate data-updated="true">Nov 5<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/s3/'>S3</a>, <a class='category' href='/blog/categories/heroku/'>heroku</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/">
-		
-			SpreeCommerce Meets Ember.js</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a record label website in Ember.js with all sorts of
-lovely dynamic goodies, infinite scrolling feeds, embedded music player,
-blah blah blah, and most challengingly a full-on store where user&#8217;s can
-browse albums, shirts, whatevers, add them to their cart, and eventually
-check out. This post covers a few lessons learned in getting a dynamic
-JS website to play nicely with Spree, an open source e-commerce
-framework.</p>
-
-<p>Things you might learn from this article:
-* Digging into gem source code
-* Passing Javascript data in and out of iframes
-* Converting non-prototype-extended data into prototype-extended data</p>
-
-
-		
-		<a href="/blog/2012/11/02/spreecommerce-meets-ember-dot-js/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-02T20:44:00-04:00" pubdate data-updated="true">Nov 2<span>nd</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/spree/'>spree</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/">
-		
-			Scraping OpenGraph for Video Cover Images</a>
-	</h2>
-	<div class="entry-content">
-		<p>I&#8217;m working on a site for a record company, and the folk in charge of
-the content usually just host their videos on YouTube, Vimeo, or some
-hosting service, so I needed to come up with a simple way for them to
-enter their YouTube/Vimeo/Whatever URLs into our CMS so that the videos
-could be added to a gallery.</p>
-
-<p>This site also does a lot of magical things with images that
-require us to know ahead of time the dimensions of the images we&#8217;re working with,
-so it was also important for us to be able to store the thumbnail for the video internally
-(and also allow this automatically selected thumbnail to be overridden
-with an image of their choice).</p>
-
-
-		
-		<a href="/blog/2012/10/23/scraping-opengraph-for-video-cover-images/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-23T21:35:00-04:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/opengraph/'>OpenGraph</a>, <a class='category' href='/blog/categories/video/'>video</a>, <a class='category' href='/blog/categories/vimeo/'>vimeo</a>, <a class='category' href='/blog/categories/youtube/'>youtube</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/10/12/batterypop-is-live/">
-		
-			batteryPOP Is Live</a>
-	</h2>
-	<div class="entry-content">
-		<p>You can check out the latest <a href="http://www.usefulrobot.io">Useful Robot</a>
-project at <a href="http://www.batterypop.com">batteryPOP.com</a>.</p>
-
-<p>batteryPOP is a children&#8217;s website featuring a bubbly, animated,
-tree-based menu that drives kids to the videos they want to watch and
-articles they want to read. It was written in
-<a href="http://www.emberjs.com">Ember.js</a>/Rails and had to look good on the
-iPad, so we couldn&#8217;t use any Flash, though the effect is largely the
-same.</p>
-
-
-		
-		<a href="/blog/2012/10/12/batterypop-is-live/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-12T10:50:00-04:00" pubdate data-updated="true">Oct 12<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/batterypop/'>batterypop</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2012/09/28/dry-your-ember-routes/">
-		
-			DRY and Tie Your Ember Routes</a>
-	</h2>
-	<div class="entry-content">
-		<h4>UPDATE 10/1/12: see bottom the post for avoiding infinite loop issues</h4>
-
-<h4>UPDATE 1/6/12: this post is deprecated since the new <a href="http://emberjs.com/guides/routing/defining-your-routes/">Ember Router v2 API</a> came out.</h4>
-
-<p>A common complaint about Ember.js routing is that seems to force you to
-create pairs of extremely light-weight, useless Views and Controllers
-for each new route you create. Another is that it&#8217;s not particular
-obvious how data ought to be shared between routes/controllers. Here&#8217;s
-one way to cut down on the seeming boilerplate while linking your data.</p>
-
-
-		
-		<a href="/blog/2012/09/28/dry-your-ember-routes/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-28T13:54:00-04:00" pubdate data-updated="true">Sep 28<span>th</span>, 2012</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/dry/'>dry</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/routing/'>routing</a>
 
 </div>
 

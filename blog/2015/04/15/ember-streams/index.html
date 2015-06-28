@@ -1,0 +1,993 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Ember Streams  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Ember Streams</h2>
+	<div class="entry-content"><h2>Ember Streams</h2>
+
+<p>My goal is to tease out the differences between Ember Streams and Rx.</p>
+
+<p><code>ember-metal/lib/streams/stream.js</code></p>
+
+<p>A stream has subscribers.</p>
+
+<h2>ConnectableObservable</h2>
+
+<p>Wraps a single subscription. Broadcasts events from this single
+subscription to all subscribers.</p>
+
+<h2>Rx Disposable</h2>
+
+<p>Anything with a <code>.dispose</code> method. So, what&#8217;s disposable in Rx?</p>
+
+<ul>
+<li>subscriptions</li>
+<li>observers</li>
+</ul>
+
+
+<p>What&#8217;s it used for?</p>
+
+<ul>
+<li>cleaning up some resource after subscriptions no longer need it</li>
+<li>generic disposal of no-longer needed objects
+
+<ul>
+<li>e.g. internal (non-detach) observers are disposable, but not really
+for the purpose of cleaning up some resource, but just making sure
+that no more events make it through</li>
+</ul>
+</li>
+</ul>
+
+
+<p>There isn&#8217;t a Subscription object in Rx, but you can think of the return
+value of <code>observable.subscribe</code> to be a &#8220;subscription&#8221;. Technically it&#8217;s
+an &#8220;auto-detach&#8221; observer; an auto-detach observer proxies to an
+underlying observer. When an auto-detach observer is disposed of, it
+disposed of the underyling subscribed observables&#8230; except that an
+observable isn&#8217;t a disposable; observables return disposables from their
+subscribe methods.</p>
+
+<p>Another way of thinking about this is that, on their own, observables
+don&#8217;t act/exist/do anything until they&#8217;re brought to life by a
+subscription. There&#8217;s nothing to &#8220;dispose&#8221; of until there is a
+subscription. Once someone subscribes, <em>then</em> you have a bunch of stuff
+that needs to be cleaned up at some point, hence disposables.</p>
+
+<p>Disposables have their use beyond Rx; <code>dispose</code> is kind of like a
+destructor; JavaScript doesn&#8217;t have destructors. Destructors don&#8217;t make
+<em>as</em> much sense in garbage-collected languages because their timing is
+non-deterministic (often it ends up being more practical to manually
+manage this yourself).</p>
+
+<h2>Ember <code>destroy</code></h2>
+
+<p>Ember&#8217;s got &#8220;destroy&#8221;-ables&#8230; <code>destroy</code> methods on objects, and
+<code>isDestroyed</code> properties that get set and checked, assertions if things
+are called on destroyed objects, etc.</p>
+
+<h3>Ember Object destroy</h3>
+
+<ul>
+<li>schedules call to <code>willDestroy</code> hook, meant for subclasses to
+implement</li>
+<li>aggressively tears down meta object
+
+<ul>
+<li>destroys bindings/observers
+
+<ul>
+<li>hence anyone listening to events on the obj or binding to values
+won&#8217;t get any more updates.</li>
+</ul>
+</li>
+<li>enables eager GC of metadata (it&#8217;s pretty easy in JS/any dynamic
+language to keep around references to stuff you don&#8217;t care about any
+more; at least with destroy you can eagerly remove things)</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>EventDispatcher destroy</h3>
+
+<p>Removes all dispatcher-added jQuery event listeners. Calls super.</p>
+
+<h3>Collection View</h3>
+
+<p>Calls super, removes array observers (which live on the content array
+and delegate to the collection view), destroy empty view.</p>
+
+<h3>Core View</h3>
+
+<p>First off, CoreView is &#8220;deprecated&#8221; in that it shouldn&#8217;t be used
+directly, but Ember.View still extends it.</p>
+
+<p>Calls super, destroys the DOM el (?), some other crap.</p>
+
+<p>Probably doesn&#8217;t make sense to write about until Glimmer.</p>
+
+<h2>Rx Observers</h2>
+
+<p>Class hierarchy</p>
+
+<ul>
+<li>Observer
+
+<ul>
+<li>AbstractObserver
+
+<ul>
+<li>AnonymousObserver</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>You can fulfill the Observer contract without using an Rx Observer
+class:</p>
+
+<p>http://jsbin.com/nupafu/11/edit?js,console</p>
+
+<pre><code>console.clear();
+
+var onNext      = () =&gt; { console.log('next'); };
+var onError     = () =&gt; { console.log('error'); };
+var onCompleted = () =&gt; { console.log('completed'); };
+
+var pojo = { onNext, onError, onCompleted };
+
+var legitObserver = Rx.Observer.create(onNext, onError, onCompleted);
+// same thing:
+// var legitObserver = new Rx.AnonymousObserver(onNext, onError, onCompleted);
+
+Rx.Observable.range(1,5).subscribe(pojo);
+Rx.Observable.range(1,5).subscribe(pojo);
+
+Rx.Observable.range(1,5).subscribe(legitObserver);
+Rx.Observable.range(1,5).subscribe(legitObserver);
+</code></pre>
+
+<p>The difference is that <code>legitObserver</code>&#8217;s hooks only fire for the first
+subscription, and nothing fires for the second; the pojo on the other
+hand runs through the range twice. Why? Because <code>Rx.Observer.create</code>
+creates an AnonymousObserver, which is an AbstractObserver, and
+AbstractObserver sets an <code>isStopped=true</code> flag to prevent further events
+from coming through. In other words, generally speaking an observer is
+only meant to be attached to one subscription, but if you want the same
+object to receive events from multiple observables (and for some stupid
+reason you don&#8217;t want to call <code>Observable.prototype.merge</code> then you can
+just pass <code>subscribe</code> some pojo with the necessary <code>onNext</code>, <code>onError</code>,
+<code>onCompleted</code> methods defined.</p>
+
+<p>Of course you can subscribe the same handler fns and internally two
+separate AnonymousObservers will get created, so events from both
+subscriptions will fire:</p>
+
+<pre><code>Rx.Observable.range(1,5).subscribe(onNext, onError, onCompleted);
+Rx.Observable.range(1,5).subscribe(onNext, onError, onCompleted);
+</code></pre>
+
+<h2>JS <code>_super</code> pattern</h2>
+
+<p>Seems obvious, but a decently nice pattern for calling a superclass&#8217;s
+method, taken from Ember&#8217;s streams:</p>
+
+<pre><code>merge(SomeSubclass.prototype, {
+  /* ... */
+
+  _super$destroy: SomeSuperclass.prototype.destroy,
+
+  destroy() {
+    this._super$destroy();
+
+    // do subclass-specific stuff
+  }
+});
+</code></pre>
+
+<h2>Routeable components / attrs / query params</h2>
+
+<pre><code>export default Ember.Route.extend({
+  queryParams: {
+    page: {
+      default: 1,
+      // refresh: true,
+      // API: infer/generate action name based on param?
+    }
+  },
+
+  model(params) {
+    // params has all params, including QPs
+  },
+
+  attrs() {
+    return {
+      model: this.model(),
+      updatePage: this.actions.updatePage
+    }
+  },
+
+  actions: {
+    updatePage(newPage) {
+      // this is a manual implementation of the inferred action
+      // based on page QP
+
+      // default implementation:
+      // when refresh: false (default)
+      this.component.set('page', newPage);
+
+      //this.component.set('page', newPage);
+    },
+  },
+});
+
+// articles template
+// 
+
+
+
+// articles component
+export default Ember.Component.extend({
+  // implicit attrs
+
+  //attrTypes: {
+  //  page: number,
+  //},
+
+  page: null,
+
+  // this is called initial render and prop updates
+  // (willReceiveAttrs called re-render only)
+  willRender(attrs) {
+    this.set('page', attrs.page);
+  },
+});
+</code></pre>
+
+<p>Lessons Learned:</p>
+
+<ul>
+<li>Route passes in read-only (non-mut) attrs to routeable component</li>
+<li><p>This prevents type-writer query params</p>
+
+<p>  // my-input component
+  export default Ember.Component.extend({</p>
+
+<pre><code>actions: {
+  doSomethingThatChangesValue() {
+    // TODO: mut api for changing thing
+    attrs.setValue...??
+  },
+},
+</code></pre>
+
+<p>  });</p></li>
+</ul>
+
+
+<h2><code>bashrc</code> and <code>bash_profile</code></h2>
+
+<p>ALWAYS forget the difference between these things. One of them is for
+login shells, one is both. Blurg.</p>
+
+<p>Answer:</p>
+
+<ul>
+<li><code>.bashrc</code> is read for interactive, non-login shells</li>
+<li><code>.bash_profile</code> is read for login shells</li>
+<li>Mac OS X uses login shells for its terminals, iTerm included</li>
+<li>hence, might make sense to just source <code>.bashrc</code> from <code>.bash_profile</code></li>
+</ul>
+
+
+<p>Also, the meaning of <code>rc</code> isn&#8217;t totally known; it could be &#8220;run
+commands&#8221; or &#8220;runtime configuration&#8221; but no one really agrees.</p>
+
+<h2>Glimmer Streams</h2>
+
+<p>KeyStream takes a source obj stream and a path and streams property values
+based on the provided key. Can be generated via sourceStream.get(&#8216;wat&#8217;).
+A source stream is just a stream of objects. KeyStreams stream property
+changes on objects. Changing the underlying object of the source stream
+will fire a change event on the KeyStream. KeyStreams watch for changes
+using Ember Observers (addObserver/removeObserver)</p>
+
+<p>KeyStreams (among others) have a setSource that changes the underyling
+stream of objects; calling setSource will always cause a notify().</p>
+
+<p>Why? mmun says:</p>
+
+<blockquote><p>in order to not notify we would have to eagerly compute the stream value
+and compare to the last value</p></blockquote>
+
+<p>So it&#8217;s a tradeoff between minimizing notify spam and losing value laziness.</p>
+
+<p>TODO: how do views use baseContext?</p>
+
+<p>ContextStream is a</p>
+
+<h2>Bash Completion</h2>
+
+<p>http://tldp.org/LDP/abs/html/tabexpansion.html</p>
+
+<ul>
+<li>works w Env vars, e.g. <code>$BASH_[tab]</code></li>
+<li>use <code>complete</code> to specify rules for a command, e.g. match
+filenames, filter by this regex, etc</li>
+<li>use <code>compgen</code> to pass shit to a filter fn written in bash
+(prefixed by underscore by convention)</li>
+</ul>
+
+
+<h2>why nom/bom/nombom</h2>
+
+<p>Most ember devs have to do something like this due to NPM fidgetries:</p>
+
+<pre><code>alias nombom='npm cache clear &amp;&amp; bower cache clean &amp;&amp; rm -rf node_modules bower_components &amp;&amp; npm install &amp;&amp; bower install'
+alias nom='npm cache clear &amp;&amp; rm -rf node_modules &amp;&amp; npm install'
+alias bom='bower cache clean &amp;&amp; rm -rf bower_components &amp;&amp; bower install'
+</code></pre>
+
+<p>Why is this necessary? Because:</p>
+
+<ol>
+<li>Even though npm will take into consideration your project&#8217;s
+dependency versions when choosing the version of dependencies of
+dependencies, once that package has been installed in <code>node_modules</code>,
+even if you bump your project&#8217;s dependencies, that old version will
+be cached in deep nestings of <code>node_modules</code>, hence it&#8217;s safest to
+nuke <code>node_modules</code>. Afaik only explains the <code>rm -rf node_modules</code>
+side of things.</li>
+<li>NPM won&#8217;t install a newer version of a dependency if a matching one
+exists in the NPM cache (<code>~/.npm/...</code>). Wait, isn&#8217;t this desirable?
+Shouldn&#8217;t this be a cue to bump your dependency version?</li>
+</ol>
+
+
+<p>This seems to be the chief reason why nombom is the only way to sane
+dependency installation:</p>
+
+<ul>
+<li>NPM caches modules by their version, e.g. <code>fstream@1.0.4</code> (these gets
+stored in <code>~/.npm/fstream/1.0.4/package.tgz</code></li>
+</ul>
+
+
+<h2>Bash + vim (or whatever)</h2>
+
+<ol>
+<li><code>set -o vi</code> so that bash is in Vim mode</li>
+<li>Type out a command</li>
+<li>Press escape (to leave &#8220;insert mode&#8221;)</li>
+<li>press <code>v</code> to open vim w the current command</li>
+<li>Save and quit to execute the command</li>
+</ol>
+
+
+<h2>Anamorphism</h2>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/05_Filtering.html</p>
+
+<p>Generating a (potentially infinite) vector from a scalar. Also known as
+an unfold.</p>
+
+<p>Actually this is better:</p>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/08_Transformation.html</p>
+
+<ul>
+<li>Ana(morphism) T &#8211;> IObservable<T></li>
+<li>Cata(morphism) IObservable<T> &#8211;> T</li>
+<li>Bind IObservable<T1> &#8211;> IObservable<T2></li>
+</ul>
+
+
+<h2>Hot observables, connect vs refCount vs singleInstance</h2>
+
+<p>http://jsbin.com/nupafu/20/edit?html,js,console,output</p>
+
+<p>I haven&#8217;t done <code>singleInstance</code> yet, but basically it&#8217;s like
+<code>publish().refCount()</code> except it&#8217;ll resubscribe if refcount goes to 0
+and then back to 1.</p>
+
+<h2>The ultimate nom nuance</h2>
+
+<p><code>npm</code> will assemble/download all project dependencies with the following
+rule:</p>
+
+<ul>
+<li>dependencies are installed only into the rootmost dependencies that
+specifies that dependency, e.g.</li>
+</ul>
+
+
+<p>If</p>
+
+<pre><code>proj
+  - foo
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p>The <code>npm</code> will <em>NOT</em> install a <code>baz/node_modules/foo</code> but will rather
+install a single foo at the root <code>node_modules</code>; the reason this works
+in Node land is that <code>require</code> always starts at the current dir and
+traverses upward.</p>
+
+<p>Shitty example: start with</p>
+
+<pre><code>proj
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p>then install at top level foo</p>
+
+<pre><code>proj
+  - foo
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p><code>npm</code> will not remove <code>foo</code> from <code>baz</code>&#8230; you wind up with two different
+versions of <code>foo</code>, shadowing each other. Holy shit!!!!!</p>
+
+<p>NPM <code>dedupe</code> would remove the second foo. NPM 3 will probably call
+dedupe automatically when you do <code>npm install</code>. But dedupe has its own
+issues, not the least of which is that no one knows about it and it&#8217;s
+one more thing to tell your team about.</p>
+
+<p>MAIN POINT OF LEARNING:</p>
+
+<p><code>npm</code> delicately stitches things together such that Node&#8217;s folder-bubbling
+<code>require</code> resolution semantics can find the packages installed by <code>npm</code>.
+It doesn&#8217;t override <code>$LOAD_PATH</code> like Bundler does or anything like
+that.</p>
+
+<h2>NPM cherry-pick</h2>
+
+<pre><code>git cherry-pick -x f2c270e8d76e81a1921bbc31777aa3ac570ca87a
+</code></pre>
+
+<p>This is how I pulled in a change on an already-merged
+<code>idempotent-rerender</code>.</p>
+
+<h2>OnErrorResumeNext</h2>
+
+<p>What a horrible name!</p>
+
+<p>Basically, it&#8217;s <code>concat</code> that automatically recovers from errors.</p>
+
+<p>http://jsbin.com/nupafu/22/edit</p>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/11_AdvancedErrorHandling.html</p>
+
+<blockquote><p>Just the title of this section will send a shudder down the spines of old VB developers! In Rx, there is an extension method called OnErrorResumeNext that has similar semantics to the VB keywords/statement that share the same name.</p>
+
+<p>Just as the OnErrorResumeNext keyword warranted mindful use in VB, so should it be used with caution in Rx. It will swallow exceptions quietly and can leave your program in an unknown state.</p></blockquote>
+
+<h2>Observable#finally invoked even on dispose</h2>
+
+<p>http://jsbin.com/nupafu/24/edit?html,js,console,output</p>
+
+<h2>ConnectableObservables can reconnect</h2>
+
+<p>http://jsbin.com/nupafu/25/edit?html,js,console,output</p>
+
+<pre><code>var c = Rx.Observable.interval(500).publish();
+
+c.subscribe((v) =&gt; {
+  console.log(v);
+});
+
+// returns a disposable that disconnects.
+var s = c.connect();
+
+setTimeout(() =&gt; {
+  s.dispose();
+  s = c.connect();
+}, 1200);
+</code></pre>
+
+<h2>Multicast</h2>
+
+<p>Didn&#8217;t understand this til I understood <code>publishLast()</code> and <code>replay()</code>,
+which basically apply <code>multicast</code> functionality through async subject
+and replay subject, respectively. Basically replay and async subjects
+just define different forms of caching, and if you want to share that
+functionality with connectable observable then you wanna use multicast.</p>
+
+<pre><code>.Publish() = .Multicast(new Subject&lt;T&gt;)
+.PublishLast() = .Multicast(new AsyncSubject&lt;T&gt;)
+.Replay() = .Multicast(new ReplaySubject&lt;T&gt;)
+</code></pre>
+
+<h2>Windows</h2>
+
+<p>I&#8217;ve talked about before, grokking it better now:</p>
+
+<p>http://jsbin.com/nupafu/27/edit?js,console,output</p>
+
+<pre><code>var o = Rx.Observable.range(5, 20);
+
+// HOT 
+var shared = o.publish().refCount();
+
+var openings = shared;//.filter((_, idx) =&gt; idx % 3 === 0);
+
+shared.window(openings, () =&gt; 
+  shared.filter((v, idx) =&gt; v % 5 === 0)
+).selectMany((obs) =&gt; {
+  return obs.toArray();
+}).subscribe((arr) =&gt; {
+  console.log(arr);
+});
+</code></pre>
+
+<p>Takeaways:</p>
+
+<ul>
+<li>closing selector gets passed the value emitted by windowOpenings that
+caused it to be opened in the first place.</li>
+<li>if the closing selector is based on the same source data stream, you
+almost certainly want to use <code>publish().refCount()</code>, or at least make
+sure the source stream is hot, or if it&#8217;s cold it doesn&#8217;t expensively
+re-create / duplicate some underlying resource</li>
+</ul>
+
+
+<h2>Subscribing inside Observer.create()</h2>
+
+<p>The contract for Observer.create is to</p>
+
+<ul>
+<li>fire <code>onNext*(onComplete|OnError)?</code> on the observer passed in</li>
+<li>return a disposable</li>
+</ul>
+
+
+<p>Based on that, the following is a perfectly valid way to alias an
+observable:</p>
+
+<p>http://jsbin.com/nupafu/30/edit</p>
+
+<pre><code>var proxy = Rx.Observable.create((o) =&gt; {
+  return Rx.Observable.interval(200).subscribe(o);
+});
+
+proxy.subscribe((v) =&gt; {
+  console.log(v);
+});
+</code></pre>
+
+<p><code>proxy</code> behaves just like <code>interval</code>.</p>
+
+<h2>C# <code>+=</code> and <code>-=</code> event subscription syntax</h2>
+
+<pre><code>this.Click += (s,e) =&gt; { MessageBox.Show(
+   ((MouseEventArgs)e).Location.ToString());};
+</code></pre>
+
+<h2><code>Either&lt;LeftT, RightT&gt;</code></h2>
+
+<p>In Rxx, <code>Either</code> is used a bunch to imply a broadcast of data from
+either source sequence A or source sequence B; one nice use case of it
+is how their <code>Retry</code> method works.</p>
+
+<p>http://rxx.codeplex.com/discussions/401272</p>
+
+<p>Basically, vanilla Rx retry disposes of the error that causes the retry
+to happen, which means it&#8217;s trick to do logging in a nice composable
+way.</p>
+
+<h2>Apple IP is <code>17.***.***.***</code></h2>
+
+<p>http://tapity.com/17-the-secret-to-finding-out-how-many-apple-employees-dig-your-stuff/</p>
+
+<p>https://support.apple.com/en-us/HT203609</p>
+
+<blockquote><p>The entire 17.0.0.0/8 address block is assigned to Apple</p></blockquote>
+
+<p>So you can check your logs to see if Apple&#8217;s snooping your shit.</p>
+
+<h2><code>embedded.mobileprovision</code></h2>
+
+<p>It is present in ALL <code>.ipa</code>s generated by XCode <em>including App Store
+builds</em>, but by the time you download <em>from the App Store</em>, it has been
+stripped out.</p>
+
+<h2>RxJava lifts, other things</h2>
+
+<p>https://speakerdeck.com/dlew/reactive-extensions-beyond-the-basics</p>
+
+<ul>
+<li>hot sequences have no subscription side effects</li>
+<li><p>cold sequences may have subscription side effects</p></li>
+<li><p>Observable.just(&#8220;1&#8221;)</p>
+
+<ul>
+<li>cold, because generates that string every subscription</li>
+</ul>
+</li>
+<li>Observable.interval()
+
+<ul>
+<li>cold, no duh</li>
+</ul>
+</li>
+<li>ReplaySubject
+
+<ul>
+<li>cold???</li>
+<li>hot if you&#8217;re first subscriber</li>
+<li>cold if there are items to replay, and then hot thereafter</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Redis: why use hash?</h2>
+
+<p>Why do</p>
+
+<pre><code>HSET somehash key val
+</code></pre>
+
+<p>when you can do HGET</p>
+
+<h2>redistogo disables <code>CONFIG</code> command</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1:39 PM &lt;machty&gt; any idea why on redis 2.8.11 i'm getting ERR unknown command 'config' ? docs say config command exists since 2.0.0
+</span><span class='line'>1:48 PM &lt;machty&gt; actually i think it's because CONFIG is disabled by redistogo service... unfortunately both CONFIG GET and CONFIG SET :/
+</span><span class='line'>1:55 PM &lt;xxxx&gt; machty: I actually work for Redistogo
+</span><span class='line'>1:55 PM &lt;xxxx&gt; We do disable it indeed
+</span><span class='line'>1:56 PM &lt;machty&gt; xxxx: ah, i guess there's no way to dynamically get maxmemory? was thinking of using it for alerts
+</span><span class='line'>1:56 PM &lt;xxxx&gt; Unfortunately not, there was talk of working on API for it but that development kind of got halted</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Apparently a lot of effort is being shifted from redistogo to
+ObjectRocket redis, which:</p>
+
+<ul>
+<li>doesn&#8217;t disable CONFIG</li>
+<li>has high availability (HA) enabled by default via sentinels</li>
+<li>http://redis.io/topics/sentinel</li>
+</ul>
+
+
+<h2>nethack</h2>
+
+<p>What is it?</p>
+
+<h2>Logstash</h2>
+
+<p>https://www.youtube.com/watch?v=RuUFnog29M4</p>
+
+<ul>
+<li><a href="http://www.nagios.org/">nagios</a>: infrastructure monitoring</li>
+<li>log = timestamp + data</li>
+<li>Logstash
+
+<ul>
+<li>open source</li>
+<li>config file is nginx-ish</li>
+<li>output graphs and a bunch of other things</li>
+<li>use grok
+
+<ul>
+<li>write patterns, and give them name</li>
+<li>reusable regex</li>
+<li>comes w 100 patterns</li>
+<li>no need for regex skills</li>
+</ul>
+</li>
+<li>data filter included to handle all varieties of timestamp format</li>
+<li>stop inventing time formats</li>
+<li>multiline filter for errors w stack trace</li>
+<li>gettimeofday</li>
+<li>NTP
+
+<ul>
+<li>network time protocol, used for syncing servers</li>
+<li>if apache uses gettimeofday</li>
+</ul>
+</li>
+<li>feature
+
+<ul>
+<li>transport and process logs to and from anywhere
+
+<ul>
+<li>get them in analyzable format</li>
+</ul>
+</li>
+<li>provide search and analytics</li>
+</ul>
+</li>
+<li>community
+
+<ul>
+<li>kibana: web interface for logstache</li>
+<li>logstash-cli: search / analytics from commandline</li>
+</ul>
+</li>
+<li>dreamhost deployment
+
+<ul>
+<li>20k apache events/sec peak</li>
+<li>250 mil events/day</li>
+<li>75gb day</li>
+<li>160 web servers</li>
+<li>7 logstach / elasticsearch servers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ELK</h2>
+
+<p>http://blog.qbox.io/indexing-heroku-logs-into-elasticsearch-with-logstash</p>
+
+<ul>
+<li>elastic search
+
+<ul>
+<li>searchable database</li>
+</ul>
+</li>
+<li>logstash
+
+<ul>
+<li>parses/processes logs from many sources, stores in centralized location</li>
+</ul>
+</li>
+<li>kibana</li>
+</ul>
+
+
+<p>https://www.elastic.co/webinars/elk-stack-devops-environment</p>
+
+<ul>
+<li>installation
+
+<ul>
+<li>download, untar, and run</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So who the fuck uses ELK stack? Just enormous companies that manage
+their own custom infrastructures?</p>
+
+<p>Answer: anyone who does enough devops to</p>
+
+<ul>
+<li>be smart enough to set it up</li>
+<li>know the pain of living without it</li>
+</ul>
+
+
+<p>Logstash is generally meant to live on the machine that&#8217;s producing the
+logs, and then it can forward it on to an elasticsearch cluster..</p>
+
+<h2>Ruby logging</h2>
+
+<blockquote><p>A flexible logging library for use in Ruby programs based on the design of Java&#8217;s log4j library.</p></blockquote>
+
+<p>https://github.com/TwP/logging</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-15T14:13:00-04:00" pubdate data-updated="true">Apr 15<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/04/15/ember-streams/';
+        var disqus_url = 'http://machty.github.com/blog/2015/04/15/ember-streams/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

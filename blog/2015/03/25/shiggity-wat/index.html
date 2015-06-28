@@ -1,0 +1,850 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Shiggity wat  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Shiggity Wat</h2>
+	<div class="entry-content"><h2>IP Spoofing</h2>
+
+<p>What&#8217;s to stop you from sending out packets with someone else&#8217;s IP as
+the source?</p>
+
+<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
+
+<ul>
+<li>packet filtering
+
+<ul>
+<li>ingress: gateway blocks incoming packets with source IP that can
+only belong to someone inside of the network</li>
+<li>egress: gateway blocking outgoing packets with source IP from
+outside of the network (altruistic since it prevents hackers from
+hacking folk outside of the network)</li>
+</ul>
+</li>
+<li>upper layer protocol
+
+<ul>
+<li>TCP prevents IP spoofing by use of sequence numbers; an attacker
+would have to guess at a correct sequence number in order for it to
+be considered valid</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>RxJS</h2>
+
+<h3>generate</h3>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, // terminate condition
+    function (x) { return x + 1; }, // step fn
+    function (x) { return x*2; }    // map fn for values emitted...?
+);
+</code></pre>
+
+<p>The last fn is weird&#8230; seems like the above is the equivalent of:</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, 
+    function (x) { return x + 1; },
+    function (x) { return x; }    
+).map(x =&gt; x*2);
+</code></pre>
+
+<p>So why embed the <code>map</code> operator? or as they call it the select.</p>
+
+<pre><code>Rx.Observable.prototype.map === Rx.Observable.prototype.select // true
+</code></pre>
+
+<h3>generateWith relative/absolute time</h3>
+
+<p>Like <code>generate</code> but adds a time selector fn: for each value you can
+decide when it should fire. So you could feasible reverse the firing
+time of a series of events, e.g. 1,2,3,4,5 fires in the reverse order:</p>
+
+<pre><code>var source = Rx.Observable.generateWithRelativeTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return 100 * (5-x); }
+);
+
+"Next: 1"
+"Next: 2"
+"Next: 3"
+"Completed"
+</code></pre>
+
+<p>NOPE I was wrong; the time selector generates the time <em>between</em> events,
+not the time relative to the start of observation. I&#8217;m guessing that can
+be accomplished via the absolute form:</p>
+
+<pre><code>var now = Date.now();
+var source = Rx.Observable.generateWithAbsoluteTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return now + 100 * (5-x); }
+).timeInterval();
+
+"Next: 1:402"
+"Next: 2:6"
+"Next: 3:2"
+"Completed"
+</code></pre>
+
+<p>WRONG AGAIN! Order is preserved, with the already-elapsed events firing
+immediately once the first one fires.</p>
+
+<h3>generate as for loops:</h3>
+
+<p>Instead of</p>
+
+<pre><code>for (var x = 0; x &lt; 10; ++x) {
+  console.log(x*2);
+}
+</code></pre>
+
+<p>you do</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 10; }, 
+    function (x) { return x + 1; },  // ++x
+    function (x) { return x*2; }  
+);
+
+// or source.subscribe
+source.forEach((val) =&gt; {
+  console.log(val);
+});
+</code></pre>
+
+<p>Keep in mind that</p>
+
+<pre><code>Rx.Observable.prototype.forEach === Rx.Observable.prototype.subscribe
+</code></pre>
+
+<p>They&#8217;re aliases of each other, they both:</p>
+
+<ul>
+<li>activate an observable</li>
+<li>are intended to cause some sort of side effects</li>
+</ul>
+
+
+<p>Why write in observable form?</p>
+
+<ul>
+<li>composability</li>
+<li>much harder to troll yourself w &#8220;global&#8221; mutable vars used for iteration</li>
+<li>you&#8217;re writing in a way that can effortlessly handle the dimension of time</li>
+</ul>
+
+
+<h2>Subscriber stack</h2>
+
+<p>How would you get more explicit bubbling behavior that we&#8217;re familiar
+with from bubbling actions in Ember?</p>
+
+<p>Basically I want there to be some root subject/observable on a parent
+route, and then child routes can push their subscription onto that
+observable&#8217;s stack of subscriptions, and only the subscription at the
+top of the stack.</p>
+
+<p>This doesn&#8217;t accomplish bubbling per se; it&#8217;s a non-bubbling form of
+first-responder. Do we want bubbling?</p>
+
+<p>Actually yeah I think we want bubbling; what we don&#8217;t want is routes
+accidentally getting actions invoked on them because at some point later
+in the game a child route invokes an action (just string names) and it
+accidentally leaks out, causing havoc on parent routes, etc.</p>
+
+<p>But to be able to pass on the action is probably nice.</p>
+
+<pre><code>// within child route
+someParentRoute.observableStack.subscribe((e) =&gt; {
+  if (canHandle(e.value)) {
+    // do stuff
+  } else {
+    e.bubble();
+  }
+});
+</code></pre>
+
+<p>and this subscription would be <code>dispose</code>d upon route deactivation so it
+cleans itself up.</p>
+
+<p>The problem with this is once you start needing to apply operators, you
+need some way of signalling the bubble later on?</p>
+
+<pre><code>someParentRoute.observableStack
+               .delay(1000)
+               .map((e) =&gt; someCopyThatStillPreservesBubbleFn})
+               .subscribe((e) =&gt; {
+                 if (canHandle(e.value)) {
+                   // do stuff
+                 } else {
+                   e.bubble();
+                 }
+               });
+</code></pre>
+
+<h2>Alex versus invalidation</h2>
+
+<p>https://github.com/ef4/liquid-fire/issues/222</p>
+
+<h2>iOS 7 and 8 usage</h2>
+
+<p>As of 3/29/2015:</p>
+
+<ul>
+<li>iOS 8: 77%</li>
+<li>iOS 7: 20%</li>
+<li>Earlier: 3%</li>
+</ul>
+
+
+<h2>WKWebView</h2>
+
+<p>Only in iOS 8, comes with Nitro engine and bunch of other things.</p>
+
+<p>http://nshipster.com/wkwebkit/</p>
+
+<ul>
+<li>https://github.com/Telerik-Verified-Plugins/WKWebView
+
+<ul>
+<li>probably the best stab at a working plugin</li>
+<li>there are many issues (i would not use it at this point)</li>
+<li>spins up an embedded server in order to:
+
+<ul>
+<li>bypass CORS</li>
+<li>allow querying file:// protocol</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>It&#8217;s also only iOS8+; the plugin is smart enough to fall back to
+UIWebView, but then you&#8217;ve just bumped an exponent on complexity, more
+shit to test.</p>
+
+<p>There is also Ludei Cocoonjs. But Iiiii couldn&#8217;t get it to work. :)</p>
+
+<h2>Rx: switch</h2>
+
+<p>When you already have an Observable of Observables, you can call
+<code>.switch()</code> to produce an Observable that only emits values from the
+most recent observable :) isn&#8217;t terminology fun.</p>
+
+<p>So this:</p>
+
+<pre><code>obs.map((val) =&gt; someObservableBasedOnVal)
+   .switch();
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>obs.flatMapLatest((val) =&gt; someObservableBasedOnVal);
+</code></pre>
+
+<h2>Multiple cursors, DevTools and Vim</h2>
+
+<p>Command click: multiple cursors</p>
+
+<p>Cmd+D selects the next instance (effectively adding a multiple cursor).
+Really a cursor is a selection with zero chars selected.</p>
+
+<p>Just downloaded https://github.com/terryma/vim-multiple-cursors</p>
+
+<p>Ctrl-n: select next occurrence of hovered word</p>
+
+<p>Ctrl-p: undo most recent selection</p>
+
+<p>Ctrl-x: skip current selection</p>
+
+<p>MultipleCursorsFind: optionally select range in v mode, then type a
+regex to select them shits as multiple cursors.</p>
+
+<p>NOTE: in visual mode, <code>o</code> swaps the cursor to the other side to let you
+modify the selection from the other end.</p>
+
+<h2>Why flatMapLatest always trips me up</h2>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>console.clear();
+
+Rx.Observable.just(1)
+  .takeUntil(Rx.Observable.timer(10))
+  .doOnCompleted(() =&gt; console.log("doOnCompleted"))
+  .flatMapLatest(() =&gt; {
+    return Rx.Observable.timer(500);
+  })
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"doOnCompleted"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>This sequence might seem obvious here but I ALWAYS make the mistake of
+thinking that because there&#8217;s a takeUntil on the source observable,
+that&#8217;ll somehow cause all subscribing observables to immediately
+complete. NOPE. If that were the case, then promise chains wouldn&#8217;t work
+since they&#8217;re just single value observables that complete after their
+first value, and if completion force completed any subscribers then you
+couldn&#8217;t have async chains of logic. Anyway.</p>
+
+<p>So I guess that means you really need to gate at every potential side
+effect via takeUntil? e.g.</p>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"one"
+"two"
+"three"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>I guess I could dispose the sub, but then no onCompletes get fired
+(and it&#8217;s also just bad style).</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.dispose();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+</code></pre>
+
+<p>WHOA if I do onCompleted, then it skips all the shit in the middle
+and still runs the completion handler!</p>
+
+<p>http://jsbin.com/nupafu/4/edit</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.onCompleted();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"COMPLETE"
+</code></pre>
+
+<p>Question: is there a way to construct your observables, without
+resorting to chaining takeUntil&#8217;s before every side-effect, such that
+some onComplete along the way skips everyone else&#8217;s?</p>
+
+<p>http://jsbin.com/nupafu/6/edit</p>
+
+<pre><code>console.clear();
+var o = Rx.Observable.interval(200)
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"));
+
+o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    console.log("EVENT " + v);
+    if (v === false) {
+      this.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+"start"
+"EVENT false"
+"COMPLETE"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+...
+</code></pre>
+
+<p>Why? Does <code>this.onCompleted()</code> not kill the current subscription?</p>
+
+<p>This works:</p>
+
+<pre><code>var sub = o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    if (v === false) {
+      sub.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Apparently sub !== this. sub is an auto-detach observer, this is an
+anonymous observer. Some rxjs internals I don&#8217;t wanna go into right now.</p>
+
+<p>Maybe there&#8217;s a merge first operator that&#8217;ll work here.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/amb.md</p>
+
+<p><code>amb</code> is close, but once a value is produced from the flatMapChain, then
+the terminating observable is ignored. I want something that stops on
+the first completed thing.</p>
+
+<p>Note that <code>amb</code> has <a href="http://www.randomhacks.net/2005/10/11/amb-operator/">roots in Lisp</a>.
+The base functionality in RxJS I guess can be used to approximate
+something like</p>
+
+<p>Oh man, I might be a HUGE idiot&#8230; I JUST NEED TO FUCKING PUT THE
+TAKEUNTIL AT THE END OMG</p>
+
+<h2>I&#8217;m waiting</h2>
+
+<p>http://i.imgur.com/4ETXzun.webm</p>
+
+<h2>Observable.using</h2>
+
+<p>Resource/disposable + observable = using</p>
+
+<pre><code>Rx.Observable.
+  using(
+    function () { return openFile('temp.txt', 'w+'); },
+    function (fd) {
+      return Rx.Observable.range(0, 10000)
+        .map(function (v) { return Buffer(v); })
+        .flatMap(function (buffer) {
+          return appendAsync(fd, buffer);
+        });
+    }
+  )
+  .subscribe();
+</code></pre>
+
+<p><code>using</code> makes it clear what the resource/disposable. Otherwise you might
+mix the two awkwardly in the body of the fn passed to
+<code>Observable.create</code>.</p>
+
+<h2>Rx grammar</h2>
+
+<p>Observable sequences have the following grammar:</p>
+
+<pre><code>onNext* (onCompleted|onError)?
+</code></pre>
+
+<p>0 or more <code>onNext</code>s followed by an optional <code>onCompleted</code> OR <code>onError</code>.
+Infinite sequences or disposed sequences might never see <code>onCompleted</code>
+or <code>onError</code>.</p>
+
+<h2>Observable.defer vs Observable.create</h2>
+
+<p>Defer wraps another underlying observable in a factory function and
+guarantees that each subscription to the outer observable gets a fresh
+subscription to a totally newly-generated inner observable&#8230; but how is
+this different from cold observables in general?</p>
+
+<p>Well before I say that, lemme just say <code>defer</code> is a useful pattern for
+when you want to kick off a sequence but don&#8217;t really know which
+observable to start with; a lame attempt to do this is via</p>
+
+<pre><code>Rx.Observable.just()
+  .flatMap(() =&gt; {
+    if (wat) {
+      return oneObservable;
+    } else {
+      return anotherObservable;
+    }
+  })
+</code></pre>
+
+<p>This could more clearly be written as</p>
+
+<pre><code>Rx.Observable.defer(() =&gt; {
+  if (wat) {
+    return oneObservable;
+  } else {
+    return anotherObservable;
+  }
+});
+</code></pre>
+
+<p>But hey, observables are cold&#8230; how is this different than writing</p>
+
+<pre><code>var obs = wat ? oneObservable : anotherObservable;
+return obs; // someone will subscribe to it
+</code></pre>
+
+<p>The difference is the decision as to which observable to use is set once
+and for all for all future subscribers. HORRIBLE ENGRISH MR MATCHNEER.
+In other words: either all subscribers get oneObservable or they get
+anotherObservable. If you wanted to <em>defer</em> that decision until each
+subscription, that&#8217;s when you use defer.</p>
+
+<p>So why not just use a factory function without using <code>defer</code>, e.g.</p>
+
+<pre><code>function getObservable() {
+  var obs = wat ? oneObservable : anotherObservable;
+}
+
+// then anyone who wants to subscribe:
+getObservable().subscribe();
+getObservable().subscribe();
+getObservable().subscribe();
+</code></pre>
+
+<p>These all get fresh observables. But then if you did</p>
+
+<pre><code>var obs = getObservable();
+obs.subscribe();
+obs.subscribe();
+obs.subscribe();
+</code></pre>
+
+<p>then these would all get the same observable decided by the single  call
+to getObservable.</p>
+
+<p>TL;DR, Rx is REALLY HARD. You have seemingly simple primitives of
+observers and observables (saying nothing of that
+almost-namespace-collision), but the way scalar things become vectors,
+merged back into scalars, and not just at the events level but in the
+primitives themselves, and how things are hot and cold. Jesus Christ.</p>
+
+<h2>iOS Permissions</h2>
+
+<ul>
+<li>iOS7
+
+<ul>
+<li>no camera permissions</li>
+<li>location permissions, but doesn&#8217;t distinguish b/w foreground/background</li>
+<li>once denied, permissions dialog won&#8217;t show up</li>
+</ul>
+</li>
+<li>iOS8
+
+<ul>
+<li>permissions for audio and video, separately</li>
+<li>location
+
+<ul>
+<li>global location shutdown in addition to</li>
+<li>app-specific:
+
+<ul>
+<li>authorized for &#8220;When in use&#8221;</li>
+<li>authorized for background</li>
+<li>denied</li>
+</ul>
+</li>
+<li>if you change permissions
+
+<ul>
+<li>app will NOT restart</li>
+<li>if you&#8217;re disabling geolocation, when you come back
+into the app, you won&#8217;t get an error code about lack</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>for all permissions:
+
+<ul>
+<li>once denied, permissions dialog won&#8217;t show up
+
+<ul>
+<li>You can open Settings via settings url w some instructions
+telling user to reset</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-25T11:15:00-04:00" pubdate data-updated="true">Mar 25<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/03/25/shiggity-wat/';
+        var disqus_url = 'http://machty.github.com/blog/2015/03/25/shiggity-wat/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

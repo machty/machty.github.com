@@ -112,6 +112,1905 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/06/11/anermic/">
+		
+			Anermic</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Nils nils nils</h2>
+
+<p>Yes, use <code>.fetch()</code> over <code>[]</code> if you&#8217;re working with an options hash
+where all fields are expected/required so that you don&#8217;t accidentally
+leak nils. But <code>.fetch(:wat, nil)</code> is the
+most pointless thing of all time. It adds no value over <code>[:wat]</code>. So
+stop thinking about it, Matchnozzle!</p>
+
+<h2>JSON Pointer</h2>
+
+<p>RFC: https://tools.ietf.org/html/rfc6901</p>
+
+<p>TL;DR defines how to reference values within a JSON doc in a
+standardized way, including via normal URIs. So potentially you could
+cite a value in an API request from Wikipedia I guess.</p>
+
+<p>Also used in JSON Patch to describe the path to changed things.</p>
+
+<h2>Persistent Data Structure</h2>
+
+<p>https://en.wikipedia.org/wiki/Persistent_data_structure</p>
+
+<p>Preserves a previous version of itself when modified; often intertwined
+with &#8220;immutable&#8221; since in some languages/libraries like Clojure data
+structures internally share structure with others between operations.</p>
+
+<h2>Racket</h2>
+
+<p>Lispy language that compiles down to bytecode run on a proprietary
+runtime.</p>
+
+<p>Excellent article: http://programming-puzzler.blogspot.com/2010/08/racket-vs-clojure.html</p>
+
+<p>In short, Clojure wins because of data structures (but is still
+annoyingly limited by Java ties; no tail recursion, poor performance w
+numbers sometimes, etc).</p>
+
+<h2>Bottom line</h2>
+
+<p>Literally the bottom line of a statement, where the total is calculated.
+That&#8217;s what the saying&#8217;s referring to when folk say how&#8217;s this affect
+our bottom line.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-11T11:39:00-04:00" pubdate data-updated="true">Jun 11<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/05/25/brooch/">
+		
+			Brooch</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Brooch</h2>
+
+<p>wtf is a brooch.</p>
+
+<p>http://en.wikipedia.org/wiki/Brooch</p>
+
+<p>Decorative jewelry that can be attached to garments, often to hold them
+closed. Could be collars to shirt, could be holding together a robe-ish
+thing. Brooch brooch brooch. Remember that shit.</p>
+
+<h2>Android HW Accel</h2>
+
+<p>There&#8217;s hardware acceleration in the Android rendering pipeline since
+Honeycomb, Android 3.0, which came out Feb 2011. By default,
+the manifest attr that controls this is set to false:</p>
+
+<pre><code>&lt;application ... android:hardwareAccelerated="false"&gt;
+</code></pre>
+
+<p>So you&#8217;d have to set that to true to enable hw accel globally. Then
+there&#8217;s finer granularity for <code>window</code> and <code>View</code> via setFlags and
+setLayerType.</p>
+
+<h2>Amazon Local</h2>
+
+<p>What it is? Google autocomplete search elucidates:</p>
+
+<p>&#8220;amazon local vs&#8221;</p>
+
+<ul>
+<li>groupon</li>
+<li>livingsocial</li>
+<li>square</li>
+</ul>
+
+
+<p>Seems to promote your business via groupon-esque deals.</p>
+
+<h2>Java Anonymous Classes</h2>
+
+<p>Weird syntax I didn&#8217;t recognize. Basically lets you instantiate an
+anonymous class assuming you don&#8217;t need to share the class. The cool
+thing about this is that you can implement/instantiate an instance of a
+class based entirely on an Interface (this was weird for me since
+Interfaces in Java seem like these ephemeral ghostly non-existent things
+that normally take a lot of verbose code to instantiate).</p>
+
+<p>https://docs.oracle.com/javase/tutorial/java/javaOO/anonymousclasses.html</p>
+
+<pre><code>public class HelloWorldAnonymousClasses {
+
+    interface HelloWorld {
+        public void greet();
+        public void greetSomeone(String someone);
+    }
+
+    public void sayHello() {
+        // this a function body!
+
+        // this is a "local" class... which means you define it,
+        // and...
+        class EnglishGreeting implements HelloWorld {
+            String name = "world";
+            public void greet() {
+                greetSomeone("world");
+            }
+            public void greetSomeone(String someone) {
+                name = someone;
+                System.out.println("Hello " + name);
+            }
+        }
+
+        // ... THEN you instantiate it
+        HelloWorld englishGreeting = new EnglishGreeting();
+
+        // This is an anonymous class; define it at the same time
+        // you instantiate it.
+        HelloWorld frenchGreeting = new HelloWorld() {
+            String name = "tout le monde";
+            public void greet() {
+                greetSomeone("tout le monde");
+            }
+            public void greetSomeone(String someone) {
+                name = someone;
+                System.out.println("Salut " + name);
+            }
+        };
+</code></pre>
+
+<h2>Wadsworth Constant</h2>
+
+<p>http://www.urbandictionary.com/define.php?term=Wadsworth+Constant</p>
+
+<blockquote><p>The Wadsworth Constant is the fundamental idea that the true meaning of a video, conversation, or comment approaches importance after approximately 30% of it has been skipped over.</p></blockquote>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-25T01:51:00-04:00" pubdate data-updated="true">May 25<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/05/11/cransible/">
+		
+			Cransible</a>
+	</h2>
+	<div class="entry-content">
+		<h2>ControlPersist</h2>
+
+<p>A feature of SSH that multiplexes ssh sessions over one TCP connection,
+cuts down TCP connection overhead, etc. Ansible benefits from it.</p>
+
+<h2>Host-based authentication</h2>
+
+<p>hence <code>pg_hba.conf</code>.</p>
+
+<h2>binstubs and gem</h2>
+
+<p>here&#8217;s a binstub</p>
+
+<pre><code>require 'rubygems'
+gem 'bundler'
+load Gem.bin_path('bundler', 'bundle')
+</code></pre>
+
+<p>binstubs prep <code>$LOAD_PATH</code> (<code>$:</code> is the same thing) before a gem is run.</p>
+
+<p>The <code>gem 'bundler'</code> command prepends <code>LOAD_PATH</code> with the specified
+gem&#8217;s load paths. Additional calls to gem append after the load paths of
+earlier gems.</p>
+
+<h2>fail2ban</h2>
+
+<p>scans your logfiles, looks for malicious activity, bans bad guys for a
+while.</p>
+
+<h2>Digital Ocean droplets have public IPs, ec2s are priv</h2>
+
+<p>ec2 <em>does</em> expose public url but it has to go through a firewall defined
+by your security group. Note that this is obvious because, within an ec2
+instance, its IP is in one of the private IP address ranges
+(10.something, 192.168.something, and i think 172.something).
+So <em>can</em> you use a private IP publicly?</p>
+
+<p>http://serverfault.com/questions/57155/can-an-ip-address-in-the-private-range-be-used-as-a-public-address</p>
+
+<p>You <em>could</em>, but any network admin/ISP is going to block egress and
+ingress packets sourced/destined for any of these ranges. This prevents
+IP spoofing among other things, e.g. you can&#8217;t forge a fake packet and
+expect it to be routed to some internal server, which might read and
+respond to the packet and cause damage&#8230; all of this is avoided by
+internal servers using private IPs.</p>
+
+<h2>Ansible: modules vs playbooks vs rules</h2>
+
+<ul>
+<li>playbook
+
+<ul>
+<li>list of &#8220;plays&#8221;</li>
+</ul>
+</li>
+<li>play
+
+<ul>
+<li>map a group of hosts to some well-defined roles</li>
+</ul>
+</li>
+<li><h2>roles</h2></li>
+<li>tasks
+
+<ul>
+<li>call to an ansible module (which can directly be done via something
+like <code>ansible somehost -m ping</code></li>
+<li>tasks are performed one at a time (though they probably branch out
+simultaneously on multiple hosts)</li>
+</ul>
+</li>
+<li>module
+
+<ul>
+<li>can be executed directly via <code>ansible</code> or via playbooks</li>
+<li>a specific command, can make changes to a variety of server types</li>
+<li>e.g.
+
+<ul>
+<li>ansible webservers -m service -a &#8220;name=httpd state=started&#8221;</li>
+<li>ansible webservers -m ping</li>
+<li>ansible webservers -m command -a &#8220;/sbin/reboot -t now&#8221;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Ansible tags</h2>
+
+<p>http://docs.ansible.com/playbooks_tags.html</p>
+
+<p>Use tags to run subsets of a playbook.</p>
+
+<ul>
+<li>tag certain tasks</li>
+<li>specify at run time a tag of which tasks to run</li>
+<li>you can also tag includes
+
+<ul>
+<li>such that if you specify tags to ansible-playbook, it won&#8217;t include
+those rules unless tagged</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Sudo password is yours, not roots!!!!</h2>
+
+<p>http://www.howtogeek.com/111479/htg-explains-whats-the-difference-between-sudo-su/</p>
+
+<blockquote><p>When you execute sudo command, the system prompts you for your current user account’s password before running command as the root user. By default, Ubuntu remembers the password for fifteen minutes and won’t ask for a password again until the fifteen minutes are up.</p></blockquote>
+
+<p>This is why you have a sudoers file! You define who&#8217;s allowed to run as
+root user and let them run as sudo.</p>
+
+<p><code>su -c 'some command'</code> on the other hand asks for root&#8217;s password.</p>
+
+<h2>Debian Hosts file</h2>
+
+<p>https://www.debian.org/doc/manuals/debian-reference/ch05.en.html#_the_hostname_resolution</p>
+
+<blockquote><p>The IP address 127.0.1.1 in the second line of this example may not be found on some other Unix-like systems. The Debian Installer creates this entry for a system without a permanent IP address as a workaround for some software (e.g., GNOME) as documented in the bug #719621.</p>
+
+<p>The <host_name> matches the hostname defined in the &#8220;/etc/hostname&#8221;.</p>
+
+<p>For a system with a permanent IP address, that permanent IP address should be used here instead of 127.0.1.1.</p>
+
+<p>For a system with a permanent IP address and a fully qualified domain name (FQDN) provided by the Domain Name System (DNS), that canonical <host_name>.<domain_name> should be used instead of just <host_name>.</p></blockquote>
+
+<h2>Loopback</h2>
+
+<p>e.g. localhost; it&#8217;s a way to access a computer&#8217;s own network services
+via a network interface. I guess I knew this, but I just didn&#8217;t think
+about how it unifies the interface&#8230; e.g. whether it&#8217;s local or remote,
+just use IP all the time.</p>
+
+<h2>ifconfig</h2>
+
+<p>&#8220;interface config&#8221;</p>
+
+<h2>debops: run site.yml first</h2>
+
+<p>Don&#8217;t skip this step!</p>
+
+<p>I used <code>rails_deploy</code> before site.yml and things were just ambiguously
+missing and I had to patch them up.</p>
+
+<h2>/etc/shadow</h2>
+
+<p>It&#8217;s where all the encrypted passwords live. <code>/etc/passwd</code> is all the
+user names, but lots of applications need access to it, so it can&#8217;t be
+plaintext. SO in <code>passwd</code> you put &#8216;x&#8217; for password and that causes
+<code>/etc/shadow</code> to be looked up.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-11T23:38:00-04:00" pubdate data-updated="true">May 11<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/04/15/ember-streams/">
+		
+			Ember Streams</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Ember Streams</h2>
+
+<p>My goal is to tease out the differences between Ember Streams and Rx.</p>
+
+<p><code>ember-metal/lib/streams/stream.js</code></p>
+
+<p>A stream has subscribers.</p>
+
+<h2>ConnectableObservable</h2>
+
+<p>Wraps a single subscription. Broadcasts events from this single
+subscription to all subscribers.</p>
+
+<h2>Rx Disposable</h2>
+
+<p>Anything with a <code>.dispose</code> method. So, what&#8217;s disposable in Rx?</p>
+
+<ul>
+<li>subscriptions</li>
+<li>observers</li>
+</ul>
+
+
+<p>What&#8217;s it used for?</p>
+
+<ul>
+<li>cleaning up some resource after subscriptions no longer need it</li>
+<li>generic disposal of no-longer needed objects
+
+<ul>
+<li>e.g. internal (non-detach) observers are disposable, but not really
+for the purpose of cleaning up some resource, but just making sure
+that no more events make it through</li>
+</ul>
+</li>
+</ul>
+
+
+<p>There isn&#8217;t a Subscription object in Rx, but you can think of the return
+value of <code>observable.subscribe</code> to be a &#8220;subscription&#8221;. Technically it&#8217;s
+an &#8220;auto-detach&#8221; observer; an auto-detach observer proxies to an
+underlying observer. When an auto-detach observer is disposed of, it
+disposed of the underyling subscribed observables&#8230; except that an
+observable isn&#8217;t a disposable; observables return disposables from their
+subscribe methods.</p>
+
+<p>Another way of thinking about this is that, on their own, observables
+don&#8217;t act/exist/do anything until they&#8217;re brought to life by a
+subscription. There&#8217;s nothing to &#8220;dispose&#8221; of until there is a
+subscription. Once someone subscribes, <em>then</em> you have a bunch of stuff
+that needs to be cleaned up at some point, hence disposables.</p>
+
+<p>Disposables have their use beyond Rx; <code>dispose</code> is kind of like a
+destructor; JavaScript doesn&#8217;t have destructors. Destructors don&#8217;t make
+<em>as</em> much sense in garbage-collected languages because their timing is
+non-deterministic (often it ends up being more practical to manually
+manage this yourself).</p>
+
+<h2>Ember <code>destroy</code></h2>
+
+<p>Ember&#8217;s got &#8220;destroy&#8221;-ables&#8230; <code>destroy</code> methods on objects, and
+<code>isDestroyed</code> properties that get set and checked, assertions if things
+are called on destroyed objects, etc.</p>
+
+<h3>Ember Object destroy</h3>
+
+<ul>
+<li>schedules call to <code>willDestroy</code> hook, meant for subclasses to
+implement</li>
+<li>aggressively tears down meta object
+
+<ul>
+<li>destroys bindings/observers
+
+<ul>
+<li>hence anyone listening to events on the obj or binding to values
+won&#8217;t get any more updates.</li>
+</ul>
+</li>
+<li>enables eager GC of metadata (it&#8217;s pretty easy in JS/any dynamic
+language to keep around references to stuff you don&#8217;t care about any
+more; at least with destroy you can eagerly remove things)</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>EventDispatcher destroy</h3>
+
+<p>Removes all dispatcher-added jQuery event listeners. Calls super.</p>
+
+<h3>Collection View</h3>
+
+<p>Calls super, removes array observers (which live on the content array
+and delegate to the collection view), destroy empty view.</p>
+
+<h3>Core View</h3>
+
+<p>First off, CoreView is &#8220;deprecated&#8221; in that it shouldn&#8217;t be used
+directly, but Ember.View still extends it.</p>
+
+<p>Calls super, destroys the DOM el (?), some other crap.</p>
+
+<p>Probably doesn&#8217;t make sense to write about until Glimmer.</p>
+
+<h2>Rx Observers</h2>
+
+<p>Class hierarchy</p>
+
+<ul>
+<li>Observer
+
+<ul>
+<li>AbstractObserver
+
+<ul>
+<li>AnonymousObserver</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>You can fulfill the Observer contract without using an Rx Observer
+class:</p>
+
+<p>http://jsbin.com/nupafu/11/edit?js,console</p>
+
+<pre><code>console.clear();
+
+var onNext      = () =&gt; { console.log('next'); };
+var onError     = () =&gt; { console.log('error'); };
+var onCompleted = () =&gt; { console.log('completed'); };
+
+var pojo = { onNext, onError, onCompleted };
+
+var legitObserver = Rx.Observer.create(onNext, onError, onCompleted);
+// same thing:
+// var legitObserver = new Rx.AnonymousObserver(onNext, onError, onCompleted);
+
+Rx.Observable.range(1,5).subscribe(pojo);
+Rx.Observable.range(1,5).subscribe(pojo);
+
+Rx.Observable.range(1,5).subscribe(legitObserver);
+Rx.Observable.range(1,5).subscribe(legitObserver);
+</code></pre>
+
+<p>The difference is that <code>legitObserver</code>&#8217;s hooks only fire for the first
+subscription, and nothing fires for the second; the pojo on the other
+hand runs through the range twice. Why? Because <code>Rx.Observer.create</code>
+creates an AnonymousObserver, which is an AbstractObserver, and
+AbstractObserver sets an <code>isStopped=true</code> flag to prevent further events
+from coming through. In other words, generally speaking an observer is
+only meant to be attached to one subscription, but if you want the same
+object to receive events from multiple observables (and for some stupid
+reason you don&#8217;t want to call <code>Observable.prototype.merge</code> then you can
+just pass <code>subscribe</code> some pojo with the necessary <code>onNext</code>, <code>onError</code>,
+<code>onCompleted</code> methods defined.</p>
+
+<p>Of course you can subscribe the same handler fns and internally two
+separate AnonymousObservers will get created, so events from both
+subscriptions will fire:</p>
+
+<pre><code>Rx.Observable.range(1,5).subscribe(onNext, onError, onCompleted);
+Rx.Observable.range(1,5).subscribe(onNext, onError, onCompleted);
+</code></pre>
+
+<h2>JS <code>_super</code> pattern</h2>
+
+<p>Seems obvious, but a decently nice pattern for calling a superclass&#8217;s
+method, taken from Ember&#8217;s streams:</p>
+
+<pre><code>merge(SomeSubclass.prototype, {
+  /* ... */
+
+  _super$destroy: SomeSuperclass.prototype.destroy,
+
+  destroy() {
+    this._super$destroy();
+
+    // do subclass-specific stuff
+  }
+});
+</code></pre>
+
+<h2>Routeable components / attrs / query params</h2>
+
+<pre><code>export default Ember.Route.extend({
+  queryParams: {
+    page: {
+      default: 1,
+      // refresh: true,
+      // API: infer/generate action name based on param?
+    }
+  },
+
+  model(params) {
+    // params has all params, including QPs
+  },
+
+  attrs() {
+    return {
+      model: this.model(),
+      updatePage: this.actions.updatePage
+    }
+  },
+
+  actions: {
+    updatePage(newPage) {
+      // this is a manual implementation of the inferred action
+      // based on page QP
+
+      // default implementation:
+      // when refresh: false (default)
+      this.component.set('page', newPage);
+
+      //this.component.set('page', newPage);
+    },
+  },
+});
+
+// articles template
+// 
+
+
+
+// articles component
+export default Ember.Component.extend({
+  // implicit attrs
+
+  //attrTypes: {
+  //  page: number,
+  //},
+
+  page: null,
+
+  // this is called initial render and prop updates
+  // (willReceiveAttrs called re-render only)
+  willRender(attrs) {
+    this.set('page', attrs.page);
+  },
+});
+</code></pre>
+
+<p>Lessons Learned:</p>
+
+<ul>
+<li>Route passes in read-only (non-mut) attrs to routeable component</li>
+<li><p>This prevents type-writer query params</p>
+
+<p>  // my-input component
+  export default Ember.Component.extend({</p>
+
+<pre><code>actions: {
+  doSomethingThatChangesValue() {
+    // TODO: mut api for changing thing
+    attrs.setValue...??
+  },
+},
+</code></pre>
+
+<p>  });</p></li>
+</ul>
+
+
+<h2><code>bashrc</code> and <code>bash_profile</code></h2>
+
+<p>ALWAYS forget the difference between these things. One of them is for
+login shells, one is both. Blurg.</p>
+
+<p>Answer:</p>
+
+<ul>
+<li><code>.bashrc</code> is read for interactive, non-login shells</li>
+<li><code>.bash_profile</code> is read for login shells</li>
+<li>Mac OS X uses login shells for its terminals, iTerm included</li>
+<li>hence, might make sense to just source <code>.bashrc</code> from <code>.bash_profile</code></li>
+</ul>
+
+
+<p>Also, the meaning of <code>rc</code> isn&#8217;t totally known; it could be &#8220;run
+commands&#8221; or &#8220;runtime configuration&#8221; but no one really agrees.</p>
+
+<h2>Glimmer Streams</h2>
+
+<p>KeyStream takes a source obj stream and a path and streams property values
+based on the provided key. Can be generated via sourceStream.get(&#8216;wat&#8217;).
+A source stream is just a stream of objects. KeyStreams stream property
+changes on objects. Changing the underlying object of the source stream
+will fire a change event on the KeyStream. KeyStreams watch for changes
+using Ember Observers (addObserver/removeObserver)</p>
+
+<p>KeyStreams (among others) have a setSource that changes the underyling
+stream of objects; calling setSource will always cause a notify().</p>
+
+<p>Why? mmun says:</p>
+
+<blockquote><p>in order to not notify we would have to eagerly compute the stream value
+and compare to the last value</p></blockquote>
+
+<p>So it&#8217;s a tradeoff between minimizing notify spam and losing value laziness.</p>
+
+<p>TODO: how do views use baseContext?</p>
+
+<p>ContextStream is a</p>
+
+<h2>Bash Completion</h2>
+
+<p>http://tldp.org/LDP/abs/html/tabexpansion.html</p>
+
+<ul>
+<li>works w Env vars, e.g. <code>$BASH_[tab]</code></li>
+<li>use <code>complete</code> to specify rules for a command, e.g. match
+filenames, filter by this regex, etc</li>
+<li>use <code>compgen</code> to pass shit to a filter fn written in bash
+(prefixed by underscore by convention)</li>
+</ul>
+
+
+<h2>why nom/bom/nombom</h2>
+
+<p>Most ember devs have to do something like this due to NPM fidgetries:</p>
+
+<pre><code>alias nombom='npm cache clear &amp;&amp; bower cache clean &amp;&amp; rm -rf node_modules bower_components &amp;&amp; npm install &amp;&amp; bower install'
+alias nom='npm cache clear &amp;&amp; rm -rf node_modules &amp;&amp; npm install'
+alias bom='bower cache clean &amp;&amp; rm -rf bower_components &amp;&amp; bower install'
+</code></pre>
+
+<p>Why is this necessary? Because:</p>
+
+<ol>
+<li>Even though npm will take into consideration your project&#8217;s
+dependency versions when choosing the version of dependencies of
+dependencies, once that package has been installed in <code>node_modules</code>,
+even if you bump your project&#8217;s dependencies, that old version will
+be cached in deep nestings of <code>node_modules</code>, hence it&#8217;s safest to
+nuke <code>node_modules</code>. Afaik only explains the <code>rm -rf node_modules</code>
+side of things.</li>
+<li>NPM won&#8217;t install a newer version of a dependency if a matching one
+exists in the NPM cache (<code>~/.npm/...</code>). Wait, isn&#8217;t this desirable?
+Shouldn&#8217;t this be a cue to bump your dependency version?</li>
+</ol>
+
+
+<p>This seems to be the chief reason why nombom is the only way to sane
+dependency installation:</p>
+
+<ul>
+<li>NPM caches modules by their version, e.g. <code>fstream@1.0.4</code> (these gets
+stored in <code>~/.npm/fstream/1.0.4/package.tgz</code></li>
+</ul>
+
+
+<h2>Bash + vim (or whatever)</h2>
+
+<ol>
+<li><code>set -o vi</code> so that bash is in Vim mode</li>
+<li>Type out a command</li>
+<li>Press escape (to leave &#8220;insert mode&#8221;)</li>
+<li>press <code>v</code> to open vim w the current command</li>
+<li>Save and quit to execute the command</li>
+</ol>
+
+
+<h2>Anamorphism</h2>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/05_Filtering.html</p>
+
+<p>Generating a (potentially infinite) vector from a scalar. Also known as
+an unfold.</p>
+
+<p>Actually this is better:</p>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/08_Transformation.html</p>
+
+<ul>
+<li>Ana(morphism) T &#8211;> IObservable<T></li>
+<li>Cata(morphism) IObservable<T> &#8211;> T</li>
+<li>Bind IObservable<T1> &#8211;> IObservable<T2></li>
+</ul>
+
+
+<h2>Hot observables, connect vs refCount vs singleInstance</h2>
+
+<p>http://jsbin.com/nupafu/20/edit?html,js,console,output</p>
+
+<p>I haven&#8217;t done <code>singleInstance</code> yet, but basically it&#8217;s like
+<code>publish().refCount()</code> except it&#8217;ll resubscribe if refcount goes to 0
+and then back to 1.</p>
+
+<h2>The ultimate nom nuance</h2>
+
+<p><code>npm</code> will assemble/download all project dependencies with the following
+rule:</p>
+
+<ul>
+<li>dependencies are installed only into the rootmost dependencies that
+specifies that dependency, e.g.</li>
+</ul>
+
+
+<p>If</p>
+
+<pre><code>proj
+  - foo
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p>The <code>npm</code> will <em>NOT</em> install a <code>baz/node_modules/foo</code> but will rather
+install a single foo at the root <code>node_modules</code>; the reason this works
+in Node land is that <code>require</code> always starts at the current dir and
+traverses upward.</p>
+
+<p>Shitty example: start with</p>
+
+<pre><code>proj
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p>then install at top level foo</p>
+
+<pre><code>proj
+  - foo
+  - bar
+    - baz
+      - foo
+</code></pre>
+
+<p><code>npm</code> will not remove <code>foo</code> from <code>baz</code>&#8230; you wind up with two different
+versions of <code>foo</code>, shadowing each other. Holy shit!!!!!</p>
+
+<p>NPM <code>dedupe</code> would remove the second foo. NPM 3 will probably call
+dedupe automatically when you do <code>npm install</code>. But dedupe has its own
+issues, not the least of which is that no one knows about it and it&#8217;s
+one more thing to tell your team about.</p>
+
+<p>MAIN POINT OF LEARNING:</p>
+
+<p><code>npm</code> delicately stitches things together such that Node&#8217;s folder-bubbling
+<code>require</code> resolution semantics can find the packages installed by <code>npm</code>.
+It doesn&#8217;t override <code>$LOAD_PATH</code> like Bundler does or anything like
+that.</p>
+
+<h2>NPM cherry-pick</h2>
+
+<pre><code>git cherry-pick -x f2c270e8d76e81a1921bbc31777aa3ac570ca87a
+</code></pre>
+
+<p>This is how I pulled in a change on an already-merged
+<code>idempotent-rerender</code>.</p>
+
+<h2>OnErrorResumeNext</h2>
+
+<p>What a horrible name!</p>
+
+<p>Basically, it&#8217;s <code>concat</code> that automatically recovers from errors.</p>
+
+<p>http://jsbin.com/nupafu/22/edit</p>
+
+<p>http://www.introtorx.com/Content/v1.0.10621.0/11_AdvancedErrorHandling.html</p>
+
+<blockquote><p>Just the title of this section will send a shudder down the spines of old VB developers! In Rx, there is an extension method called OnErrorResumeNext that has similar semantics to the VB keywords/statement that share the same name.</p>
+
+<p>Just as the OnErrorResumeNext keyword warranted mindful use in VB, so should it be used with caution in Rx. It will swallow exceptions quietly and can leave your program in an unknown state.</p></blockquote>
+
+<h2>Observable#finally invoked even on dispose</h2>
+
+<p>http://jsbin.com/nupafu/24/edit?html,js,console,output</p>
+
+<h2>ConnectableObservables can reconnect</h2>
+
+<p>http://jsbin.com/nupafu/25/edit?html,js,console,output</p>
+
+<pre><code>var c = Rx.Observable.interval(500).publish();
+
+c.subscribe((v) =&gt; {
+  console.log(v);
+});
+
+// returns a disposable that disconnects.
+var s = c.connect();
+
+setTimeout(() =&gt; {
+  s.dispose();
+  s = c.connect();
+}, 1200);
+</code></pre>
+
+<h2>Multicast</h2>
+
+<p>Didn&#8217;t understand this til I understood <code>publishLast()</code> and <code>replay()</code>,
+which basically apply <code>multicast</code> functionality through async subject
+and replay subject, respectively. Basically replay and async subjects
+just define different forms of caching, and if you want to share that
+functionality with connectable observable then you wanna use multicast.</p>
+
+<pre><code>.Publish() = .Multicast(new Subject&lt;T&gt;)
+.PublishLast() = .Multicast(new AsyncSubject&lt;T&gt;)
+.Replay() = .Multicast(new ReplaySubject&lt;T&gt;)
+</code></pre>
+
+<h2>Windows</h2>
+
+<p>I&#8217;ve talked about before, grokking it better now:</p>
+
+<p>http://jsbin.com/nupafu/27/edit?js,console,output</p>
+
+<pre><code>var o = Rx.Observable.range(5, 20);
+
+// HOT 
+var shared = o.publish().refCount();
+
+var openings = shared;//.filter((_, idx) =&gt; idx % 3 === 0);
+
+shared.window(openings, () =&gt; 
+  shared.filter((v, idx) =&gt; v % 5 === 0)
+).selectMany((obs) =&gt; {
+  return obs.toArray();
+}).subscribe((arr) =&gt; {
+  console.log(arr);
+});
+</code></pre>
+
+<p>Takeaways:</p>
+
+<ul>
+<li>closing selector gets passed the value emitted by windowOpenings that
+caused it to be opened in the first place.</li>
+<li>if the closing selector is based on the same source data stream, you
+almost certainly want to use <code>publish().refCount()</code>, or at least make
+sure the source stream is hot, or if it&#8217;s cold it doesn&#8217;t expensively
+re-create / duplicate some underlying resource</li>
+</ul>
+
+
+<h2>Subscribing inside Observer.create()</h2>
+
+<p>The contract for Observer.create is to</p>
+
+<ul>
+<li>fire <code>onNext*(onComplete|OnError)?</code> on the observer passed in</li>
+<li>return a disposable</li>
+</ul>
+
+
+<p>Based on that, the following is a perfectly valid way to alias an
+observable:</p>
+
+<p>http://jsbin.com/nupafu/30/edit</p>
+
+<pre><code>var proxy = Rx.Observable.create((o) =&gt; {
+  return Rx.Observable.interval(200).subscribe(o);
+});
+
+proxy.subscribe((v) =&gt; {
+  console.log(v);
+});
+</code></pre>
+
+<p><code>proxy</code> behaves just like <code>interval</code>.</p>
+
+<h2>C# <code>+=</code> and <code>-=</code> event subscription syntax</h2>
+
+<pre><code>this.Click += (s,e) =&gt; { MessageBox.Show(
+   ((MouseEventArgs)e).Location.ToString());};
+</code></pre>
+
+<h2><code>Either&lt;LeftT, RightT&gt;</code></h2>
+
+<p>In Rxx, <code>Either</code> is used a bunch to imply a broadcast of data from
+either source sequence A or source sequence B; one nice use case of it
+is how their <code>Retry</code> method works.</p>
+
+<p>http://rxx.codeplex.com/discussions/401272</p>
+
+<p>Basically, vanilla Rx retry disposes of the error that causes the retry
+to happen, which means it&#8217;s trick to do logging in a nice composable
+way.</p>
+
+<h2>Apple IP is <code>17.***.***.***</code></h2>
+
+<p>http://tapity.com/17-the-secret-to-finding-out-how-many-apple-employees-dig-your-stuff/</p>
+
+<p>https://support.apple.com/en-us/HT203609</p>
+
+<blockquote><p>The entire 17.0.0.0/8 address block is assigned to Apple</p></blockquote>
+
+<p>So you can check your logs to see if Apple&#8217;s snooping your shit.</p>
+
+<h2><code>embedded.mobileprovision</code></h2>
+
+<p>It is present in ALL <code>.ipa</code>s generated by XCode <em>including App Store
+builds</em>, but by the time you download <em>from the App Store</em>, it has been
+stripped out.</p>
+
+<h2>RxJava lifts, other things</h2>
+
+<p>https://speakerdeck.com/dlew/reactive-extensions-beyond-the-basics</p>
+
+<ul>
+<li>hot sequences have no subscription side effects</li>
+<li><p>cold sequences may have subscription side effects</p></li>
+<li><p>Observable.just(&#8220;1&#8221;)</p>
+
+<ul>
+<li>cold, because generates that string every subscription</li>
+</ul>
+</li>
+<li>Observable.interval()
+
+<ul>
+<li>cold, no duh</li>
+</ul>
+</li>
+<li>ReplaySubject
+
+<ul>
+<li>cold???</li>
+<li>hot if you&#8217;re first subscriber</li>
+<li>cold if there are items to replay, and then hot thereafter</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Redis: why use hash?</h2>
+
+<p>Why do</p>
+
+<pre><code>HSET somehash key val
+</code></pre>
+
+<p>when you can do HGET</p>
+
+<h2>redistogo disables <code>CONFIG</code> command</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1:39 PM &lt;machty&gt; any idea why on redis 2.8.11 i'm getting ERR unknown command 'config' ? docs say config command exists since 2.0.0
+</span><span class='line'>1:48 PM &lt;machty&gt; actually i think it's because CONFIG is disabled by redistogo service... unfortunately both CONFIG GET and CONFIG SET :/
+</span><span class='line'>1:55 PM &lt;xxxx&gt; machty: I actually work for Redistogo
+</span><span class='line'>1:55 PM &lt;xxxx&gt; We do disable it indeed
+</span><span class='line'>1:56 PM &lt;machty&gt; xxxx: ah, i guess there's no way to dynamically get maxmemory? was thinking of using it for alerts
+</span><span class='line'>1:56 PM &lt;xxxx&gt; Unfortunately not, there was talk of working on API for it but that development kind of got halted</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Apparently a lot of effort is being shifted from redistogo to
+ObjectRocket redis, which:</p>
+
+<ul>
+<li>doesn&#8217;t disable CONFIG</li>
+<li>has high availability (HA) enabled by default via sentinels</li>
+<li>http://redis.io/topics/sentinel</li>
+</ul>
+
+
+<h2>nethack</h2>
+
+<p>What is it?</p>
+
+<h2>Logstash</h2>
+
+<p>https://www.youtube.com/watch?v=RuUFnog29M4</p>
+
+<ul>
+<li><a href="http://www.nagios.org/">nagios</a>: infrastructure monitoring</li>
+<li>log = timestamp + data</li>
+<li>Logstash
+
+<ul>
+<li>open source</li>
+<li>config file is nginx-ish</li>
+<li>output graphs and a bunch of other things</li>
+<li>use grok
+
+<ul>
+<li>write patterns, and give them name</li>
+<li>reusable regex</li>
+<li>comes w 100 patterns</li>
+<li>no need for regex skills</li>
+</ul>
+</li>
+<li>data filter included to handle all varieties of timestamp format</li>
+<li>stop inventing time formats</li>
+<li>multiline filter for errors w stack trace</li>
+<li>gettimeofday</li>
+<li>NTP
+
+<ul>
+<li>network time protocol, used for syncing servers</li>
+<li>if apache uses gettimeofday</li>
+</ul>
+</li>
+<li>feature
+
+<ul>
+<li>transport and process logs to and from anywhere
+
+<ul>
+<li>get them in analyzable format</li>
+</ul>
+</li>
+<li>provide search and analytics</li>
+</ul>
+</li>
+<li>community
+
+<ul>
+<li>kibana: web interface for logstache</li>
+<li>logstash-cli: search / analytics from commandline</li>
+</ul>
+</li>
+<li>dreamhost deployment
+
+<ul>
+<li>20k apache events/sec peak</li>
+<li>250 mil events/day</li>
+<li>75gb day</li>
+<li>160 web servers</li>
+<li>7 logstach / elasticsearch servers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>ELK</h2>
+
+<p>http://blog.qbox.io/indexing-heroku-logs-into-elasticsearch-with-logstash</p>
+
+<ul>
+<li>elastic search
+
+<ul>
+<li>searchable database</li>
+</ul>
+</li>
+<li>logstash
+
+<ul>
+<li>parses/processes logs from many sources, stores in centralized location</li>
+</ul>
+</li>
+<li>kibana</li>
+</ul>
+
+
+<p>https://www.elastic.co/webinars/elk-stack-devops-environment</p>
+
+<ul>
+<li>installation
+
+<ul>
+<li>download, untar, and run</li>
+</ul>
+</li>
+</ul>
+
+
+<p>So who the fuck uses ELK stack? Just enormous companies that manage
+their own custom infrastructures?</p>
+
+<p>Answer: anyone who does enough devops to</p>
+
+<ul>
+<li>be smart enough to set it up</li>
+<li>know the pain of living without it</li>
+</ul>
+
+
+<p>Logstash is generally meant to live on the machine that&#8217;s producing the
+logs, and then it can forward it on to an elasticsearch cluster..</p>
+
+<h2>Ruby logging</h2>
+
+<blockquote><p>A flexible logging library for use in Ruby programs based on the design of Java&#8217;s log4j library.</p></blockquote>
+
+<p>https://github.com/TwP/logging</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-15T14:13:00-04:00" pubdate data-updated="true">Apr 15<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/03/25/shiggity-wat/">
+		
+			Shiggity Wat</a>
+	</h2>
+	<div class="entry-content">
+		<h2>IP Spoofing</h2>
+
+<p>What&#8217;s to stop you from sending out packets with someone else&#8217;s IP as
+the source?</p>
+
+<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
+
+<ul>
+<li>packet filtering
+
+<ul>
+<li>ingress: gateway blocks incoming packets with source IP that can
+only belong to someone inside of the network</li>
+<li>egress: gateway blocking outgoing packets with source IP from
+outside of the network (altruistic since it prevents hackers from
+hacking folk outside of the network)</li>
+</ul>
+</li>
+<li>upper layer protocol
+
+<ul>
+<li>TCP prevents IP spoofing by use of sequence numbers; an attacker
+would have to guess at a correct sequence number in order for it to
+be considered valid</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>RxJS</h2>
+
+<h3>generate</h3>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, // terminate condition
+    function (x) { return x + 1; }, // step fn
+    function (x) { return x*2; }    // map fn for values emitted...?
+);
+</code></pre>
+
+<p>The last fn is weird&#8230; seems like the above is the equivalent of:</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, 
+    function (x) { return x + 1; },
+    function (x) { return x; }    
+).map(x =&gt; x*2);
+</code></pre>
+
+<p>So why embed the <code>map</code> operator? or as they call it the select.</p>
+
+<pre><code>Rx.Observable.prototype.map === Rx.Observable.prototype.select // true
+</code></pre>
+
+<h3>generateWith relative/absolute time</h3>
+
+<p>Like <code>generate</code> but adds a time selector fn: for each value you can
+decide when it should fire. So you could feasible reverse the firing
+time of a series of events, e.g. 1,2,3,4,5 fires in the reverse order:</p>
+
+<pre><code>var source = Rx.Observable.generateWithRelativeTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return 100 * (5-x); }
+);
+
+"Next: 1"
+"Next: 2"
+"Next: 3"
+"Completed"
+</code></pre>
+
+<p>NOPE I was wrong; the time selector generates the time <em>between</em> events,
+not the time relative to the start of observation. I&#8217;m guessing that can
+be accomplished via the absolute form:</p>
+
+<pre><code>var now = Date.now();
+var source = Rx.Observable.generateWithAbsoluteTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return now + 100 * (5-x); }
+).timeInterval();
+
+"Next: 1:402"
+"Next: 2:6"
+"Next: 3:2"
+"Completed"
+</code></pre>
+
+<p>WRONG AGAIN! Order is preserved, with the already-elapsed events firing
+immediately once the first one fires.</p>
+
+<h3>generate as for loops:</h3>
+
+<p>Instead of</p>
+
+<pre><code>for (var x = 0; x &lt; 10; ++x) {
+  console.log(x*2);
+}
+</code></pre>
+
+<p>you do</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 10; }, 
+    function (x) { return x + 1; },  // ++x
+    function (x) { return x*2; }  
+);
+
+// or source.subscribe
+source.forEach((val) =&gt; {
+  console.log(val);
+});
+</code></pre>
+
+<p>Keep in mind that</p>
+
+<pre><code>Rx.Observable.prototype.forEach === Rx.Observable.prototype.subscribe
+</code></pre>
+
+<p>They&#8217;re aliases of each other, they both:</p>
+
+<ul>
+<li>activate an observable</li>
+<li>are intended to cause some sort of side effects</li>
+</ul>
+
+
+<p>Why write in observable form?</p>
+
+<ul>
+<li>composability</li>
+<li>much harder to troll yourself w &#8220;global&#8221; mutable vars used for iteration</li>
+<li>you&#8217;re writing in a way that can effortlessly handle the dimension of time</li>
+</ul>
+
+
+<h2>Subscriber stack</h2>
+
+<p>How would you get more explicit bubbling behavior that we&#8217;re familiar
+with from bubbling actions in Ember?</p>
+
+<p>Basically I want there to be some root subject/observable on a parent
+route, and then child routes can push their subscription onto that
+observable&#8217;s stack of subscriptions, and only the subscription at the
+top of the stack.</p>
+
+<p>This doesn&#8217;t accomplish bubbling per se; it&#8217;s a non-bubbling form of
+first-responder. Do we want bubbling?</p>
+
+<p>Actually yeah I think we want bubbling; what we don&#8217;t want is routes
+accidentally getting actions invoked on them because at some point later
+in the game a child route invokes an action (just string names) and it
+accidentally leaks out, causing havoc on parent routes, etc.</p>
+
+<p>But to be able to pass on the action is probably nice.</p>
+
+<pre><code>// within child route
+someParentRoute.observableStack.subscribe((e) =&gt; {
+  if (canHandle(e.value)) {
+    // do stuff
+  } else {
+    e.bubble();
+  }
+});
+</code></pre>
+
+<p>and this subscription would be <code>dispose</code>d upon route deactivation so it
+cleans itself up.</p>
+
+<p>The problem with this is once you start needing to apply operators, you
+need some way of signalling the bubble later on?</p>
+
+<pre><code>someParentRoute.observableStack
+               .delay(1000)
+               .map((e) =&gt; someCopyThatStillPreservesBubbleFn})
+               .subscribe((e) =&gt; {
+                 if (canHandle(e.value)) {
+                   // do stuff
+                 } else {
+                   e.bubble();
+                 }
+               });
+</code></pre>
+
+<h2>Alex versus invalidation</h2>
+
+<p>https://github.com/ef4/liquid-fire/issues/222</p>
+
+<h2>iOS 7 and 8 usage</h2>
+
+<p>As of 3/29/2015:</p>
+
+<ul>
+<li>iOS 8: 77%</li>
+<li>iOS 7: 20%</li>
+<li>Earlier: 3%</li>
+</ul>
+
+
+<h2>WKWebView</h2>
+
+<p>Only in iOS 8, comes with Nitro engine and bunch of other things.</p>
+
+<p>http://nshipster.com/wkwebkit/</p>
+
+<ul>
+<li>https://github.com/Telerik-Verified-Plugins/WKWebView
+
+<ul>
+<li>probably the best stab at a working plugin</li>
+<li>there are many issues (i would not use it at this point)</li>
+<li>spins up an embedded server in order to:
+
+<ul>
+<li>bypass CORS</li>
+<li>allow querying file:// protocol</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>It&#8217;s also only iOS8+; the plugin is smart enough to fall back to
+UIWebView, but then you&#8217;ve just bumped an exponent on complexity, more
+shit to test.</p>
+
+<p>There is also Ludei Cocoonjs. But Iiiii couldn&#8217;t get it to work. :)</p>
+
+<h2>Rx: switch</h2>
+
+<p>When you already have an Observable of Observables, you can call
+<code>.switch()</code> to produce an Observable that only emits values from the
+most recent observable :) isn&#8217;t terminology fun.</p>
+
+<p>So this:</p>
+
+<pre><code>obs.map((val) =&gt; someObservableBasedOnVal)
+   .switch();
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>obs.flatMapLatest((val) =&gt; someObservableBasedOnVal);
+</code></pre>
+
+<h2>Multiple cursors, DevTools and Vim</h2>
+
+<p>Command click: multiple cursors</p>
+
+<p>Cmd+D selects the next instance (effectively adding a multiple cursor).
+Really a cursor is a selection with zero chars selected.</p>
+
+<p>Just downloaded https://github.com/terryma/vim-multiple-cursors</p>
+
+<p>Ctrl-n: select next occurrence of hovered word</p>
+
+<p>Ctrl-p: undo most recent selection</p>
+
+<p>Ctrl-x: skip current selection</p>
+
+<p>MultipleCursorsFind: optionally select range in v mode, then type a
+regex to select them shits as multiple cursors.</p>
+
+<p>NOTE: in visual mode, <code>o</code> swaps the cursor to the other side to let you
+modify the selection from the other end.</p>
+
+<h2>Why flatMapLatest always trips me up</h2>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>console.clear();
+
+Rx.Observable.just(1)
+  .takeUntil(Rx.Observable.timer(10))
+  .doOnCompleted(() =&gt; console.log("doOnCompleted"))
+  .flatMapLatest(() =&gt; {
+    return Rx.Observable.timer(500);
+  })
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"doOnCompleted"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>This sequence might seem obvious here but I ALWAYS make the mistake of
+thinking that because there&#8217;s a takeUntil on the source observable,
+that&#8217;ll somehow cause all subscribing observables to immediately
+complete. NOPE. If that were the case, then promise chains wouldn&#8217;t work
+since they&#8217;re just single value observables that complete after their
+first value, and if completion force completed any subscribers then you
+couldn&#8217;t have async chains of logic. Anyway.</p>
+
+<p>So I guess that means you really need to gate at every potential side
+effect via takeUntil? e.g.</p>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"one"
+"two"
+"three"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>I guess I could dispose the sub, but then no onCompletes get fired
+(and it&#8217;s also just bad style).</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.dispose();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+</code></pre>
+
+<p>WHOA if I do onCompleted, then it skips all the shit in the middle
+and still runs the completion handler!</p>
+
+<p>http://jsbin.com/nupafu/4/edit</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.onCompleted();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"COMPLETE"
+</code></pre>
+
+<p>Question: is there a way to construct your observables, without
+resorting to chaining takeUntil&#8217;s before every side-effect, such that
+some onComplete along the way skips everyone else&#8217;s?</p>
+
+<p>http://jsbin.com/nupafu/6/edit</p>
+
+<pre><code>console.clear();
+var o = Rx.Observable.interval(200)
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"));
+
+o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    console.log("EVENT " + v);
+    if (v === false) {
+      this.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+"start"
+"EVENT false"
+"COMPLETE"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+...
+</code></pre>
+
+<p>Why? Does <code>this.onCompleted()</code> not kill the current subscription?</p>
+
+<p>This works:</p>
+
+<pre><code>var sub = o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    if (v === false) {
+      sub.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Apparently sub !== this. sub is an auto-detach observer, this is an
+anonymous observer. Some rxjs internals I don&#8217;t wanna go into right now.</p>
+
+<p>Maybe there&#8217;s a merge first operator that&#8217;ll work here.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/amb.md</p>
+
+<p><code>amb</code> is close, but once a value is produced from the flatMapChain, then
+the terminating observable is ignored. I want something that stops on
+the first completed thing.</p>
+
+<p>Note that <code>amb</code> has <a href="http://www.randomhacks.net/2005/10/11/amb-operator/">roots in Lisp</a>.
+The base functionality in RxJS I guess can be used to approximate
+something like</p>
+
+<p>Oh man, I might be a HUGE idiot&#8230; I JUST NEED TO FUCKING PUT THE
+TAKEUNTIL AT THE END OMG</p>
+
+<h2>I&#8217;m waiting</h2>
+
+<p>http://i.imgur.com/4ETXzun.webm</p>
+
+<h2>Observable.using</h2>
+
+<p>Resource/disposable + observable = using</p>
+
+<pre><code>Rx.Observable.
+  using(
+    function () { return openFile('temp.txt', 'w+'); },
+    function (fd) {
+      return Rx.Observable.range(0, 10000)
+        .map(function (v) { return Buffer(v); })
+        .flatMap(function (buffer) {
+          return appendAsync(fd, buffer);
+        });
+    }
+  )
+  .subscribe();
+</code></pre>
+
+<p><code>using</code> makes it clear what the resource/disposable. Otherwise you might
+mix the two awkwardly in the body of the fn passed to
+<code>Observable.create</code>.</p>
+
+<h2>Rx grammar</h2>
+
+<p>Observable sequences have the following grammar:</p>
+
+<pre><code>onNext* (onCompleted|onError)?
+</code></pre>
+
+<p>0 or more <code>onNext</code>s followed by an optional <code>onCompleted</code> OR <code>onError</code>.
+Infinite sequences or disposed sequences might never see <code>onCompleted</code>
+or <code>onError</code>.</p>
+
+<h2>Observable.defer vs Observable.create</h2>
+
+<p>Defer wraps another underlying observable in a factory function and
+guarantees that each subscription to the outer observable gets a fresh
+subscription to a totally newly-generated inner observable&#8230; but how is
+this different from cold observables in general?</p>
+
+<p>Well before I say that, lemme just say <code>defer</code> is a useful pattern for
+when you want to kick off a sequence but don&#8217;t really know which
+observable to start with; a lame attempt to do this is via</p>
+
+<pre><code>Rx.Observable.just()
+  .flatMap(() =&gt; {
+    if (wat) {
+      return oneObservable;
+    } else {
+      return anotherObservable;
+    }
+  })
+</code></pre>
+
+<p>This could more clearly be written as</p>
+
+<pre><code>Rx.Observable.defer(() =&gt; {
+  if (wat) {
+    return oneObservable;
+  } else {
+    return anotherObservable;
+  }
+});
+</code></pre>
+
+<p>But hey, observables are cold&#8230; how is this different than writing</p>
+
+<pre><code>var obs = wat ? oneObservable : anotherObservable;
+return obs; // someone will subscribe to it
+</code></pre>
+
+<p>The difference is the decision as to which observable to use is set once
+and for all for all future subscribers. HORRIBLE ENGRISH MR MATCHNEER.
+In other words: either all subscribers get oneObservable or they get
+anotherObservable. If you wanted to <em>defer</em> that decision until each
+subscription, that&#8217;s when you use defer.</p>
+
+<p>So why not just use a factory function without using <code>defer</code>, e.g.</p>
+
+<pre><code>function getObservable() {
+  var obs = wat ? oneObservable : anotherObservable;
+}
+
+// then anyone who wants to subscribe:
+getObservable().subscribe();
+getObservable().subscribe();
+getObservable().subscribe();
+</code></pre>
+
+<p>These all get fresh observables. But then if you did</p>
+
+<pre><code>var obs = getObservable();
+obs.subscribe();
+obs.subscribe();
+obs.subscribe();
+</code></pre>
+
+<p>then these would all get the same observable decided by the single  call
+to getObservable.</p>
+
+<p>TL;DR, Rx is REALLY HARD. You have seemingly simple primitives of
+observers and observables (saying nothing of that
+almost-namespace-collision), but the way scalar things become vectors,
+merged back into scalars, and not just at the events level but in the
+primitives themselves, and how things are hot and cold. Jesus Christ.</p>
+
+<h2>iOS Permissions</h2>
+
+<ul>
+<li>iOS7
+
+<ul>
+<li>no camera permissions</li>
+<li>location permissions, but doesn&#8217;t distinguish b/w foreground/background</li>
+<li>once denied, permissions dialog won&#8217;t show up</li>
+</ul>
+</li>
+<li>iOS8
+
+<ul>
+<li>permissions for audio and video, separately</li>
+<li>location
+
+<ul>
+<li>global location shutdown in addition to</li>
+<li>app-specific:
+
+<ul>
+<li>authorized for &#8220;When in use&#8221;</li>
+<li>authorized for background</li>
+<li>denied</li>
+</ul>
+</li>
+<li>if you change permissions
+
+<ul>
+<li>app will NOT restart</li>
+<li>if you&#8217;re disabling geolocation, when you come back
+into the app, you won&#8217;t get an error code about lack</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>for all permissions:
+
+<ul>
+<li>once denied, permissions dialog won&#8217;t show up
+
+<ul>
+<li>You can open Settings via settings url w some instructions
+telling user to reset</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-25T11:15:00-04:00" pubdate data-updated="true">Mar 25<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/03/19/today-i-learn-top/">
 		
 			Today I Learn Top</a>
@@ -625,573 +2524,6 @@ integration test.</p>
 
 
 <time datetime="2015-01-26T15:55:00-05:00" pubdate data-updated="true">Jan 26<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/01/13/reekris/">
-		
-			Reekris</a>
-	</h2>
-	<div class="entry-content">
-		<h2>More on Rx state machines</h2>
-
-<p>From https://github.com/logicalguess/rx-state-machine</p>
-
-<pre><code>// Pattern:
-// 1. start off with initial door state, 
-// 2. scan the UI event stream with a initial door state and a
-//    transforming function. The transforming function is the thing
-//    that runs the UI event on the current state, and returns the next state.
-//    In this case the transforming fn is `transition`.
-events.scan(door, transition).map(doorStatus)
-    .subscribe(function (value) {
-        view.render(value);
-    });
-</code></pre>
-
-<p>So what I want to do is expose an API where you can group related events
-into states, possibly share events between states, get an actions stream,
-and&#8230; somehow transition elsewhere after that?</p>
-
-<pre><code>var state = {
-  submitForm: function() {
-    // this is just a normal callback handler, just like actions api
-  },
-
-  // but maybe if you decorate your handler in some way...
-  $submitForm: function(stream) {
-    // ... you get a stream of actions instead
-    // What should this API look like? How to export another stream
-    // or property? 
-    // Goals:
-    // - make it easy/possible to
-    //   - derive flag/state from action progress
-    //   - 
-  }
-};
-
-&lt;form &gt;
-  &lt;SubmitButton action='submitForm'&gt;
-&lt;/form&gt;
-</code></pre>
-
-<h2>Harness</h2>
-
-<p>I don&#8217;t think I&#8217;ve ever grokked the word &#8220;harness&#8221; in a computer science
-context.</p>
-
-<blockquote><p>a set of straps and fittings by which a horse or other draft animal is fastened to a cart, plow, etc., and is controlled by its driver.</p></blockquote>
-
-<p>So, a horse harness, wrapped around a horse to control it. Or a
-parachute harness that wraps around a person to levitate them. Or a
-child-restraining harness.</p>
-
-<pre><code>so in this case, it takes a compiled ember CLI app that can normally run by itself, adds some bootstrap code, and runs it in a different environment
-
-wrapper is maybe a synonym
-
-but with slightly different connotations
-
-I think of a harness as "holding the software in place" so you can make modifications to it, then run it
-
-whereas wrapper implies you're trying to hide the underlying software
-</code></pre>
-
-<p>So put the otherwise self-contained / self-sufficient software in a
-harness so you can run a bunch of tests on it, run it in a different
-environment.</p>
-
-
-		
-		<a href="/blog/2015/01/13/reekris/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-13T17:06:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/01/07/a-life-of-possibilities/">
-		
-			A Life of Possibilities</a>
-	</h2>
-	<div class="entry-content">
-		<h2>More actions shit</h2>
-
-<p>Scenario: mobile app, I have a back button, I don&#8217;t want it to cause
-another transition if the app is in mid-transition.</p>
-
-<p>Mid-transition means:</p>
-
-<ul>
-<li>data has already started loading for a target route, or</li>
-<li>some animation is underway, e.g. liquid fire</li>
-</ul>
-
-
-<p>Present day Ember:</p>
-
-<ul>
-<li><code>willTransition</code> hook to check some &#8220;isTransitioning&#8221; state (which you
-have to remember to properly set and unset (though ember could/should
-probably provide this for you))</li>
-<li>some other router reopen hook, override transitionTo behavior. Pretty
-crappy.</li>
-</ul>
-
-
-<p>React w react-router:</p>
-
-<pre><code>Router.run(routes, function (Handler) {
-  // custom data-loading logic, construct your own chain of promises
-  // ...
-  // maybe use flatMapLatest so that you're only responding to the
-  // most recent transition, and then eventually:
-  // React.render(&lt;Handler/&gt;, document.body);
-
-  // this could be modeled by a stream 
-});
-</code></pre>
-
-<p>Hmm so I want to be able to push values into a stream (let&#8217;s call it raw
-stream), but have it only come out the other side if some other&#8230;
-stream? predicate? allows it.</p>
-
-<h2>Rx/Bacon Diagrams</h2>
-
-<ul>
-<li>Bacon: <code>flatMapConcat</code> (or <code>flatMapWithConcurrencyLimit(1)</code>)</li>
-<li>Rx: <code>concatAll</code></li>
-</ul>
-
-
-<p>Flatten, preserve order of previously started streams (buffers later streams)</p>
-
-<pre><code>...{1}
-......{2........3}
-.........{}
-............{4}
-{...1..2........3.4}
-</code></pre>
-
-<ul>
-<li>Bacon: <code>flatMap</code> (or <code>flatMapWithConcurrencyLimit(infinity)</code>)</li>
-<li>Rx: <code>mergeAll</code></li>
-</ul>
-
-
-<p>Flatten, don&#8217;t preserve order (no buffering). (limiting concurrency
-means buffering).</p>
-
-<pre><code>...{1}
-......{2........3}
-.........{}
-............{4}
-
-produces
-{...1..2.....4..3}
-</code></pre>
-
-<ul>
-<li>Bacon: <code>flatMapLatest</code></li>
-<li>Rx: <code>switchLatest</code></li>
-</ul>
-
-
-<p>Flatten, unsubscribe from previous streams, RIGHT when the new stream
-begins, not on its first value!</p>
-
-<pre><code>...{1}
-......{2........3}
-............{4}
-
-produces
-{...1..2.....4}
-</code></pre>
-
-<p>and</p>
-
-<pre><code>...{1}
-......{2........3}
-............{.........4}
-
-produces
-{...1..2.....4}
-</code></pre>
-
-<h2>CircleCI uses ClojureScript/Om</h2>
-
-<p>http://blog.circleci.com/local-state-global-concerns/</p>
-
-<h2>MRR</h2>
-
-<p>Monthly recurring revenue: a way to calculate monthly revenue based off
-of multiple dissimilar subscription terms.</p>
-
-<h2>Observable of 1 is a promise</h2>
-
-<p>http://www.infoq.com/presentations/async-programming-netflix</p>
-
-<p>Promises can&#8217;t be cancelled.</p>
-
-<ul>
-<li>Work is already being done (in flight)</li>
-<li>No way to stop it</li>
-</ul>
-
-
-<p>Observables are lazy. You can build a giant nested logical chunk of
-observable but nothing happens until, say, a <code>forEach</code> subscribes to the
-result of an observable that all the internal logic kicks into place.
-Not true for promises (unless someone implements a lazy thennable).</p>
-
-<p>TODO: hot vs cold observables distinction? does this exist in bacon?</p>
-
-<p>This is how the <code>retry</code> operator works&#8230; in the same way you can call
-<code>forEach</code> N times on an observable and kick start all the internal
-logic/event handlers, retry will internally do this until it gets a
-non-error response.</p>
-
-<p>This is unless promises, which have the <code>.then</code> operator:</p>
-
-<ul>
-<li>Regardless of whether you call <code>.then</code>, the promise logic has already started</li>
-<li>Calling <code>.then</code> at the same time just subscribes to the single,
-already running promise, and <code>.then</code> on an already resolved promise
-just returns that.</li>
-</ul>
-
-
-
-		
-		<a href="/blog/2015/01/07/a-life-of-possibilities/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-07T14:07:00-05:00" pubdate data-updated="true">Jan 7<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/01/04/everything-and-nothin/">
-		
-			Everything and Nothin</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Indemnity</h2>
-
-<p>http://en.wikipedia.org/wiki/Indemnity</p>
-
-<p>Where indemnitor A pays B a sum of money to cover losses suffered by B
-(regardless of whether A caused/was responsible for the loss).
-Car insurance is an example. Life insurance is not, since the payout is
-not based on any &#8220;valuation&#8221; of the life..</p>
-
-<p>HMOs basically get involved with health care options to try and secure
-efficient/cheap means of good healthcare, rather than traditional
-indemnity insurance, which would, uhh, just pay out after the fact and
-not get involved beforehand?</p>
-
-<h2>HMO act of 1973</h2>
-
-<p>http://en.wikipedia.org/wiki/Health_Maintenance_Organization_Act_of_1973</p>
-
-<ul>
-<li>signed by nixon</li>
-<li>intended to curb medical inflation</li>
-<li>provided grants/loans to start an HMO, removed certain state
-restrictions for federally qualified HMOs</li>
-<li>required employers w 25+ employees to offer federally certified HMO
-options <em>if</em> the employer was already offering traditional insurance</li>
-<li>did NOT require employers to offer health insurance</li>
-<li>established/solidied the term HMO</li>
-</ul>
-
-
-<h2>Humble Bundle</h2>
-
-<p>http://en.wikipedia.org/wiki/Humble_Bundle</p>
-
-<p>Series of collections (bundles) of digital thingers, often games,
-distributed via pay-what-you-want. The more you pay, the more that&#8217;s
-opened up. Configurable, but most pay goes to developers, some to
-charity, some to Humble.</p>
-
-<h2>What is JLD in Empire Blue?</h2>
-
-<p>JLD is a network code representing the Pathway Enhanced network of
-doctors, pharmaceuticals, etc.</p>
-
-<p>The ID number on the card is network + member ID.</p>
-
-<p>1-866-755-2680 Tech support for the website.</p>
-
-<p>Even though they don&#8217;t put it on the card this year, my co-pay is $30,
-which I always pay. After I blast through deductible, co-insurance kicks
-in. But preventative visits to PCP are freeeeee. But if it&#8217;s not
-preventative, the doctor will submit it to insurance as a different
-code, which I have to pay for out of deductible. Otherwise shit is
-freeeee.</p>
-
-<p>What&#8217;s the difference between Empire and Anthem?</p>
-
-<p>There&#8217;s Empire BlueCross BlueShield and Anthem BlueCross BlueShield?</p>
-
-<p>OK OK OK BlueCross BlueShield is a federation (bigass organization where
-smaller groups have decent autonomy). Was originally Blue Cross in 1929,
-and a separate Blue Shield in 1948, and they merged in 1982.</p>
-
-<p>Anthem is their only publicly traded company, and within New York they
-operate as &#8220;Empire&#8221; BlueCross. Jesus Christ these companies are too
-fucking huge.</p>
-
-<ul>
-<li>Blue Cross Blue Shield
-
-<ul>
-<li>Anthem (publicly traded)
-
-<ul>
-<li>Empire Blue Cross Blue Shield (operates out of New York)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Difference b/w renter&#8217;s and home owner&#8217;s insurance</h2>
-
-<p>http://coverhound.com/insurance-learning-center/homeowners-vs-renters-insurance-a-big-difference</p>
-
-<ul>
-<li>Renters
-
-<ul>
-<li>You insure belongings, not the building</li>
-</ul>
-</li>
-<li>Homeowners
-
-<ul>
-<li>You insure the building, and the belongings
-
-<ul>
-<li>Hence it&#8217;s way more expensive</li>
-</ul>
-</li>
-<li>Insurance is often mandatory if you have a mortgage, but probably
-not legally required if you straight up own the whole thing.</li>
-</ul>
-</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-04T22:26:00-05:00" pubdate data-updated="true">Jan 4<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/01/02/omnifocus-et-al/">
-		
-			OmniFocus Et Al</a>
-	</h2>
-	<div class="entry-content">
-		<h2>OmniFocus</h2>
-
-<ul>
-<li>Quick action add: ctrl+option+space</li>
-<li>Send to inbox: Ctrl+F6
-
-<ul>
-<li>Note this is a Service that some reason not all apps implement?
-But it works in Chrome so I think we&#8217;re good</li>
-</ul>
-</li>
-<li>Once you assign an inbox item to a project, it&#8217;s removed from the project</li>
-<li>Someday maybe:
-
-<ul>
-<li>Put in single action project, mark project as on hold.</li>
-</ul>
-</li>
-<li>So projects can have an On Hold status&#8230; but there&#8217;s also a waiting context?
-
-<ul>
-<li>Ah, both projects and contexts can choose what status they are&#8230;
-from the same list of possible statuses.</li>
-</ul>
-</li>
-<li>How does the repeat work? &#8220;1 week&#8221;? Why does it say multiple values?
-
-<ul>
-<li>Ah I should probably do this one at a time. The way it works is once
-you complete, it&#8217;ll immediately schedule another one.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>OmniFocus is implements GDT: <a href="http://gettingthingsdone.com/">Getting Things Done</a></p>
-
-<h2>Elephants in Trees</h2>
-
-<p>Why do you never see elephants hiding in trees?</p>
-
-<p>Because they&#8217;re very good at it.</p>
-
-
-		
-		<a href="/blog/2015/01/02/omnifocus-et-al/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-02T16:27:00-05:00" pubdate data-updated="true">Jan 2<span>nd</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/17/learnin-clojure/">
-		
-			Learnin Clojure</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Joy of Clojure</h2>
-
-<ul>
-<li>Imperative
-
-<ul>
-<li>a sequence of statements mutates program state</li>
-</ul>
-</li>
-<li>maenad (maenadic): wild and unrestrained: a female follower of
-Bacchus, traditionally associated with divine possession and frenzied
-rites</li>
-<li>expression problem
-
-<ul>
-<li>&#8220;The Expression Problem is a new name for an old problem. The
-goal is to define a datatype by cases, where one can add new cases
-to the datatype and new functions over the datatype, without
-recompiling existing code, and while retaining static type safety
-(e.g., no casts).&#8221;</li>
-<li>Java requires these to be declared up front, suffers</li>
-<li>Why the &#8220;expression&#8221; problem? &#8216;The label &#8220;Expression Problem&#8221; puns on expression = &#8220;how much can your language express&#8221; and expression = &#8220;the terms you are trying to represent are language expressions&#8221;.&#8217;</li>
-</ul>
-</li>
-</ul>
-
-
-
-		
-		<a href="/blog/2014/12/17/learnin-clojure/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-17T12:52:00-05:00" pubdate data-updated="true">Dec 17<span>th</span>, 2014</time></div>
 	
 
 
