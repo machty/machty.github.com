@@ -112,6 +112,911 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/11/20/stankonia/">
+		
+			Stankonia</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Zonebie</h2>
+
+<p>https://github.com/alindeman/zonebie</p>
+
+<p>Ruby gem to randomly change the current timezone to help catch bugs /
+false assumptions in your timezone-touching code.</p>
+
+<p>NOTE: trolled myself because i had a <code>_spec.rb</code> file that didn&#8217;t have
+<code>require 'spec_helper'</code> at the top and hence Zonebie magic wasn&#8217;t
+happening.</p>
+
+<h2>Hellbanning</h2>
+
+<p>http://en.wikipedia.org/wiki/Hellbanning</p>
+
+<p>Aka, shadowbanning. You don&#8217;t know you&#8217;re banned, but no one sees your
+stuff, people stuff responding to you. Used on HN.</p>
+
+<h2>Redis SLAVEOF</h2>
+
+<p>http://redis.io/commands/slaveof</p>
+
+<p>Master-slave replication. A slave has its own port, connects to parent
+with SYNC, starts a BGSAVE, shares shit, blah blahblah.</p>
+
+<p>You can even pretend to be a slave with netcat.</p>
+
+<pre><code>nc localhost 9595
+SYNC
+</code></pre>
+
+<p>And then you&#8217;ll get a stream of all the stuff a redis slave server sees.
+If you write to the master you&#8217;ll the slave being sent that same write
+request.</p>
+
+<p>Slaves can have slaves. If a master disconnects, slaves become
+masters&#8230;?</p>
+
+<p>Slaves are read only:</p>
+
+<pre><code>(error) READONLY You can't write against a read only slave.
+</code></pre>
+
+<p>If master disconnects, it&#8217;s still a slave until you tell it to
+<code>SLAVE NO ONE</code>, then it severs that connection, preserving the
+replicated data, and then the old master might connect to the new master
+and invert the master-slave relationship. PRETTY RAD. Or you could also
+tell the new master to become a slave, but that&#8217;ll mean it loses all of
+its data.</p>
+
+<p>Use slave chains if a master is overloaded w forwarding writes to all of
+its slaves. Instead of</p>
+
+<pre><code>- MASTER
+  - SLAVE 0
+  - SLAVE 1
+  - SLAVE 2
+  - SLAVE 3
+</code></pre>
+
+<p>You could do</p>
+
+<pre><code>- MASTER
+  - SLAVE 0
+    - SLAVE 1
+      - SLAVE 2
+        - SLAVE 3
+</code></pre>
+
+<h2>Git: tags are a flat hierarchy</h2>
+
+<p>You could release multiple versions of a project from different
+branches. There&#8217;s no requirement that all the versions you tag are on
+<code>master</code> or <code>release</code> or anything like that. Tags, as opposed to branch
+names, are a flattened hiearchy.</p>
+
+<p>A branch is just a pointer.</p>
+
+<p>A tag is just a pointer.</p>
+
+<p>The difference is that if you commit to a branch, the pointer moves. A
+tag on the other hand stays pointing to that commit SHA.</p>
+
+<p>A client can make sure a master write made it to slave via checking
+UUID&#8217;s, and using <code>INFO</code> command to check sync status, etc.</p>
+
+<h2>Redis Sentinel</h2>
+
+<p>http://redis.io/topics/sentinel</p>
+
+<p>Monitors master/slaves, restarts, notifies, failovers, etc.</p>
+
+<h2>Redis-cli</h2>
+
+<pre><code>-x                 Read last argument from STDIN.
+
+Example:
+cat /etc/passwd | redis-cli -x set mypasswd
+</code></pre>
+
+<p>So that sets <code>mypasswd</code> to the contents of a file.</p>
+
+<pre><code>$ echo "SOMEVALUE" | redis-cli -x set wat
+OK
+$ redis-cli get wat
+</code></pre>
+
+<h2>Redis: MULTI/EXEC doesn&#8217;t mean pipelining</h2>
+
+<p>Pipelining refers to a redis client queueing commands and then sending
+them to a Redis server all at once. The Redis server its has its own
+concept of queued commands via MULTI/EXEC, but the concepts are separate;
+you could invidually send a bunch of commands including MULTI/EXEC, and
+get responses to each, but once you&#8217;re in the MULTI/EXEC block, you
+start getting QUEUED as a response.</p>
+
+<h2>Redis: WATCH, DISCARD, MULTI</h2>
+
+<p>You can invalidate your own WATCH pretty immediately:</p>
+
+<pre><code>127.0.0.1:6379&gt; WATCH foo
+OK
+127.0.0.1:6379&gt; SET foo wat
+OK
+127.0.0.1:6379&gt; MULTI
+OK
+127.0.0.1:6379&gt; EXEC
+(nil)
+</code></pre>
+
+<p>Obviously you can&#8217;t put it in a MULTI</p>
+
+<pre><code>127.0.0.1:6379&gt; MULTI
+OK
+127.0.0.1:6379&gt; WATCH foo
+(error) ERR WATCH inside MULTI is not allowed
+</code></pre>
+
+<p>DISCARDS must take place within MULTI block.</p>
+
+<pre><code>127.0.0.1:6379&gt; DISCARD
+(error) ERR DISCARD without MULTI
+</code></pre>
+
+<h2>Optimistic Locking</h2>
+
+<p>http://en.wikipedia.org/wiki/Optimistic_concurrency_control</p>
+
+<p>Redis implements optimistic locking; it never locks a datatype and
+prevents someone from writing; rather, transactions can be aborted and
+retried if it&#8217;s detected that someone else wrote to the same data
+(detected via watch).</p>
+
+<p>Pessimistic locking would be, say, if a DB row was locked and someone
+wanting to write to it was blocked til the lock was given up, which
+apparently most databases do.</p>
+
+<p>Postgres (and other relational DBs) have other approaches:</p>
+
+<p>http://blog.2ndquadrant.com/postgresql-anti-patterns-read-modify-write-cycles/</p>
+
+<p>TL;DR Avoid read-modify-write</p>
+
+<h2>No pipelining + latency = multiplied awfulness</h2>
+
+<p>Just like w TCP or anything with roundtrips, latency is the multiplier.
+Good thing I wrote this.</p>
+
+<h2>Standard Deviation</h2>
+
+<p>http://en.wikipedia.org/wiki/Standard_deviation#History</p>
+
+<blockquote><p>The term standard deviation was first used[10] in writing by Karl Pearson[11] in 1894, following his use of it in lectures.</p></blockquote>
+
+<p>So there&#8217;s no statistical meaning behind the word &#8220;standard&#8221;. We&#8217;re all
+just talking about &#8220;deviation&#8221;, using the most basic/default/standard
+way of calculating it.</p>
+
+<h2>Ruby blocks v Python context manager</h2>
+
+<p>One thing I noticed regarding <code>return</code>s:</p>
+
+<pre><code>def foo():
+  print(1)
+  yield
+  print(2)
+
+def bar():
+  with foo():
+    print(999)
+    return "LOL"
+</code></pre>
+
+<p>In python this yields</p>
+
+<pre><code>1
+999
+2
+</code></pre>
+
+<p>and returns &#8216;LOL&#8217;. This is interesting because the <code>print(2)</code> is still
+hit, which isn&#8217;t what would happen in Ruby.</p>
+
+<pre><code>def foo
+  puts 1
+  yield
+  puts 2
+end
+
+def bar
+  foo { puts "999"; return "LOL" }
+end
+</code></pre>
+
+<p>yields</p>
+
+<pre><code>1
+999
+=&gt; "LOL"
+</code></pre>
+
+<p>The <code>2</code> isn&#8217;t printed because in Ruby, the return causes the caller to
+return.</p>
+
+<h2>Redis ZSETS sort by key when scores equal</h2>
+
+<p>That&#8217;s all.</p>
+
+<h2>Lua</h2>
+
+<p>http://en.wikipedia.org/wiki/Lua_(programming_language)</p>
+
+<p>Why use Lua:</p>
+
+<ul>
+<li>you&#8217;re building something that needs to be scriptable</li>
+<li>that shouldn&#8217;t have a heavy footprint from the interpreter</li>
+<li>that might be in an embedded system</li>
+<li>that is easy to grok</li>
+<li>that lots of people use already</li>
+</ul>
+
+
+<p><a href="http://en.wikipedia.org/wiki/Wikipedia:Lua">Wikipedia is Lua-extensible</a></p>
+
+<p>Redis offers Lua scripting now, useful in certain cases over
+pipelining/multi-exec, since (I think) it allows logic to be placed on
+the Redis server rather than having to do all logic on the application
+sides and remembering to do all the WATCH/MULTI/EXEC crap.</p>
+
+<h2>Redis: why lock?</h2>
+
+<p>Because WATCH/retry loops quickly degrade as the number of actors
+increase; particularly if the WATCH is coarse (only keys can be WATCH&#8217;d,
+not specific items in a hash).</p>
+
+<p>Instead of retrying, a lock might make sense in this case.</p>
+
+<p>Implementing locks is error-prone:</p>
+
+<ul>
+<li>a process grabs a lock, but takes too long and the lock times out, and
+process is blissfully unaware and keeps doing potentially destructive
+things</li>
+<li>process crashes, doesn&#8217;t releaes lock, and everyone wastes time
+waiting for the timeout</li>
+<li>process crashes, other blocked processes try to acquire lock at same
+time, think they each got the lock. (This is an issue in general but
+more likely to happen if many processes attempting-to-lock are blocked
+at the same time)</li>
+</ul>
+
+
+<p>SETNX only writes if not already present. It&#8217;s a test and set. Useful
+for locks. You can just spin-lock on a sleep(.001) loop.</p>
+
+<p>Increasing the granularity of lock generally improves perf.</p>
+
+<h2>Dogpiling</h2>
+
+<p>http://en.wikipedia.org/wiki/Cache_stampede</p>
+
+<p>aka cache stampede; under very high loads, multiple processes try to
+warm the cache at the same time, and performance takes a megahit.</p>
+
+<p>This book seems to suggest a more general phenomenon of the system
+taking a hit if lots of people are trying to acquire a lock. Probably
+because they&#8217;re all spin locks, and spin lock take processing time.
+Couldn&#8217;t we just implement a semaphore w BLPOP and LPUSH?</p>
+
+<h2>Horrible App Store Deploy BS</h2>
+
+<p>http://stackoverflow.com/a/26511924/914123</p>
+
+<h2>Qualcomm: Mobile Station Modem</h2>
+
+<p>http://en.wikipedia.org/wiki/Qualcomm</p>
+
+<p>MSM: The CPU on Nexus, made by Qualcomm. You see in the android source
+code a whole bunch.</p>
+
+<p>What is Qualcomm?</p>
+
+<blockquote><p>Qualcomm Incorporated is an American global semiconductor company that designs and markets wireless telecommunications products and services.</p></blockquote>
+
+<h2>ioctl</h2>
+
+<p>Swiss army knife for special io device files.</p>
+
+<h2>Dalvik</h2>
+
+<p>VM for android.</p>
+
+<h2><code>set -e</code></h2>
+
+<p>Makes it so that the shell terminates after the first unsuccessful
+command. You can kill a tmux/terminal pane by just doing</p>
+
+<pre><code>set -e
+ls somethingthatdoesnotexist
+</code></pre>
+
+<p>Boom.</p>
+
+<h2>Heroku Buildpack</h2>
+
+<p><code>compile</code> gets run and apparently passed the app root path</p>
+
+<pre><code>mkdir -p "$1/bin/server"
+cp "bin/nginx-$STACK" "$1/bin/server/nginx"
+</code></pre>
+
+<h2>Nginx logging</h2>
+
+<p>Customize via <code>error_log</code> and <code>access_log</code> directives, but keep in mind
+it&#8217;s going to expect to use <code>./logs/*.log</code> no matter what before it&#8217;s
+had time to read your config file (how else would it log a failure to
+parse a config file?).</p>
+
+<h2>Render right from config/routes.rb</h2>
+
+<pre><code>get '/horse_ass', :to =&gt; proc { |env|
+                                    [
+                                      200,
+                                      {"Content-Type" =&gt; 'text/plain'},
+                                      ["FUDGLES"]
+                                    ]
+                                  }
+</code></pre>
+
+<p>It&#8217;s just the Rack API (anything that <code>respond_to?(:call)</code>).</p>
+
+<h2>Millinery</h2>
+
+<p>Women&#8217;s hats. A Milliner is a person who sells hats.</p>
+
+<h2>Find and replace in project</h2>
+
+<pre><code>ack -l 'pattern' | xargs perl -pi -E 's/pattern/replacement/g'
+</code></pre>
+
+<p>could also do</p>
+
+<pre><code>ack -l OLD_TEXT | xargs sed -i "" "s/OLD_TEXT/NEW_TEXT/g
+</code></pre>
+
+<p>http://stackoverflow.com/a/8744108</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-20T16:25:00-05:00" pubdate data-updated="true">Nov 20<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/17/redis-the-slack-jawed-yokel/">
+		
+			Redis the Slack-jawed Yokel</a>
+	</h2>
+	<div class="entry-content">
+		<p>Some stores&#8217;ll never page to disk, but then again, some stores&#8217;ll, like
+Redis, the slack-jawed yokel.</p>
+
+<h2>Transparent Huge Pages</h2>
+
+<p>https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Performance_Tuning_Guide/s-memory-transhuge.html</p>
+
+<p>Huge pages are a Linux feature whereby pages, normally 4096 bytes,
+can be 2MB or 1 GB. Useful for some applications, difficult to
+configure, hence Transparent Huge Pages is provided automagically, I
+guess. But it&#8217;s not recommended for database workloads&#8230; why not?</p>
+
+<p>Probably Redis has the answer:</p>
+
+<p>http://redis.io/topics/latency</p>
+
+<p>Redis uses forking for</p>
+
+<ul>
+<li>generating RDB snapshot</li>
+<li>rewriting AOF</li>
+</ul>
+
+
+<p>Forking is slower in certain virtual settings; EC2 old Xen instances
+could take more than a second to fork. Newer ones using HVM
+(hardware virtual machine) leverages assistive hardware to make this
+efficient.</p>
+
+<p>If you have transparent hugepages, they&#8217;ll need to be COW&#8217;d upon fork,
+which is expensive. So you can disable them entirely:</p>
+
+<pre><code>echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled
+</code></pre>
+
+<h2>Hypervisor / Virtual Machine Monitor</h2>
+
+<p>http://en.wikipedia.org/wiki/Hypervisor</p>
+
+<p>Tis what it sounds like. It&#8217;s the thing that schedules processing time
+b/w multiple virtual machines. It&#8217;s the host to the guest virtual
+machines.</p>
+
+<h2>Multiple values in sysfs</h2>
+
+<p>http://techoverflow.net/blog/2013/08/01/how-to-check-if-hugepages-are-enabled-in-linux/</p>
+
+<pre><code>$ cat /sys/kernel/mm/transparent_hugepage/enabled
+always [madvise] never
+</code></pre>
+
+<p>I thought this meant the first value (active) was the current value and
+the other two were left as documentation, but no, it means madvise is
+current value among the other two options. Kinda wacky. Who parses this?</p>
+
+<p>IRC tells me this is a common sysfs pattern.</p>
+
+<pre><code>$ cat /sys/block/xvda/queue/scheduler
+[noop]
+</code></pre>
+
+<h2>SSR</h2>
+
+<p>Server-side render.</p>
+
+<h2>InfoSec</h2>
+
+<p>Information Security. Usually refers to IT security, but sometimes
+physical backups play into it, such as off-site tape backups.</p>
+
+<h2>Which process is using which port?</h2>
+
+<pre><code>lsof -i $PORT
+# e.g.
+lsof -i :5000
+</code></pre>
+
+<p><code>-i</code> just means filter by internet address. The above supplied only a
+port, you could also provide a host name.</p>
+
+<h2>Redis Pub Sub</h2>
+
+<p>Not super common because</p>
+
+<ul>
+<li>older versions might crash system / OS if clients don&#8217;t read published
+messages fast enough, back pressure, bloating outgoing buffer. New
+versions disconnect slow readers though.</li>
+<li>Unreliable message delivery if there&#8217;s an intermittent disconnect and
+reconnect.</li>
+</ul>
+
+
+<h2>Redis Expiration</h2>
+
+<ul>
+<li>you can manually DEL or use expiration</li>
+<li>expires whole keys, i.e. can&#8217;t expire individual items in a set (hence
+more common to use ZSETs with timestamps and manual deletion based on
+a range)</li>
+</ul>
+
+
+<h2>Stripe Token Retrieval</h2>
+
+<p>https://stripe.com/docs/api#retrieve_token</p>
+
+<p>This is only interesting since it clarified that a token wraps a card
+with details that you can access before you, say, add it to a card.
+This is the only way presently to prevent attaching the same card
+to a customer twice: retrieve and then add.</p>
+
+<p>But for my purposes I can just add it twice, and check the fingerprint
+after word to prevent duplicates on my app&#8217;s Customer obj.</p>
+
+<p>Why doesn&#8217;t Stripe de-dup? https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/OzmhpQOs_SU</p>
+
+<blockquote><p>We do not check, as many people have their own policies around when
+duplicates are acceptable or aren&#8217;t.
+However, you can look at the &#8220;fingerprint&#8221; property on cards that you
+have saved in order to dedup.</p></blockquote>
+
+<h2>Ruby Enumerators are awesome</h2>
+
+<p>&#8220;Hey how come there&#8217;s <code>each_with_index</code> but not <code>map_with_index</code>?&#8221;</p>
+
+<p>Use enumerators. Lots of the Ruby Enumerables return enumerators if you
+don&#8217;t pass a block to them, and they can be chained. For instance you
+can create a 1-indexed series via:</p>
+
+<pre><code>10.times.map { |i| i+1 }
+</code></pre>
+
+<p>Does this work with lazy enumerators?</p>
+
+<pre><code>(0..Float::INFINITY).lazy.map { |i| i + 1 }.first(10)
+</code></pre>
+
+<p>So yeah, just that ranges have no <code>times</code>&#8230; probably more correct to
+think of <code>10.times</code> as a range rather than other way around.</p>
+
+<h2>Stripe Checkout is only Web</h2>
+
+<p>There&#8217;s no native ios/android version of Stripe Checkout. It&#8217;s just web.
+iOS/Android SDKs offer token exchange utilities and some widgets but
+it&#8217;s not the full tailored UI solution that Checkout is.</p>
+
+<h2>Stripe passes through failed CVVs</h2>
+
+<p>https://support.stripe.com/questions/cvc-or-avs-failed-but-payment-succeeded</p>
+
+<p>You can still process a card with the wrong CVV. Though you probably
+shouldn&#8217;t.</p>
+
+<p>Test:</p>
+
+<blockquote><p>4000000000000101: cvc_check will fail.</p></blockquote>
+
+<h2>Rx state machine</h2>
+
+<p>https://github.com/logicalguess/rx-state-machine</p>
+
+<p>Basically every transition that occurs maps to a new state machine. You
+define a state machine in a classic OO manner but it streamifies it for
+you.</p>
+
+<h2>Write amplification w SSDs</h2>
+
+<p>http://en.wikipedia.org/wiki/Write_amplification</p>
+
+<p>When the amount you write to an SSD is amplified by the fact that you
+often have to flash much more than you originally intended to write
+based on how SSD works. So you wanna be careful about abusing <code>fsync</code>.
+Ramdisks might help too.</p>
+
+<h2>MySQL installation n00bness</h2>
+
+<p>There&#8217;s <code>mysql</code> and <code>mysql-server</code>. They&#8217;re separate packages. Derp.
+One can connect to a server and issue commands, one actually installs
+the database.</p>
+
+<pre><code>/usr/bin/mysqladmin -u root password 'new-password'
+</code></pre>
+
+<p><code>mysqld_safe</code> is a script for starting up the daemon (as opposed to
+<code>service mysqld start</code>?).</p>
+
+<pre><code>cd /usr ; /usr/bin/mysqld_safe &amp;
+</code></pre>
+
+<p>Apparently it&#8217;s helpful because it:</p>
+
+<ul>
+<li>restarts the server upon error</li>
+<li>runtime logging</li>
+</ul>
+
+
+<p>Apparently MySQL on Linux stores the DB files in</p>
+
+<pre><code>/var/lib/mysql/
+</code></pre>
+
+<p>There&#8217;s a secure install script that does a few things:</p>
+
+<pre><code>sudo /usr/bin/mysql_secure_installation
+</code></pre>
+
+<ol>
+<li>Encourages you to set root password</li>
+<li>Require <code>root</code> login must come from <code>localhost</code>; disable remote
+logins.</li>
+<li>Delete test database</li>
+<li>Reload perms table.</li>
+</ol>
+
+
+<h2>PHP FPM</h2>
+
+<p>http://php-fpm.org/</p>
+
+<p>A simple and robust FastCGI Process Manager for PHP</p>
+
+<p>I think this is necessary if you do nginx + php (apache has built in
+niceties w php).</p>
+
+<p>I already wrote about this shit and forgot it again:</p>
+
+<blockquote><p>CGI applications are processes spun up by a web server to handle an
+incoming request. Unscalable since spinning up processes all the time
+takes a toll on the OS, not to mention that there&#8217;s no way to do
+resource sharing (DB connection sharing, in-memory caching (because
+the process dies at the end of request)).</p>
+
+<p>With FastCGI, there&#8217;s a persisting FastCGI server that owns all of the
+CGI programs, and webservers interact with FastCGI via a binary protocol
+(over a socket (local) or TCP connection (remote)).</p></blockquote>
+
+<p>So FPM is the thing that stays up and running, and may spawn PHP
+instances, but can do the connection sharing.</p>
+
+<h2>WordPress FPM</h2>
+
+<p>http://codingsteps.com/install-php-fpm-nginx-mysql-on-ec2-with-amazon-linux-ami/</p>
+
+<pre><code>location / {
+    root   /var/www/html;
+    index  index.php index.html index.htm;
+}
+location ~ \.php$ {
+      fastcgi_pass   unix:/var/run/php-fpm/php-fpm.sock;
+      fastcgi_index  index.php;
+      fastcgi_param  SCRIPT_FILENAME  /usr/share/nginx/
+                       html$fastcgi_script_name;
+      include        fastcgi_params;
+}
+</code></pre>
+
+<p>Why location and not server? Isn&#8217;t this gonna be required within
+nginx.conf? I guess server means a proxy.</p>
+
+<p>I&#8217;m guessing it&#8217;s expecting this include to be within a server
+directive. Which I don&#8217;t want. I want simultaneous blogs, yo.</p>
+
+<p>AH OK figured it out:</p>
+
+<ul>
+<li><code>server</code> doesn&#8217;t just mean a proxy; it means nginx will spin up such a
+server, bind to the ports, and then proxy or serve the thing itself or
+pass to FastCGI, however you&#8217;ve configured it. <code>server</code> must be
+within the <code>http</code> context.</li>
+<li><code>location</code> must be within <code>server</code> or nested within <code>location</code>
+context.</li>
+</ul>
+
+
+<p>So we have</p>
+
+<pre><code>location / { ...
+</code></pre>
+
+<p>and</p>
+
+<pre><code>location ~ \.php$ { ... 
+</code></pre>
+
+<p>So the first matches root. The second case-insensitive matches anything
+ending in .php.</p>
+
+<h2>Nginx FastCGI</h2>
+
+<p>FastCGI is a binary protocol. Nginx implements that protocol. Just in
+the same way nginx can match a URL and proxy through to an underlying
+server, nginx can match a URL and proxy through to a FastCGI server.</p>
+
+<p>There might be multiple FastCGI-speaking servers that nginx might talk
+to. PHP-FPM is an alternative implementation over the default FastCGI.</p>
+
+<p>Nginx won&#8217;t spin up a fastCGI server (in the same way it won&#8217;t spin up a
+proxy server that it proxies requests to), but rather expects it to be
+already running and answering requests from a unix socket or internet socket.</p>
+
+<p>A fast-cgi process is a process manager. It might spin up 8 worker
+instances of, say, php, and reuse these instances efficiently. It might
+feature adaptive process spawning, like PHP-FPM does, or it might just
+block one request if N+1 requests arrive at the same time. Either way,
+it&#8217;s better than:</p>
+
+<ol>
+<li>Constant process starting/stopping that plain of CGI entails</li>
+<li>Building PHP into apache (<code>mod_php</code>), which means you can&#8217;t restart
+PHP (after, say, an upgrade) without restarting Apache. Also, you
+lose permissions granularity if it&#8217;s built into Apache, which opens
+security holes that could be closed by letting PHP run at a different
+uid/group, etc.</li>
+</ol>
+
+
+<p>So what&#8217;s PHP FPM?</p>
+
+<h2>Nginx index causing internal redirect</h2>
+
+<p>http://nginx.org/en/docs/http/ngx_http_index_module.html#index</p>
+
+<p>It should be noted that using an index file causes an internal redirect, and the request can be processed in a different location. For example, with the following configuration:</p>
+
+<p>Interesting. That&#8217;s how you can make a <code>/</code> behave like a PHP and be
+processed like a PHP.</p>
+
+<h2>Configure PHP-FPM to create unix domain socket with nginx owner/user</h2>
+
+<p>http://stackoverflow.com/questions/23443398/nginx-error-connect-to-php5-fpm-sock-failed-13-permission-denied</p>
+
+<p>You can configure php-fpm to create a unix domain socket and chown it
+to a different user/group. Since nginx workers need to talk to it, it
+should be configured to their user/group, which was <code>nginx</code> for me.</p>
+
+<p>Now I&#8217;m getting &#8220;No input file specified.&#8221;</p>
+
+<p>LONG STORY SHORT I was pointing to home/some-user/sites/wordpress and
+unless you&#8217;re root, that&#8217;s inaccessible.</p>
+
+<h2>PHP config</h2>
+
+<p>https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-ubuntu-12-04</p>
+
+<p>They want me to change <code>cgi.fix_pathinfo</code> to 0, else it will be fuzzy
+match a php file for processing, a potential security risk.</p>
+
+<p>Then I have to change PHP FPM to accept requests off a unix domain
+socket:</p>
+
+<pre><code>listen = /var/run/php5-fpm.sock
+</code></pre>
+
+<p>Makes sense, otherwise it assumes the fast cgi server is localhost 9000.</p>
+
+<p>So&#8230; does nginx spin up a FastCGI server? Is it part of nginx? Is it
+just a protocol?</p>
+
+<h2>System V Services</h2>
+
+<p>You don&#8217;t directly start mysqld, you do</p>
+
+<pre><code>service mysqld start
+</code></pre>
+
+<h2>CentOS</h2>
+
+<p>http://en.wikipedia.org/wiki/CentOS</p>
+
+<p>Largely a clone of Red Hat Enterprise Linux.</p>
+
+<p>http://unix.stackexchange.com/questions/27323/is-centos-exactly-the-same-as-rhel</p>
+
+<blockquote><p>CentOS is very close to being RHEL without the branding and support. In particular, the library versions are the same, so binaries that work on one will work on the other. The administration tools are the same and configured in similar ways. However, there are a few differences, as the two distributions sometimes apply different minor patches. For example, in this question, it was apparent that RHEL 5 and CentOS 5 apply different rules to identify files under /etc/cron.d.</p>
+
+<p>In other words, at the level of your course, you can treat CentOS and RHEL as interchangeable. But if you needed to look up the precise behavior of a program in a corner of the man page, you may encounter differences.</p></blockquote>
+
+<h2>Alice in Flames</h2>
+
+<p>http://techblog.netflix.com/2014/11/nodejs-in-flames.html</p>
+
+<p>Flame chart things I didn&#8217;t know:</p>
+
+<ul>
+<li>X axis isn&#8217;t necessarily passage of time; I think it is in Chrome but
+doesn&#8217;t need to be for purposes of flame chart?</li>
+<li>Width of a box is aggregate call time;</li>
+</ul>
+
+
+<p>Ehh I guess flame charts do different things? Seems that chrome X axis
+is in order. But it doesn&#8217;t need to be, in the same way that the tree
+view of calls isn&#8217;t in time order; you care about total elapsed time,
+not passage of time.</p>
+
+<h2>Heroku one-off dynos</h2>
+
+<p>https://devcenter.heroku.com/articles/one-off-dynos</p>
+
+<p>TL;dr heroku run console (and any other run) will use a one-off dyno.</p>
+
+<h2>Sampling vs Tracing</h2>
+
+<p>https://www.jetbrains.com/profiler/webhelp/Profiling_Guidelines__Choosing_the_Right_Profiling_Mode.html</p>
+
+<p>Sampling vs Tracing.</p>
+
+<p>TL;DR tracing is more expensive, affects perf, but is more accurate than
+sampling.</p>
+
+<h2>Wordpress Admin on SSL</h2>
+
+<p>http://codex.wordpress.org/Administration_Over_SSL</p>
+
+<p>If you&#8217;re reverse-proxying, you have to prevent loops via:</p>
+
+<pre><code>define('FORCE_SSL_ADMIN', true);
+if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+       $_SERVER['HTTPS']='on';
+</code></pre>
+
+<p>Remember that wp-config.php is going to be loaded on every stupid thing.
+Right?</p>
+
+<h2>Heroku buildpacks</h2>
+
+<p>Integration-tested via <a href="https://github.com/heroku/hatchet">Hatchet</a>.</p>
+
+<p>https://devcenter.heroku.com/articles/buildpack-api</p>
+
+<ul>
+<li>detect: determines whether to apply buildpack to app</li>
+<li>compile: apply the transformations</li>
+<li>release: provides metadata back to runtime&#8230;?</li>
+</ul>
+
+
+<p>If you want both a node and ruby setup, you can do</p>
+
+<pre><code>https://github.com/ddollar/heroku-buildpack-multi
+</code></pre>
+
+<p>and point to the default heroku-provided buildpacks within a .buildpacks
+file.</p>
+
+<h2>nginx-buildpack</h2>
+
+<p>https://github.com/ryandotsmith/nginx-buildpack/blob/master/bin/start-nginx</p>
+
+<p>This is a pretty awesome file that uses lots of Linux-y IPC trickery to
+get</p>
+
+<p>You must put the following in your Procfile:</p>
+
+<pre><code>web: bin/start-nginx bundle exec unicorn -c config/unicorn.rb
+</code></pre>
+
+<p>The start-nginx script spins up processes in the background; nginx
+will wait for</p>
+
+<h2>App server</h2>
+
+<p>Unicorn, Puma, Rainbows, zbatery, etc. It&#8217;s the thing that listens to a
+socket and runs your application code for you. Rails isn&#8217;t an app
+server, but Puma running a rails app is. Rails is an app framework. Puma is
+an app server.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-17T08:02:00-05:00" pubdate data-updated="true">Nov 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/11/15/redis-b-hayes/">
 		
 			Redis B Hayes</a>
@@ -4363,1138 +5268,6 @@ subset of the C standard lib.</p>
 
 
 <time datetime="2014-10-17T17:52:00-04:00" pubdate data-updated="true">Oct 17<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/10/10/faily-burnhole/">
-		
-			Faily Burnhole</a>
-	</h2>
-	<div class="entry-content">
-		<h2>(postgres) Transactions</h2>
-
-<p>http://www.postgresql.org/docs/8.3/static/tutorial-transactions.html</p>
-
-<ul>
-<li>group sequence of SQL into atomic (all-or-nothing) operations</li>
-<li>useful for preventing invalid state of a crash occurs in the middle of
-a sequence of queries</li>
-<li>also, transactions are isolated from each other; one in-progress
-transaction won&#8217;t see the partially complete transaction process of
-another</li>
-<li>postgres implicitly wraps every statement in a transaction block if
-you haven&#8217;t.</li>
-<li>transaction is <code>BEGIN</code> followed by <code>COMMIT</code> or <code>ROLLBACK</code>.</li>
-<li>savepoints allow for finer granularity:
-
-<ul>
-<li><code>BEGIN</code></li>
-<li><code>UPDATE ...</code></li>
-<li><code>SAVEPOINT wat</code></li>
-<li><code>UPDATE ...</code></li>
-<li><code>ROLLBACK TO wat</code></li>
-<li><code>UPDATE ...</code></li>
-<li><code>COMMIT</code></li>
-</ul>
-</li>
-</ul>
-
-
-<p>So how can I use this for nested world environments&#8230;</p>
-
-<h2>Sharing raised error with <code>ensure</code> block</h2>
-
-<p>Saw a Ruby thing I hadn&#8217;t seen before at
-https://github.com/rails/rails/blob/master/activerecord/lib/active_record/connection_adapters/abstract/transaction.rb#L186-L205</p>
-
-<p>Basically, a <code>rescue</code> must precede an optional <code>ensure</code> block, but whats
-cool is that the error caught be the rescue block is available to the
-<code>ensure</code> block. Stripped down, the basic construct is</p>
-
-<pre><code>def wat
-  do_something_that_might_fail
-  rescue Exception =&gt; e
-    # do some error handling
-  ensure
-    # do generic stuff
-    if e
-      # continue to do some error handling
-    end
-end
-</code></pre>
-
-<h2>ramdisk + ember-cli</h2>
-
-<p>tmpfs is a form of ramdisk. ramdisk is just a general purpose term for
-when a virtual file system is provided but the data just lives on memory
-rather than hard disk.</p>
-
-<p>Some questions I need to answer:</p>
-
-<ul>
-<li>are there different rules about paging when you create a ramdisk? Does
-it prevent its own memory from paging to disk any more than other
-processes&#8217; virtual memory?</li>
-<li>can you control paging in general? (other than going out of your way
-to regularly read memory)</li>
-</ul>
-
-
-<p>My ember-cli builds for a decently complex project are about 2s, which
-is waaaay better than the 20s they were a month ago. But I can get my 2s
-down to 1s my mounting a ramdisk and symlinking my tmp folder to it:</p>
-
-<pre><code>diskutil erasevolume HFS+ 'RAM Disk' `hdiutil attach -nomount ram://8388608`
-rm -rf tmp
-mkdir /Volumes/RAM\ Disk/tmp
-ln -s /Volumes/RAM\ Disk/tmp tmp
-</code></pre>
-
-<h2>Photoshop and tmpfs</h2>
-
-<p>http://www.tekrevue.com/tip/how-to-create-a-4gbs-ram-disk-in-mac-os-x/#comment-904649071</p>
-
-<p>This comment speaks of the diminishing returns of using a ramdisk as
-scratch space for Photoshop now that Photoshop is 64bit.</p>
-
-<p>If your system is 32bit, it means running processes can only access
-virtual mem addresses from 0 to 2<sup>32-1</sup> (0xFFFFFFFF or 4294967293).
-On 64 bit systems, that max address is doubled to 0xFFFFFFFFFFFFFFFF, or
-1.84 * 10<sup>19.</sup> If you had more than 4gig of RAM on a 32bit system, each
-process would still be limited to a max of 4gig memory usage simply due
-to the fact that it can&#8217;t reference memory addresses higher than 4gig.
-But Photoshop often needs more than 4gig, so what&#8217;s the solution?
-Scratch disks.</p>
-
-<p>Scratch disks are like virtual memory implemented in user space. If you
-need to store more temporary data than you can put into memory, just
-throw it on scratch disk. The problem is that scratch disks</p>
-
-<p>I could totally be bullshitting right now. I could be wrong. But seems
-right? Less wrong?</p>
-
-<h2>ln</h2>
-
-<p>I never remember the argument order for <code>ln</code>.</p>
-
-<p>It is FUCKING LEFTWARD. The thing you create on the right points to the
-thing on the left.</p>
-
-<pre><code>ln EXISTING_THING LINK
-
-&lt;-------------
-</code></pre>
-
-<p>The thing that confused me was that i kept thinking <code>-s</code> was an option
-that accepted an argument. It is not! It&#8217;s just an argless option. <code>ln</code>
-always has the format of new thing on right points to left. NEVER
-FORGOT.</p>
-
-<h2>Dockyard&#8217;s fixtory</h2>
-
-<p>https://github.com/dockyard/fixtory</p>
-
-<p>Convenient way to populate groups of fixtures, maintain references to
-the created instances, etc.</p>
-
-<h2>Execute/search permission</h2>
-
-<p>http://content.hccfl.edu/pollock/AUnix1/FilePermissions.htm</p>
-
-<p>Directories have different levels of &#8220;readability&#8221; based on their read /
-execute flags. A file record within a directory has a name and an inode.</p>
-
-<p>You can read names of files in a directory (<code>ls</code>) if you have read
-permissions on that directory, and permissions denied if not.</p>
-
-<pre><code>$ ls wat
-lol
-$ chmod -r wat
-$ ls wat
-ls: wat: Permission denied
-</code></pre>
-
-<p>If you want to access the inode in any way, like to read file
-attributes (permissions et al), or to read its contents, you&#8217;ll need
-execute (search) permissions on the directory.</p>
-
-<pre><code>$ chmod +r wat
-$ chmod -x wat
-$ ls wat
-lol
-$ ls -l wat
-ls: wat: Permission denied
-$ ls -i wat
-ls: wat: Permission denied
-$ cat wat/lol
-cat: wat/lol: Permission denied
-$ chmod +x wat
-$ ls wat
-lol
-</code></pre>
-
-<p>Then of course you need file read permissions to access the contents.</p>
-
-<p>So if you&#8217;re using absolute file paths, every directory along the way
-needs execute (search) permissions. But in the unusual case that you&#8217;re
-able to <code>cd</code> into a directory (thus setting the process&#8217;s current
-working directory, something the kernel tracks to control where relative
-file lookups occur from) before a parent directory&#8217;s read permissions
-are revoked, you&#8217;re grandfathered in if you&#8217;re using relative file perms
-from that point on, unless of course the path you provide steps out and
-in again.</p>
-
-<pre><code>$ chmod -x ..
-$ cat ../inner/woot
-../inner/woot: Permission denied
-$ chmod +x ..
-$ cat ../inner/woot
-lol
-</code></pre>
-
-<p>Basically, there&#8217;s no concept of deeper and deeper folders, just
-following pointers (<code>..</code> and <code>.</code> included), and pointers have permissions
-that must be adhered to in order to traverse them.</p>
-
-<h2>dev id and inode</h2>
-
-<p>Device id + inode uniquely identify a file across all file systems.</p>
-
-<p>If the file itself is a special device file, the inode for that file
-contains the major/minor id of the device.</p>
-
-<h2><code>utimes(2)</code> for manually changing access/modify timestamps</h2>
-
-<p>You can change the last modified time and last accessed time of a file.
-One use case is how <code>tar</code> and <code>unzip</code> preserve the original timestamps
-of archived files when they are unarchived.</p>
-
-<p><code>ctime</code> is changed to now when you run <code>utimes</code>.</p>
-
-<h2>group ID of newly created files</h2>
-
-<p>This is governed by 1. how you&#8217;ve configured the file system and 2.
-whether set-group-id is set on parent directory.</p>
-
-<p>I think this is one of the rare cases where set-group-id is meaningfully
-used on files rather than directories.</p>
-
-<h2>File deletion doesn&#8217;t require file permissions</h2>
-
-<p>You can delete a file without having any permissions on it, since all
-you&#8217;re doing is modifying a parent directory.</p>
-
-<h2>Why not have slashes for directories by default?</h2>
-
-<pre><code>$ ls
-inner   lol
-$ ls -F
-inner/  lol
-</code></pre>
-
-<p>Wouldn&#8217;t that slash on <code>inner/</code> be convenient to always display?
-Why isn&#8217;t that a default?</p>
-
-<p>Answer: because knowing whether a file is a normal file or a directory
-requires execute/search permissions on the directory that file lives in.
-You can list file/directory names with next to no permissions, but once
-you start looking at inode information (such as whether a file is a
-normal file or a directory), you&#8217;ll need search/execute perms, and the
-default behavior of <code>ls</code> is much less likely to get permission denied
-errors.</p>
-
-<p>So thinketh I. Could be wrong.</p>
-
-<h2>Accessing files w/o read perms</h2>
-
-<p>Even if a directory has no read permissions, if it has execute
-permissions, then files inside can still be accessed, but their names
-must be known ahead of time since you won&#8217;t be able to list the file
-names in that directory.</p>
-
-<p>Seems crazy, but useful for when you have a public directory and don&#8217;t
-want to list all the contents.</p>
-
-<p>I guess this also means it&#8217;s not possible to hide a single
-file/directory within a directory that has read permissions; i.e. if you
-can list one file in a directory, you can list them all.</p>
-
-<p>Neat tidbit: there is (was?) a process accounting flag ASU that&#8217;s set if
-the process made use of superuser privileges, and the kernel will only
-check superuser permissions last in case it can&#8217;t get privileges any
-other way than so that it can avoid unnecessarily setting ASU.</p>
-
-<p>It&#8217;s possible to wind up in a situation where an owner has less access
-than a group s/he belongs to, due to the fact that the kernel
-permissions algorithm will stop once it finds a matching user or group;
-it won&#8217;t try to find read (etc) permissions in all matching permission
-bits, it&#8217;ll just check the first set of bits it matches.</p>
-
-<p>ACLs (Access Control Lists) allow for per-user and per-group file permissions.</p>
-
-<h2>Sticky bit</h2>
-
-<p>Used to be a signal for a process to stay in swap, now it&#8217;s a signal
-set on directories that, when set, prevents non owners and non write
-accessors from being able to delete files they don&#8217;t own.</p>
-
-<h2>umask</h2>
-
-<p>A mask, attached to a process, that negates certain permissions.</p>
-
-<h2>EA: extended attrs</h2>
-
-<p>User EAs can only be applied to files and folders, because</p>
-
-<ul>
-<li>symlinks have no meaningful permissions, which means anyone in the
-world could clutter symlink w EAs if it were possible</li>
-</ul>
-
-
-<h2>executable permissions</h2>
-
-<p>If no one has executable permissions on a file, then not even <code>sudo</code> can
-get it to run as such.</p>
-
-<pre><code>$ chmod -x exe
-$ ./exe
--bash: ./exe: Permission denied
-$ sudo ./exe
-sudo: ./exe: command not found
-$ chmod o+x ./exe
-$ sudo ./exe
-wat
-</code></pre>
-
-<p>I guess another way of thinking about it is that a file isn&#8217;t an
-executable if no one has permissions to it.</p>
-
-<h2>Processes, cwd, directories, etc</h2>
-
-<p>Kernel tracks two attributes on running processes:</p>
-
-<ul>
-<li>root: the point from which absolute paths are looked up. Most
-processes have <code>/</code></li>
-<li>cwd: the directory from which relative paths are looked up</li>
-</ul>
-
-
-<p>(you can use <code>chroot</code> to change the root directory for a process)</p>
-
-<p>A directory is different from a file in that 1) it is specially marked
-as a directory in its inode attrs (remember this is why <code>ls -F</code>
-requires execute permissions on the parent directory), and 2)
-its contents are a table of filenames (read perms) and inodes
-(execute/search perms).</p>
-
-<p>You can&#8217;t use <code>read</code> on a directory, you must use other system calls,
-hence <code>cat: wat: Is a directory</code>. Basically, the kernel restricts you to
-certain syscalls to modify the directory; you can&#8217;t <code>read</code> / <code>write</code> it
-the way you would a normal file. The error that gets thrown is <code>EISDIR</code>.</p>
-
-<h2>inode table</h2>
-
-<p>A filesystem has a root inode table that inode entries in directories
-will refer to. The root inode table has the following features:</p>
-
-<ul>
-<li>index 0 is unused since a 0 is how directory inodes signal that an
-entry is unused</li>
-<li>index 1 tracks bad blocks on the disk</li>
-<li><p>index 2 is <code>/</code></p>
-
-<p>  $ ls -di /
-  2 /</p></li>
-</ul>
-
-
-<p>Woot woot! This stuff is so awesome.</p>
-
-<p>So it&#8217;s in this shared inode table that perms are stored. So if you hard
-link, any changes to the permissions of one link affects the other:</p>
-
-<pre><code>permstest :: touch shit1 &amp;&amp; ln shit1 shit2
-permstest :: ls -l shit*
--rw-r--r--  2 machty  staff  0 Oct 14 10:40 shit1
--rw-r--r--  2 machty  staff  0 Oct 14 10:40 shit2
-permstest :: chmod -rwx shit1
-permstest :: ls -l shit*
-----------  2 machty  staff  0 Oct 14 10:40 shit1
-----------  2 machty  staff  0 Oct 14 10:40 shit2
-</code></pre>
-
-<p>TODO: Is this the same w ACLs permissions?</p>
-
-<p>Hardlinks not supported by MS VFAT, but yes to NTFS.</p>
-
-<p>inodes don&#8217;t have filenames&#8230; that&#8217;s only in the directory&#8217;s table;
-remember that gzip and gunzip (and some other utilities) share the same
-inode, and depending on <code>argv[0]</code>, do different things:</p>
-
-<pre><code>$ ls -i `which gunzip` `which gzip`
-343041 /usr/bin/gunzip  343041 /usr/bin/gzip
-</code></pre>
-
-<p>The <code>rm</code> algorithm is simple: decrement the inode counter, and if 0,
-then deallocate. Reference counting, bitchez.</p>
-
-<p>Based on the above layout, you can&#8217;t (easily) get the filename of an
-open file, because multiple files might point to that inode, not to
-mention that even if you wanted to loop through the file system&#8217;s inode
-table, you still wouldn&#8217;t have the file name, just a matching inode
-number.</p>
-
-<p>Hardlinks can&#8217;t be created cross-file-system (since they&#8217;re just inode
-numbers. symlinks can handle this though).</p>
-
-<p>Hardlinks can&#8217;t (cept Mac due to Time Machine shit) link to directories
-due to circular dependencies (e.g. a nested folder hardlinking to an
-ancestor folder).</p>
-
-<p>Symlinks can be displayed with trailing <code>@</code> via <code>ls -F</code>. They don&#8217;t bump
-the inode counter. They can be created to point to nothing, or can have
-their target files deleted (dangling). Like all the other extra data
-displayed by <code>ls -F</code>, search perms are needed on the parent directory.
-Symlinks have a symlink file type stored in the inode.</p>
-
-<p>Tools are smart enough to avoid cirular dependencies when symlinks link
-to directories, because they actually can know they&#8217;re dealing with a
-symlink; a multi-hardlink doesn&#8217;t look any different than anything else.</p>
-
-<pre><code>$ ln -s ./circle ./circle
-$ ./circle
--bash: ./circle: Too many levels of symbolic links
-</code></pre>
-
-<p>For long ass symlinks (> 60 bytes), a data block (where file data is
-normally stored) is used to store the target link. But lots of file
-systems (<code>ext2</code>+ et al) have an optimization where if the target is less
-than 60 bytes, the target is written right into the inode structure
-where the data block pointers are usually kept. I tried reproducing this
-with a test case of a bunch of <code>stat</code> syscalls on a small-target symlink
-and a 60+ byte symlink and it didn&#8217;t make a difference, but that could
-just be due to disk cache on behalf of the kernel; the kernel kept the
-inode data in RAM so it was just as fast, but if the cache was cold then
-symlink lookups should be a lot faster.</p>
-
-<h2>unlinks don&#8217;t complete while files are open</h2>
-
-<p>If there are open file descriptors, an unlinked file won&#8217;t be totally
-deleted. Hence the common practice to create and unlink a temporary file
-so that you&#8217;re guaranteed when the handle closes, the file will be
-totally deleted. This also makes it possible to happily unlink a file
-and not worry whether someone else is using it&#8230; but don&#8217;t we sometimes
-get file-in-use errors, like &#8220;can&#8217;t delete this file since it&#8217;s being
-used be process X&#8221; stuff? Ah, you can delete a file out from under
-someone else. They might still save it if they&#8217;ve buffered the data
-(think Vim&#8217;s OMG THE FILE NO LONGER EXISTS warning).</p>
-
-<h2>NTFS vs FAT32</h2>
-
-<p>Windows 7 prefers NTFS. Earlier versions prefer FAT. FAT doesn&#8217;t have
-security-related features (I&#8217;m guessing permissions?). FAT was
-originally designed for floppies, and then used on hard drives. It&#8217;s
-still often used for thumb drives.</p>
-
-<h2>Transducers</h2>
-
-<p>http://blog.cognitect.com/blog/2014/8/6/transducers-are-coming</p>
-
-<p>http://jlongster.com/Transducers.js&#8211;A-JavaScript-Library-for-Transformation-of-Data</p>
-
-<p>God damn it. Guess I have to learn a new thing.</p>
-
-<h2>Reentrant</h2>
-
-<p><a href="wiki">http://en.wikipedia.org/wiki/Reentrancy_(computing)</a></p>
-
-<p>Reentrancy means the function can be interrupted and re-entered without
-harm. Actually I think more accurately it means it can be re-entered,
-even within the same thread, without causing issue. A function can be
-threadsafe and not re-entrant. e.g.</p>
-
-<pre><code>trap :INT do
-  puts "int"
-end
-Process.kill :INT, Process.pid
-puts "boom"
-</code></pre>
-
-<p>This yields a <code>deadlock; recursive locking (ThreadError)</code> every time,
-the same that would happen if you tried to double lock a mutex within
-the same thread. The reason is that <code>puts</code> calls <code>write</code>, and <code>write</code>
-mutexes around Ruby&#8217;s IO buffer. The signal handler doesn&#8217;t get called
-synchronously at <code>Process.kill</code>, but for whatever reason, the kernel
-decides to fire the signal handler during <code>write</code> in <code>puts "boom"</code>,
-after the write mutex has already been locked. Then the signal handler
-runs, tries to the do the same lock, and BOOM. Weird shit. But proof
-that <code>puts</code> and <code>write</code> aren&#8217;t re-entrant even though they&#8217;re thread
-safe. If you did <code>$stdout.sync = true</code>, they would be reentrant though
-and the above error would go away.</p>
-
-<h2>Process cwd</h2>
-
-<p>Hmmm a process&#8217;s cwd does contain a pathname to the cwd; I thought it&#8217;d
-just be some kind of inode pointer and not know the name? That said, the
-beginning of the path is truncated if there&#8217;s not enough space, though
-this is probably rare. That said, you can <code>readlink</code> the symlink at
-<code>/proc/PID/cwd</code> (this doesn&#8217;t exist on Mac though).</p>
-
-<h2><code>chroot</code> jail</h2>
-
-<ul>
-<li>FTP uses this so that anonymous users can&#8217;t just browse the whole
-system</li>
-<li>Linux doesn&#8217;t have hard-linked directories, but some UNIX varieties
-do, and a hardlink outside of a <code>chroot</code> jail will compromise the jail</li>
-<li>Most programs can&#8217;t run in <code>chroot</code> jail because they rely on
-dynamically linked libraries, and the link targets are often absolute
-and expect <code>/usr</code> to live.</li>
-</ul>
-
-
-<h2>Symlink perfs</h2>
-
-<p>I was enouraged by the fact that on ext2+, symlinks whose targets are
-less than 60 chars long get written into the inode rather than into a
-separate data block (it&#8217;s basically written where the data block
-pointers are usually saved, which amounts to ~60 bytes). Sooo I did a
-quick benchmark to see if ember-cli would benefit, and alas (and go
-figure?) 60 char perfs that apply to ext2 (and 3 and 4) don&#8217;t apply to
-OS X&#8217;s HFS+.</p>
-
-<p>I ran a test creating 100,000 symlinks, one where each symlink target
-was 59 chars, and another with 60, and the difference is dramatic:</p>
-
-<pre><code>Linux, ext4, 60 char symlink, 100,000
-
-real    0m19.642s
-user    0m0.468s
-sys     0m3.988s
-
-Linux, ext4, 59 char symlink, 100,000
-
-real    0m2.005s
-user    0m0.360s
-sys     0m1.436s
-</code></pre>
-
-<p>I&#8217;m sad, because most ember-cli / broccoli symlinks are above the 60
-limit, and this would have brought us some insane perfs, but alas alas
-alas, most people do ember-cli work on OS X, not Linux. Oh god damn
-well.</p>
-
-<h2>ARS Technica on why HFS+ blows</h2>
-
-<p>http://arstechnica.com/apple/2011/07/mac-os-x-10-7/12/#file-system</p>
-
-<ul>
-<li>HFS is from 1985</li>
-<li>HFS+ (aka Mac OS Extended) released in 1998.</li>
-<li>OS X (2001) unfortunately kept HFS+ around even though it sucks</li>
-</ul>
-
-
-<p>So yusuck:</p>
-
-<ul>
-<li>16 bit processing resolution in Mac&#8217;s implementation (Motorola 68000
-hangover). Not really sure what this means, not sure why if the data
-is 32+ bit why 16 is the resolution? So many things I don&#8217;t know.</li>
-<li>Time resolution of HFS+ is only a second, shitty for file timing logic
-in <code>make</code>, et al. Most modern fs&#8217;s have nanosecond resolution.</li>
-<li>Global file lock on metadata; only one process can write to a file at a time. NOPE
-that&#8217;s obviously incorrect. It means only one process can update the
-file system at a time&#8230; I don&#8217;t understand? Can&#8217;t add multiple files to
-a directory at the same time? Metadata?</li>
-<li><p>No sparse files. The following ruby code will instantly eat a gig on
-HFS+. On ext2 you could still use that gig space for other files, and
-intermediate blocks would only be allocated as needed:</p>
-
-<p>  File.open(&#8216;bigassfile_DELETE_ME&#8217;, &#8216;w&#8217;) do |f|</p>
-
-<pre><code>f.seek(1000000000)
-f.puts('l')
-</code></pre>
-
-<p>  end</p></li>
-</ul>
-
-
-<p>Result: Finder reports -=1gig of freespace, as expected (if there are no
-sparse files). Weird though: <code>ls -l</code> reports only 87 block usage; I
-would have expected a lot more give the fact that the file system is
-allegedly allocating a bunch of zeroes? ANSWER: I think it&#8217;s because OS
-X uses a VFS that pretends to support sparse files over HFS+, which
-doesn&#8217;t, but I need to confirm this.</p>
-
-<ul>
-<li>Hard links to directories is supported, which is kinda weird.
-Internally it works by hiding them in hidden a hidden directory (my
-guess is to avoid cycles?)</li>
-<li>No concern about data integrity. Easy for meta data to get corrupted.
-Report showed that ~30% of HFS+ systems had mismatched checksum. Data
-loss likely.</li>
-</ul>
-
-
-<h2>Endianness</h2>
-
-<p>Not to be confused with &#8220;bit-endianness&#8221;, the atomic unit Endianness
-as people normally talk about it is the byte, rather than the order of
-bits. Endianness is concerned with the byte order in a &#8220;word&#8221; (the unit
-of a CPU processing, e.g. 32 bit machine vs 64 bit machine refers to the
-word size and has implications on the size limits of integers, memory
-addresses, etc.). Whether the most significant bits appear at the
-beginning or end of a word is the endianness, big-endian or
-little-endian. You have to care about this stuff if you&#8217;re manually
-converting bytestreams between different systems with different
-endianness. Some processors are bi-endian.</p>
-
-<h2>POODLE attack</h2>
-
-<p>https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00</p>
-
-<p>SSL 3.0 preceded TLS 1.0 and has vulnerabilities that allow an attacker
-to see plaintext communication. Some clients go beyond the TLS handshake
-specifications and will fall back to SSL 3.0 if a TLS handshake fails in
-order to support the case where they&#8217;re talking to a legacy ass server
-that runs SSL 3.0. A man in the middle can fuck with a handshake,
-causing it to fail, and causing the TLS client to try communication with
-SSL 3.0, and many servers supporting legacy SSL 3.0 will just happily
-fall back to that, exposing the connection to SSL 3.0&#8217;s weaknesses.</p>
-
-<p>The solution is for clients falling back to SSL 3.0 to send a backwards
-compatible cipher suggestion that newer patched servers will look out
-for and will treat as a signal that &#8220;this SSL 3.0 connection attempt is
-only a fallback, and you shouldn&#8217;t accept this and start speaking in
-3.0&#8221;. Legacy servers will just see it as a suggested cipher that they
-don&#8217;t understand and will just choose another cipher that they do, and
-continue communicating in their legacy 3.0 way. Case in point: upgrade
-your servers.</p>
-
-<p>The name for the patch is the TLS Signaling Cipher Suite Value (SCSV).</p>
-
-<h2>inotify config</h2>
-
-<p>On Linux you can configure aspects of <code>inotify</code> by writing values in to
-various files in <code>/proc/sys/fs/inotify</code>. Question: why this format of
-config? Why a single value in each? Why not <code>sysctl</code>?</p>
-
-<h2>ssh escape char</h2>
-
-<p><code>~</code> at the beginning of a line is an ssh escape char; if your connection
-is hung, you can do <code>~.</code> (at the beginning of a line; you can force this
-by pressing enter) and that&#8217;ll disconnect.</p>
-
-<pre><code>Supported escape sequences:
- ~.   - terminate connection (and any multiplexed sessions)
- ~B   - send a BREAK to the remote system
- ~C   - open a command line
- ~R   - request rekey
- ~V/v - decrease/increase verbosity (LogLevel)
- ~^Z  - suspend ssh
- ~#   - list forwarded connections
- ~&amp;   - background ssh (when waiting for connections to terminate)
- ~?   - this message
- ~~   - send the escape character by typing it twice
-</code></pre>
-
-<p>Mmmm command line, this seems interesting if you&#8217;re using ssh for
-proxying:</p>
-
-<pre><code> ~C      Open command line.  Currently this allows the addition of port for-
-         wardings using the -L, -R and -D options (see above).  It also
-         allows the cancellation of existing port-forwardings with
-         -KL[bind_address:]port for local, -KR[bind_address:]port for remote
-         and -KD[bind_address:]port for dynamic port-forwardings.  !command
-         allows the user to execute a local command if the PermitLocalCommand
-         option is enabled in ssh_config(5).  Basic help is available, using
-         the -h option.
-</code></pre>
-
-<h2>Signals</h2>
-
-<p>Signals are sync; between generation and delivery, they are pending.
-Most often sent immediately if running, or once it&#8217;s next scheduled to
-run. Signals can be temporarily blocked by signal masks til the process
-is ready to handle them (to prevent rude interruptions). Signals can
-yield the following reponse from processes:</p>
-
-<ul>
-<li>ignore: kernel never tells process about it</li>
-<li>terminate: &#8220;abnormal&#8221; (non <code>exit</code>) termination</li>
-<li>core dump and terminate: core dump is image of virtual memory</li>
-<li>stop execution (suspend)</li>
-<li>resume execution</li>
-</ul>
-
-
-<p>I guess the thing I&#8217;ve learned here is that by setting signal masks,
-you&#8217;re telling the kernel ahead of time what should happen when signals
-are sent to this process, rather than setting some process-level
-handlers that server as callbacks when these signals arrive;
-particularly ignore &#8211; I thought it&#8217;d still make it to some low level
-library in the process, but sounds like it&#8217;s rather just the kernel
-knowing ahead of time not to even send it.</p>
-
-<p>You can&#8217;t tell a signal that doesn&#8217;t by default terminate/core dump to
-terminate/core dump, but you can install a signal handler and then call
-<code>abort()</code> or whatever to send yourself a signal that <em>will</em> cause such a
-thing to happen.</p>
-
-<p>On Linux you can look up a process&#8217;s signal mask via <code>/proc/PID/status</code>.
-You can also use <code>ps -p $$ -o sigmask,sig</code> to get info about signal
-masks.</p>
-
-<p><code>SEGV</code> means segmentation violation.</p>
-
-<p><code>SIGBUS</code> is like <code>SIGSEGV</code> but in very particular situations, such as
-reading past the end of a memory mapped file. BUS is hipster SEGV.</p>
-
-<p>Send signals with <code>kill</code> (whose name is a hangover from a time in which
-most if not all signals terminated a process). Different <code>pid</code> values do
-different things:</p>
-
-<ul>
-<li>positive: send signal to pid</li>
-<li><code>0</code>: send signal to processing group of calling process, including
-calling process</li>
-<li><code>&lt; -1</code>: send signal to process group dilineated by the absolute value of
-the supplied pid</li>
-<li><code>-1</code>: send to all processes you have permission to send to, excluding
-<code>init</code>/<code>launchd</code> (pid 1) and the calling process. AKA broadcast
-signals.</li>
-</ul>
-
-
-<p><code>init</code>/<code>launchd</code> can only be sent signals for which it has signal
-handlers, to prevent accidental killing of this precious process.</p>
-
-<p><code>CAP_KILL</code> is the privilege that allows a process to send a signal to
-whatever.</p>
-
-<p><code>SIG_CONT</code> is special in that it can be sent by unprivileged processes
-to any process in the same session to allow for job-control shells to
-restart stopped jobs that have changed their user IDs.</p>
-
-<p>Null signal 0 can be used to test if a process exists and we can send a
-signal to it. Of course you might troll yourself given that pids are
-recycled.</p>
-
-<p>Plain ol (non-realtime) signals don&#8217;t queue; they just internally set a
-bit in the kernel and fire next time that process runs. This is why
-multiple signals fired very quickly might get coalesced into one</p>
-
-<h2>How to check if process is still running</h2>
-
-<ul>
-<li>(for child processes) <code>wait</code></li>
-<li>semaphores and exclusive file locks; if you know a process locks a
-file, and you can acquire the lock or semaphore, you know it must be
-dead. I&#8217;m guessing pidfiles work this way?</li>
-<li><code>stat</code> <code>/proc/PID</code>.</li>
-<li>IPC sockets go dead, etc</li>
-</ul>
-
-
-<h2>async-signal-safe</h2>
-
-<p>A function is async-signal-safe if</p>
-
-<ol>
-<li>it&#8217;s reentrant</li>
-<li>it can&#8217;t be interrupted by signal handler</li>
-</ol>
-
-
-<p>Signal handlers should ideally only call async-signal-safe functions.
-Note that if you have a signal handler installed for multiple signals,
-or if you have <code>SA_NODEFER</code>, a handler function might get simultaneously
-and might not be reentrant relative to itself if it mucks with globals,
-even if the main app code doesn&#8217;t touch those globals.</p>
-
-<p>In C-land (and Java) you can use the volatile keyword to prevent
-variables from living in registers, or at least guaranteeing that a
-write to a variable goes all the way to memory, which is an important
-guarantee for when threads share and write to a global variable.</p>
-
-<p>In JRuby, the Atomic gem is useful as a lock-free test-and-set way of
-performing an update to a value, and detecting/retrying if someone else
-interrupted your operation.</p>
-
-<p>http://moonbase.rydia.net/mental/blog/programming/atomic-operations-in-ruby.html</p>
-
-<p>Parallelism is moronically hard.</p>
-
-<h2>Signal handler recovery</h2>
-
-<p>You can do <code>setjmp</code> and <code>longjmp</code>&#8230; cray crqy.</p>
-
-<p>When the kernel runs a handler, it adds a bit to the <code>sa_mask</code> and then
-removes it when handler returns, so if you <code>longjmp</code>, you need to make
-sure to unset it. (Presumably NODEFER prevents this bit from being set,
-allowing the handler to be called multiple times?)</p>
-
-<h2>Signal Stack</h2>
-
-<p>Processes have a signal stack separate from the regular stack for
-running signal handlers. You can use <code>sigaltstack</code> to change it to some
-preallocated region, useful for when you want to catch SIGSEGV on a
-stack overflow (which means there&#8217;s no more room on the process stack
-for a signal frame/stack).</p>
-
-<h2>Interrupted syscalls</h2>
-
-<p>Blocking reads are syscalls, and if a signal hits an app during such a
-syscall, when the signal handler returns and normal process flow
-continues, that syscall will yield an <code>EINTR</code>. In Ruby this results in a
-<code>Interrupt &lt; SignalException &lt; Exception</code> being raised. So you have to
-jump through some hoops, put things in loops, to handle/ignore <code>EINTR</code>
-on blocking syscalls. Orrr you can use <code>SA_RESTART</code> when establishing
-signal handlers w <code>sigaction</code> so that the kernel automatically restarts
-interrupted syscalls post signal handler.</p>
-
-<p>Just realized something: on Ruby, if you don&#8217;t trap a (non-terminating)
-signal handle, it&#8217;ll fire as an exception that you can caught. That&#8217;s
-crazy. This must mean Ruby internally traps all trappable signals and
-then checks them against any registered trap handlers in Rubyland.</p>
-
-<h2>Framework blackboxing</h2>
-
-<p>Exceptions in blackboxed frameworks don&#8217;t pause. So you can add
-blackboxed frameworks in Chrome inspector options to ignore a framework
-that keeps throwing shit. Probably other thins too; TODO: research!</p>
-
-<h2>Cryptonomicomicon</h2>
-
-<p>Page 17.</p>
-
-<p>lambent: glowing, gleaming, or flickering with a soft radiance</p>
-
-<p>gnomon: the projecting piece on a sundial that shows the time by the
-position of its shadow.</p>
-
-<h2>Why <code>sysctl</code>?</h2>
-
-<p>In my Linux learnings I was curious as to why some settings seemed to be
-stored in files while others seemed to be stored via separate utilities
-like <code>sysctl</code>. Turns out <code>sysctl</code> is just a wrapper around <code>/proc/sys</code>,
-and the setting variable names e.g. <code>a.b.c.d</code> would map to
-<code>/proc/sys/a/b/c/d</code> and the setting would be the contents of that file.</p>
-
-<p>So as far as global structures go, I know about:</p>
-
-<ul>
-<li>Environment variables</li>
-<li>Shell variables (basically non-exported env vars, don&#8217;t get shared
-with child processes).</li>
-<li>Shell settings (e.g. ulimit, a per-shell set of defaults used when
-invoking child processes <em>from that shell</em>; it&#8217;s not like you&#8217;re
-setting system-wide settings when you set <code>ulimit</code>)</li>
-<li><code>procfs</code></li>
-<li>Probably lots more file based stuff I&#8217;m not thinking of. If it&#8217;s
-really system-wide global stuff, it must live in a file somewhere,
-right? Everything is a file?</li>
-</ul>
-
-
-<h2><code>TASK_UNINTERRUPTIBLE</code></h2>
-
-<p>A risky process state, usually for operations that are quick to
-complete, like waiting for a syscall to finish flushing data to disk,
-but if there&#8217;s some issue, NFS or kernel bug, it might result in a hung
-task that cannot be killed without a system restart. Another state,
-<code>TASK_KILLABLE</code>, was added to prevent this, and it was first applied to
-hung NFS.</p>
-
-<h2>Hardware signals</h2>
-
-<p>Linux force-delivers hardware signals even if they&#8217;re set to ignore.
-Returning from a signal handler means undefined behavior because likely
-the machine instruction that caused the interrupt is going to be
-retried, likely causing an infinite loop. You need to <code>_exit</code> (because
-<code>exit</code> flushes stdio buffers which might be locked and cause problems,
-not to mention that <code>exit</code> fires <code>onexit</code> hooks) or do a <code>siglongjmp</code> to
-guarantee that you&#8217;re skipping over the broke ass machine instruction.</p>
-
-<h2>Timers</h2>
-
-<p>3 types of timers per process: real (wall clock), virtual (user CPU),
-and profile (user+kernel).</p>
-
-<p>You can set timers on read operations by omitting <code>SA_RESTART</code> from the
-<code>SIGALRM</code> registration.</p>
-
-<h2><code>sleep</code></h2>
-
-<p>This could be implemented otherwise with <code>sigsuspend()</code> (which allows
-you to specify a temporary signal mask and block until a signal arrives
-to wake it up).</p>
-
-<p>You can use <code>sleep</code>, or <code>nanosleep</code>. <code>nanosleep</code> is limited by
-resolution of software clock which uses units of time called jiffies&#8230;?
-Jiffies are the amount of time the kernel lets a process execute, in HZ.
-For a long time it was 100 HZ. So a jiffy was 1% of a second, or 10ms.
-That seems crazy big! Maybe not? But if video games wanna run at 60 fps,
-and they have to share the CPU with other things, they&#8217;re gonna need
-larger jiffy. Because if the video game is alternating with only a
-single other process (and in real life it should be many other
-processes), then it couldn&#8217;t achieve more than 50 fps. Soooo sounds like
-there&#8217;s something I don&#8217;t understand. The Jiffies did get smaller.</p>
-
-<h2>SSLMate</h2>
-
-<p>Buy SSL certs from your terminal. Why the fuck not?</p>
-
-<p>https://sslmate.com/</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-10T10:24:00-04:00" pubdate data-updated="true">Oct 10<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/10/06/crowley-journal/">
-		
-			Crowley Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Comptroller</h2>
-
-<p>Basically the CFO of public institutions. In charge of audits,
-accountability, etc.</p>
-
-<h2>Fetch remote branch</h2>
-
-<p>http://stackoverflow.com/questions/945654/git-checkout-on-a-remote-branch-does-not-work</p>
-
-<p>I was burned by this.</p>
-
-<p>Basically, I had <code>origin</code> in the <code>+fetch</code> section when I wanted the new
-branch in there</p>
-
-<pre><code>fetch = +refs/heads/*:refs/remotes/origin/*
-</code></pre>
-
-<p>TODO: understand this fetch crap. I still don&#8217;t grok it.</p>
-
-<h2>Amazon SES</h2>
-
-<p>http://aws.amazon.com/ses/</p>
-
-<p>Simple Email Service.</p>
-
-<h2>Bash run last command substitute</h2>
-
-<pre><code>$ ls lol
-ls: wat: No such file or directory
-$ ^wat^lol
-ls lol
-ls: lol: No such file or directory
-</code></pre>
-
-<h2>Harp. What is it?</h2>
-
-<p>I don&#8217;t know. You tell me.</p>
-
-<p>http://harpjs.com/</p>
-
-<p>Static web server with built in preprocessing.</p>
-
-<p>https://github.com/silentrob/harp-editor</p>
-
-<h2>Candy kid</h2>
-
-<p><img src="http://kandipatterns.com/images/kandikids.jpg" alt="" /></p>
-
-<h2>Lissajous curve</h2>
-
-<p>http://en.wikipedia.org/wiki/Lissajous_curve</p>
-
-<pre><code>x=A\sin(at+\delta),\quad y=B\sin(bt),
-</code></pre>
-
-<p>Family of curves that seem bounded by a (-1,-1)x(1,1) box. What am I
-doing with my life.</p>
-
-<p>Source: cryptonomicon, bumble bee doing Lissajous across the ceiling.</p>
-
-<h2>CSS history theft</h2>
-
-<p>http://lcamtuf.coredump.cx/css_calc/?utm_source=html5weekly&amp;utm_medium=email</p>
-
-<ul>
-<li>Til mid 2010, a crappy site could use the <code>:visited</code> pseudo class to
-render a bunch of URLs and then check the url to see if the <code>:visited</code>
-styles were applied.</li>
-<li>this loophole was closed by only letting specify color attributes, and
-prevent color lookup via <code>getComputedStyle</code>.</li>
-<li>loophole remains open for clicking a single URL, which doesn&#8217;t scale
-too well.</li>
-</ul>
-
-
-<h2>Milquetoast</h2>
-
-<p>Based on comic cartoon character Caspar Milquetoast, a timid, weak-willed old man,
-whose namesake is breakfast comfort food consisting of toast and a white
-milk-based sauce.</p>
-
-<p>Millhouse is milqtoast, kinda, but more dweeby. Edward Norton in Fight
-Club is milquetoast.</p>
-
-<h2>Gone Girl</h2>
-
-<p>I should see it. Once book, now David Fincher movie that makes people
-not want to get married.</p>
-
-<h2>504 Gateway Timeout</h2>
-
-<p>Never knew what this meant, but this can be returned by an intermediary
-or proxy server that doesn&#8217;t get a timely response from a backend server
-it&#8217;s talking to in order to prepare a response to the client. DOS&#8217;d
-servers might see this, wherein their nginx/whatever reverse proxy can
-handle the load just fine, but the backend server is inundated and can&#8217;t
-keep up with the load.</p>
-
-<h2>Cairns</h2>
-
-<p>City in far north of Queensland, Australia. Scuba.</p>
-
-<h2>FastCGI</h2>
-
-<p>http://en.wikipedia.org/wiki/FastCGI</p>
-
-<p>CGI applications are processes spun up by a web server to handle an
-incoming request. Unscalable since spinning up processes all the time
-takes a toll on the OS, not to mention that there&#8217;s no way to do
-resource sharing (DB connection sharing, in-memory caching (because
-the process dies at the end of request)).</p>
-
-<p>With FastCGI, there&#8217;s a persisting FastCGI server that owns all of the
-CGI programs, and webservers interact with FastCGI via a binary protocol
-(over a socket (local) or TCP connection (remote)).</p>
-
-<p>This decoupling also allows smaller components to be restarted (rather
-than having to restart the entire web server).</p>
-
-<p><code>mod_php</code> is another answer to this problem, which takes the approach to
-embedding the PHP interpreter inside Apache itself. But each Apache
-child then needs to load the interpreter. FastCGI is better on memory
-and not constrained to Apache (nginx implements it).</p>
-
-<p>TODO: reverse proxy rails configuration vs Rails attached to FastCGI.</p>
-
-<h2>Copy as curl</h2>
-
-<p>You can copy a resource request made by Chrome as a curl command.</p>
-
-<h2>HAR format</h2>
-
-<p>You can save network requests (request data/headers and response etc) as
-a HAR files from the Chrome debugger.</p>
-
-<p>Stands for &#8220;HTTP ARchive&#8221;:
-http://www.softwareishard.com/blog/har-12-spec/</p>
-
-<p>HARs are JSON documents containing</p>
-
-<h2>bcrypt stretches</h2>
-
-<p><code>Devise.stretches</code> controls the internal bcrypt stretching amount for
-bcrypt password hashing. When <code>RACK_ENV=test</code>, <code>Devise.stretches</code> is 1,
-else it is 10 (or some higher number).</p>
-
-<p>Increasing stretches drastically increases the CPU time required for
-hashing passwords, which seems like an obvious anti-perf except for the
-nice fact that if you&#8217;re server&#8217;s being bombed by a dictionary attack,
-which sequentially tries to hash many passwords, the attack will be
-thwarted by just how long the server takes to hash the password.</p>
-
-<p>http://en.wikipedia.org/wiki/Key_stretching</p>
-
-<h2>ActiveRecord connection pooling</h2>
-
-<p>http://blog.plataformatec.com.br/2011/12/three-tips-to-improve-the-performance-of-your-test-suite/</p>
-
-<p>Connection pools allow for connection reuse (rather than, say, the
-shitty alternative of opening/closing a connection for every query).
-The ActiveRecord connection pool has the additional stipulation that
-connections are not shared between threads. This makes sense, since
-otherwise if you had a multithreaded Rails application and connections
-were shared between threads, then only one thread at a time could be
-querying the database, and locking would occur, making shit slow.</p>
-
-<p>So by letting each thread have its own connection to a shared resource,
-threads won&#8217;t get blocked on each other. Happy fucking day.</p>
-
-<h2>Rails dbconsole</h2>
-
-<p>http://guides.rubyonrails.org/command_line.html#rails-dbconsole</p>
-
-<pre><code>rails dbconsole
-# or
-rails db
-</code></pre>
-
-<h2>dRuby</h2>
-
-<p>COBRA for Ruby basically.</p>
-
-<p>http://www.ruby-doc.org/stdlib-1.9.3/libdoc/drb/rdoc/DRb.html</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-06T21:15:00-04:00" pubdate data-updated="true">Oct 6<span>th</span>, 2014</time></div>
 	
 
 

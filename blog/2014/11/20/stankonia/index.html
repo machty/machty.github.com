@@ -463,6 +463,18 @@ parse a config file?).</p>
 <h2>Millinery</h2>
 
 <p>Women&#8217;s hats. A Milliner is a person who sells hats.</p>
+
+<h2>Find and replace in project</h2>
+
+<pre><code>ack -l 'pattern' | xargs perl -pi -E 's/pattern/replacement/g'
+</code></pre>
+
+<p>could also do</p>
+
+<pre><code>ack -l OLD_TEXT | xargs sed -i "" "s/OLD_TEXT/NEW_TEXT/g
+</code></pre>
+
+<p>http://stackoverflow.com/a/8744108</p>
 </div>
 
 

@@ -112,6 +112,639 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/07/21/sriracha/">
+		
+			Sriracha</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Android GUI Architecture</h2>
+
+<p>Single-threaded, event-driven, nestable components, much like:</p>
+
+<ul>
+<li>AWT
+
+<ul>
+<li>Java&#8217;s original cross-platform UI widget toolkit</li>
+</ul>
+</li>
+<li>Swing
+
+<ul>
+<li>richer widget set</li>
+<li>draws its own widgets rather than using host OS&#8217;s user interface widgets</li>
+</ul>
+</li>
+<li>SWT
+
+<ul>
+<li>alternative to AWT/Swing, heavy use/development by Eclipse</li>
+</ul>
+</li>
+<li>LWUIT (Lightweight User Interface Toolkit)
+
+<ul>
+<li>for Java ME (micro edition, mobile phones, etc)</li>
+</ul>
+</li>
+<li>others</li>
+</ul>
+
+
+<p>So what UI library / environment doesn&#8217;t have a single UI thread? It
+doesn&#8217;t seem like there is one. UI data-structures are so fragile and
+coupled that you&#8217;d need to mutex the hell out of them any way; easier to
+just have a single UI thread.</p>
+
+<p>http://stackoverflow.com/a/1677785</p>
+
+<h2>Android Event Loop</h2>
+
+<ol>
+<li>User touches the screen</li>
+<li>Android system enqueues action on event queue</li>
+<li>UI thread dequeues event, dispatches to handler</li>
+<li>Tell the Model that state has changed</li>
+<li>Model notifies UI framework that some portion of display is stale
+(which is just another action enqueued to the same event queue)</li>
+<li>redraw event removed from queue, dispatched to a View, tree of views
+is redrawn</li>
+</ol>
+
+
+<p>Specific example:</p>
+
+<ol>
+<li>User taps screen, framework enqueues MotionEvent</li>
+<li>MotionEvent is dequeued, framework dispatches to the first view
+within the bounding box of where tap happened</li>
+<li>Button handler tells model to resume playing a song</li>
+<li>Model starts playing song, enqueues redraw request</li>
+<li>redraw request dequeued, redraw occurs</li>
+</ol>
+
+
+<p>A Button therefore acts like both a Controller and a View; it handles
+tap events and updates a model, and then gets redrawn accordingly to
+reflect updated state.</p>
+
+<p>Never update display within a controller handler; just issue redraw
+requests. Aside from separating concerns, this lets multiple redraw
+events essentially coalesce into one, after ALL changes caused by the
+handler have been made.</p>
+
+<p>Single-threaded-ness means:</p>
+
+<ul>
+<li>no synchronize blocks b/w View and Controller; just enqueue and the
+single threaded UI looper will pop. QUESTION: do you need to
+synchronize pushing to the queue? What if multiple threads are pushing
+to the queue? ANSWER: the queue is managed by the Hander class, which
+is bound to a specific Looper and thread. You <code>post</code> to the Handler,
+and Handler <code>post</code> methods are threadsafe.</li>
+<li>it&#8217;s easy to completely block/stall your application if you&#8217;re doing
+something long/slow/expensive; move that logic to some other thread</li>
+</ul>
+
+
+<h2>What&#8217;s a widget?</h2>
+
+<p>Leaves in the view tree, basically.</p>
+
+<h2>Tunneling to Redis from the browser</h2>
+
+<p>Was reading a Heroku thing about not abusing tunnels via websockets, so
+I figured I&#8217;d connect to Redis from the browser because why not.</p>
+
+<p>First off</p>
+
+<pre><code>npm install -g wstunnel
+</code></pre>
+
+<p>Then in somefile.html</p>
+
+<pre><code>&lt;input type="text" id="textInput"/&gt;
+
+&lt;pre id="messages"&gt;&lt;/pre&gt;
+
+&lt;script type="text/javascript" charset="utf-8"&gt;
+  var redisSocket = new WebSocket("ws://localhost:8080", ["tunnel-protocol"]);
+
+  redisSocket.onmessage = function(event) {
+    // need FileReader to convert from blob to text
+    var reader = new window.FileReader();
+    reader.readAsText(event.data);
+    reader.onloadend = function() {
+      messages.innerHTML += reader.result;
+    }
+  };
+
+  textInput.addEventListener('keypress', function(e) {
+    if (e.keyCode !== 13) { return; }
+    redisSocket.send(new Blob([textInput.value + "\n"]));
+    textInput.value = "";
+  }, false);
+&lt;/script&gt;
+</code></pre>
+
+<p>Then you can type in raw redis commands and get raw redis responses.
+Pretty cool.</p>
+
+<h2>ngrok</h2>
+
+<p>Tunnel public URL to your localhost server. Useful for:</p>
+
+<ul>
+<li>testing webhooks</li>
+<li>testing apps that don&#8217;t have access to localhost, etc</li>
+</ul>
+
+
+<h2>Localytics (and analytics terminology)</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Attribution_(marketing">Attribution</a>)</p>
+
+<p>The quantification of how a given ad impression influences a user
+conversion rates. Use Attribution to find out which ad campaigns seem to
+be the most effective. I guess you could also say use Attribution to
+figure out which entry points into an app most often lead to conversion.</p>
+
+<ul>
+<li>sessionTimeoutSeconds
+
+<ul>
+<li>time after <code>close()</code> that the session is actually considered closed.</li>
+<li>if <code>open</code> is called within the timeout&#8230; on the same localyticsRequest object.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Google Analytics events</h2>
+
+<p>https://support.google.com/analytics/answer/1033068#Anatomy</p>
+
+<h3>Category</h3>
+
+<p>Over-arching string name for a category of events.</p>
+
+<ul>
+<li>You need to decide ahead of time whether you care to distinguish
+between &#8220;Videos - Cats&#8221; and &#8220;Videos - Dogs&#8221; or whether you just
+want them grouped under &#8220;Videos&#8221;</li>
+<li>You&#8217;re screwed if you push a version of your code sending a category
+of &#8220;Video&#8221; and later change to &#8220;Videos&#8221;; your historical data will
+remain there as &#8220;Video&#8221; (this is probably true for all Event fields)</li>
+</ul>
+
+
+<h3>Action</h3>
+
+<p>The thing being done, the name of the event. If you&#8217;re category is
+&#8220;Videos&#8221;, you might have actions named:</p>
+
+<ul>
+<li>Play</li>
+<li>Stop</li>
+<li>Pause</li>
+</ul>
+
+
+<p>Caveats:</p>
+
+<ul>
+<li>&#8220;All actions are listed independently from their parent categories&#8221;.
+This means if you have re-use the event name &#8220;Play&#8221; between parent
+categories &#8220;Videos&#8221; and &#8220;Songs&#8221;, they&#8217;ll all be munged together, and
+it&#8217;s only when you do a breakdown of &#8220;Play&#8221; events that their differing
+parent categories will show up. But you probably don&#8217;t want to have
+something so general as a &#8220;click&#8221; event across a ton of different
+categories.</li>
+<li>&#8220;A unique event is determined by a unique action name&#8221;. Oh ok this
+explains the above a bit &#8220;You can use duplicate event names across
+categories&#8221;.</li>
+</ul>
+
+
+<h2>document.readyState and friends</h2>
+
+<ul>
+<li><code>DOMContentLoaded</code>
+
+<ul>
+<li>DOM and synchronous scripts (the default) have been loaded</li>
+<li>does NOT wait for stylesheets, images, subframes, etc</li>
+<li>scripts can be made async to not interfere w this loading process</li>
+<li>UNSURE: can listen on <code>window</code> or <code>document</code></li>
+</ul>
+</li>
+<li><code>load</code> event
+
+<ul>
+<li>all subresources (images, stylesheets, subframes) have loaded</li>
+<li>only fires on <code>window</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p>But you can also ask <code>document.readyState</code> where you are in the process:</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState</p>
+
+<ul>
+<li>loading
+
+<ul>
+<li>The document is still loading.</li>
+</ul>
+</li>
+<li>interactive
+
+<ul>
+<li>The document has finished loading and the document has been parsed but sub-resources such as images, stylesheets and frames are still loading. The state indicates that the DOMContentLoaded event has been fired.</li>
+</ul>
+</li>
+<li>complete
+
+<ul>
+<li>The document and all sub-resources have finished loading. The state indicates that the load event has been fired.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Add <code>document.readyState</code> to your watches and run:</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width"&gt;
+    &lt;title&gt;DOMContentLoaded&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;script type="text/javascript" charset="utf-8"&gt;
+
+    debugger;
+
+    window.addEventListener("load", function(e) {
+      debugger;
+      //alert("i am loaded");
+    }, false);
+
+    window.addEventListener("DOMContentLoaded", function(e) {
+      debugger;
+    }, false);
+
+  &lt;/script&gt;
+  &lt;body&gt;
+    body
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h2>window.onerror and CORS</h2>
+
+<p>http://blog.errorception.com/2012/04/script-error-on-line-0.html</p>
+
+<p>Script error on line 0.</p>
+
+<p>This almost certainly means a script loaded via CORS fired an error.
+Modern browsers zero-out the data</p>
+
+<p>http://jeremiahgrossman.blogspot.in/2006/12/i-know-if-youre-logged-in-anywhere.html</p>
+
+<p>The above 2006 link demonstrates how the errors produced by a non CORS
+remote script can be used to sniff out which sites you&#8217;re logged into,
+and hence modern browsers strip all information from external non CORS
+scripts to just say line 0 and &#8220;Script Error.&#8221;. This thwarts bugsnag
+unless the script you load is CORS.</p>
+
+<h2>Ruby Exception#cause</h2>
+
+<p>If one caught exception causes another to be raised, Ruby keeps track of
+all preceding exceptions within a chain of Exception#cause. Bugsnag uses
+this to great effect.</p>
+
+<pre><code>begin
+  begin
+    raise "wat"
+  rescue =&gt; e
+    oasnoiasd
+  end
+rescue =&gt; e
+  puts e.cause.backtrace # print the backtrace of RuntimeError "wat"
+end
+</code></pre>
+
+<p>https://bugsnag.com/blog/ruby-2-1-exception-causes</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-21T20:28:00-04:00" pubdate data-updated="true">Jul 21<span>st</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/06/28/spf-10000/">
+		
+			SPF 10000</a>
+	</h2>
+	<div class="entry-content">
+		<h2>SPF: Sender Policy Framework</h2>
+
+<p>Prevents sender spoofing: server receiving STMP mail can check the
+sender&#8217;s IP against SPF DNS records. SPF records are stored in
+both SPF and TXT records and have a format like:</p>
+
+<pre><code>"v=spf1 a mx ip4:55.11.65.20/2 ip4:90.2.123.112/2 ip4:176.33.87.19/2 ip4:212.63.89.33/2 -all"
+</code></pre>
+
+<p>Question: what if the sender sends the wrong IP? Answer: then the server
+wouldn&#8217;t be able to communicate back to the sender (SMTP operates over
+TCP, so you have the handshake and connection state preventing IP
+spoofing).</p>
+
+<p>Google apps for businesses makes you add an SPF record to your domain so
+that it can send e-mail on your behalf and not have recipient servers
+block it.</p>
+
+<h2>SRV records: share the location of services via DNS</h2>
+
+<p>https://tools.ietf.org/html/rfc2782</p>
+
+<p>Sample:</p>
+
+<pre><code>_sip._tcp.example.com. 86400 IN SRV 10 60 5060 bigbox.example.com.
+</code></pre>
+
+<p>Google apps for businesses also use this for XMPP service location. SRV
+records have a priority in a weight. Clients must use the lowest
+priority services, and then if there are multiple services in that
+priority, randomly select using the provided <code>weight</code>s.</p>
+
+<h2>Ember tests</h2>
+
+<pre><code>import hbs from 'htmlbars-inline-precompile';
+import { moduleForComponent, test } from 'ember-qunit';
+
+moduleForComponent('my-component', {
+  integration: true
+});
+
+test('block params work', function(assert) {
+  this.render(hbs`
+
+      This happened  days ago.
+
+  `);
+
+  this.set('theDate', new Date(2015, 2, 11));
+  assert.equal(this.$().text().trim(), "This happened 123 days ago.");
+});
+</code></pre>
+
+<p>In recent versions, <code>integration:true</code> is the default.</p>
+
+<p>Checked in:</p>
+
+<p>https://github.com/switchfly/ember-test-helpers/pull/38</p>
+
+<p>Nice example:</p>
+
+<p>https://github.com/yapplabs/ember-radio-button/blob/master/tests/unit/components/radio-button-test.js#L27-L56</p>
+
+<p>Aaaaand a nice blag!</p>
+
+<p>http://alisdair.mcdiarmid.org/2015/06/20/ember-component-integration-tests.html</p>
+
+<h2>Vim: save and run</h2>
+
+<p>From DAS: easy enough to just write a quick <code>map</code> on the fly:</p>
+
+<pre><code>map ,t :w\|!ruby %&lt;cr&gt;
+</code></pre>
+
+<h2>JS Regex: multiline</h2>
+
+<p>Use <code>/m</code> option and your <code>^</code> and <code>$</code> will match beginnings/ends of lines
+rather than beginnings and ends of the entire string. :)</p>
+
+<h2>Hyperthreading, Physical vs Logical Cores</h2>
+
+<pre><code>machty.github.com :: sysctl hw.physicalcpu
+hw.physicalcpu: 4
+machty.github.com :: sysctl hw.logicalcpu
+hw.logicalcpu: 8
+</code></pre>
+
+<p>Feature of Intel Core i5 and i7 (probably others too). Allows, in
+certain cases, multiple executions to be run on a single core, squeezing
+out more power out of a single core. Allows multiple threads to run on
+the same core. Gives a 20% performance boost in a lot of cases (rather
+than 100% boost of a full on new core).</p>
+
+<h2>Ember boot</h2>
+
+<p>https://github.com/emberjs/ember.js/pull/10256#issuecomment-113846021</p>
+
+<ol>
+<li>Ember loads.</li>
+<li>You create an <code>Ember.Application</code> instance global (e.g. <code>App</code>).</li>
+<li>At this point, none of your classes have been loaded yet.</li>
+<li>As your JavaScript file is evaluated, you register classes on the application (e.g. <code>App.MyController = Ember.Controller.extend(…);</code>)</li>
+<li>Ember waits for DOM ready to ensure that all of your JavaScript included via <code>&lt;script&gt;</code> tags has loaded.</li>
+<li>Initializers are run.</li>
+<li>If you need to lazily load code or wait for additional setup, you can call <code>deferReadiness()</code>.</li>
+<li>Once everything is loaded, you can call <code>advanceReadiness()</code>.</li>
+<li>At this point, we say that the <code>Application</code> is ready; in other words, we have told Ember that all of the classes (components, routes, controllers, etc.) that make up the app are loaded.</li>
+<li>A new instance of the application is created, and instance initializers are run.</li>
+<li>Routing starts and the UI is rendered to the screen.</li>
+</ol>
+
+
+<h2>Brew Terminology</h2>
+
+<p>https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Formula-Cookbook.md#terminology&#8212;homebrew-speak</p>
+
+<p>Formula The package definition  /usr/local/Library/Formula/foo.rb
+Keg The installation prefix of a Formula    /usr/local/Cellar/foo/0.1
+opt prefix  A symlink to the active version of a keg    /usr/local/opt/foo
+Cellar  All kegs are installed here /usr/local/Cellar
+Tap An optional repository (git) of Formulae    /usr/local/Library/Taps
+Bottle  Pre-built (binary) Keg that can be unpacked qt-4.8.4.mountain_lion.bottle.1.tar.gz</p>
+
+<h2>Slack: Shift Escape</h2>
+
+<ul>
+<li>shift-esc marks all channels as read</li>
+</ul>
+
+
+<h2>Ember fix force push?</h2>
+
+<p>Here&#8217;s a git fetch</p>
+
+<pre><code>From github.com:emberjs/ember.js
+ + 61c9ba6...c3f15cf master     -&gt; origin/master  (forced update)
+   4aab5ad..d1a1a7c  beta       -&gt; origin/beta
+ + 5a084f7...e7866ca in-template-config -&gt; origin/in-template-config  (forced update)
+ + 172002f...642f5c3 remove-bind-attr -&gt; origin/remove-bind-attr  (forced update)
+   c3accfb..1ad89cf  stable     -&gt; origin/stable
+</code></pre>
+
+<h2>vim-rails and other shit i should already know</h2>
+
+<p>Come on this has been out forever how do you not know this.</p>
+
+<ul>
+<li>ctrl-O back</li>
+<li>ctrl-I forward</li>
+<li>gf: go to file of hovered-over class</li>
+</ul>
+
+
+<h2>Justdelete.me</h2>
+
+<p>http://justdelete.me/</p>
+
+<p>Instructions for how to remove yourself from various services, social
+media, etc.</p>
+
+<h2>Java <code>final</code> and immutable objects</h2>
+
+<p>Since Java strings are immutable, the String class must be declared
+<code>final</code>. Otherwise, someone could just subclass <code>String</code> and mutate it,
+breaking the immutable guarantees of the parent String class.</p>
+
+<h2>Java <code>@Override</code> annotation</h2>
+
+<p>Not strictly required, but hints to the compiler what you&#8217;re trying to
+do, and errors out if you fail to correctly override a parent class&#8217;s
+method.</p>
+
+<h2>Java: Checked vs Unchecked Exceptions</h2>
+
+<p>Checked: required in <code>throws</code> clause.</p>
+
+<p>Unchecked: not required in <code>throws</code> clause, must extend <code>RuntimeException</code>.</p>
+
+<p>This might be wrong but checked exceptions kinda just feel like they&#8217;re
+just part of the type signature, e.g. &#8220;this is a method that returns a
+<code>Result</code>, <code>IOException</code>, <code>ParseException</code>, or <code>SomeOtherThing</code>&#8221;. In
+functional land it seems like it&#8217;d be really easy to switch based on the
+result.</p>
+
+<h2>Android: Dalvik</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Dalvik_%28software%29">wiki</a></p>
+
+<p>Android compiles your java down to JVM bytecode <code>.class</code> files, and then
+the dexer compiles <code>.class</code> files down to Dalvik bytecode. Androids
+don&#8217;t have JVMs. They have DVMs. Actually, they did until about Android
+4.4. Now they&#8217;re replaced by <a href="https://en.wikipedia.org/wiki/Android_Runtime">Android Runtime</a>.</p>
+
+<h2>Android Activity</h2>
+
+<p>Activity is UI + execution. It&#8217;s a component, I guess.</p>
+
+<p>Activities invoke each other with Intents. Several activities might be
+registered for a given Intent. An application is a bundle of activities.
+Activities don&#8217;t directly call code on other activities; rather, intents
+are used. Don&#8217;t hold on to references to Activities; they&#8217;re meant to be
+aggressively GC&#8217;d.</p>
+
+<p>A Task is a chain of user interactions that might span multiple
+activities (sometimes apps), e.g. going to Messaging, looking up a
+Contact, and calling that contact (3 separate activities from 3
+different apps).</p>
+
+<p>A Service is a background task, e.g. music player, or any kind of server
+waiting for a client interaction. Android avoids reclaiming services and
+keeps them alive unless extreme memory pressure.</p>
+
+<h2>Android multi-user</h2>
+
+<p>Android runs on Linux, and each application vendor gets its own user and
+group, and all applications installed are run under that user and group.
+So basically applications can&#8217;t access other applications&#8217; data, unless
+they&#8217;re from the same application vendor (as determined by the keystore
+that signed the release apk?).</p>
+
+<h2>String#%</h2>
+
+<p>http://ruby-doc.org/core-2.2.2/String.html#method-i-25</p>
+
+<pre><code>"foo = %{foo}" % { :foo =&gt; 'bar' }        #=&gt; "foo = bar"
+</code></pre>
+
+<h2>Base64 from the shell</h2>
+
+<pre><code>echo "wat" | openssl enc -base64 -A
+d2F0Cg==
+</code></pre>
+
+<p>From http://www.w3.org/TR/SRI/#goals</p>
+
+<pre><code>echo -n "alert('Hello, world.');" | openssl dgst -sha256 -binary | openssl enc -base64 -A
+</code></pre>
+
+<h2>SubscribeOn vs ObserveOn</h2>
+
+<p>http://blogs.msdn.com/b/rxteam/archive/2009/11/21/observable-context-observable-subscribeon-and-observable-observeon.aspx</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-28T17:06:00-04:00" pubdate data-updated="true">Jun 28<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/06/11/anermic/">
 		
 			Anermic</a>
@@ -2396,134 +3029,6 @@ icons, it&#8217;s fine, but one audio/visual</p>
 
 
 <time datetime="2015-02-17T05:45:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/02/04/i-need-ur-luv/">
-		
-			I Need Ur Luv</a>
-	</h2>
-	<div class="entry-content">
-		<h2>flatMapObserver</h2>
-
-<p>Whereas flatMap merges the elements of the observable returned from the
-mapping fn, flatMapObserver subscribes to each event of the incoming
-observable via a similar API to observers, but the return of each fn is
-an observable that gets merged/flatMapped.</p>
-
-<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/flatmapobserver.md</p>
-
-<p>NOTE: the observable returned from the onComplete handler does not
-cause the generated stream to end; it&#8217;ll be merged with any (possibly
-delayed) observables returned from onNext handler.</p>
-
-<h2>State</h2>
-
-<p>State a la Clojure/immutability separates value from
-identity, value is a consistent concept over time, and once two values
-are equal, they&#8217;re equal forever, because nothing is mutable.</p>
-
-<p>So, what about app state where event handlers are set up? Say you&#8217;ve
-done the functional/React-y thing and you have some leaf component that
-fires an event into the ethos at some point in time, and you&#8217;ve fluxed
-it into some event handler that <code>setState</code>s at the root level. This
-event could happen after 10 seconds, 1000 seconds, or possibly
-immediately. But if it&#8217;s immediately, is this fundamentally different
-from a situation where things are <em>not</em> data down actions up? How is
-this different from a two way binding with async settling?</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-04T05:45:00-05:00" pubdate data-updated="true">Feb 4<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/01/26/watoozy/">
-		
-			Watoozy</a>
-	</h2>
-	<div class="entry-content">
-		<h2>DAS</h2>
-
-<p>&#8220;how and why to avoid nil&#8221;</p>
-
-<p>I&#8217;d watched this before, but the last approach is most interesting:</p>
-
-<ul>
-<li>embrace immutability</li>
-<li>embrace domain objects whose non-nullable properties are part of
-their identity</li>
-</ul>
-
-
-<p>Other thoughts:</p>
-
-<p>Block-less <code>it</code> rspec specs are considered pending; useful for writing
-out a bunch of specifications at once and implementing them later.</p>
-
-<p>&#8220;pushing complexity down&#8221;</p>
-
-<p>When you&#8217;re writing a test whose behavior depends on dependencies (e.g.
-MonthlyBilling class pushes the &#8220;who-to-charge&#8221; logic into the User
-classes&#8217;s <code>charge</code> method), you&#8217;re writing a &#8220;systems test&#8221; /
-integration test.</p>
-
-<h2>Ebryn machtizzle</h2>
-
-<p>Talking about the sideways problem</p>
-
-<p>https://hackpad.com/Ebryn-Machty-Router-discussion-iRBXvKmKj5v</p>
-
-
-		
-		<a href="/blog/2015/01/26/watoozy/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-26T15:55:00-05:00" pubdate data-updated="true">Jan 26<span>th</span>, 2015</time></div>
 	
 
 

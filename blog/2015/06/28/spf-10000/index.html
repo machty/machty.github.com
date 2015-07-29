@@ -1,0 +1,446 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>SPF 10000  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">SPF 10000</h2>
+	<div class="entry-content"><h2>SPF: Sender Policy Framework</h2>
+
+<p>Prevents sender spoofing: server receiving STMP mail can check the
+sender&#8217;s IP against SPF DNS records. SPF records are stored in
+both SPF and TXT records and have a format like:</p>
+
+<pre><code>"v=spf1 a mx ip4:55.11.65.20/2 ip4:90.2.123.112/2 ip4:176.33.87.19/2 ip4:212.63.89.33/2 -all"
+</code></pre>
+
+<p>Question: what if the sender sends the wrong IP? Answer: then the server
+wouldn&#8217;t be able to communicate back to the sender (SMTP operates over
+TCP, so you have the handshake and connection state preventing IP
+spoofing).</p>
+
+<p>Google apps for businesses makes you add an SPF record to your domain so
+that it can send e-mail on your behalf and not have recipient servers
+block it.</p>
+
+<h2>SRV records: share the location of services via DNS</h2>
+
+<p>https://tools.ietf.org/html/rfc2782</p>
+
+<p>Sample:</p>
+
+<pre><code>_sip._tcp.example.com. 86400 IN SRV 10 60 5060 bigbox.example.com.
+</code></pre>
+
+<p>Google apps for businesses also use this for XMPP service location. SRV
+records have a priority in a weight. Clients must use the lowest
+priority services, and then if there are multiple services in that
+priority, randomly select using the provided <code>weight</code>s.</p>
+
+<h2>Ember tests</h2>
+
+<pre><code>import hbs from 'htmlbars-inline-precompile';
+import { moduleForComponent, test } from 'ember-qunit';
+
+moduleForComponent('my-component', {
+  integration: true
+});
+
+test('block params work', function(assert) {
+  this.render(hbs`
+
+      This happened  days ago.
+
+  `);
+
+  this.set('theDate', new Date(2015, 2, 11));
+  assert.equal(this.$().text().trim(), "This happened 123 days ago.");
+});
+</code></pre>
+
+<p>In recent versions, <code>integration:true</code> is the default.</p>
+
+<p>Checked in:</p>
+
+<p>https://github.com/switchfly/ember-test-helpers/pull/38</p>
+
+<p>Nice example:</p>
+
+<p>https://github.com/yapplabs/ember-radio-button/blob/master/tests/unit/components/radio-button-test.js#L27-L56</p>
+
+<p>Aaaaand a nice blag!</p>
+
+<p>http://alisdair.mcdiarmid.org/2015/06/20/ember-component-integration-tests.html</p>
+
+<h2>Vim: save and run</h2>
+
+<p>From DAS: easy enough to just write a quick <code>map</code> on the fly:</p>
+
+<pre><code>map ,t :w\|!ruby %&lt;cr&gt;
+</code></pre>
+
+<h2>JS Regex: multiline</h2>
+
+<p>Use <code>/m</code> option and your <code>^</code> and <code>$</code> will match beginnings/ends of lines
+rather than beginnings and ends of the entire string. :)</p>
+
+<h2>Hyperthreading, Physical vs Logical Cores</h2>
+
+<pre><code>machty.github.com :: sysctl hw.physicalcpu
+hw.physicalcpu: 4
+machty.github.com :: sysctl hw.logicalcpu
+hw.logicalcpu: 8
+</code></pre>
+
+<p>Feature of Intel Core i5 and i7 (probably others too). Allows, in
+certain cases, multiple executions to be run on a single core, squeezing
+out more power out of a single core. Allows multiple threads to run on
+the same core. Gives a 20% performance boost in a lot of cases (rather
+than 100% boost of a full on new core).</p>
+
+<h2>Ember boot</h2>
+
+<p>https://github.com/emberjs/ember.js/pull/10256#issuecomment-113846021</p>
+
+<ol>
+<li>Ember loads.</li>
+<li>You create an <code>Ember.Application</code> instance global (e.g. <code>App</code>).</li>
+<li>At this point, none of your classes have been loaded yet.</li>
+<li>As your JavaScript file is evaluated, you register classes on the application (e.g. <code>App.MyController = Ember.Controller.extend(…);</code>)</li>
+<li>Ember waits for DOM ready to ensure that all of your JavaScript included via <code>&lt;script&gt;</code> tags has loaded.</li>
+<li>Initializers are run.</li>
+<li>If you need to lazily load code or wait for additional setup, you can call <code>deferReadiness()</code>.</li>
+<li>Once everything is loaded, you can call <code>advanceReadiness()</code>.</li>
+<li>At this point, we say that the <code>Application</code> is ready; in other words, we have told Ember that all of the classes (components, routes, controllers, etc.) that make up the app are loaded.</li>
+<li>A new instance of the application is created, and instance initializers are run.</li>
+<li>Routing starts and the UI is rendered to the screen.</li>
+</ol>
+
+
+<h2>Brew Terminology</h2>
+
+<p>https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Formula-Cookbook.md#terminology&#8212;homebrew-speak</p>
+
+<p>Formula The package definition  /usr/local/Library/Formula/foo.rb
+Keg The installation prefix of a Formula    /usr/local/Cellar/foo/0.1
+opt prefix  A symlink to the active version of a keg    /usr/local/opt/foo
+Cellar  All kegs are installed here /usr/local/Cellar
+Tap An optional repository (git) of Formulae    /usr/local/Library/Taps
+Bottle  Pre-built (binary) Keg that can be unpacked qt-4.8.4.mountain_lion.bottle.1.tar.gz</p>
+
+<h2>Slack: Shift Escape</h2>
+
+<ul>
+<li>shift-esc marks all channels as read</li>
+</ul>
+
+
+<h2>Ember fix force push?</h2>
+
+<p>Here&#8217;s a git fetch</p>
+
+<pre><code>From github.com:emberjs/ember.js
+ + 61c9ba6...c3f15cf master     -&gt; origin/master  (forced update)
+   4aab5ad..d1a1a7c  beta       -&gt; origin/beta
+ + 5a084f7...e7866ca in-template-config -&gt; origin/in-template-config  (forced update)
+ + 172002f...642f5c3 remove-bind-attr -&gt; origin/remove-bind-attr  (forced update)
+   c3accfb..1ad89cf  stable     -&gt; origin/stable
+</code></pre>
+
+<h2>vim-rails and other shit i should already know</h2>
+
+<p>Come on this has been out forever how do you not know this.</p>
+
+<ul>
+<li>ctrl-O back</li>
+<li>ctrl-I forward</li>
+<li>gf: go to file of hovered-over class</li>
+</ul>
+
+
+<h2>Justdelete.me</h2>
+
+<p>http://justdelete.me/</p>
+
+<p>Instructions for how to remove yourself from various services, social
+media, etc.</p>
+
+<h2>Java <code>final</code> and immutable objects</h2>
+
+<p>Since Java strings are immutable, the String class must be declared
+<code>final</code>. Otherwise, someone could just subclass <code>String</code> and mutate it,
+breaking the immutable guarantees of the parent String class.</p>
+
+<h2>Java <code>@Override</code> annotation</h2>
+
+<p>Not strictly required, but hints to the compiler what you&#8217;re trying to
+do, and errors out if you fail to correctly override a parent class&#8217;s
+method.</p>
+
+<h2>Java: Checked vs Unchecked Exceptions</h2>
+
+<p>Checked: required in <code>throws</code> clause.</p>
+
+<p>Unchecked: not required in <code>throws</code> clause, must extend <code>RuntimeException</code>.</p>
+
+<p>This might be wrong but checked exceptions kinda just feel like they&#8217;re
+just part of the type signature, e.g. &#8220;this is a method that returns a
+<code>Result</code>, <code>IOException</code>, <code>ParseException</code>, or <code>SomeOtherThing</code>&#8221;. In
+functional land it seems like it&#8217;d be really easy to switch based on the
+result.</p>
+
+<h2>Android: Dalvik</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Dalvik_%28software%29">wiki</a></p>
+
+<p>Android compiles your java down to JVM bytecode <code>.class</code> files, and then
+the dexer compiles <code>.class</code> files down to Dalvik bytecode. Androids
+don&#8217;t have JVMs. They have DVMs. Actually, they did until about Android
+4.4. Now they&#8217;re replaced by <a href="https://en.wikipedia.org/wiki/Android_Runtime">Android Runtime</a>.</p>
+
+<h2>Android Activity</h2>
+
+<p>Activity is UI + execution. It&#8217;s a component, I guess.</p>
+
+<p>Activities invoke each other with Intents. Several activities might be
+registered for a given Intent. An application is a bundle of activities.
+Activities don&#8217;t directly call code on other activities; rather, intents
+are used. Don&#8217;t hold on to references to Activities; they&#8217;re meant to be
+aggressively GC&#8217;d.</p>
+
+<p>A Task is a chain of user interactions that might span multiple
+activities (sometimes apps), e.g. going to Messaging, looking up a
+Contact, and calling that contact (3 separate activities from 3
+different apps).</p>
+
+<p>A Service is a background task, e.g. music player, or any kind of server
+waiting for a client interaction. Android avoids reclaiming services and
+keeps them alive unless extreme memory pressure.</p>
+
+<h2>Android multi-user</h2>
+
+<p>Android runs on Linux, and each application vendor gets its own user and
+group, and all applications installed are run under that user and group.
+So basically applications can&#8217;t access other applications&#8217; data, unless
+they&#8217;re from the same application vendor (as determined by the keystore
+that signed the release apk?).</p>
+
+<h2>String#%</h2>
+
+<p>http://ruby-doc.org/core-2.2.2/String.html#method-i-25</p>
+
+<pre><code>"foo = %{foo}" % { :foo =&gt; 'bar' }        #=&gt; "foo = bar"
+</code></pre>
+
+<h2>Base64 from the shell</h2>
+
+<pre><code>echo "wat" | openssl enc -base64 -A
+d2F0Cg==
+</code></pre>
+
+<p>From http://www.w3.org/TR/SRI/#goals</p>
+
+<pre><code>echo -n "alert('Hello, world.');" | openssl dgst -sha256 -binary | openssl enc -base64 -A
+</code></pre>
+
+<h2>SubscribeOn vs ObserveOn</h2>
+
+<p>http://blogs.msdn.com/b/rxteam/archive/2009/11/21/observable-context-observable-subscribeon-and-observable-observeon.aspx</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-28T17:06:00-04:00" pubdate data-updated="true">Jun 28<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/06/28/spf-10000/';
+        var disqus_url = 'http://machty.github.com/blog/2015/06/28/spf-10000/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

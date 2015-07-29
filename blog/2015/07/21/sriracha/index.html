@@ -1,0 +1,527 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Sriracha  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Sriracha</h2>
+	<div class="entry-content"><h2>Android GUI Architecture</h2>
+
+<p>Single-threaded, event-driven, nestable components, much like:</p>
+
+<ul>
+<li>AWT
+
+<ul>
+<li>Java&#8217;s original cross-platform UI widget toolkit</li>
+</ul>
+</li>
+<li>Swing
+
+<ul>
+<li>richer widget set</li>
+<li>draws its own widgets rather than using host OS&#8217;s user interface widgets</li>
+</ul>
+</li>
+<li>SWT
+
+<ul>
+<li>alternative to AWT/Swing, heavy use/development by Eclipse</li>
+</ul>
+</li>
+<li>LWUIT (Lightweight User Interface Toolkit)
+
+<ul>
+<li>for Java ME (micro edition, mobile phones, etc)</li>
+</ul>
+</li>
+<li>others</li>
+</ul>
+
+
+<p>So what UI library / environment doesn&#8217;t have a single UI thread? It
+doesn&#8217;t seem like there is one. UI data-structures are so fragile and
+coupled that you&#8217;d need to mutex the hell out of them any way; easier to
+just have a single UI thread.</p>
+
+<p>http://stackoverflow.com/a/1677785</p>
+
+<h2>Android Event Loop</h2>
+
+<ol>
+<li>User touches the screen</li>
+<li>Android system enqueues action on event queue</li>
+<li>UI thread dequeues event, dispatches to handler</li>
+<li>Tell the Model that state has changed</li>
+<li>Model notifies UI framework that some portion of display is stale
+(which is just another action enqueued to the same event queue)</li>
+<li>redraw event removed from queue, dispatched to a View, tree of views
+is redrawn</li>
+</ol>
+
+
+<p>Specific example:</p>
+
+<ol>
+<li>User taps screen, framework enqueues MotionEvent</li>
+<li>MotionEvent is dequeued, framework dispatches to the first view
+within the bounding box of where tap happened</li>
+<li>Button handler tells model to resume playing a song</li>
+<li>Model starts playing song, enqueues redraw request</li>
+<li>redraw request dequeued, redraw occurs</li>
+</ol>
+
+
+<p>A Button therefore acts like both a Controller and a View; it handles
+tap events and updates a model, and then gets redrawn accordingly to
+reflect updated state.</p>
+
+<p>Never update display within a controller handler; just issue redraw
+requests. Aside from separating concerns, this lets multiple redraw
+events essentially coalesce into one, after ALL changes caused by the
+handler have been made.</p>
+
+<p>Single-threaded-ness means:</p>
+
+<ul>
+<li>no synchronize blocks b/w View and Controller; just enqueue and the
+single threaded UI looper will pop. QUESTION: do you need to
+synchronize pushing to the queue? What if multiple threads are pushing
+to the queue? ANSWER: the queue is managed by the Hander class, which
+is bound to a specific Looper and thread. You <code>post</code> to the Handler,
+and Handler <code>post</code> methods are threadsafe.</li>
+<li>it&#8217;s easy to completely block/stall your application if you&#8217;re doing
+something long/slow/expensive; move that logic to some other thread</li>
+</ul>
+
+
+<h2>What&#8217;s a widget?</h2>
+
+<p>Leaves in the view tree, basically.</p>
+
+<h2>Tunneling to Redis from the browser</h2>
+
+<p>Was reading a Heroku thing about not abusing tunnels via websockets, so
+I figured I&#8217;d connect to Redis from the browser because why not.</p>
+
+<p>First off</p>
+
+<pre><code>npm install -g wstunnel
+</code></pre>
+
+<p>Then in somefile.html</p>
+
+<pre><code>&lt;input type="text" id="textInput"/&gt;
+
+&lt;pre id="messages"&gt;&lt;/pre&gt;
+
+&lt;script type="text/javascript" charset="utf-8"&gt;
+  var redisSocket = new WebSocket("ws://localhost:8080", ["tunnel-protocol"]);
+
+  redisSocket.onmessage = function(event) {
+    // need FileReader to convert from blob to text
+    var reader = new window.FileReader();
+    reader.readAsText(event.data);
+    reader.onloadend = function() {
+      messages.innerHTML += reader.result;
+    }
+  };
+
+  textInput.addEventListener('keypress', function(e) {
+    if (e.keyCode !== 13) { return; }
+    redisSocket.send(new Blob([textInput.value + "\n"]));
+    textInput.value = "";
+  }, false);
+&lt;/script&gt;
+</code></pre>
+
+<p>Then you can type in raw redis commands and get raw redis responses.
+Pretty cool.</p>
+
+<h2>ngrok</h2>
+
+<p>Tunnel public URL to your localhost server. Useful for:</p>
+
+<ul>
+<li>testing webhooks</li>
+<li>testing apps that don&#8217;t have access to localhost, etc</li>
+</ul>
+
+
+<h2>Localytics (and analytics terminology)</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Attribution_(marketing">Attribution</a>)</p>
+
+<p>The quantification of how a given ad impression influences a user
+conversion rates. Use Attribution to find out which ad campaigns seem to
+be the most effective. I guess you could also say use Attribution to
+figure out which entry points into an app most often lead to conversion.</p>
+
+<ul>
+<li>sessionTimeoutSeconds
+
+<ul>
+<li>time after <code>close()</code> that the session is actually considered closed.</li>
+<li>if <code>open</code> is called within the timeout&#8230; on the same localyticsRequest object.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Google Analytics events</h2>
+
+<p>https://support.google.com/analytics/answer/1033068#Anatomy</p>
+
+<h3>Category</h3>
+
+<p>Over-arching string name for a category of events.</p>
+
+<ul>
+<li>You need to decide ahead of time whether you care to distinguish
+between &#8220;Videos - Cats&#8221; and &#8220;Videos - Dogs&#8221; or whether you just
+want them grouped under &#8220;Videos&#8221;</li>
+<li>You&#8217;re screwed if you push a version of your code sending a category
+of &#8220;Video&#8221; and later change to &#8220;Videos&#8221;; your historical data will
+remain there as &#8220;Video&#8221; (this is probably true for all Event fields)</li>
+</ul>
+
+
+<h3>Action</h3>
+
+<p>The thing being done, the name of the event. If you&#8217;re category is
+&#8220;Videos&#8221;, you might have actions named:</p>
+
+<ul>
+<li>Play</li>
+<li>Stop</li>
+<li>Pause</li>
+</ul>
+
+
+<p>Caveats:</p>
+
+<ul>
+<li>&#8220;All actions are listed independently from their parent categories&#8221;.
+This means if you have re-use the event name &#8220;Play&#8221; between parent
+categories &#8220;Videos&#8221; and &#8220;Songs&#8221;, they&#8217;ll all be munged together, and
+it&#8217;s only when you do a breakdown of &#8220;Play&#8221; events that their differing
+parent categories will show up. But you probably don&#8217;t want to have
+something so general as a &#8220;click&#8221; event across a ton of different
+categories.</li>
+<li>&#8220;A unique event is determined by a unique action name&#8221;. Oh ok this
+explains the above a bit &#8220;You can use duplicate event names across
+categories&#8221;.</li>
+</ul>
+
+
+<h2>document.readyState and friends</h2>
+
+<ul>
+<li><code>DOMContentLoaded</code>
+
+<ul>
+<li>DOM and synchronous scripts (the default) have been loaded</li>
+<li>does NOT wait for stylesheets, images, subframes, etc</li>
+<li>scripts can be made async to not interfere w this loading process</li>
+<li>UNSURE: can listen on <code>window</code> or <code>document</code></li>
+</ul>
+</li>
+<li><code>load</code> event
+
+<ul>
+<li>all subresources (images, stylesheets, subframes) have loaded</li>
+<li>only fires on <code>window</code></li>
+</ul>
+</li>
+</ul>
+
+
+<p>But you can also ask <code>document.readyState</code> where you are in the process:</p>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState</p>
+
+<ul>
+<li>loading
+
+<ul>
+<li>The document is still loading.</li>
+</ul>
+</li>
+<li>interactive
+
+<ul>
+<li>The document has finished loading and the document has been parsed but sub-resources such as images, stylesheets and frames are still loading. The state indicates that the DOMContentLoaded event has been fired.</li>
+</ul>
+</li>
+<li>complete
+
+<ul>
+<li>The document and all sub-resources have finished loading. The state indicates that the load event has been fired.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Add <code>document.readyState</code> to your watches and run:</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width"&gt;
+    &lt;title&gt;DOMContentLoaded&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;script type="text/javascript" charset="utf-8"&gt;
+
+    debugger;
+
+    window.addEventListener("load", function(e) {
+      debugger;
+      //alert("i am loaded");
+    }, false);
+
+    window.addEventListener("DOMContentLoaded", function(e) {
+      debugger;
+    }, false);
+
+  &lt;/script&gt;
+  &lt;body&gt;
+    body
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h2>window.onerror and CORS</h2>
+
+<p>http://blog.errorception.com/2012/04/script-error-on-line-0.html</p>
+
+<p>Script error on line 0.</p>
+
+<p>This almost certainly means a script loaded via CORS fired an error.
+Modern browsers zero-out the data</p>
+
+<p>http://jeremiahgrossman.blogspot.in/2006/12/i-know-if-youre-logged-in-anywhere.html</p>
+
+<p>The above 2006 link demonstrates how the errors produced by a non CORS
+remote script can be used to sniff out which sites you&#8217;re logged into,
+and hence modern browsers strip all information from external non CORS
+scripts to just say line 0 and &#8220;Script Error.&#8221;. This thwarts bugsnag
+unless the script you load is CORS.</p>
+
+<h2>Ruby Exception#cause</h2>
+
+<p>If one caught exception causes another to be raised, Ruby keeps track of
+all preceding exceptions within a chain of Exception#cause. Bugsnag uses
+this to great effect.</p>
+
+<pre><code>begin
+  begin
+    raise "wat"
+  rescue =&gt; e
+    oasnoiasd
+  end
+rescue =&gt; e
+  puts e.cause.backtrace # print the backtrace of RuntimeError "wat"
+end
+</code></pre>
+
+<p>https://bugsnag.com/blog/ruby-2-1-exception-causes</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-21T20:28:00-04:00" pubdate data-updated="true">Jul 21<span>st</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/07/21/sriracha/';
+        var disqus_url = 'http://machty.github.com/blog/2015/07/21/sriracha/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+
