@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2015-08-26T16:10:13-04:00</updated>
+  <updated>2015-08-26T16:29:32-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -20,7 +20,7 @@
     <id>http://machty.github.com/blog/2015/08/26/help-me-with-observables</id>
     <content type="html"><![CDATA[<h2>How do I do this with Observables (or CSP or alternatives)</h2>
 
-<p>I build/maintain <a href="http://www.expresscheckouapp.com">Express Checkout</a>,
+<p>I build/maintain <a href="http://www.expresscheckoutapp.com">Express Checkout</a>,
 a hybrid app, which means it&#8217;s an Ember.js app running in an embedded
 browser within an iOS/Android app that occasionally calls into the native app layer
 to do native-specific things like turn on the camera, scan barcodes, register
