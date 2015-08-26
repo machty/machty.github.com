@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2015-08-26T16:29:32-04:00</updated>
+  <updated>2015-08-26T16:33:39-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -197,7 +197,8 @@ to hear them; please comment below or hit me up at
 <a href="https://twitter.com/machty">@machty on Twitter</a>.</p>
 
 <p>Also, if you see this as something that could be more
-appropriately/easily solved by CSP, I&#8217;d love to hear what that&#8217;d entail.</p>
+appropriately/easily solved by CSP (communicating sequential processes,
+e.g. ClojureScript&#8217;s core.async), I&#8217;d love to hear what that&#8217;d entail.</p>
 ]]></content>
   </entry>
   
