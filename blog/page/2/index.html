@@ -112,6 +112,298 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/02/21/post-with-the-most/">
+		
+			Post With the Most</a>
+	</h2>
+	<div class="entry-content">
+		<h2>DI, Clojure Components</h2>
+
+<p>https://www.youtube.com/watch?v=13cmHf_kt-Q</p>
+
+<p>A component is an object (just like in OOP) that encapsulates some state
+but really just tries to focus on behavior rather than the manipulation
+of that internal state.</p>
+
+<p>Types of Components:</p>
+
+<ul>
+<li><p>State Wrapper</p>
+
+<ul>
+<li>e.g. wrap a stateful connection to a database</li>
+<li>e.g. open expensive connection object on create, kill on destroy
+
+<ul>
+<li><code>(defrecord DB [host conn])</code>
+
+<ul>
+<li>host and conn are meant to be private fields, but privacy
+isn&#8217;t actually enforcible in clojure</li>
+</ul>
+</li>
+<li>Public API
+
+<ul>
+<li><code>(defn query [db &amp; ...] (.doStatement (:conn db)))</code></li>
+<li>these functions <em>do</em> access the conn and host fields; they&#8217;re
+the &#8220;public methods&#8221;</li>
+</ul>
+</li>
+<li>Constructor
+
+<ul>
+<li>You don&#8217;t have to just use (and maybe shouldn&#8217;t use?) the
+default defrecord constructor (e.g. ->DB)</li>
+<li>Instead you should expose more convenient constructors that
+are themselves side-effect less but return the record.</li>
+<li>e.g. <code>(defn db [host] (map-&gt;DB {:host host}))</code></li>
+<li>NOTE: <code>map-&gt;RECORDNAME</code> is something declared for you by
+the <code>defrecord</code> macro, specifically <code>(declare ~(symbol (str 'map-&gt; gname))</code></li>
+<li>Again, no side effects&#8230; a constructor just produces an object,
+but that object still needs to be kicked into gear in some way,
+let&#8217;s say, via:</li>
+</ul>
+</li>
+<li>Lifeycle Protocol
+
+<ul>
+<li>Side effects!</li>
+</ul>
+</li>
+</ul>
+
+
+<p>(defrecord DB [host conn]
+  component/Lifecycle
+  (start [this]</p>
+
+<pre><code>(assoc this   ;; returns new thing!!! don't just sideeffect the obj
+  :conn (Driver/connect host)))
+</code></pre>
+
+  (stop [this]
+
+<pre><code>(.stop conn)
+this)
+</code></pre></li>
+</ul>
+</li>
+<li><p>Service Wrapper</p>
+
+<ul>
+<li>a service like Email is initialized with, say, host and api-key,
+but after that point, everyone just needs to pass args like
+address and body to use it; that state is encapsulated.</li>
+</ul>
+</li>
+<li><p>Domain Model</p>
+
+<ul>
+<li>some subset of functionality and represent as a component</li>
+<li>as opposed to OOP where you&#8217;d have a Customer obj with both state
+for a specific customer as well as methods to control behavior and
+manipulate state, a <code>Customers</code> domain model is an aggregate of
+behavioral operations.</li>
+<li><p>behavioral dependencies are encapsulated together; a Customers
+object depends on the db state wrapper and email service</p>
+
+<p>(defrecord Customers [db email])</p>
+
+<p>;; public api:
+(defn notify [customers name message]
+  (let [{:keys [db email]} customers</p>
+
+<pre><code>    address (query db ... name)]
+(send email address message)))
+</code></pre></li>
+</ul>
+</li>
+<li><p>Domain Model (cont.)</p>
+
+<ul>
+<li>fetches db and email dependencies from customers record&#8230;</li>
+<li>&#8230; queries address from db</li>
+<li>&#8230; and uses the email service to send it to the customer</li>
+</ul>
+</li>
+<li><p>Constructing components</p>
+
+<ul>
+<li>make a <code>defn</code>, tell the name of the dependences with :keywords.</li>
+</ul>
+</li>
+<li>Associative injection
+
+<ul>
+<li>a system (container in Ember) is just a map</li>
+<li>if you want to stub dependencies, just assoc those stubs
+
+<ul>
+<li>weakness: if you base these test systems off the live one,
+if you add another component to the live one, you have to
+remember to stub it out (hence isolated containers)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Sample RxJsbin w testing</h2>
+
+<p>http://jsbin.com/colora/31/edit</p>
+
+<p>Good lord do they need help w docs.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-21T16:33:00-05:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/02/17/omg-calfornia/">
+		
+			OMG I&#8217;m in California</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Definitive Ubuntu folder hierarchy</h2>
+
+<p>https://help.ubuntu.com/community/LinuxFilesystemTreeOverview</p>
+
+<pre><code>/bin is a place for most commonly used terminal commands, like ls, mount, rm, etc.
+
+/boot contains files needed to start up the system, including the Linux kernel, a RAM disk image and bootloader configuration files.
+
+/dev contains all device files, which are not regular files but instead refer to various hardware devices on the system, including hard drives.
+
+/etc contains system-global configuration files, which affect the system's behavior for all users.
+
+/home home sweet home, this is the place for users' home directories.
+
+/lib contains very important dynamic libraries and kernel modules
+
+/media is intended as a mount point for external devices, such as hard drives or removable media (floppies, CDs, DVDs).
+
+/mnt is also a place for mount points, but dedicated specifically to "temporarily mounted" devices, such as network filesystems.
+
+/opt can be used to store addition software for your system, which is not handled by the package manager.
+
+/proc is a virtual filesystem that provides a mechanism for kernel to send information to processes.
+
+/root is the superuser's home directory, not in /home/ to allow for booting the system even if /home/ is not available.
+
+/sbin contains important administrative commands that should generally only be employed by the superuser.
+
+/srv can contain data directories of services such as HTTP (/srv/www/) or FTP.
+
+/sys is a virtual filesystem that can be accessed to set or obtain information about the kernel's view of the system.
+
+/tmp is a place for temporary files used by applications.
+
+/usr contains the majority of user utilities and applications, and partly replicates the root directory structure, containing for instance, among others, /usr/bin/ and /usr/lib.
+
+/var is dedicated variable data that potentially changes rapidly; a notable directory it contains is /var/log where system log files are kept.
+</code></pre>
+
+<h2>init.d vs init</h2>
+
+<p><code>init.d</code> is old-school SystemV style, wherein you have executable
+scripts in <code>/etc/init.d</code> folder which have case statements matching
+<code>reload</code>, <code>start</code>, etc, and doing some behavior based on that.</p>
+
+<p><code>/etc/init</code> houses the newer Upstart format largely adopted by Ubuntu,
+and within that you have a bunch of <code>.conf</code> files for managing daemons.</p>
+
+<p>init.d / SystemV:</p>
+
+<pre><code>/etc/init.d/nginx restart
+</code></pre>
+
+<p>upstart</p>
+
+<pre><code>restart nginx 
+# looks up /etc/init/nginx.conf
+</code></pre>
+
+<h2>Apple Store Wonkery</h2>
+
+<p>Failed to upload the app, many times, provisioning profile and
+certificate shit due to know laptop. Final error within Application
+Loader was due to ITMS-4088 error, and was solved when 1) built
+everything with fresh certificates / prov profs under machty and 2)
+deployed via the other email account which shall not be publicly named
+because security.</p>
+
+<h2>File Dialog slowness on 2011 MBP Yosemite</h2>
+
+<p>Just upgraded my 2011 MBP (w SSD drive) to Yosemite and notice a bug
+that every time a file dialog closes, regardless of the app, and
+regardless of whether a file was chosen or the user cancels, there is a
+~15s hanging spinner until it unfreezes. This happens:</p>
+
+<ul>
+<li>if the view mode is anything other than Icon mode (e.g. for any list view), AND</li>
+<li>there are audio/video files in the folder (e.g. mp3, aiff, mov)</li>
+</ul>
+
+
+<p>If there&#8217;s text only files, or even pdfs or dmgs or other things with
+icons, it&#8217;s fine, but one audio/visual</p>
+
+
+		
+		<a href="/blog/2015/02/17/omg-calfornia/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-17T05:45:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/02/04/i-need-ur-luv/">
 		
 			I Need Ur Luv</a>
@@ -1058,491 +1350,6 @@ interpolation.</p>
 
 
 <time datetime="2014-12-10T11:04:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/08/808s-and-android-heartbreak/">
-		
-			808s and Android Heartbreak</a>
-	</h2>
-	<div class="entry-content">
-		<h2>TL;DR on Android WebView Form Shit</h2>
-
-<p>Here&#8217;s a list of unsurmountable barriers involved when implementing
-forms in a mobile web app in Cordova</p>
-
-<ul>
-<li>You <em>cannot</em> focus an input field on a setTimeout
-
-<ul>
-<li>It must be tied to a user input event (e.g. a touchstart/end)</li>
-<li>It might look focused but it won&#8217;t bring up the keyboard</li>
-<li>You can halfass get things working in cordova by using a plugin that
-opens the keyboard before you tell the field to focus, but it you
-lose all configurability of the keyboard (whether it&#8217;s numpad,
-whether autocorrect is enabled, etc).</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Android WebView</h2>
-
-<p>https://www.youtube.com/watch?v=HbOtn5VhGZU</p>
-
-<p>Android Browser just uses a WebView (probably not Chrome).</p>
-
-<p>Platform</p>
-
-<ul>
-<li>network, disk</li>
-<li>system integration, e.g. HTML5 Camera integration</li>
-<li>graphics and rendering; this is why differences exists b/w webkit</li>
-<li>V8 is used in Android WebView instead of default webkit</li>
-</ul>
-
-
-<p>What is +1 dependent?</p>
-
-<p>Render loop:</p>
-
-<ul>
-<li><p>Event -> Paint -> Draw</p></li>
-<li><p>Before Honeycomb (2012?)</p>
-
-<ul>
-<li>Paint loops are tight, they capture content into a Picture, and
-then render the Picture</li>
-<li>Picture is Vector representation of page, not just visible area</li>
-<li>No need to go back to webkit when
-
-<ul>
-<li>scrolling</li>
-<li>zooming</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Multithreading
-
-<ul>
-<li>UI Thread (Picture)</li>
-<li>WebCore Thread (webkit; generates a new Picture that UI thread can
-use for zooming, scrolling, etc)</li>
-</ul>
-</li>
-<li>Software rendering
-
-<ul>
-<li>Slow, risk of taking longer than 16ms</li>
-<li>CSS3D not supported in software</li>
-</ul>
-</li>
-<li>Async rendering
-
-<ul>
-<li>e.g. flash, composited on top and often lagged behind scroll</li>
-</ul>
-</li>
-<li>Software doesn&#8217;t keep up w increasing size</li>
-<li>Tiling via Hardware
-
-<ul>
-<li>Scroll event kicks off request for new tiles to render, if they
-don&#8217;t arrive in time, no big deal, everything will be fast even if
-there&#8217;s a moment where it&#8217;s blank</li>
-</ul>
-</li>
-<li>Texture Generation Thread?
-
-<ul>
-<li>the thing that splits things into tiles</li>
-</ul>
-</li>
-<li>w Hardware acceleration:
-
-<ul>
-<li>Painting slower, drawing (compositing?) faster!</li>
-<li>Precache tiles
-
-<ul>
-<li>prefetch surrounding tiles</li>
-<li>direction dependent (e.g. prefetch tiles below if you&#8217;re scrolling
-down)</li>
-</ul>
-</li>
-<li>low-res tiles when scrolling quickly&#8230; blur sharpens once it&#8217;s had
-time to settle and finish painting</li>
-<li>memory usage
-
-<ul>
-<li>limited number of tiles (device dependent)</li>
-<li>tiles are 256x256</li>
-<li>check if plain colors&#8230; JellyBean</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>AHH fuck it all it&#8217;s powered in Chromium now. Why bother.</p>
-
-<p>Android Versions</p>
-
-<p>Operating Systems:</p>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Android_Ice_Cream_Sandwich">Android 4: Ice Cream Sandwich</a></li>
-</ul>
-
-
-<h2>Android API levels</h2>
-
-<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels</p>
-
-<p>API Levels are just integers that match up w Platform versions</p>
-
-<pre><code>Platform Version    API Level   VERSION_CODE    Notes
-Android 5.0 21  LOLLIPOP    Platform Highlights
-Android 4.4W    20  KITKAT_WATCH    KitKat for Wearables Only
-Android 4.4 19  KITKAT  Platform Highlights
-Android 4.3 18  JELLY_BEAN_MR2  Platform Highlights
-Android 4.2, 4.2.2  17  JELLY_BEAN_MR1  Platform Highlights
-Android 4.1, 4.1.1  16  JELLY_BEAN  Platform Highlights
-Android 4.0.3, 4.0.4    15  ICE_CREAM_SANDWICH_MR1  Platform Highlights
-</code></pre>
-
-<h2>Android Activity / Fragment Lifestyle</h2>
-
-<p>https://plus.google.com/+StevePomeroy/posts/HsthxN21Yp1</p>
-
-<p>http://staticfree.info/~steve/complete_android_fragment_lifecycle.png</p>
-
-<p>https://github.com/xxv/android-lifecycle</p>
-
-<h2>Server-push</h2>
-
-<p>http://caniuse.com/#feat=eventsource</p>
-
-<p>Android supports SSE from 4.4 onward (since Nov 2013).</p>
-
-<h2>Android Chromium WebView since 4.4 KitKat (Nov 2013)</h2>
-
-<p>https://www.youtube.com/watch?v=IOY2UNZU9QQ</p>
-
-<p>Android Browser still uses WebView, just that it&#8217;s Chromium now.
-Snapshot of Chrome 30.</p>
-
-<p>Chrome vs Chrome WebView</p>
-
-<ul>
-<li>Graphics backend</li>
-<li>Otherwise invisible to app developer</li>
-<li>Chop out Chrome backend, replace w graphics stack compatible w android
-graphics.</li>
-<li>SurfaceFlinger</li>
-<li>Hardware accelerated layers.</li>
-</ul>
-
-
-<p>KitKat webview is way more HTML5 compliant, rather than old WebKit
-browser.</p>
-
-<p>Features:</p>
-
-<ul>
-<li>IndexedDB (ios only has shitty/buggy support in 8+)
-
-<ul>
-<li>async, non-blocking, etc</li>
-</ul>
-</li>
-<li>Websockets</li>
-<li>requestAnimationFrame</li>
-<li>SVG filters and effects, sepia, convolution blurs</li>
-<li>Hardware accelerated
-
-<ul>
-<li>everything</li>
-<li>default for all new apps is hardware accelerated on</li>
-<li>Question: hardware acceleration can be enabled for the app, but also
-the webview itself?</li>
-</ul>
-</li>
-</ul>
-
-
-<p>WebView methods must be run on UI Tthread, use <code>runOnUiThread</code> if you&#8217;re
-within a different thread&#8230;</p>
-
-<p>Compositing Thread,</p>
-
-<p>Main UI thread</p>
-
-<p><a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> since kitkat all urls
-most conform to it.</p>
-
-<p>A CSS pixel corresponds to 1, 2, 4, etc, depending on your viewport.</p>
-
-<p>There must only be one Meta Viewport tag&#8230; only the last one is
-actually used.</p>
-
-<p>Shorthand CSS can override others in KitKit+; be specific w CSS
-properties unless you really want to override many things.</p>
-
-<h2>uses-sdk</h2>
-
-<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html</p>
-
-<p>Always set target API, but you can still support min SDK versions for
-fallback.</p>
-
-<h2>lint</h2>
-
-<p>Android <code>lint</code></p>
-
-<pre><code>$ which lint
-/Users/machty/adt-bundle-mac-x86_64/sdk/tools/lint
-</code></pre>
-
-<p>seems like ADT, the Eclipse plugin suite.</p>
-
-<p>http://developer.android.com/tools/sdk/eclipse-adt.html</p>
-
-<h2>Focusing fields within Android</h2>
-
-<p>Is it actually fucking possible?</p>
-
-<p>https://code.google.com/p/android/issues/detail?id=27438</p>
-
-<p>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#toggleSoftInput(int, int)</p>
-
-<p>WTF is toggleSoftInput vs toggleSoftInputFromWindow vs</p>
-
-<p>TODO: prevent defocusing with</p>
-
-<pre><code>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#SHOW_FORCED
-</code></pre>
-
-<p>?</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-08T12:21:00-05:00" pubdate data-updated="true">Dec 8<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/01/sloggin/">
-		
-			Sloggin</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Gaslighting</h2>
-
-<p>http://en.wikipedia.org/wiki/Gaslighting</p>
-
-<p>Presenting false information to someone until they doubt their own sanity.</p>
-
-<h2>Deductible</h2>
-
-<p>http://en.wikipedia.org/wiki/Deductible</p>
-
-<p>The amount that must be paid by policy owner, out of pocket,
-before insurance kicks in.</p>
-
-<blockquote><p>Given the nature of medical treatment, the insured often faces multiple medical expenses spread over several days for a single illness or injury. Due to this reason, health insurance deductibles often tend to be imposed on a term basis (e.g. annually) as opposed to a per-visit threshold.[4] In spite of this, major medical insurance policies may have a per-visit excess which often does not cover the cost of routine visits to a GP, unless it is certified to be a part of a continuous treatment (and the bills can be collated in a single claim).</p></blockquote>
-
-<p>So it&#8217;s annual so that you&#8217;re always paying <em>something</em> out of pocket.
-Deductibles are ultimately limited by a Out-of-Pocket Maximum.</p>
-
-<p>http://www.bcbsm.com/index/health-insurance-help/faqs/topics/how-health-insurance-works/deductibles-coinsurance-copays.html</p>
-
-<ul>
-<li>If you have $1500, and you get a $2000 medical bill, you have to pay
-$1500 of that, no matter what, and then the last $500 might require
-paying coinsurance
-
-<ul>
-<li>After deductible: insurance kicks in after deductible is paid</li>
-<li>No deductible: insurance kicks in immediately without having to pay
-a deductible (there could still be coinsurance)</li>
-<li>Before deductible: you still have to pay deductible, but</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Ah ok so you&#8217;re still chipping away at a yearly deductible. After which
-you only need to think about coinsurance and copay.</p>
-
-<p>But first, deductible types:</p>
-
-<ul>
-<li>Annual: most common, chipping away at deductible throughout the year</li>
-<li>Per-episode: min deductible to pay per each type of visit, e.g. each
-time you&#8217;re hospitalized</li>
-<li>Out of network deductible: what it sounds like; sometimes paying out
-of network deductible subtracts from your regular deductible.</li>
-<li>Family deductible: multiple members chipping away at deductible</li>
-</ul>
-
-
-<p>Coinsurance: your share of health care service costs, usually a
-percentage. e.g. if you&#8217;ve paid your deductible, then you might have to
-pay 20% of whatever&#8217;s left over.</p>
-
-<p>Copay: a fixed amount you pay for a given service, each time you use it.
-Could be $40 when you buy prescription drugs, $20 every doctor visit,
-etc. Copays prevent frequent visits to the same person/service, since
-they add up, particular if the service is cheap, whereas coisurance, a
-fixed percentage, doesn&#8217;t add up if the service is cheap.</p>
-
-<ul>
-<li>Pros
-
-<ul>
-<li>You always know the fixed amount (rather than a percentage tied to
-total cost)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>So the difference is just fixed amount vs percentage?</p>
-
-<h2>Honeypot</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Honeypot_%28computing%29">wiki</a></p>
-
-<p>Hacker lure, like a bear to honey. Pretends to be some network with
-useful info, contains nothing, logs attack attempts.</p>
-
-<h2>STEM fields</h2>
-
-<p>http://en.wikipedia.org/wiki/STEM_fields</p>
-
-<p>Science, technology, engineering, math.</p>
-
-<p>http://en.wikipedia.org/wiki/Women_in_STEM_fields</p>
-
-<p>STEM equity: gender equity in STEM fields.</p>
-
-<h2>Who is logged in what are they doing?</h2>
-
-<p><code>w(1)</code>:</p>
-
-<blockquote><p>w &#8211; display who is logged in and what they are doing</p></blockquote>
-
-<pre><code>$ w
-USER     TTY      FROM              LOGIN@  IDLE WHAT
-machty   console  -                18Nov14 15days -
-machty   s000     -                18Nov14 9days tmux a
-machty   s029     -                22Nov14     - tmux a
-</code></pre>
-
-<h2>rcp, rsh, rcmd</h2>
-
-<p>Non-secure scp, ssh, and rcmd. Uses kind of a crappy auth scheme,
-wherein the server, rshd, has its <code>iruserok</code> fn called and can decide
-based on IP, etc, whether things are cool.</p>
-
-<p>TLDR use ssh.</p>
-
-<h2>hub pull-request depends on -u upstream</h2>
-
-<p>This used to create pull request from ember to ember</p>
-
-<pre><code>hub pull-request
-</code></pre>
-
-<p>I had to do</p>
-
-<pre><code>hub pull-request -h machty:some-crap
-</code></pre>
-
-<p>but if I <code>git push -u</code> then it&#8217;ll set the upstream and the original will
-work. Hooray. Thanks Robert Jackson.</p>
-
-<h2>bash hashes commands</h2>
-
-<p>Because path resolution is slow, bash will hash the location of a
-command. This broke my shit when I upgraded git from the Mac
-(/usr/bin/git) to the one from homebrew (/usr/local/bin/git).</p>
-
-<p>Bash has some built-ins <code>hash</code> and <code>type</code>. <code>type</code> tells you how a
-command resolves:</p>
-
-<pre><code>$ type git
-git is hashed (/usr/local/bin/git)
-
-$ hash
-hits    command
-   2    /usr/bin/which
-   1    /usr/local/bin/node
-   2    /Users/machty/.rvm/gems/ruby-2.0.0-p353@global/bin/bundle
-   3    /usr/local/bin/git
-   1    /Users/machty/.rvm/rubies/ruby-2.0.0-p353/bin/irb
-  12    /usr/bin/man
-   2    /bin/ls
-   2    /usr/bin/rsh
-   1    /bin/LS
-   1    /usr/bin/w
-   1    /usr/bin/dig
-   1    /bin/rcp
-</code></pre>
-
-<p>And you can invalidate a cached command via <code>hash -r COMMAND</code>.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-01T11:36:00-05:00" pubdate data-updated="true">Dec 1<span>st</span>, 2014</time></div>
 	
 
 

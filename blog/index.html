@@ -112,6 +112,348 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/08/26/help-me-with-observables/">
+		
+			Help Me With Observables</a>
+	</h2>
+	<div class="entry-content">
+		<h2>How do I do this with Observables (or CSP or alternatives)</h2>
+
+<p>I build/maintain <a href="http:://www.expresscheckouapp.com">Express Checkout</a>,
+a hybrid app, which means it&#8217;s an Ember.js app running in an embedded
+browser within an iOS/Android app that occasionally calls into the native app layer
+to do native-specific things like turn on the camera, scan barcodes, register
+for push notifications, etc.</p>
+
+<p>I&#8217;ve been fascinated with <a href="https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">Rx Observables</a>
+for some time now and have used them to clean up a lot of the code in my
+app that deals with asynchronous behavior and concurrency. But there&#8217;s
+one part of my app I&#8217;ve been avoided refactoring with Observables
+because I just can&#8217;t wrap my head around how to approach it and express
+it with Observables, hence I&#8217;m enlisting any functionally-minded
+Observables veterans to help me think about how to structure this.</p>
+
+
+		
+		<a href="/blog/2015/08/26/help-me-with-observables/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-26T14:11:00-04:00" pubdate data-updated="true">Aug 26<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/07/29/ewouldblockagain/">
+		
+			Ewouldblockagain</a>
+	</h2>
+	<div class="entry-content">
+		<h2>EAGAIN</h2>
+
+<p>If you try a non-blocking read and there&#8217;s no data available for you,
+then EAGAIN fires.</p>
+
+<p>https://github.com/redis/redis-rb/blob/master/lib/redis/connection/ruby.rb#L47-L62</p>
+
+<pre><code>def _read_from_socket(nbytes)
+  begin
+    read_nonblock(nbytes)
+
+  rescue Errno::EWOULDBLOCK, Errno::EAGAIN
+    if IO.select([self], nil, nil, @timeout)
+      retry
+    else
+      raise Redis::TimeoutError
+    end
+  end
+
+rescue EOFError
+  raise Errno::ECONNRESET
+end
+</code></pre>
+
+<p>So:</p>
+
+<ol>
+<li>Try and read in a non-blocking manner</li>
+<li>If no data is available the read, IO.select to block for <code>@timeout</code>
+seconds until there&#8217;s something to read. If there&#8217;s nothing to read
+after <code>@timeout</code> seconds, it returns nil and raises a redis error.</li>
+<li>If there is something to read, start over and try a non-reading
+block again, which should succeed.</li>
+</ol>
+
+
+<p>If it throws TimeoutError then the redis call took longer than the
+default 5 seconds, probably cuz the server&#8217;s overwhelmed.</p>
+
+<p>So, why even bother <code>read_nonblock</code> at first if you&#8217;re just going to
+block on IO.select? Why not just do a blocking read with a timeout? I&#8217;m
+guessing because it doesn&#8217;t exist since it can otherwise be expressed
+with the above structure of 1) try nonblocking read and 2) block with
+IO.select and retry again. This answer is probably wrong but jesus
+christ this stuff is nuts.</p>
+
+<h2>XCode Build Settings</h2>
+
+<p>BOLD means motherfuckin STRING LITERAL as opposed to</p>
+
+<h2>Apple iOS plist format</h2>
+
+<p>https://gist.github.com/palaniraja/1051160</p>
+
+<p>Then you need a link like</p>
+
+<pre><code>&lt;a href="itms-services://?action=download-manifest&amp;url=itms-services://?action=download-manifest&amp;url=http:/oursite.com/myApp.plist" id="text"&gt;
+</code></pre>
+
+<p>http://stackoverflow.com/questions/8439127/ios-enterprise-distribution-through-ota</p>
+
+<p>https://longtrieuquang.wordpress.com/2014/08/01/how-to-distribute-your-ios-app-ota-with-enterprise-account/</p>
+
+<h2>Plot Armor</h2>
+
+<p>http://tvtropes.org/pmwiki/pmwiki.php/Main/PlotArmor</p>
+
+<p>When you&#8217;re so essential to the story that obviously you won&#8217;t be killed
+by some fight or some bullet, you have plot armor. Because you&#8217;re
+crucial to the plot.</p>
+
+<h2>Point ember components to github zipped archives</h2>
+
+<p>e.g. instead of</p>
+
+<pre><code>"ember": "components/ember#fed005fdc4dc3a8f19324a887c1021e8bf19acf4",
+</code></pre>
+
+<p>do</p>
+
+<pre><code>"ember": "https://github.com/components/ember/archive/ae3730263f416204e424f884c8444190e5a967dc.zip",
+</code></pre>
+
+<p>The former will clone the massively large repo of compiled Ember builds,
+which takes forever even with an insanely fast connection, while the
+latter just downloads a zip of a snapshot of the directory tree at that
+particular checkout, which is FAST.</p>
+
+<h2>Time Zones</h2>
+
+<p>Basically this railscast is amazing.</p>
+
+<p>http://railscasts.com/episodes/106-time-zones-revised</p>
+
+<p>Ruby <code>Time.now</code> uses system timezone. Verifiable by opening <code>irb</code> and
+running <code>Time.now</code> many times whilst changing the timezone in system
+preferences.</p>
+
+<p>Use <code>around_filter</code> with <code>Time.use_zone(current_user.time_zone, &amp;block)</code></p>
+
+<h2>Less mixins vs extend</h2>
+
+<p>http://lesscss.org/features/#extend-feature-use-cases-for-extend</p>
+
+<p>Mixins copy and paste CSS rules into everyone who mixes it in. Extend
+just creates multiple selections for the same rules, which almost
+certainly means smaller output CSS size (but perhaps adds to CSS engine
+overhead since there are more rules to check against?).</p>
+
+<h2>objects vs memoizations</h2>
+
+<p>Say you have an array of people:</p>
+
+<pre><code>people = [
+  {
+    id: 1,
+    first_name: "Alex",
+    last_name:  "Matchneer",
+    follows: [
+      312,
+      { somePersonObjOfSameRecursiveStructure },
+      999
+    ]
+  },
+  {
+    id: 2,
+    first_name: "Noel",
+    last_name:  "Gallagher",
+    follows: [
+      1,
+      { somePersonObjOfSameRecursiveStructure }
+    ]
+  },
+]
+</code></pre>
+
+<p>What&#8217;s the difference between</p>
+
+<pre><code>people[0]
+</code></pre>
+
+<p>and</p>
+
+<pre><code>get(people, 0)
+</code></pre>
+
+<p>? What&#8217;s the difference between</p>
+
+<pre><code>people[0].first_name
+</code></pre>
+
+<p>and</p>
+
+<pre><code>get(get(people, 0), 'first_name')
+</code></pre>
+
+<p>? What&#8217;s the difference between</p>
+
+<pre><code>person # a var with mem address 0x00001234
+</code></pre>
+
+<p>and</p>
+
+<pre><code>get(MEMORY, 0x00001234)
+</code></pre>
+
+<p>?</p>
+
+<p>It&#8217;s all just memoization. In the end, every object has a memory
+address. Variables are just memoized <code>get(MEMORY, someMemoryAddress)</code>.</p>
+
+<p><code>===</code> in javascript is just memory address comparisons.</p>
+
+<p>What if you needed to print a credits page, and the same person had
+multiple roles, e.g. director, producer, actor, and you wanted to print
+out a formal version of their first and last name. Maybe you&#8217;d write a
+function:</p>
+
+<pre><code>function formalizedName(person) {
+  return `M. ${person.first_name} ${person.last_name}`;
+}
+</code></pre>
+
+<p>But if you&#8217;re rendering a page and that name shows up multiple times,
+you&#8217;re wastefully recomputing, concatenating. Let&#8217;s assume avoiding
+recomputation/concatenation would improve performance by some noticeable
+margin. You could memoize, i.e. store the result</p>
+
+<p>blah blah blah</p>
+
+<h2>binding and immutability</h2>
+
+<pre><code>  Hello . Your friends are:
+</code></pre>
+
+<p>if <code>people</code> is an immutable data structure, then any of the following
+modifications will produce a new immutable value of <code>people</code>:</p>
+
+<ul>
+<li>a person&#8217;s name changes</li>
+<li>a person&#8217;s list of friends changes</li>
+<li>a person&#8217;s friend&#8217;s name changes</li>
+<li>etc</li>
+</ul>
+
+
+<p>But we&#8217;re using &#8220;, which means we&#8217;re creating bindings (internally
+we&#8217;re creating keystreams, and those create bindings according to the
+ember object model). This means we&#8217;ll be creating meta objects on each
+immutable data pojo&#8230; which is wasteful and useless considering they&#8217;re
+immutable, and their properties can&#8217;t can&#8217;t change.</p>
+
+<p>So why not use <code>unbound</code> helper within each curly? It&#8217;d save us an
+observer, right? It&#8217;d save us writing to <code>meta</code>, right? Sure, but it
+also means that it won&#8217;t update the second time around, because it&#8217;s
+unbound.</p>
+
+<p>So basically, &#8220; does two things:</p>
+
+<p>1) Sets up a keystream
+2) Sets up a binding</p>
+
+<p>TL;DR to get immutable structures bindable in a performant manner in
+Ember, we need to make it possible to opt into a different KeyStream
+constructor:</p>
+
+<ol>
+<li>it doesn&#8217;t call add/removeObserver (wasteful since it&#8217;ll never fire)</li>
+<li>don&#8217;t assume that just because <code>changed, that</code>
+changed; with immutable data, it&#8217;s pretty likely a.prop is actually
+the same assuming that&#8217;s not one of the properties that was changed
+between the old immutable value and the new immutable value.</li>
+</ol>
+
+
+<h2>Lazy Observables / Ember Streams</h2>
+
+<p>Unlike push-only observables, Ember streams are push/pull. You push
+that something has changed by <code>notify()</code>, and then later on you pull
+with <code>value()</code>, which only runs through computations once.</p>
+
+<p>This implies laziness. In Ember, the laziness of an LO lasts from the
+first <code>.set</code> that changes a watched value until the <code>render</code> run loop
+queue.</p>
+
+<p>For similar reasons, this is why computed properties don&#8217;t work with
+observers without an explicit get to eagerly flush a CP.</p>
+
+<p>But anyway, what are the tradeoffs between LO and push-only Observables?</p>
+
+<p>Well, one is that, if you funnel an O into an LO, then
+you&#8217;re discarding a bunch of onNexts until some arbitary pull into
+the future (yet you only end up reading the most recent &#8220;event&#8221;).</p>
+
+<p>Here&#8217;s a stab at lazy observables:
+http://jsbin.com/polude/6/edit?html,js,console,output</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-29T16:53:00-04:00" pubdate data-updated="true">Jul 29<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/07/21/sriracha/">
 		
 			Sriracha</a>
@@ -2737,298 +3079,6 @@ up things for a future allocation attempts? either seem fine.</li>
 
 
 <time datetime="2015-03-19T09:18:00-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/02/21/post-with-the-most/">
-		
-			Post With the Most</a>
-	</h2>
-	<div class="entry-content">
-		<h2>DI, Clojure Components</h2>
-
-<p>https://www.youtube.com/watch?v=13cmHf_kt-Q</p>
-
-<p>A component is an object (just like in OOP) that encapsulates some state
-but really just tries to focus on behavior rather than the manipulation
-of that internal state.</p>
-
-<p>Types of Components:</p>
-
-<ul>
-<li><p>State Wrapper</p>
-
-<ul>
-<li>e.g. wrap a stateful connection to a database</li>
-<li>e.g. open expensive connection object on create, kill on destroy
-
-<ul>
-<li><code>(defrecord DB [host conn])</code>
-
-<ul>
-<li>host and conn are meant to be private fields, but privacy
-isn&#8217;t actually enforcible in clojure</li>
-</ul>
-</li>
-<li>Public API
-
-<ul>
-<li><code>(defn query [db &amp; ...] (.doStatement (:conn db)))</code></li>
-<li>these functions <em>do</em> access the conn and host fields; they&#8217;re
-the &#8220;public methods&#8221;</li>
-</ul>
-</li>
-<li>Constructor
-
-<ul>
-<li>You don&#8217;t have to just use (and maybe shouldn&#8217;t use?) the
-default defrecord constructor (e.g. ->DB)</li>
-<li>Instead you should expose more convenient constructors that
-are themselves side-effect less but return the record.</li>
-<li>e.g. <code>(defn db [host] (map-&gt;DB {:host host}))</code></li>
-<li>NOTE: <code>map-&gt;RECORDNAME</code> is something declared for you by
-the <code>defrecord</code> macro, specifically <code>(declare ~(symbol (str 'map-&gt; gname))</code></li>
-<li>Again, no side effects&#8230; a constructor just produces an object,
-but that object still needs to be kicked into gear in some way,
-let&#8217;s say, via:</li>
-</ul>
-</li>
-<li>Lifeycle Protocol
-
-<ul>
-<li>Side effects!</li>
-</ul>
-</li>
-</ul>
-
-
-<p>(defrecord DB [host conn]
-  component/Lifecycle
-  (start [this]</p>
-
-<pre><code>(assoc this   ;; returns new thing!!! don't just sideeffect the obj
-  :conn (Driver/connect host)))
-</code></pre>
-
-  (stop [this]
-
-<pre><code>(.stop conn)
-this)
-</code></pre></li>
-</ul>
-</li>
-<li><p>Service Wrapper</p>
-
-<ul>
-<li>a service like Email is initialized with, say, host and api-key,
-but after that point, everyone just needs to pass args like
-address and body to use it; that state is encapsulated.</li>
-</ul>
-</li>
-<li><p>Domain Model</p>
-
-<ul>
-<li>some subset of functionality and represent as a component</li>
-<li>as opposed to OOP where you&#8217;d have a Customer obj with both state
-for a specific customer as well as methods to control behavior and
-manipulate state, a <code>Customers</code> domain model is an aggregate of
-behavioral operations.</li>
-<li><p>behavioral dependencies are encapsulated together; a Customers
-object depends on the db state wrapper and email service</p>
-
-<p>(defrecord Customers [db email])</p>
-
-<p>;; public api:
-(defn notify [customers name message]
-  (let [{:keys [db email]} customers</p>
-
-<pre><code>    address (query db ... name)]
-(send email address message)))
-</code></pre></li>
-</ul>
-</li>
-<li><p>Domain Model (cont.)</p>
-
-<ul>
-<li>fetches db and email dependencies from customers record&#8230;</li>
-<li>&#8230; queries address from db</li>
-<li>&#8230; and uses the email service to send it to the customer</li>
-</ul>
-</li>
-<li><p>Constructing components</p>
-
-<ul>
-<li>make a <code>defn</code>, tell the name of the dependences with :keywords.</li>
-</ul>
-</li>
-<li>Associative injection
-
-<ul>
-<li>a system (container in Ember) is just a map</li>
-<li>if you want to stub dependencies, just assoc those stubs
-
-<ul>
-<li>weakness: if you base these test systems off the live one,
-if you add another component to the live one, you have to
-remember to stub it out (hence isolated containers)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Sample RxJsbin w testing</h2>
-
-<p>http://jsbin.com/colora/31/edit</p>
-
-<p>Good lord do they need help w docs.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-21T16:33:00-05:00" pubdate data-updated="true">Feb 21<span>st</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/02/17/omg-calfornia/">
-		
-			OMG I&#8217;m in California</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Definitive Ubuntu folder hierarchy</h2>
-
-<p>https://help.ubuntu.com/community/LinuxFilesystemTreeOverview</p>
-
-<pre><code>/bin is a place for most commonly used terminal commands, like ls, mount, rm, etc.
-
-/boot contains files needed to start up the system, including the Linux kernel, a RAM disk image and bootloader configuration files.
-
-/dev contains all device files, which are not regular files but instead refer to various hardware devices on the system, including hard drives.
-
-/etc contains system-global configuration files, which affect the system's behavior for all users.
-
-/home home sweet home, this is the place for users' home directories.
-
-/lib contains very important dynamic libraries and kernel modules
-
-/media is intended as a mount point for external devices, such as hard drives or removable media (floppies, CDs, DVDs).
-
-/mnt is also a place for mount points, but dedicated specifically to "temporarily mounted" devices, such as network filesystems.
-
-/opt can be used to store addition software for your system, which is not handled by the package manager.
-
-/proc is a virtual filesystem that provides a mechanism for kernel to send information to processes.
-
-/root is the superuser's home directory, not in /home/ to allow for booting the system even if /home/ is not available.
-
-/sbin contains important administrative commands that should generally only be employed by the superuser.
-
-/srv can contain data directories of services such as HTTP (/srv/www/) or FTP.
-
-/sys is a virtual filesystem that can be accessed to set or obtain information about the kernel's view of the system.
-
-/tmp is a place for temporary files used by applications.
-
-/usr contains the majority of user utilities and applications, and partly replicates the root directory structure, containing for instance, among others, /usr/bin/ and /usr/lib.
-
-/var is dedicated variable data that potentially changes rapidly; a notable directory it contains is /var/log where system log files are kept.
-</code></pre>
-
-<h2>init.d vs init</h2>
-
-<p><code>init.d</code> is old-school SystemV style, wherein you have executable
-scripts in <code>/etc/init.d</code> folder which have case statements matching
-<code>reload</code>, <code>start</code>, etc, and doing some behavior based on that.</p>
-
-<p><code>/etc/init</code> houses the newer Upstart format largely adopted by Ubuntu,
-and within that you have a bunch of <code>.conf</code> files for managing daemons.</p>
-
-<p>init.d / SystemV:</p>
-
-<pre><code>/etc/init.d/nginx restart
-</code></pre>
-
-<p>upstart</p>
-
-<pre><code>restart nginx 
-# looks up /etc/init/nginx.conf
-</code></pre>
-
-<h2>Apple Store Wonkery</h2>
-
-<p>Failed to upload the app, many times, provisioning profile and
-certificate shit due to know laptop. Final error within Application
-Loader was due to ITMS-4088 error, and was solved when 1) built
-everything with fresh certificates / prov profs under machty and 2)
-deployed via the other email account which shall not be publicly named
-because security.</p>
-
-<h2>File Dialog slowness on 2011 MBP Yosemite</h2>
-
-<p>Just upgraded my 2011 MBP (w SSD drive) to Yosemite and notice a bug
-that every time a file dialog closes, regardless of the app, and
-regardless of whether a file was chosen or the user cancels, there is a
-~15s hanging spinner until it unfreezes. This happens:</p>
-
-<ul>
-<li>if the view mode is anything other than Icon mode (e.g. for any list view), AND</li>
-<li>there are audio/video files in the folder (e.g. mp3, aiff, mov)</li>
-</ul>
-
-
-<p>If there&#8217;s text only files, or even pdfs or dmgs or other things with
-icons, it&#8217;s fine, but one audio/visual</p>
-
-
-		
-		<a href="/blog/2015/02/17/omg-calfornia/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-17T05:45:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2015</time></div>
 	
 
 

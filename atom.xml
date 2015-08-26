@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2015-07-29T16:51:32-04:00</updated>
+  <updated>2015-08-26T16:02:10-04:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,458 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Help me with Observables]]></title>
+    <link href="http://machty.github.com/blog/2015/08/26/help-me-with-observables/"/>
+    <updated>2015-08-26T14:11:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/08/26/help-me-with-observables</id>
+    <content type="html"><![CDATA[<h2>How do I do this with Observables (or CSP or alternatives)</h2>
+
+<p>I build/maintain <a href="http:://www.expresscheckouapp.com">Express Checkout</a>,
+a hybrid app, which means it&#8217;s an Ember.js app running in an embedded
+browser within an iOS/Android app that occasionally calls into the native app layer
+to do native-specific things like turn on the camera, scan barcodes, register
+for push notifications, etc.</p>
+
+<p>I&#8217;ve been fascinated with <a href="https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">Rx Observables</a>
+for some time now and have used them to clean up a lot of the code in my
+app that deals with asynchronous behavior and concurrency. But there&#8217;s
+one part of my app I&#8217;ve been avoided refactoring with Observables
+because I just can&#8217;t wrap my head around how to approach it and express
+it with Observables, hence I&#8217;m enlisting any functionally-minded
+Observables veterans to help me think about how to structure this.</p>
+
+<!--more-->
+
+
+<h2>The Situation</h2>
+
+<p>In our hybrid web app, we have a screen that allows shoppers to scan
+barcodes on items in a store. To navigate to this screen, a few things
+must happen, in the following sequence:</p>
+
+<ul>
+<li>Shopper taps a &#8220;Start Shopping&#8221; button</li>
+<li>The app fetches the current shopping session from the server</li>
+<li>Once the session is fetched, we transition to the Ember.js route
+called <code>scan</code>. I use the Ember animation/transition library
+<a href="https://github.com/ef4/liquid-fire">Liquid Fire</a>, so the route
+transition causes a sideways full screen transition as you would
+expect from any iOS app.</li>
+<li>Once the sideways transition finishes, we call into the native code to
+turn on the camera/scanner</li>
+<li>Once the camera/scanner is turned on, we remove the white CSS
+background from the screen to reveal the native camera behind our
+transparent webview, and from here on out the user can scan barcodes,
+add items to their cart, etc.</li>
+</ul>
+
+
+<p>The part I&#8217;d like to focus on specifically is the timing of turning on
+the native camera and removing the white background. Note the following
+constraints:</p>
+
+<ul>
+<li>on both iOS and Android (though way worse on Android), turning on the
+native camera while there is any sort of visual transition/animation
+in the webview causes all sorts of hideous jank; this is why we
+transition in with a white BG and only hide the BG after a few hundred
+milliseconds after turning on the native camera</li>
+<li>if the user immediately taps the back button (either on the screen or
+android&#8217;s back button) immediately after transioning to the <code>scan</code>
+route, any unnecessary camera or visual churn should be avoided: if
+the camera hasn&#8217;t been turned on, don&#8217;t turn it on; if the white
+background hasn&#8217;t been removed, don&#8217;t remove it</li>
+<li>on the flipside, when transitioning out of the scan route, before we
+do the sideways transition, we want to 1) re-enable white bg, 2) turn
+of camera and wait a few hundred ms, and then 3) do the sideways
+tranasition</li>
+</ul>
+
+
+<p>Right now, I handle all these cases with a state machine, but given all
+the different entry/exit/abort possibilities, it&#8217;s ugly and complex.
+I&#8217;ve had much success replacing similar async-managing state machines
+in my app with Observables, so I&#8217;d like to do the same here, if
+possible.</p>
+
+<h2>A First Stab at the Problem</h2>
+
+<p>One of the nice properties of Observables is that they know when they&#8217;ve
+been subscribed-to and when they&#8217;ve been desubscribed-from. This
+property alone is what makes Observables cancellable (unlike Promises,
+that go go go until their predetermined chain of callbacks have run to
+completion, regardless of whether anyone&#8217;s still listening).</p>
+
+<p>For this problem, my intuition was to model the native camera as an
+observable, as well as the white background that needs to become
+transparent once the camera is good and ready.</p>
+
+<p>With this approach, I can pretty elegantly model the series of events
+that happen when transitioning into the <code>scan</code> route in a cancellable
+manner:</p>
+
+<pre><code>let enableCameraObservable = Observable.create(() =&gt; {
+  cordovaService.turnOnCamera();
+
+  // we could also have this observable be the thing that emits
+  // scan events, since scan events can only happen while this
+  // observable is still alive, but that's beyond the scope
+
+  return () =&gt; {
+    cordovaService.turnOffCamera();
+  };
+});
+
+let makeBackgroundTransparent = Observable.create(() =&gt; {
+  // set background to transparent
+  return () =&gt; {
+    // according to Observable.create API, this returned function
+    // fires when the observable is de-subscribed; hence we can
+    // use it for cleanup and setting the background back to white
+  };
+});
+
+liquidFireDoneTransitioning()
+  .delay(100)
+  .flatMap(() =&gt; enableCameraObservable().delay(100))
+  .flatMap(() =&gt; makeBackgroundTransparent())
+  .takeUntil(routeTransitionAttempt)
+  .subscribe((scanResult) =&gt; {
+    // ...
+  });
+</code></pre>
+
+<p>The chain of operators above is terse but expressive; it describes the
+following behavior:</p>
+
+<ul>
+<li>wait 100ms between the sideways Liquid Fire transition and turning on the camera</li>
+<li>wait 100ms between turning on the camera and making the background transparent</li>
+<li>throughout all of this, watch for routeTransitionAttempts, and if any
+of them come through, stop whatever we&#8217;re doing with the previous
+observable. This means: 1) the camera will be turned off&#8230; only if we
+ever got to the point that it was turned on, and 2) the background
+will be reset to white&#8230; if it ever got to the point that it was made
+transparent. In other words, the dispose functions for each observable
+are only called if they were ever subscribed to.</li>
+</ul>
+
+
+<p>Possible timeline of events</p>
+
+<ul>
+<li>0: <code>liquidFireDoneTransitioning</code></li>
+<li>50ms: if <code>routeTransitionAttempts</code> fires, nothing happens</li>
+<li>100ms: <code>enableCameraObservable</code> is subscribed-to; camera is turned on</li>
+<li>150ms: if <code>routeTransitionAttempts</code> fires, only
+<code>enableCameraObservable</code> dispose function fires, turning off the camera</li>
+<li>200ms: <code>makeBackgroundTransparent</code> is subscribed-to; background is
+made transparent, revealing native camera view</li>
+<li>250ms and after: if <code>routeTransitionAttempts</code>, both <code>enableCameraObservable</code> and
+<code>makeBackgroundTransparent</code> subscriptions are disposed, the camera is
+turned off, the screen turns to white.</li>
+</ul>
+
+
+<p>This is actually pretty elegant for the most part; writing a more
+imperative version of this code would involve way more code, that
+managed manually setting / cancelling timers, based on how far along the
+process was before a later <code>routeTransitionAttempt</code> was made. And it&#8217;s
+these kind of refactorings that have cleaned up code all over the app.</p>
+
+<h2>Async Disposables?</h2>
+
+<p>But there&#8217;s one major omission here: making the disposals async. For
+anti-jank performance reasons, we need the disposals to be
+staggered on the way out, just as they are staggered on the way in, and
+we need the <code>routeTransitionAttempt</code> to be delayed while it waits for
+this process to complete.</p>
+
+<p>And this, my functionally-minded Rx-experienced friends, is where I am
+at a loss and would appreciate your advice. I can&#8217;t seem to settle on a
+pattern that maintains the elegance of the disposable native camera
+and transparent backgrounds cleaning up after themselves, because those
+disposables happen right at the same time. Of course I could throw some
+hacky <code>setTimeout</code>s in there, but then I&#8217;m just introducing more
+potential race conditions and trying to sweep what should be additional
+observables/subscriptions under the rug. Of course, I&#8217;m happy to do that
+pragmatically to ship a feature, but I&#8217;d really like to understand how
+to better structure these interactions in a Observable-minded manner.</p>
+
+<p>So please, if you&#8217;ve got some ideas that might set me straight, I&#8217;d love
+to hear them; please comment below or hit me up at
+<a href="https://twitter.com/machty">@machty on Twitter</a>.</p>
+
+<p>Also, if you see this as something that could be more
+appropriately/easily solved by CSP, I&#8217;d love to hear what that&#8217;d entail.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ewouldblockagain]]></title>
+    <link href="http://machty.github.com/blog/2015/07/29/ewouldblockagain/"/>
+    <updated>2015-07-29T16:53:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/07/29/ewouldblockagain</id>
+    <content type="html"><![CDATA[<h2>EAGAIN</h2>
+
+<p>If you try a non-blocking read and there&#8217;s no data available for you,
+then EAGAIN fires.</p>
+
+<p>https://github.com/redis/redis-rb/blob/master/lib/redis/connection/ruby.rb#L47-L62</p>
+
+<pre><code>def _read_from_socket(nbytes)
+  begin
+    read_nonblock(nbytes)
+
+  rescue Errno::EWOULDBLOCK, Errno::EAGAIN
+    if IO.select([self], nil, nil, @timeout)
+      retry
+    else
+      raise Redis::TimeoutError
+    end
+  end
+
+rescue EOFError
+  raise Errno::ECONNRESET
+end
+</code></pre>
+
+<p>So:</p>
+
+<ol>
+<li>Try and read in a non-blocking manner</li>
+<li>If no data is available the read, IO.select to block for <code>@timeout</code>
+seconds until there&#8217;s something to read. If there&#8217;s nothing to read
+after <code>@timeout</code> seconds, it returns nil and raises a redis error.</li>
+<li>If there is something to read, start over and try a non-reading
+block again, which should succeed.</li>
+</ol>
+
+
+<p>If it throws TimeoutError then the redis call took longer than the
+default 5 seconds, probably cuz the server&#8217;s overwhelmed.</p>
+
+<p>So, why even bother <code>read_nonblock</code> at first if you&#8217;re just going to
+block on IO.select? Why not just do a blocking read with a timeout? I&#8217;m
+guessing because it doesn&#8217;t exist since it can otherwise be expressed
+with the above structure of 1) try nonblocking read and 2) block with
+IO.select and retry again. This answer is probably wrong but jesus
+christ this stuff is nuts.</p>
+
+<h2>XCode Build Settings</h2>
+
+<p>BOLD means motherfuckin STRING LITERAL as opposed to</p>
+
+<h2>Apple iOS plist format</h2>
+
+<p>https://gist.github.com/palaniraja/1051160</p>
+
+<p>Then you need a link like</p>
+
+<pre><code>&lt;a href="itms-services://?action=download-manifest&amp;url=itms-services://?action=download-manifest&amp;url=http:/oursite.com/myApp.plist" id="text"&gt;
+</code></pre>
+
+<p>http://stackoverflow.com/questions/8439127/ios-enterprise-distribution-through-ota</p>
+
+<p>https://longtrieuquang.wordpress.com/2014/08/01/how-to-distribute-your-ios-app-ota-with-enterprise-account/</p>
+
+<h2>Plot Armor</h2>
+
+<p>http://tvtropes.org/pmwiki/pmwiki.php/Main/PlotArmor</p>
+
+<p>When you&#8217;re so essential to the story that obviously you won&#8217;t be killed
+by some fight or some bullet, you have plot armor. Because you&#8217;re
+crucial to the plot.</p>
+
+<h2>Point ember components to github zipped archives</h2>
+
+<p>e.g. instead of</p>
+
+<pre><code>"ember": "components/ember#fed005fdc4dc3a8f19324a887c1021e8bf19acf4",
+</code></pre>
+
+<p>do</p>
+
+<pre><code>"ember": "https://github.com/components/ember/archive/ae3730263f416204e424f884c8444190e5a967dc.zip",
+</code></pre>
+
+<p>The former will clone the massively large repo of compiled Ember builds,
+which takes forever even with an insanely fast connection, while the
+latter just downloads a zip of a snapshot of the directory tree at that
+particular checkout, which is FAST.</p>
+
+<h2>Time Zones</h2>
+
+<p>Basically this railscast is amazing.</p>
+
+<p>http://railscasts.com/episodes/106-time-zones-revised</p>
+
+<p>Ruby <code>Time.now</code> uses system timezone. Verifiable by opening <code>irb</code> and
+running <code>Time.now</code> many times whilst changing the timezone in system
+preferences.</p>
+
+<p>Use <code>around_filter</code> with <code>Time.use_zone(current_user.time_zone, &amp;block)</code></p>
+
+<h2>Less mixins vs extend</h2>
+
+<p>http://lesscss.org/features/#extend-feature-use-cases-for-extend</p>
+
+<p>Mixins copy and paste CSS rules into everyone who mixes it in. Extend
+just creates multiple selections for the same rules, which almost
+certainly means smaller output CSS size (but perhaps adds to CSS engine
+overhead since there are more rules to check against?).</p>
+
+<h2>objects vs memoizations</h2>
+
+<p>Say you have an array of people:</p>
+
+<pre><code>people = [
+  {
+    id: 1,
+    first_name: "Alex",
+    last_name:  "Matchneer",
+    follows: [
+      312,
+      { somePersonObjOfSameRecursiveStructure },
+      999
+    ]
+  },
+  {
+    id: 2,
+    first_name: "Noel",
+    last_name:  "Gallagher",
+    follows: [
+      1,
+      { somePersonObjOfSameRecursiveStructure }
+    ]
+  },
+]
+</code></pre>
+
+<p>What&#8217;s the difference between</p>
+
+<pre><code>people[0]
+</code></pre>
+
+<p>and</p>
+
+<pre><code>get(people, 0)
+</code></pre>
+
+<p>? What&#8217;s the difference between</p>
+
+<pre><code>people[0].first_name
+</code></pre>
+
+<p>and</p>
+
+<pre><code>get(get(people, 0), 'first_name')
+</code></pre>
+
+<p>? What&#8217;s the difference between</p>
+
+<pre><code>person # a var with mem address 0x00001234
+</code></pre>
+
+<p>and</p>
+
+<pre><code>get(MEMORY, 0x00001234)
+</code></pre>
+
+<p>?</p>
+
+<p>It&#8217;s all just memoization. In the end, every object has a memory
+address. Variables are just memoized <code>get(MEMORY, someMemoryAddress)</code>.</p>
+
+<p><code>===</code> in javascript is just memory address comparisons.</p>
+
+<p>What if you needed to print a credits page, and the same person had
+multiple roles, e.g. director, producer, actor, and you wanted to print
+out a formal version of their first and last name. Maybe you&#8217;d write a
+function:</p>
+
+<pre><code>function formalizedName(person) {
+  return `M. ${person.first_name} ${person.last_name}`;
+}
+</code></pre>
+
+<p>But if you&#8217;re rendering a page and that name shows up multiple times,
+you&#8217;re wastefully recomputing, concatenating. Let&#8217;s assume avoiding
+recomputation/concatenation would improve performance by some noticeable
+margin. You could memoize, i.e. store the result</p>
+
+<p>blah blah blah</p>
+
+<h2>binding and immutability</h2>
+
+<pre><code>  Hello . Your friends are:
+</code></pre>
+
+<p>if <code>people</code> is an immutable data structure, then any of the following
+modifications will produce a new immutable value of <code>people</code>:</p>
+
+<ul>
+<li>a person&#8217;s name changes</li>
+<li>a person&#8217;s list of friends changes</li>
+<li>a person&#8217;s friend&#8217;s name changes</li>
+<li>etc</li>
+</ul>
+
+
+<p>But we&#8217;re using &#8220;, which means we&#8217;re creating bindings (internally
+we&#8217;re creating keystreams, and those create bindings according to the
+ember object model). This means we&#8217;ll be creating meta objects on each
+immutable data pojo&#8230; which is wasteful and useless considering they&#8217;re
+immutable, and their properties can&#8217;t can&#8217;t change.</p>
+
+<p>So why not use <code>unbound</code> helper within each curly? It&#8217;d save us an
+observer, right? It&#8217;d save us writing to <code>meta</code>, right? Sure, but it
+also means that it won&#8217;t update the second time around, because it&#8217;s
+unbound.</p>
+
+<p>So basically, &#8220; does two things:</p>
+
+<p>1) Sets up a keystream
+2) Sets up a binding</p>
+
+<p>TL;DR to get immutable structures bindable in a performant manner in
+Ember, we need to make it possible to opt into a different KeyStream
+constructor:</p>
+
+<ol>
+<li>it doesn&#8217;t call add/removeObserver (wasteful since it&#8217;ll never fire)</li>
+<li>don&#8217;t assume that just because <code>changed, that</code>
+changed; with immutable data, it&#8217;s pretty likely a.prop is actually
+the same assuming that&#8217;s not one of the properties that was changed
+between the old immutable value and the new immutable value.</li>
+</ol>
+
+
+<h2>Lazy Observables / Ember Streams</h2>
+
+<p>Unlike push-only observables, Ember streams are push/pull. You push
+that something has changed by <code>notify()</code>, and then later on you pull
+with <code>value()</code>, which only runs through computations once.</p>
+
+<p>This implies laziness. In Ember, the laziness of an LO lasts from the
+first <code>.set</code> that changes a watched value until the <code>render</code> run loop
+queue.</p>
+
+<p>For similar reasons, this is why computed properties don&#8217;t work with
+observers without an explicit get to eagerly flush a CP.</p>
+
+<p>But anyway, what are the tradeoffs between LO and push-only Observables?</p>
+
+<p>Well, one is that, if you funnel an O into an LO, then
+you&#8217;re discarding a bunch of onNexts until some arbitary pull into
+the future (yet you only end up reading the most recent &#8220;event&#8221;).</p>
+
+<p>Here&#8217;s a stab at lazy observables:
+http://jsbin.com/polude/6/edit?html,js,console,output</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sriracha]]></title>
@@ -8015,437 +8467,6 @@ interpolation.</p>
 <p><code>npm pack</code></p>
 
 <p>Then inspect the tgz.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[808s and Android Heartbreak]]></title>
-    <link href="http://machty.github.com/blog/2014/12/08/808s-and-android-heartbreak/"/>
-    <updated>2014-12-08T12:21:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/12/08/808s-and-android-heartbreak</id>
-    <content type="html"><![CDATA[<h2>TL;DR on Android WebView Form Shit</h2>
-
-<p>Here&#8217;s a list of unsurmountable barriers involved when implementing
-forms in a mobile web app in Cordova</p>
-
-<ul>
-<li>You <em>cannot</em> focus an input field on a setTimeout
-
-<ul>
-<li>It must be tied to a user input event (e.g. a touchstart/end)</li>
-<li>It might look focused but it won&#8217;t bring up the keyboard</li>
-<li>You can halfass get things working in cordova by using a plugin that
-opens the keyboard before you tell the field to focus, but it you
-lose all configurability of the keyboard (whether it&#8217;s numpad,
-whether autocorrect is enabled, etc).</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Android WebView</h2>
-
-<p>https://www.youtube.com/watch?v=HbOtn5VhGZU</p>
-
-<p>Android Browser just uses a WebView (probably not Chrome).</p>
-
-<p>Platform</p>
-
-<ul>
-<li>network, disk</li>
-<li>system integration, e.g. HTML5 Camera integration</li>
-<li>graphics and rendering; this is why differences exists b/w webkit</li>
-<li>V8 is used in Android WebView instead of default webkit</li>
-</ul>
-
-
-<p>What is +1 dependent?</p>
-
-<p>Render loop:</p>
-
-<ul>
-<li><p>Event -> Paint -> Draw</p></li>
-<li><p>Before Honeycomb (2012?)</p>
-
-<ul>
-<li>Paint loops are tight, they capture content into a Picture, and
-then render the Picture</li>
-<li>Picture is Vector representation of page, not just visible area</li>
-<li>No need to go back to webkit when
-
-<ul>
-<li>scrolling</li>
-<li>zooming</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Multithreading
-
-<ul>
-<li>UI Thread (Picture)</li>
-<li>WebCore Thread (webkit; generates a new Picture that UI thread can
-use for zooming, scrolling, etc)</li>
-</ul>
-</li>
-<li>Software rendering
-
-<ul>
-<li>Slow, risk of taking longer than 16ms</li>
-<li>CSS3D not supported in software</li>
-</ul>
-</li>
-<li>Async rendering
-
-<ul>
-<li>e.g. flash, composited on top and often lagged behind scroll</li>
-</ul>
-</li>
-<li>Software doesn&#8217;t keep up w increasing size</li>
-<li>Tiling via Hardware
-
-<ul>
-<li>Scroll event kicks off request for new tiles to render, if they
-don&#8217;t arrive in time, no big deal, everything will be fast even if
-there&#8217;s a moment where it&#8217;s blank</li>
-</ul>
-</li>
-<li>Texture Generation Thread?
-
-<ul>
-<li>the thing that splits things into tiles</li>
-</ul>
-</li>
-<li>w Hardware acceleration:
-
-<ul>
-<li>Painting slower, drawing (compositing?) faster!</li>
-<li>Precache tiles
-
-<ul>
-<li>prefetch surrounding tiles</li>
-<li>direction dependent (e.g. prefetch tiles below if you&#8217;re scrolling
-down)</li>
-</ul>
-</li>
-<li>low-res tiles when scrolling quickly&#8230; blur sharpens once it&#8217;s had
-time to settle and finish painting</li>
-<li>memory usage
-
-<ul>
-<li>limited number of tiles (device dependent)</li>
-<li>tiles are 256x256</li>
-<li>check if plain colors&#8230; JellyBean</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>AHH fuck it all it&#8217;s powered in Chromium now. Why bother.</p>
-
-<p>Android Versions</p>
-
-<p>Operating Systems:</p>
-
-<ul>
-<li><a href="http://en.wikipedia.org/wiki/Android_Ice_Cream_Sandwich">Android 4: Ice Cream Sandwich</a></li>
-</ul>
-
-
-<h2>Android API levels</h2>
-
-<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels</p>
-
-<p>API Levels are just integers that match up w Platform versions</p>
-
-<pre><code>Platform Version    API Level   VERSION_CODE    Notes
-Android 5.0 21  LOLLIPOP    Platform Highlights
-Android 4.4W    20  KITKAT_WATCH    KitKat for Wearables Only
-Android 4.4 19  KITKAT  Platform Highlights
-Android 4.3 18  JELLY_BEAN_MR2  Platform Highlights
-Android 4.2, 4.2.2  17  JELLY_BEAN_MR1  Platform Highlights
-Android 4.1, 4.1.1  16  JELLY_BEAN  Platform Highlights
-Android 4.0.3, 4.0.4    15  ICE_CREAM_SANDWICH_MR1  Platform Highlights
-</code></pre>
-
-<h2>Android Activity / Fragment Lifestyle</h2>
-
-<p>https://plus.google.com/+StevePomeroy/posts/HsthxN21Yp1</p>
-
-<p>http://staticfree.info/~steve/complete_android_fragment_lifecycle.png</p>
-
-<p>https://github.com/xxv/android-lifecycle</p>
-
-<h2>Server-push</h2>
-
-<p>http://caniuse.com/#feat=eventsource</p>
-
-<p>Android supports SSE from 4.4 onward (since Nov 2013).</p>
-
-<h2>Android Chromium WebView since 4.4 KitKat (Nov 2013)</h2>
-
-<p>https://www.youtube.com/watch?v=IOY2UNZU9QQ</p>
-
-<p>Android Browser still uses WebView, just that it&#8217;s Chromium now.
-Snapshot of Chrome 30.</p>
-
-<p>Chrome vs Chrome WebView</p>
-
-<ul>
-<li>Graphics backend</li>
-<li>Otherwise invisible to app developer</li>
-<li>Chop out Chrome backend, replace w graphics stack compatible w android
-graphics.</li>
-<li>SurfaceFlinger</li>
-<li>Hardware accelerated layers.</li>
-</ul>
-
-
-<p>KitKat webview is way more HTML5 compliant, rather than old WebKit
-browser.</p>
-
-<p>Features:</p>
-
-<ul>
-<li>IndexedDB (ios only has shitty/buggy support in 8+)
-
-<ul>
-<li>async, non-blocking, etc</li>
-</ul>
-</li>
-<li>Websockets</li>
-<li>requestAnimationFrame</li>
-<li>SVG filters and effects, sepia, convolution blurs</li>
-<li>Hardware accelerated
-
-<ul>
-<li>everything</li>
-<li>default for all new apps is hardware accelerated on</li>
-<li>Question: hardware acceleration can be enabled for the app, but also
-the webview itself?</li>
-</ul>
-</li>
-</ul>
-
-
-<p>WebView methods must be run on UI Tthread, use <code>runOnUiThread</code> if you&#8217;re
-within a different thread&#8230;</p>
-
-<p>Compositing Thread,</p>
-
-<p>Main UI thread</p>
-
-<p><a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> since kitkat all urls
-most conform to it.</p>
-
-<p>A CSS pixel corresponds to 1, 2, 4, etc, depending on your viewport.</p>
-
-<p>There must only be one Meta Viewport tag&#8230; only the last one is
-actually used.</p>
-
-<p>Shorthand CSS can override others in KitKit+; be specific w CSS
-properties unless you really want to override many things.</p>
-
-<h2>uses-sdk</h2>
-
-<p>http://developer.android.com/guide/topics/manifest/uses-sdk-element.html</p>
-
-<p>Always set target API, but you can still support min SDK versions for
-fallback.</p>
-
-<h2>lint</h2>
-
-<p>Android <code>lint</code></p>
-
-<pre><code>$ which lint
-/Users/machty/adt-bundle-mac-x86_64/sdk/tools/lint
-</code></pre>
-
-<p>seems like ADT, the Eclipse plugin suite.</p>
-
-<p>http://developer.android.com/tools/sdk/eclipse-adt.html</p>
-
-<h2>Focusing fields within Android</h2>
-
-<p>Is it actually fucking possible?</p>
-
-<p>https://code.google.com/p/android/issues/detail?id=27438</p>
-
-<p>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#toggleSoftInput(int, int)</p>
-
-<p>WTF is toggleSoftInput vs toggleSoftInputFromWindow vs</p>
-
-<p>TODO: prevent defocusing with</p>
-
-<pre><code>http://developer.android.com/reference/android/view/inputmethod/InputMethodManager.html#SHOW_FORCED
-</code></pre>
-
-<p>?</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Sloggin]]></title>
-    <link href="http://machty.github.com/blog/2014/12/01/sloggin/"/>
-    <updated>2014-12-01T11:36:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/12/01/sloggin</id>
-    <content type="html"><![CDATA[<h2>Gaslighting</h2>
-
-<p>http://en.wikipedia.org/wiki/Gaslighting</p>
-
-<p>Presenting false information to someone until they doubt their own sanity.</p>
-
-<h2>Deductible</h2>
-
-<p>http://en.wikipedia.org/wiki/Deductible</p>
-
-<p>The amount that must be paid by policy owner, out of pocket,
-before insurance kicks in.</p>
-
-<blockquote><p>Given the nature of medical treatment, the insured often faces multiple medical expenses spread over several days for a single illness or injury. Due to this reason, health insurance deductibles often tend to be imposed on a term basis (e.g. annually) as opposed to a per-visit threshold.[4] In spite of this, major medical insurance policies may have a per-visit excess which often does not cover the cost of routine visits to a GP, unless it is certified to be a part of a continuous treatment (and the bills can be collated in a single claim).</p></blockquote>
-
-<p>So it&#8217;s annual so that you&#8217;re always paying <em>something</em> out of pocket.
-Deductibles are ultimately limited by a Out-of-Pocket Maximum.</p>
-
-<p>http://www.bcbsm.com/index/health-insurance-help/faqs/topics/how-health-insurance-works/deductibles-coinsurance-copays.html</p>
-
-<ul>
-<li>If you have $1500, and you get a $2000 medical bill, you have to pay
-$1500 of that, no matter what, and then the last $500 might require
-paying coinsurance
-
-<ul>
-<li>After deductible: insurance kicks in after deductible is paid</li>
-<li>No deductible: insurance kicks in immediately without having to pay
-a deductible (there could still be coinsurance)</li>
-<li>Before deductible: you still have to pay deductible, but</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Ah ok so you&#8217;re still chipping away at a yearly deductible. After which
-you only need to think about coinsurance and copay.</p>
-
-<p>But first, deductible types:</p>
-
-<ul>
-<li>Annual: most common, chipping away at deductible throughout the year</li>
-<li>Per-episode: min deductible to pay per each type of visit, e.g. each
-time you&#8217;re hospitalized</li>
-<li>Out of network deductible: what it sounds like; sometimes paying out
-of network deductible subtracts from your regular deductible.</li>
-<li>Family deductible: multiple members chipping away at deductible</li>
-</ul>
-
-
-<p>Coinsurance: your share of health care service costs, usually a
-percentage. e.g. if you&#8217;ve paid your deductible, then you might have to
-pay 20% of whatever&#8217;s left over.</p>
-
-<p>Copay: a fixed amount you pay for a given service, each time you use it.
-Could be $40 when you buy prescription drugs, $20 every doctor visit,
-etc. Copays prevent frequent visits to the same person/service, since
-they add up, particular if the service is cheap, whereas coisurance, a
-fixed percentage, doesn&#8217;t add up if the service is cheap.</p>
-
-<ul>
-<li>Pros
-
-<ul>
-<li>You always know the fixed amount (rather than a percentage tied to
-total cost)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>So the difference is just fixed amount vs percentage?</p>
-
-<h2>Honeypot</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Honeypot_%28computing%29">wiki</a></p>
-
-<p>Hacker lure, like a bear to honey. Pretends to be some network with
-useful info, contains nothing, logs attack attempts.</p>
-
-<h2>STEM fields</h2>
-
-<p>http://en.wikipedia.org/wiki/STEM_fields</p>
-
-<p>Science, technology, engineering, math.</p>
-
-<p>http://en.wikipedia.org/wiki/Women_in_STEM_fields</p>
-
-<p>STEM equity: gender equity in STEM fields.</p>
-
-<h2>Who is logged in what are they doing?</h2>
-
-<p><code>w(1)</code>:</p>
-
-<blockquote><p>w &#8211; display who is logged in and what they are doing</p></blockquote>
-
-<pre><code>$ w
-USER     TTY      FROM              LOGIN@  IDLE WHAT
-machty   console  -                18Nov14 15days -
-machty   s000     -                18Nov14 9days tmux a
-machty   s029     -                22Nov14     - tmux a
-</code></pre>
-
-<h2>rcp, rsh, rcmd</h2>
-
-<p>Non-secure scp, ssh, and rcmd. Uses kind of a crappy auth scheme,
-wherein the server, rshd, has its <code>iruserok</code> fn called and can decide
-based on IP, etc, whether things are cool.</p>
-
-<p>TLDR use ssh.</p>
-
-<h2>hub pull-request depends on -u upstream</h2>
-
-<p>This used to create pull request from ember to ember</p>
-
-<pre><code>hub pull-request
-</code></pre>
-
-<p>I had to do</p>
-
-<pre><code>hub pull-request -h machty:some-crap
-</code></pre>
-
-<p>but if I <code>git push -u</code> then it&#8217;ll set the upstream and the original will
-work. Hooray. Thanks Robert Jackson.</p>
-
-<h2>bash hashes commands</h2>
-
-<p>Because path resolution is slow, bash will hash the location of a
-command. This broke my shit when I upgraded git from the Mac
-(/usr/bin/git) to the one from homebrew (/usr/local/bin/git).</p>
-
-<p>Bash has some built-ins <code>hash</code> and <code>type</code>. <code>type</code> tells you how a
-command resolves:</p>
-
-<pre><code>$ type git
-git is hashed (/usr/local/bin/git)
-
-$ hash
-hits    command
-   2    /usr/bin/which
-   1    /usr/local/bin/node
-   2    /Users/machty/.rvm/gems/ruby-2.0.0-p353@global/bin/bundle
-   3    /usr/local/bin/git
-   1    /Users/machty/.rvm/rubies/ruby-2.0.0-p353/bin/irb
-  12    /usr/bin/man
-   2    /bin/ls
-   2    /usr/bin/rsh
-   1    /bin/LS
-   1    /usr/bin/w
-   1    /usr/bin/dig
-   1    /bin/rcp
-</code></pre>
-
-<p>And you can invalidate a cached command via <code>hash -r COMMAND</code>.</p>
 ]]></content>
   </entry>
   

@@ -112,6 +112,218 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/04/21/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<p>This is a half-finished journal. Most of the value lies in the fact that
+there&#8217;s a crap-ton of flashcards associated with what I learned.</p>
+
+<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
+
+<p>In a Unicorn setting, shared resources like database connections
+need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
+in <code>after_hook</code>. This is so that you don&#8217;t wind up in a situation where
+two forked instances of your server try to write to a DB socket at the
+same time, which can result in a Protocol Error. This makes sense; if
+two protocol-adhering processes write to the socket at the same time,
+the message delivered to the other side obviously won&#8217;t adhere to the
+protocol. TODO: at what point does this actually break? How bout writing
+a quick Ruby script to prove this :) :) :)</p>
+
+<p>Resources:</p>
+
+<ul>
+<li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
+</ul>
+
+
+<h2>The difference between a process and a thread</h2>
+
+<p>A Process has:</p>
+
+<ul>
+<li>A group of resources</li>
+<li>A Thread of Execution</li>
+</ul>
+
+
+<p>The group of resources includes:</p>
+
+<ul>
+<li>Address space where program text and data lives in memory</li>
+<li>Global variables</li>
+<li>Open files</li>
+<li>Child processes</li>
+<li>Pending alarms</li>
+<li>Signals and signal handlers</li>
+<li>Accounting information</li>
+</ul>
+
+
+<p>A Thread (of Execution) has:</p>
+
+<ul>
+<li>Program counter</li>
+<li>Registers (of course these aren&#8217;t shared b/w threads; that&#8217;s crazy)</li>
+<li>Stack</li>
+<li>State</li>
+</ul>
+
+
+<p>A Thread must execute in a Process, but they are separate entities.</p>
+
+<p>There are multiple types of threads:</p>
+
+<ul>
+<li>User-space threads: super-fast thread switching because no kernel trap
+is required. Fine-grain control over thread scheduling. Unable to do
+blocking I/O though, since this blocks the entire process and all
+user threads.</li>
+<li>Kernel-threads: can using blocking IO, defers scheduling to the OS,
+but each thread switch means a slow kernel trap, but then again if
+you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
+<li>Combined: multiple kernel threads have multiple userspace threads.</li>
+</ul>
+
+
+<p>Resources:
+  - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
+  - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
+  - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-21T09:41:00-04:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/04/16/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h3>Heroku + Unicorn + Rails Logging</h3>
+
+<p>We&#8217;re using Unicorn on Heroku and would like to log just about
+everything, particularly incoming JSON request payloads, but it seemed
+like the Heroku logs (which we forward to Papertrail) weren&#8217;t properly
+logging everything the way they do with <code>rails server</code>.
+<a href="http://dave.is/unicorn.html">This article</a> points out the problem and
+offers the solution; specifically, <code>rails s</code> adds
+<code>Rails::Rack::LogTailer</code> middleware which tails the log files and prints
+their contents to <code>stdout</code>, but if you run your server via <code>unicorn</code>,
+that middleware doesn&#8217;t get added, so if you want a Unicorn-driven Rails
+server to have the same logging behavior as <code>rails s</code>, you&#8217;ll have to
+configure the Rails logger to print to STDOUT in
+<code>config/application.rb</code>:</p>
+
+<pre><code>config.logger = Logger.new(STDOUT)
+config.logger.level = Logger.const_get(
+  ENV['LOG_LEVEL'] ? ENV['LOG_LEVEL'].upcase : 'DEBUG'
+)
+</code></pre>
+
+<h5>Update 4/17/14: Use TaggedLogging</h5>
+
+<p>Actually, if you want to use <code>config</code> options like <code>log_tags</code>, you&#8217;ll
+want to use an instance of <code>TaggedLogging</code> instead of <code>Logger</code>:</p>
+
+<pre><code>config.logger = ActiveSupport::TaggedLogging.new(Logger.new($stdout))
+
+# Prepend all log lines with the following tags.
+config.log_tags = [
+  :uuid,
+  -&gt; request {
+    request.env["HTTP_USER_AGENT"]
+  }
+]
+</code></pre>
+
+<p>Vanilla <code>Logger</code> doesn&#8217;t make use of the <code>log_tags</code> config, among other
+config vars.</p>
+
+<h3>Prevent expensive debug logs</h3>
+
+<p>This is coming from an old ass Railscast, but thought it was cool: if
+you do <code>logger.debug "some #{expensive_calc}"</code>, it&#8217;ll only print this
+out if your log level is <code>:debug</code>, but the <code>expensive_calc</code> is still
+performed; to actually prevent the calculation unless you&#8217;re on
+<code>:debug</code>, you can write this as:</p>
+
+<pre><code>logger.debug { "some #{expensive_calc}" }
+</code></pre>
+
+<h3><code>Hash#values_at</code></h3>
+
+<p>In Ruby, use <code>Hash#values_at</code> to query a Hash for multiple and return an
+array of those values, e.g.</p>
+
+<pre><code>hash = { some: "value", other: "lame value" }
+hash.values_at(:some, :other) # =&gt; ["value", "lame value"]
+</code></pre>
+
+<p>This plays nicely with multiple assignment:</p>
+
+<pre><code>some,other = hash.values_at(:some, :other)
+# now some and other have been assigned values from the hash
+</code></pre>
+
+<p>This is the Ruby equivalent of <code>Ember.getProperties(obj, vals)</code>.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-16T13:31:00-04:00" pubdate data-updated="true">Apr 16<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/04/12/blog-flashcards/">
 		
 			Blog Flashcards</a>
@@ -527,113 +739,6 @@ motivation and architecture behind Emblem.</p>
 <div class="tags">
 
 	<a class='category' href='/blog/categories/ember/'>ember</a>, <a class='category' href='/blog/categories/emblem/'>emblem</a>, <a class='category' href='/blog/categories/handlebars/'>handlebars</a>, <a class='category' href='/blog/categories/indentation/'>indentation</a>, <a class='category' href='/blog/categories/parsing/'>parsing</a>, <a class='category' href='/blog/categories/pegjs/'>pegjs</a>, <a class='category' href='/blog/categories/templates/'>templates</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/">
-		
-			Quickly Peruse Gem Source: Vim + Tmux + Bundle Open</a>
-	</h2>
-	<div class="entry-content">
-		<p>Ever find yourself
-working on a project and needing to dig into the source code of a Gem
-you&#8217;re using? In the past I used to just go to the github for that gem
-and use their project explorer, searching for particular commands using
-their ultra helpful <code>t</code> command, but I got sick of having to do that, so
-I found a better way using Vim + tmux + <code>bundle open</code>. The result is a
-command I can run in Vim, which autocompletes gem names by looking
-through <code>Gemfile.lock</code>, which splits the current tmux pane and runs a
-new instance of Vim in the root directory of the Gem I&#8217;m looking for.</p>
-
-<p>Even if you don&#8217;t
-share my exact configuration, you might learn something about any of the
-following: Tmux, Vim, <code>bundle open</code>, and some Unix commands, and the end
-result code is pretty easily modifiable.</p>
-
-
-		
-		<a href="/blog/2013/01/13/quickly-peruse-gem-source-vim-plus-tmux-plus-bundle-open/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-13T15:45:00-05:00" pubdate data-updated="true">Jan 13<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/bundle/'>bundle</a>, <a class='category' href='/blog/categories/gems/'>gems</a>, <a class='category' href='/blog/categories/tmux/'>tmux</a>, <a class='category' href='/blog/categories/vim/'>vim</a>
-
-</div>
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/">
-		
-			Everything You Never Wanted to Know About the Ember Run Loop</a>
-	</h2>
-	<div class="entry-content">
-		<p>Just posted a
-<a href="http://stackoverflow.com/questions/13597869/what-is-ember-runloop-and-how-does-it-work/14296339#14296339">Giant Ass Response on Stack Overflow</a> about the Ember Run Loop. I&#8217;ve reproduced the text below. The question basically was: What is the Run Loop? How long does it take? When does it fire up? Can I expect views to be rendered to the DOM by the end of the run loop? etc. etc. Take a look, I think there&#8217;s some good stuff in there. Without further ado:</p>
-
-<p>First off, read these:</p>
-
-<p><a href="http://blog.sproutcore.com/the-run-loop-part-1/">Sproutcore Run Loop, part 1</a>
-<a href="http://blog.sproutcore.com/the-run-loop-part-2/">Sproutcore Run Loop, part 2</a></p>
-
-<p>They&#8217;re not 100% accurate to Ember, but the core concepts and motivation behind the RunLoop still generally apply to Ember; only some implementation details differ. But, on to your questions:</p>
-
-
-		
-		<a href="/blog/2013/01/12/everything-you-never-wanted-to-know-about-the-ember-run-loop/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-12T13:09:00-05:00" pubdate data-updated="true">Jan 12<span>th</span>, 2013</time></div>
-	
-
-<div class="tags">
-
-	<a class='category' href='/blog/categories/binding-w/'>binding:w</a>, <a class='category' href='/blog/categories/ember-js/'>ember.js</a>, <a class='category' href='/blog/categories/run-loop/'>run loop</a>
 
 </div>
 

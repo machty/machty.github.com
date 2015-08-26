@@ -1,0 +1,385 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Help me with Observables  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Help Me With Observables</h2>
+	<div class="entry-content"><h2>How do I do this with Observables (or CSP or alternatives)</h2>
+
+<p>I build/maintain <a href="http:://www.expresscheckouapp.com">Express Checkout</a>,
+a hybrid app, which means it&#8217;s an Ember.js app running in an embedded
+browser within an iOS/Android app that occasionally calls into the native app layer
+to do native-specific things like turn on the camera, scan barcodes, register
+for push notifications, etc.</p>
+
+<p>I&#8217;ve been fascinated with <a href="https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">Rx Observables</a>
+for some time now and have used them to clean up a lot of the code in my
+app that deals with asynchronous behavior and concurrency. But there&#8217;s
+one part of my app I&#8217;ve been avoided refactoring with Observables
+because I just can&#8217;t wrap my head around how to approach it and express
+it with Observables, hence I&#8217;m enlisting any functionally-minded
+Observables veterans to help me think about how to structure this.</p>
+
+<!--more-->
+
+
+<h2>The Situation</h2>
+
+<p>In our hybrid web app, we have a screen that allows shoppers to scan
+barcodes on items in a store. To navigate to this screen, a few things
+must happen, in the following sequence:</p>
+
+<ul>
+<li>Shopper taps a &#8220;Start Shopping&#8221; button</li>
+<li>The app fetches the current shopping session from the server</li>
+<li>Once the session is fetched, we transition to the Ember.js route
+called <code>scan</code>. I use the Ember animation/transition library
+<a href="https://github.com/ef4/liquid-fire">Liquid Fire</a>, so the route
+transition causes a sideways full screen transition as you would
+expect from any iOS app.</li>
+<li>Once the sideways transition finishes, we call into the native code to
+turn on the camera/scanner</li>
+<li>Once the camera/scanner is turned on, we remove the white CSS
+background from the screen to reveal the native camera behind our
+transparent webview, and from here on out the user can scan barcodes,
+add items to their cart, etc.</li>
+</ul>
+
+
+<p>The part I&#8217;d like to focus on specifically is the timing of turning on
+the native camera and removing the white background. Note the following
+constraints:</p>
+
+<ul>
+<li>on both iOS and Android (though way worse on Android), turning on the
+native camera while there is any sort of visual transition/animation
+in the webview causes all sorts of hideous jank; this is why we
+transition in with a white BG and only hide the BG after a few hundred
+milliseconds after turning on the native camera</li>
+<li>if the user immediately taps the back button (either on the screen or
+android&#8217;s back button) immediately after transioning to the <code>scan</code>
+route, any unnecessary camera or visual churn should be avoided: if
+the camera hasn&#8217;t been turned on, don&#8217;t turn it on; if the white
+background hasn&#8217;t been removed, don&#8217;t remove it</li>
+<li>on the flipside, when transitioning out of the scan route, before we
+do the sideways transition, we want to 1) re-enable white bg, 2) turn
+of camera and wait a few hundred ms, and then 3) do the sideways
+tranasition</li>
+</ul>
+
+
+<p>Right now, I handle all these cases with a state machine, but given all
+the different entry/exit/abort possibilities, it&#8217;s ugly and complex.
+I&#8217;ve had much success replacing similar async-managing state machines
+in my app with Observables, so I&#8217;d like to do the same here, if
+possible.</p>
+
+<h2>A First Stab at the Problem</h2>
+
+<p>One of the nice properties of Observables is that they know when they&#8217;ve
+been subscribed-to and when they&#8217;ve been desubscribed-from. This
+property alone is what makes Observables cancellable (unlike Promises,
+that go go go until their predetermined chain of callbacks have run to
+completion, regardless of whether anyone&#8217;s still listening).</p>
+
+<p>For this problem, my intuition was to model the native camera as an
+observable, as well as the white background that needs to become
+transparent once the camera is good and ready.</p>
+
+<p>With this approach, I can pretty elegantly model the series of events
+that happen when transitioning into the <code>scan</code> route in a cancellable
+manner:</p>
+
+<pre><code>let enableCameraObservable = Observable.create(() =&gt; {
+  cordovaService.turnOnCamera();
+
+  // we could also have this observable be the thing that emits
+  // scan events, since scan events can only happen while this
+  // observable is still alive, but that's beyond the scope
+
+  return () =&gt; {
+    cordovaService.turnOffCamera();
+  };
+});
+
+let makeBackgroundTransparent = Observable.create(() =&gt; {
+  // set background to transparent
+  return () =&gt; {
+    // according to Observable.create API, this returned function
+    // fires when the observable is de-subscribed; hence we can
+    // use it for cleanup and setting the background back to white
+  };
+});
+
+liquidFireDoneTransitioning()
+  .delay(100)
+  .flatMap(() =&gt; enableCameraObservable().delay(100))
+  .flatMap(() =&gt; makeBackgroundTransparent())
+  .takeUntil(routeTransitionAttempt)
+  .subscribe((scanResult) =&gt; {
+    // ...
+  });
+</code></pre>
+
+<p>The chain of operators above is terse but expressive; it describes the
+following behavior:</p>
+
+<ul>
+<li>wait 100ms between the sideways Liquid Fire transition and turning on the camera</li>
+<li>wait 100ms between turning on the camera and making the background transparent</li>
+<li>throughout all of this, watch for routeTransitionAttempts, and if any
+of them come through, stop whatever we&#8217;re doing with the previous
+observable. This means: 1) the camera will be turned off&#8230; only if we
+ever got to the point that it was turned on, and 2) the background
+will be reset to white&#8230; if it ever got to the point that it was made
+transparent. In other words, the dispose functions for each observable
+are only called if they were ever subscribed to.</li>
+</ul>
+
+
+<p>Possible timeline of events</p>
+
+<ul>
+<li>0: <code>liquidFireDoneTransitioning</code></li>
+<li>50ms: if <code>routeTransitionAttempts</code> fires, nothing happens</li>
+<li>100ms: <code>enableCameraObservable</code> is subscribed-to; camera is turned on</li>
+<li>150ms: if <code>routeTransitionAttempts</code> fires, only
+<code>enableCameraObservable</code> dispose function fires, turning off the camera</li>
+<li>200ms: <code>makeBackgroundTransparent</code> is subscribed-to; background is
+made transparent, revealing native camera view</li>
+<li>250ms and after: if <code>routeTransitionAttempts</code>, both <code>enableCameraObservable</code> and
+<code>makeBackgroundTransparent</code> subscriptions are disposed, the camera is
+turned off, the screen turns to white.</li>
+</ul>
+
+
+<p>This is actually pretty elegant for the most part; writing a more
+imperative version of this code would involve way more code, that
+managed manually setting / cancelling timers, based on how far along the
+process was before a later <code>routeTransitionAttempt</code> was made. And it&#8217;s
+these kind of refactorings that have cleaned up code all over the app.</p>
+
+<h2>Async Disposables?</h2>
+
+<p>But there&#8217;s one major omission here: making the disposals async. For
+anti-jank performance reasons, we need the disposals to be
+staggered on the way out, just as they are staggered on the way in, and
+we need the <code>routeTransitionAttempt</code> to be delayed while it waits for
+this process to complete.</p>
+
+<p>And this, my functionally-minded Rx-experienced friends, is where I am
+at a loss and would appreciate your advice. I can&#8217;t seem to settle on a
+pattern that maintains the elegance of the disposable native camera
+and transparent backgrounds cleaning up after themselves, because those
+disposables happen right at the same time. Of course I could throw some
+hacky <code>setTimeout</code>s in there, but then I&#8217;m just introducing more
+potential race conditions and trying to sweep what should be additional
+observables/subscriptions under the rug. Of course, I&#8217;m happy to do that
+pragmatically to ship a feature, but I&#8217;d really like to understand how
+to better structure these interactions in a Observable-minded manner.</p>
+
+<p>So please, if you&#8217;ve got some ideas that might set me straight, I&#8217;d love
+to hear them; please comment below or hit me up at
+<a href="https://twitter.com/machty">@machty on Twitter</a>.</p>
+
+<p>Also, if you see this as something that could be more
+appropriately/easily solved by CSP, I&#8217;d love to hear what that&#8217;d entail.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-26T14:11:00-04:00" pubdate data-updated="true">Aug 26<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/08/26/help-me-with-observables/';
+        var disqus_url = 'http://machty.github.com/blog/2015/08/26/help-me-with-observables/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

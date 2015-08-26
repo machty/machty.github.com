@@ -112,6 +112,129 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/05/22/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Array Computed / Reduce Computed</h2>
+
+<p>The difference between reduce computed properties and array computed
+properties in Ember is that reduce computed properties will boil down
+the contents of an array to <em>some value</em> using one-at-a-time semantics;
+Array CPs are Reduce CPs that happen to boil down to: other arrays.</p>
+
+<p>So you can&#8217;t write a &#8220;sum&#8221; Array Computed; you&#8217;d just use reduce
+computed for that. And you <em>could</em> write your own hand-crafted &#8220;filter&#8221;
+reduced CP, but why not use the Array Computed API for that?</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T14:08:00-04:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/array-computed-reduce-computed/'>Array Computed / Reduce Computed</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/19/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Active Model: GlobalID</h2>
+
+<p>https://github.com/rails/activemodel-globalid/</p>
+
+<p>GlobalID is a way of serializing a model into a string so that
+it can be looked up later; rather than serializing all of the
+object&#8217;s data into a string, you merely serialize just enough
+information so that you can look up the rest.</p>
+
+<p>I&#8217;m already doing something similar with model dep state in Ember,
+only extending it such that part of the &#8220;GlobalID&#8221;, which we&#8217;ll
+use internally for binding into a cache bucket, might be a prefixing
+controller name to uniquely identify a cache bucket to a specific
+controller, but in cases where you want to share information about
+a model with other controllers, you&#8217;d leave this prefix off.</p>
+
+<p>Anyway, nice to see other folk arriving at a similar thing, though
+I personally wouldn&#8217;t call this sort of thing &#8220;serializing&#8221; but rather
+&#8220;paramaterizing&#8221;, since you&#8217;re not actually storing all the data in
+string form but just enough to uniquely identify it so that some
+other operation can restore the object.</p>
+
+<h2>Strings have read-only props in &#8220;use strict&#8221; Safari</h2>
+
+<p>The following throws an exception only in Safari (not Chrome or FF):</p>
+
+<pre><code>(function(){"use strict"; ("a").b = 'writing to a string'; })();
+TypeError: Attempted to assign to readonly property.
+</code></pre>
+
+<p>But not if you leave off the &#8220;use strict&#8221;.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-19T07:38:00-04:00" pubdate data-updated="true">May 19<span>th</span>, 2014</time></div>
+	
+
+<div class="tags">
+
+	<a class='category' href='/blog/categories/global-id/'>global id</a>, <a class='category' href='/blog/categories/use-strict/'>use strict</a>
+
+</div>
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/05/15/daily-journal/">
 		
 			Daily Journal</a>
@@ -1039,218 +1162,6 @@ this:</p>
 
 
 <time datetime="2014-04-26T14:49:00-04:00" pubdate data-updated="true">Apr 26<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/21/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<p>This is a half-finished journal. Most of the value lies in the fact that
-there&#8217;s a crap-ton of flashcards associated with what I learned.</p>
-
-<h2>Unicorn <code>before_fork</code>, <code>after_fork</code>, and <code>preload_app</code></h2>
-
-<p>In a Unicorn setting, shared resources like database connections
-need to be disconnected in Unicorn&#8217;s <code>before_fork</code> hook and reconnected
-in <code>after_hook</code>. This is so that you don&#8217;t wind up in a situation where
-two forked instances of your server try to write to a DB socket at the
-same time, which can result in a Protocol Error. This makes sense; if
-two protocol-adhering processes write to the socket at the same time,
-the message delivered to the other side obviously won&#8217;t adhere to the
-protocol. TODO: at what point does this actually break? How bout writing
-a quick Ruby script to prove this :) :) :)</p>
-
-<p>Resources:</p>
-
-<ul>
-<li>https://devcenter.heroku.com/articles/concurrency-and-database-connections</li>
-</ul>
-
-
-<h2>The difference between a process and a thread</h2>
-
-<p>A Process has:</p>
-
-<ul>
-<li>A group of resources</li>
-<li>A Thread of Execution</li>
-</ul>
-
-
-<p>The group of resources includes:</p>
-
-<ul>
-<li>Address space where program text and data lives in memory</li>
-<li>Global variables</li>
-<li>Open files</li>
-<li>Child processes</li>
-<li>Pending alarms</li>
-<li>Signals and signal handlers</li>
-<li>Accounting information</li>
-</ul>
-
-
-<p>A Thread (of Execution) has:</p>
-
-<ul>
-<li>Program counter</li>
-<li>Registers (of course these aren&#8217;t shared b/w threads; that&#8217;s crazy)</li>
-<li>Stack</li>
-<li>State</li>
-</ul>
-
-
-<p>A Thread must execute in a Process, but they are separate entities.</p>
-
-<p>There are multiple types of threads:</p>
-
-<ul>
-<li>User-space threads: super-fast thread switching because no kernel trap
-is required. Fine-grain control over thread scheduling. Unable to do
-blocking I/O though, since this blocks the entire process and all
-user threads.</li>
-<li>Kernel-threads: can using blocking IO, defers scheduling to the OS,
-but each thread switch means a slow kernel trap, but then again if
-you&#8217;re blocked by IO you&#8217;re probably in the kernel anyway.</li>
-<li>Combined: multiple kernel threads have multiple userspace threads.</li>
-</ul>
-
-
-<p>Resources:
-  - http://stackoverflow.com/questions/200469/what-is-the-difference-between-a-process-and-a-thread/19518207#19518207
-  - http://www.amazon.com/dp/0136006639/?tag=stackoverfl08-20
-  - http://www.igvita.com/2010/03/22/untangling-evented-code-with-ruby-fibers/</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-21T09:41:00-04:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/04/16/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h3>Heroku + Unicorn + Rails Logging</h3>
-
-<p>We&#8217;re using Unicorn on Heroku and would like to log just about
-everything, particularly incoming JSON request payloads, but it seemed
-like the Heroku logs (which we forward to Papertrail) weren&#8217;t properly
-logging everything the way they do with <code>rails server</code>.
-<a href="http://dave.is/unicorn.html">This article</a> points out the problem and
-offers the solution; specifically, <code>rails s</code> adds
-<code>Rails::Rack::LogTailer</code> middleware which tails the log files and prints
-their contents to <code>stdout</code>, but if you run your server via <code>unicorn</code>,
-that middleware doesn&#8217;t get added, so if you want a Unicorn-driven Rails
-server to have the same logging behavior as <code>rails s</code>, you&#8217;ll have to
-configure the Rails logger to print to STDOUT in
-<code>config/application.rb</code>:</p>
-
-<pre><code>config.logger = Logger.new(STDOUT)
-config.logger.level = Logger.const_get(
-  ENV['LOG_LEVEL'] ? ENV['LOG_LEVEL'].upcase : 'DEBUG'
-)
-</code></pre>
-
-<h5>Update 4/17/14: Use TaggedLogging</h5>
-
-<p>Actually, if you want to use <code>config</code> options like <code>log_tags</code>, you&#8217;ll
-want to use an instance of <code>TaggedLogging</code> instead of <code>Logger</code>:</p>
-
-<pre><code>config.logger = ActiveSupport::TaggedLogging.new(Logger.new($stdout))
-
-# Prepend all log lines with the following tags.
-config.log_tags = [
-  :uuid,
-  -&gt; request {
-    request.env["HTTP_USER_AGENT"]
-  }
-]
-</code></pre>
-
-<p>Vanilla <code>Logger</code> doesn&#8217;t make use of the <code>log_tags</code> config, among other
-config vars.</p>
-
-<h3>Prevent expensive debug logs</h3>
-
-<p>This is coming from an old ass Railscast, but thought it was cool: if
-you do <code>logger.debug "some #{expensive_calc}"</code>, it&#8217;ll only print this
-out if your log level is <code>:debug</code>, but the <code>expensive_calc</code> is still
-performed; to actually prevent the calculation unless you&#8217;re on
-<code>:debug</code>, you can write this as:</p>
-
-<pre><code>logger.debug { "some #{expensive_calc}" }
-</code></pre>
-
-<h3><code>Hash#values_at</code></h3>
-
-<p>In Ruby, use <code>Hash#values_at</code> to query a Hash for multiple and return an
-array of those values, e.g.</p>
-
-<pre><code>hash = { some: "value", other: "lame value" }
-hash.values_at(:some, :other) # =&gt; ["value", "lame value"]
-</code></pre>
-
-<p>This plays nicely with multiple assignment:</p>
-
-<pre><code>some,other = hash.values_at(:some, :other)
-# now some and other have been assigned values from the hash
-</code></pre>
-
-<p>This is the Ruby equivalent of <code>Ember.getProperties(obj, vals)</code>.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-16T13:31:00-04:00" pubdate data-updated="true">Apr 16<span>th</span>, 2014</time></div>
 	
 
 
