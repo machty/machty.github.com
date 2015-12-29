@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2015-08-26T16:33:39-04:00</updated>
+  <updated>2015-12-29T09:46:15-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -12,6 +12,1066 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[tarpit]]></title>
+    <link href="http://machty.github.com/blog/2015/12/29/tarpit/"/>
+    <updated>2015-12-29T09:41:00-05:00</updated>
+    <id>http://machty.github.com/blog/2015/12/29/tarpit</id>
+    <content type="html"><![CDATA[<p>Notes from tarpit reading: http://shaffner.us/cs/papers/tarpit.pdf</p>
+
+<p>OOP: intentionally couple state to related behavior</p>
+
+<p>No Silver Bullet, what makes software hard: Complexity, Conformity, Changeability, Invisibility</p>
+
+<p>Dijkstra: testing is hopelessly inadequate&#8230; it can be used very effectively to show the presence of bugs but never to show their absence.</p>
+
+<p>State hinders Informal Reasoning, reasoning about expected behavior from the inside, with knowledge of internal code.</p>
+
+<p>Control Complexity: complexity due to having to be concerned about the order of events. Languages with explicit flow control make you think about this.</p>
+
+<p>a = b + 3
+c = d + 2
+e = f * 4</p>
+
+<p>No reason for this flow, but programmer has to over-specify it (and compilers have to go to lengths to know that the order can be safely ignored). Accidental complexity:</p>
+
+<ol>
+<li>artificial, totally ignorable ordering imposed on programmer</li>
+<li>compiler work is done to optimize it away</li>
+</ol>
+
+
+<p>Note that these two forms of complexity only apply given the assumption that the above code is for an imperative language with guarantees about order of execution; Oz is an example of a programming language that didn&#8217;t specify this.</p>
+
+<p>&#8220;Running a test in the presence of concurrency with a known initial state and set of inputs tells you nothing at all about what will happen the next time you run that very same test with the very same inputs and the very same starting state&#8230; and things can’t really get any worse than that.&#8221;</p>
+
+<p>CLOS: Common Lisp Object System, with multiple dispatch (methods can specialize on any/all required arguments, unlike classic OOP single dispatch).</p>
+
+<p>Problems with OOP encapsulation:</p>
+
+<ul>
+<li>access to state can still be spread all over the place, e.g. in presence of inheritance</li>
+<li>encapsulation strongly biased toward single-object constraints; not a lot of help in coordinating multiple object states</li>
+</ul>
+
+
+<p>Identity and State</p>
+
+<p>Object identity: in OOP, each object is considered uniquely identifiable regardless of attributes. This is intensional identity (as opposed to extensional where objects are the same if their attributes are). Intensional identity opposes relational algebra view of the world.</p>
+
+<p>But OOP is complicated when mutability isn&#8217;t needed, and you add concepts like Value Objects where equality is based on values and not identity (in other words, it brings back extensional identity).</p>
+
+<p>https://en.wikipedia.org/wiki/Value_object</p>
+
+<p>Immutable small objects whose equality is not based on identity. In int is an int forever, but objects can be mutated, so if you want an object that acts like, say, an int, you want a value object.</p>
+
+<p>TL;DR C++ has copy-by-value because C does, hence both support value objects. Java has no native support for value objects, but you can get a functionally similar/equivalent thing by passing around references to immutable objects (VALJO, VALue Java Object, where all attributes of the obj are final and doesn&#8217;t contain other objects w mutable state).</p>
+
+<p>Object Identity exists because state exists, and is a source of error due to mental switching between the meaning of equality. (TODO: why isn&#8217;t this a problem in Clojure? You have to mentally switch between values and atoms&#8230; how is that any different?).</p>
+
+<p>Hmm I feel like there&#8217;s something I&#8217;m not quite grasping about what people mean when they say state. Seems like everything has state? I dunno.</p>
+
+<p>Summary: conventional OOP suffers from state-derived and control-derived complexity.</p>
+
+<p>Functional Languages</p>
+
+<p>Pure: Haskell. Impure: ML, in that it advocates avoiding but still permits state.</p>
+
+<p>Referential transparency: an expression (e.g. function calls) are replaceable by a value&#8230; nope, i guess it&#8217;s just that a function called with the same args will always return the same value.</p>
+
+<p>Control:</p>
+
+<p>Still an implicit left-to-right sequencing of operations, but fortunately control flow like loops are avoided in favor of fold/map.</p>
+
+<p>Kinds of state</p>
+
+<p>When most people talk about state they really mean mutable state.</p>
+
+<p>Stateful methods can be replaced by functions where the state is passed in, and a new version of the state is returned, with the expectation that the new state must be passed in again to future calls (because referential transparency means the same function invocation always returns the same thing).</p>
+
+<p>This paper seems to distinguish b/w procedures and functions based on a procedure having state&#8230; it runs and can manipulate inner state. But a functional only returns values based on what was passed in and has new inner state.</p>
+
+<p>BUT, this is just using FP to simulate state. In principle, you could build functional programs by just passing in the global god state of the app into every function and just chaining it along, which brings back the problem of single pool of global variables. Ref transparency++, ease of reasoning&#8211;. But this is an extreme example.</p>
+
+<p>Argument: state increases modularity:</p>
+
+<p>&#8220;Working within a stateful framework it is possible to add state to any component without adjusting the components which invoke it.&#8221;</p>
+
+<p>With FP, you have ripple effects where adding &#8220;state&#8221; to a function means that state needs to be provided by a caller of a caller of a caller, etc, e.g. adding that extra state parameter.</p>
+
+<p>It&#8217;s a tradeoff between hiding state and FP where you know exactly what will happen.</p>
+
+<p>But in stateful PLs, you never know if there will be side-effects; you have to inspect all code to really know.</p>
+
+<p>&#8220;As with the discipline of (static) typing, it is trading a one-off up-front cost for continuing future gains and safety (“one-off” because each piece of code is written once but is read, reasoned about and tested on a continuing basis).&#8221;</p>
+
+<p>In other words, it&#8217;s convenient in the moment to have state (the one-off time you write that stateful code), but for all future readers/reasoners, they have to deal with the fallout of losing the guarantee of statelessness.</p>
+
+<p>Monads are kind of a way to have the cake and it it too, but makes it possible to create a stateful sub-language within Haskell, even if technically it&#8217;s properly typed as such. But still, monads have been insufficient in helping widespread FP adoption.</p>
+
+<p>Logic Programming</p>
+
+<p>State your axioms and desired goals, let the system build the formal proof for each solution. Prolog is seminal logic PL.</p>
+
+<p>&#8220;It is worth noting that a single Prolog program can be both correct when read in the first way, and incorrect (for example due to non-termination) when read in the second.&#8221;</p>
+
+<p>This is because Prolog axioms aren&#8217;t read as purely logical axioms but are applied sequentially, which is why the order of axioms can affect the outcome.</p>
+
+<p>Control issues</p>
+
+<p>LTR and top to bottom dependencies exist. Also, extra-logical features such as cuts (which prevent a restriction of control flow, presumably to prevent non-termination) add complexity.</p>
+
+<p>Oz gives you flexibility of control rather than depth-first prolog, but rather than sprinkling these into the code, it&#8217;s at a separate level; in other words, the way you execute code is configurable, not within the code itself (a contamination of control complexity).</p>
+
+<p>Classifying state:</p>
+
+<p>Goal: determine origins of state, hope that most state turns out to be accidental.</p>
+
+<p>All data is either directly provided to system (input) or derived.</p>
+
+<p>Derived data is either immutable (used only for display) or mutable (because requirements specify user should update that data)</p>
+
+<p>But just because all user input data is essential does not mean it must result in essential state. If it&#8217;s avoidable, it&#8217;s accidental state.</p>
+
+<p>Input Data:</p>
+
+<ul>
+<li>there&#8217;s a possibility of referring to that data in the future: essential state</li>
+<li>there is no possibility (e.g. it&#8217;s used to cause some side effect but then can be forgotten)</li>
+</ul>
+
+
+<p>Essential Derived Data - immutable</p>
+
+<p>Always rederivable, accidental state if stored.</p>
+
+<p>Essential Derived Data - mutable</p>
+
+<p>I don&#8217;t understand this.</p>
+
+<p>Accidental Derived Data</p>
+
+<p>Ideal world:</p>
+
+<p>No caches, no stores of derived calculations of any kind. Result: all state is visible to the user (or tester) of the system, since (disallowed) caching is the main source of hidden state. If you&#8217;re not caching, then everything you calculate is presented to the user.</p>
+
+<p>Control</p>
+
+<p>Control is accidental since it&#8217;s rare if ever that requirements are a view of execution.</p>
+
+<p>Concurrency is accidental; assuming zero time computation, user doesn&#8217;t care whether something happens in sequence or parallel.</p>
+
+<p>Real world</p>
+
+<ul>
+<li>state is required because most systems have state as part of their true essence (wtf does this mean?)</li>
+<li>control is accidental, but practically (and for efficiency purposes) it is needed, same goes w state (caching and what not)</li>
+</ul>
+
+
+<p>Formal Specification</p>
+
+<ul>
+<li>property-based: <em>what</em> is required rather than how. Includes algebraic approaches such as Larch and OBJ</li>
+<li>model-based / state-based: construct a model, often stateful, and specify how it must behave. Implies a stateful approach for how to solve the problem.</li>
+</ul>
+
+
+<p>Sometimes ideal world approach (no accidental state, derive everything) does not best model program. Example: derived data is dependent on both series of user inputs over time, AND its own previous values. In such a case it can help to maintain accidental state (I don&#8217;t get this&#8230; why is this different than the conveniences of storing derived state that isn&#8217;t strictly historical?). Example: position of computer controlled opponent in interactive game: technically position is derivable as f(initialPosition, allMovementsSince), but &#8220;this is not the way it is most naturally expressed&#8221;. Go fuck yourself and your loose definition of what is natural.</p>
+
+<p>Required Accidental Complexity:</p>
+
+<ul>
+<li>perf
+
+<ul>
+<li>avoid explicit management of accidental state; instead: simply declare what accidental state should be use, leave to separate infrastructure to maintain.</li>
+</ul>
+</li>
+<li>ease of expression: (e.g. position of computer controlled opponent)
+
+<ul>
+<li>solution: pretend user is typing in this derived state, i.e. pretend that it is essential input</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Relational Model</p>
+
+<ul>
+<li>structure of data</li>
+<li>manipulating data</li>
+<li>maintaining integrity and consistency of state</li>
+<li>insistence on separation b/w logical and physical layers of system</li>
+</ul>
+
+
+<p>Data independence: app / logical model is separate from the data is actually stored</p>
+
+<p>Structure: use of relations to represent all data
+Manipulation: a means to specify derived data
+Integrity: constraints
+Data Independence: clear separation is enforced b/w logical data and physical representation</p>
+
+<p>Base Relations: raw tables
+Derived Relations: Views: defined in terms of other relations</p>
+
+<p>Access path independence:</p>
+
+<p>Relational structuring allows you to defer access paths (how the data will be queried, join, etc). Before relational model, you had to decide up front, e.g, whether employees would live inside top level departments, or departments within top level employees. This is the hierarchical approach. The network approach is a little better in that you can add cycles but in the end you&#8217;re still defining the primary retrieval requirements up front at the expense of not knowing what secondary/future retrieval requirements you&#8217;ll have. Again, joining is the canonical example.</p>
+
+<p>OOP and XML suffer same hierarchical problems. Nesting. Who owns what. etc.</p>
+
+<p>Manipulation: relational algebra</p>
+
+<p>Restrict: unary operation for selecting subset (where clause?)
+Project: unary op which creates a new relation w various attributes removed (not added?)
+Product: cartesian product of tables (e.g. SELECT FROM foo, wat;)
+Union: binary operation, creates relation w all records in either arg relation
+Intersection: binary operation, creates a relation consisting of all records in both
+Difference: xor
+Join: binary operation construction all possible records that result from identical attrs
+Divide: ternary operation returning all records of first arg with occur in second arg associated w each record of 3rd arg (wat?</p>
+
+<p>Functional Relational Programming</p>
+
+<p>All essential state comes in the form of relations, and essential logic is expressed using relational algebra extended w pure user defined functions</p>
+
+<p>Step 1, specify each of the following</p>
+
+<p>Essential State: relational definition of stateful components
+Essential Logic: Derived-relation defitions, integrity constraints, and pure functions
+Accidental State and Control: declarative specification of a set of perf optimizations for the system
+Other: user and system interfaces for the outside world</p>
+
+<p>Essential state</p>
+
+<p>Relations, tables, columns (the schema, not actual rows/records)
+Data should only be considered essential if directly input by user.</p>
+
+<p>Essential Logic</p>
+
+<p>Pure functions about data transformation, set of db constraints.</p>
+
+<p>Note that we ignore &#8220;denormalization for perf&#8221; for now because we&#8217;re just talking about formal specifications; the physical storage may or may not mirror what&#8217;s being specified here.</p>
+
+<p>Accidental State and Control</p>
+
+<p>Specify 1) what state should exist, 2) what physical storage mechanism used</p>
+
+<ul>
+<li>state-related hint: e.g. some derived-relvar should be stored rather than recalculated</li>
+<li>second kind of state-related hint: infrequently used subset of relvar should be stored elsewhere (e.g. partitioning a table)</li>
+</ul>
+
+
+<p>Control side:</p>
+
+<ul>
+<li>tweaking the evaluator</li>
+</ul>
+
+
+<p>TL;DRs:</p>
+
+<p>Declarative lets infrastructure optimize for you, e.g. avoid relational <code>intersection</code> if it can be determined that two groups are mutually exclusive, not possible/easy with imperative.</p>
+
+<p>Normalized relational everything: avoids subjective bias about data access paths. OOP and XML generally force you to do the opposite, choosing nestings ahead of time and other things.</p>
+
+<p>Control is <em>avoided</em>  relational approach (think of SQL; no order of evaluation; this is intentional).</p>
+
+<p>Explicit parallelism is avoided, but allows for possibility for separated accidental control if required; whether it&#8217;s parallel or not shouldn&#8217;t matter to anyone other than implementor, i.e. if it really improves things, it&#8217;ll be parallel, but functionally it&#8217;s the same interface for infrastructure consumers.</p>
+
+<p>Code Volume</p>
+
+<p>Focus on true essentials avoids accidental complexity.</p>
+
+<p>Data Abstraction</p>
+
+<p>Creation of compound data types; to be avoided. Why:</p>
+
+<ul>
+<li><p>Subjective: like baking in data paths in OOP/XML-ish representation of data, is brittle to future use cases. Pre-existing bias will force future use cases into inappropriate reuse of pre-established biased structures. (I like this; this is a source of refactors, when you know what you&#8217;re doing is gross because of some new use case)</p></li>
+<li><p>Data Hiding: constructing giant objects often causes unneeded, irrelevant data to be supplied to function, and <em>which</em> data actually gets used is hidden at call site, hurts informal reasoning and testability. Avoiding composite objects helps avoiding this problem.</p></li>
+</ul>
+
+
+<p>FRP (func rel) opens door to</p>
+
+<ul>
+<li>perf (decided by infrastructure)</li>
+<li>different dev teams focusing on different components (by components we mean accidental vs essential vs interfacing)&#8230; this arg seems weak, or i don&#8217;t really understand it</li>
+</ul>
+
+
+<p>Allowed Types</p>
+
+<p>Can create limited types for essential state/logic components:</p>
+
+<ul>
+<li>disjoint union / enumeration types</li>
+<li>NO product types (types w subsidiary components)</li>
+</ul>
+
+
+<p>https://en.wikipedia.org/wiki/Algebraic_data_type</p>
+
+<p>Algebraic data type is a kind of composite type; type formed by combining other types. Product types (tuples and records), and sum types (disjoint unions or variant types). So you can have things like</p>
+
+<p>Action = UserClickEvent | UserDragEvent | Blah</p>
+
+<p>This is a sum type; the total values an Action could be are the total possible values of its variants, summed.</p>
+
+<p>A Product type is, say, a type, e.g. (Int, String), where the total possible values are all the possible values of variants, multiplied (hence product).</p>
+
+<p>Why sum and not product? because Sums don&#8217;t add new data types, really, they just categorize for pattern matching and other things. Whereas products create new compound datatypes.</p>
+
+<p>Example app</p>
+
+<p>Derived internal relations:</p>
+
+<ul>
+<li>RoomInfo, extend(Room, (roomSize = width*breadth))
+
+<ul>
+<li>so it&#8217;s a room info with another type</li>
+</ul>
+</li>
+<li>Acceptance takes accepted Decisions and strips away accepted bool. So an Acceptance is a Decision without an accepted flag. I like this because we&#8217;re keeping the domain simple; if we&#8217;re dealing with Acceptances, we don&#8217;t have to worry that it&#8217;s an acceptance that&#8217;s not an acceptance; the domain is constrained properly.</li>
+<li>Rejection is the opposite, but has the same attrs</li>
+</ul>
+
+
+<p>Accidental state and control</p>
+
+<p>This part is interesting because it suggests that defining relations (like you do when designing/committing a DB schema) is a premature accidental complexity. This paper suggests that you take your essential state types and hint that some of them should be cached. In relational databases, if you CREATE TABLE, you&#8217;re creating a cache. I guess this should be obvious. But the thing to note is that what this paper is suggesting is that there is a level above this at which we should be thinking. Everything below is accidental. Whether you CREATE TABLE or recompute on the fly is accidental. The user doesn&#8217;t care.</p>
+
+<p>So, hints:</p>
+
+<p>declare store PropertyInfo : create a cache / table for PropertyInfo rather than re-calc</p>
+
+<p>declare store shared Room Floor : denormalize Room and Floor into shared storage structure (hmm, why? is this a join table?)</p>
+
+<p>declare store separate Property (photo) : split out photo from other properties (perf hint).</p>
+
+<p>TODO: read Kow79</p>
+
+<p>Simple Made Easy</p>
+
+<p>Classes as namespaces = bad.</p>
+
+<p>Syntax is inferior to data.</p>
+
+<p>Switching/pattern matching allegedly complects multiple pairs of who&#8217;s going to do something and what happens&#8230; how is this different than multi-methods?</p>
+
+<p>variables complect value and time (they are state i guess)</p>
+
+<p>for loops complecting by explicitly specifying how to do something.</p>
+
+<p>folds still complect because they go from left to right&#8230;</p>
+
+<p>Polymorphism a la cart, via Clojure protocols. 1) define data structures, 2) definitions of sets of functions, and 3) connect them together.</p>
+
+<p>Favor declarative Prolog-ish logic programming to littering conditionals all over the place.</p>
+
+<p>Resource contention is inherent complexity, not your fault.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[identizzle]]></title>
+    <link href="http://machty.github.com/blog/2015/08/30/identizzle/"/>
+    <updated>2015-08-30T13:32:00-04:00</updated>
+    <id>http://machty.github.com/blog/2015/08/30/identizzle</id>
+    <content type="html"><![CDATA[<h2>Half-open connections</h2>
+
+<p>http://blog.stephencleary.com/2009/05/detection-of-half-open-dropped.html</p>
+
+<p>TL;DR: if you don&#8217;t write, you have no way of knowing whether your
+connection is still alive.</p>
+
+<h2>Does setTimeout wait til until the end of the event loop to start ticking?</h2>
+
+<p>No, it doesn&#8217;t:</p>
+
+<pre><code>  var endOfEventLoop;
+
+  setTimeout(function() {
+    console.log("" + (+new Date() - endOfEventLoop) + " ms after end of event loop");
+  }, 1000);
+
+  var now = +new Date();
+  while((+ new Date()) - now &lt; 900) { /* spin for 900ms */ }
+  endOfEventLoop = +new Date();
+</code></pre>
+
+<p>yields:</p>
+
+<pre><code>  101ms later
+</code></pre>
+
+<p>Why is this important?</p>
+
+<p>Because if you&#8217;re using magic numbers to, say, open a popup after some
+animation has occurred, you&#8217;re opening yourself up to disaster / timing
+errors if, after setting your timeout, a lot of slow computation /
+rendering logic eats up a chunk of that timer.</p>
+
+<h2>Primary Key</h2>
+
+<p>A primary key is just a column with the follow constraints:</p>
+
+<ul>
+<li>NOT NULL</li>
+<li>UNIQUE</li>
+</ul>
+
+
+<p>Note: you can have multiple NOT NULL / UNIQUE columns, but only one can
+be marked as PRIMARY.</p>
+
+<h2>observeOn vs subscribeOn</h2>
+
+<p>http://reactivex.io/documentation/scheduler.html</p>
+
+<blockquote><p>As shown in this illustration, the SubscribeOn operator designates which thread the Observable will begin operating on, no matter at what point in the chain of operators that operator is called. ObserveOn, on the other hand, affects the thread that the Observable will use below where that operator appears. For this reason, you may call ObserveOn multiple times at various points during the chain of Observable operators in order to change on which threads certain of those operators operate.</p></blockquote>
+
+<h1>Roth IRA</h1>
+
+<p>&#8220;IRA&#8221; stannds for Individual Retirement Account.</p>
+
+<p>http://www.rothira.com/roth-ira-taxes-and-tax-issues</p>
+
+<blockquote><p>Roth IRA contributions are not taxed at the time you contribute the funds to your Roth IRA. However, your contributions come from post-tax income. You pay taxes on your income today, but not in the future.</p></blockquote>
+
+<p>What does post-tax income mean? If I make 80k pre-tax, let&#8217;s say my
+post-tax income is 60k. If I want to put $5k into a Roth IRA, then I&#8217;m
+down to 75k and 55k. OH I get it&#8230; I think. The amount the government
+takes from me grows as I make more money. I&#8217;d benefit me if I were able
+to put 5k into Roth before I was taxed, so that then my taxable income
+would be 75k, and I&#8217;d have to pay the gov less than if I were taxed
+based on 80k.</p>
+
+<h1>Random acts of optimization</h1>
+
+<p>http://engineering.riotgames.com/news/random-acts-optimization</p>
+
+<h1>Readline</h1>
+
+<p>TODO: figure out how to get your tmux / bash setup working. Shouldn&#8217;t
+be rocket science. Goal: get irb and psql working.</p>
+
+<h1>ORDBMS</h1>
+
+<p>Object-relational database management system. Postgres is this. MySQL is
+not; MySQL is just RDBMS.</p>
+
+<blockquote><p>An object-relational database (ORD), or object-relational database management system (ORDBMS), is a database management system (DBMS) similar to a relational database, but with an object-oriented database model: objects, classes and inheritance are directly supported in database schemas and in the query language. In addition, just as with pure relational systems, it supports extension of the data model with custom data-types and methods.</p></blockquote>
+
+<p>An Object Database leverages pointers over joins for collecting data,
+where as a the relational approach leverages foreign keys,
+denormalizing, and storing everything in tabular format. Pros to Object
+Database include no mental model mismatch between your programming model
+(often OOP) and database storage; create an obj, modify an obj, save an
+obj &#8211; no need to figure out how to express your object in tabular
+format.</p>
+
+<p>Disadvantages are that any sort of reporting / querying needs to be
+programmed in, whereas relational databases follow set/relational theory
+and if you&#8217;ve got things stored in a tabular format you have way more
+flexibility to modify / query your database in the future.</p>
+
+<h1>Postgres</h1>
+
+<p>Developed at Berkeley as POSTGRES, pioneered many concepts later adopted by
+commercial databases. Sponsored by DARPA. Didn&#8217;t have SQL (btw SQL has
+been around since the 70s). SQL added in Postgres95, became PostgreSQL.</p>
+
+<p>Comes with a bunch of binaries:</p>
+
+<p><code>postgres</code> the server; accepts connection and then starts a worker
+process to handle that connection. (Can verify this; spinning up a
+rails console creates one more postgres worker instance).</p>
+
+<blockquote><p>Thus, the master server process is always running, waiting for client connections</p></blockquote>
+
+<p><code>psql</code> shell looks like <code>mydb=&gt;</code> for regular users, <code>mydb=#</code> for
+superuser.</p>
+
+<p>Commands prefixed with <code>\h</code> are not SQL; everything else is SQL.</p>
+
+<p>A relation = mathemtical term for table.</p>
+
+<p>https://en.wikipedia.org/wiki/Relational_model</p>
+
+<p>All data sets represented as tuples, grouped into relations.</p>
+
+<blockquote><p>&#8220;A relation is a data structure which consists of a heading and an unordered set of tuples which share the same type,&#8221;</p></blockquote>
+
+<h1>Deviations of SQL from relational model</h1>
+
+<p>https://en.wikipedia.org/wiki/Relational_model#SQL_and_the_relational_model</p>
+
+<ul>
+<li>SQL allows duplicate rows; relational model does not. Practically
+though this is avoided by auto-incrementing.</li>
+</ul>
+
+
+<p>SQL apparently also allows anonymous columns, duplicate rows, etc, which
+make things impossible to reference due to indistinguishability.</p>
+
+<p>SQL includes &#8220;NULL&#8221; to imply missing data; comparison of NULL with
+itself is not true, but NULL. (Comparison of anything with NULL yields
+NULL; it means unknown, not determinable). And hence it&#8217;s a form of
+three-valued logic, rather than just boolean.</p>
+
+<p>Law of exclude middle: It states that for any proposition, either that proposition is true, or its negation is true.</p>
+
+<p>Relational model depends on this law, but SQL does not, since it allows
+for NULL. Apparently Codd (relational model inventor) eventually
+suggested a 4-valued logic, probably to differentiate NULL from UNKNOWN,
+only to have a bunch of smug guys suggesting 19 or even 21-valued logic.
+WAT. So Postgres just stuck w 3 valued logic.</p>
+
+<p>SQL also uses NULL for other things than value unknown: the sum of an
+empty set is NULL.</p>
+
+<p>Rows are grouped into tables/relations. Relations grouped into database.
+Databases managed by a single Postgres server instance is a cluster.</p>
+
+<h1>Joins</h1>
+
+<pre><code>SELECT * FROM wats, foos;
+</code></pre>
+
+<p>Gives you a combination</p>
+
+<pre><code> name | name | wat
+------+------+------
+ foo1 | bar1 | wat1
+ foo1 | bar2 | wat2
+ foo2 | bar1 | wat1
+ foo2 | bar2 | wat2
+ foo3 | bar1 | wat1
+ foo3 | bar2 | wat2
+</code></pre>
+
+<p>Or even</p>
+
+<pre><code> name | name | wat  | bazname
+------+------+------+---------
+ foo1 | bar1 | wat1 | baz1
+ foo1 | bar1 | wat1 | baz2
+ foo1 | bar2 | wat2 | baz1
+ foo1 | bar2 | wat2 | baz2
+ foo2 | bar1 | wat1 | baz1
+ foo2 | bar1 | wat1 | baz2
+ foo2 | bar2 | wat2 | baz1
+ foo2 | bar2 | wat2 | baz2
+ foo3 | bar1 | wat1 | baz1
+ foo3 | bar1 | wat1 | baz2
+ foo3 | bar2 | wat2 | baz1
+ foo3 | bar2 | wat2 | baz2
+</code></pre>
+
+<p>If any of those tables had zero rows then zero rows would be selected
+even if there&#8217;s data in the other tables.</p>
+
+<blockquote><p>It is widely considered good style to qualify all column names in a
+join query, so that the query won’t fail if a duplicate column name
+is later added to one of the tables.</p></blockquote>
+
+<p>You could also rewrite the first one as</p>
+
+<pre><code>SELECT * FROM foos INNER JOIN bars ON true;
+</code></pre>
+
+<p>So selecting * seems to select from all relations/tables involved.</p>
+
+<p>Aggregate functions can&#8217;t be used in WHERE clauses, since WHERE clauses
+are limit the input rows, recursive infinite etc blah blah.</p>
+
+<pre><code>SELECT city FROM weather WHERE temp_lo = max(temp_lo);
+</code></pre>
+
+<p>You can change this to a subquery</p>
+
+<pre><code>SELECT city FROM weather
+    WHERE temp_lo = (SELECT max(temp_lo) FROM weather);
+</code></pre>
+
+<p>Aggregates play nicely with GROUP BY clauses: here&#8217;s how you&#8217;d count
+many rows had the same values.</p>
+
+<pre><code>SELECT name, count(*) FROM bars GROUP BY name;
+</code></pre>
+
+<p><code>HAVING</code> is like a WHERE clause for grouping / aggregate functions.
+Specifically, WHERE filters the input rows, and HAVING filters the
+results after aggregation has taken place:</p>
+
+<p>http://stackoverflow.com/a/287496/914123</p>
+
+<h2>Referential integrity</h2>
+
+<p>Making sure foreign keys point to objects in the table.</p>
+
+<h2>Window functions</h2>
+
+<p>Similar to GROUP BY, but instead preserves each input row in the
+output set rather than coalescing them down to just one row; in other
+words, instead of boiling down to a single answer per group, window
+functions add that answer to as a column to each of the input rows.</p>
+
+<pre><code>SELECT depname, empno, salary, avg(salary) OVER (PARTITION BY depname) FROM empsalary;
+</code></pre>
+
+<p>Whoa this is pretty awesome:</p>
+
+<pre><code>SELECT depname, empno, salary,
+       rank() OVER (PARTITION BY depname ORDER BY salary DESC)
+FROM empsalary;
+</code></pre>
+
+<p>&#8220;For each row, the window function is computed across the rows that fall into the same partition as the current row.&#8221;</p>
+
+<p>Kinda like how aggregate functions are computed using rows with the same
+GROUP BY value.</p>
+
+<p>There partitions and there are window frames&#8230;</p>
+
+<p>A window frame is a subset of a partition (or the whole partition
+itself). Many window functions use window frame rows, though some
+use partition rows. By default, if ORDER BY is supplied <em>to the
+over clause, not the whole query</em>, then the window frame consists
+of the all rows from start of the partition through to current row,
+plus any following rows that have same ORDER BY value&#8230;</p>
+
+<p>WAT.</p>
+
+<p>There must be some good reason for this. Can&#8217;t think of it now.</p>
+
+<pre><code>SELECT salary, sum(salary) OVER (ORDER BY salary) FROM empsalary;
+</code></pre>
+
+<p>But the thing to keep in mind I guess is that the <code>ORDER BY</code> here is
+just another way to configure the partition + window frame. Maybe that&#8217;s
+the way to think of it: <code>OVER</code> clauses are used to specify both
+partitions and window frames all in one shot. PARTITION BY is one way,
+that specifies a partition where window frame is the partition, and
+ORDER BY is another, where the PARTITION is all the rows (filtered by
+WHERE) and window set is from start to current row.</p>
+
+<p>Window functions can only be used in the SELECT list and in ORDER BY. I
+guess that makes sense. Can&#8217;t use them in GROUP BY, HAVING, or WHERE,
+since they logically execute after those things.</p>
+
+<h2>Aggregate expressions</h2>
+
+<pre><code>---                   direct arguments                   aggregated arguments
+aggregate_name ( [ expression [ , ... ] ] ) WITHIN GROUP ( order_by_clause ) [ FILTER ...
+</code></pre>
+
+<blockquote><p>The argument expressions preceding WITHIN GROUP, if any, are called direct arguments to distinguish them from the aggregated arguments listed in the order_by_clause. Unlike normal aggregate arguments, direct arguments are evaluated only once per aggregate call, not once per input row.</p></blockquote>
+
+<p>So the stuff in <code>WITHIN GROUP(...)</code> are evaluated once per input row. So
+ideally we should minimize the stuff we put in there.</p>
+
+<blockquote><p>This means that they (direct arguments) can contain variables only if those variables are grouped by GROUP BY;this restriction is the same as if the direct arguments were not inside an aggregate expression at all.</p></blockquote>
+
+<pre><code>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY income) FROM households;
+ percentile_disc
+-----------------
+           50489
+</code></pre>
+
+<p>0.5 is a direct argument; it makes no sense for it to be substituted
+with a value that varies across rows.</p>
+
+<p>So for example you could do:</p>
+
+<pre><code>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums;
+ percentile_disc
+-----------------
+               3
+</code></pre>
+
+<p><code>percentile_disc</code> is an aggregate function. It&#8217;s going to spit out
+values that are the result of coalescing rows. It wouldn&#8217;t make sense
+for me to try and add the column <code>name</code> to this result, because the
+<code>percentile_disc</code> result is based on coalesced rows:</p>
+
+<pre><code>SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums;
+ERROR:  column "nums.name" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num...
+               ^
+</code></pre>
+
+<p>The only way that&#8217;d make sense would be to GROUP BY <code>name</code> so that the
+aggregate function is only being applied to groups grouped by name
+rather than all of the input rows at once:</p>
+
+<pre><code>SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums GROUP BY name;
+  name  | percentile_disc
+--------+-----------------
+ alex   |               3
+ justin |               2
+(2 rows)
+</code></pre>
+
+<p>Wow this stuff is weird to talk about.</p>
+
+<p>Note that <code>count</code> is not an &#8220;ordered set&#8221; aggregate:</p>
+
+<pre><code>SELECT name, count(*) WITHIN GROUP (ORDER BY num) from nums GROUP BY name;
+ERROR:  count is not an ordered-set aggregate, so it cannot have WITHIN GROUP
+LINE 1: SELECT name, count(*) WITHIN GROUP (ORDER BY num) from nums ...
+                     ^
+</code></pre>
+
+<p>It barfs because I tried to provide a <code>WITHIN GROUP</code> clause to a non
+ordered set aggregate <code>count</code>. If I remove my WITHIN GROUP clause, I
+get:</p>
+
+<pre><code>SELECT name, count(*) from nums GROUP BY name;
+  name  | count
+--------+-------
+ alex   |     6
+ justin |     3
+(2 rows)
+</code></pre>
+
+<p>So what is an ordered set aggregate? It just means an aggregate fn
+whereby performing the computation requires some kind of ordering. My
+hunch is that ORDER BY inside of WITHIN GROUP isn&#8217;t used just for
+&#8220;sorting&#8221; the rows, but for defining the key by which they&#8217;ll be
+grouped. Or that&#8217;s just my bullshit way of fitting it into my brain.</p>
+
+<pre><code>SELECT count(*) as unfiltered, count(*) FILTER (WHERE i &lt; 5) as filtered FROM generate_series(1,10) AS s(i);
+ unfiltered | filtered
+------------+----------
+         10 |        4
+</code></pre>
+
+<p>So why <code>count(*)</code> and not <code>count()</code>? Because <code>count</code> is an aggregate
+function I guess, and that&#8217;s one why to distinguish it from something,
+say, <code>version()</code>.</p>
+
+<h2>Type casts</h2>
+
+<pre><code>CAST ( expression AS type )
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>expression::type
+</code></pre>
+
+<p>You can cast any string literal:</p>
+
+<pre><code>select '4.123'::real;
+ float4
+--------
+  4.123
+(1 row)
+</code></pre>
+
+<p>Postgres implicitly casts things for you, e.g. assigning values to
+columns (because the column type is obviously known). In some cases you
+have to be explicit; Postgres works this way so as to not surprise you
+with silent type casts.</p>
+
+<h2>Collation</h2>
+
+<p>http://stackoverflow.com/questions/4538732/what-does-collation-mean</p>
+
+<p>It means how words/letters/phonemes are stored.</p>
+
+<h2>Arrays</h2>
+
+<p>must be rectangular</p>
+
+<pre><code>SELECT ARRAY[ARRAY[1],ARRAY[1,2]];
+ERROR:  multidimensional arrays must have array expressions with matching dimensions
+</code></pre>
+
+<h2>Composites</h2>
+
+<pre><code>CREATE TYPE myrowtype AS (f1 int, f2 text);
+SELECT ('1',2)::myrowtype;
+</code></pre>
+
+<h2>Order of expression evaluation</h2>
+
+<p>Left-to-right short-circuit eval is not a thing:</p>
+
+<pre><code>SELECT true OR somefunc();
+</code></pre>
+
+<p>Hence the above <em>probably</em> won&#8217;t run <code>somefunc</code>, but not because it&#8217;s on
+the right and the left side evals to true, but because the evaluator&#8217;s
+already gone thrugh and decided that it can do less work by only using
+the left side.</p>
+
+<p>CASE constructs defeat optimizations by forcing evaluation, so you could
+write the above as</p>
+
+<pre><code>SELECT CASE WHEN true THEN true ELSE somefunc() END;
+</code></pre>
+
+<p>or</p>
+
+<pre><code>SELECT CASE WHEN true THEN true ELSE false END;
+</code></pre>
+
+<p>That&#8217;s pretty awesome. Declarative all the way. Let the evaluator figure
+out the best way to go.</p>
+
+<p>One gotcha is though is that the evaluator might try and simplify
+constant subexpressions (subexpressions that don&#8217;t depend on any rows
+being looked up), so something like this:</p>
+
+<pre><code>SELECT CASE WHEN num &gt; 0 THEN num ELSE 1/0 END FROM nums;
+ERROR:  division by zero
+</code></pre>
+
+<p>This happens because <code>num</code> is dynamic and the evaluator will evaluate
+the <code>1/0</code> before even running the query, causing the divide by zero
+error.</p>
+
+<h2>Foreign keys</h2>
+
+<blockquote><p>A foreign key must reference columns that either are a primary key or form a unique constraint. This means that the referenced columns always have an index (the one underlying the primary key or unique constraint); so checks on whether a referencing row has a match will be efficient.</p></blockquote>
+
+<p>Makes sense:</p>
+
+<pre><code>CREATE TABLE lols ( thing_id integer REFERENCES nums(num) );
+ERROR:  there is no unique constraint matching given keys for referenced table "nums"
+</code></pre>
+
+<blockquote><p>Since a DELETE of a row from the referenced table or an UPDATE of a referenced column will require a scan of the referencing table for rows matching the old value, it is often a good idea to index the referencing columns too.</p>
+
+<p>Because this is not always needed, and there are many choices available on how to index, declaration of a foreign key constraint does not automatically create an index on the referencing columns.</p></blockquote>
+
+<p>So if an article has many comments, then <code>comments.article_id</code> is an FK,
+hence <code>article.id</code> must have unique constraint. But if the referenced
+article is deleted, then postgres needs to scan the <code>comments</code> table for
+all rows referencing the deleted article to perform some logic on it. So
+you probably want to index <code>comments.article_id</code>. That said you probably
+want to index it anyway since you&#8217;ll be doing many comment lookups for a
+given article.</p>
+
+<h2>Postgres wiki</h2>
+
+<p>https://wiki.postgresql.org/wiki/Main_Page</p>
+
+<p>This seems surprisingly badass.</p>
+
+<h2>Schemas / clusters</h2>
+
+<p>The only data shared b/w databases is users and groups.</p>
+
+<p>But schemas aren&#8217;t kept so separate; a database can have multiple
+schemas, multiple schemas can have tables w the same name.</p>
+
+<h2>Table Expressions</h2>
+
+<p>Think of WHERE, GROUP BY, HAVING and others as modifiers that ultimately
+produce a table that you can select from. Holy shit that would have made
+my life so much easier if I knew that.</p>
+
+<h2>Joins</h2>
+
+<pre><code>FROM T1 CROSS JOIN T2isequivalenttoFROM T1 INNER JOIN T2 ON TRUE
+</code></pre>
+
+<p>Note that <code>WHERE</code> filtering happens after <code>ON</code> criteria. Again this is a
+case of JOIN just being a thing that produces another virtual table and
+WHERE filters whatever table.</p>
+
+<h2>Subqueries</h2>
+
+<p>Use them when you can&#8217;t use joins:</p>
+
+<ul>
+<li>subquery is a grouping / aggregation</li>
+</ul>
+
+
+<p>VALUES can also be a subquery.</p>
+
+<h1>Sedition</h1>
+
+<p>conduct or speech inciting rebellion against an authority or monarch</p>
+
+<h1>Discount brokerage</h1>
+
+<p>https://en.wikipedia.org/wiki/Discount_brokerage</p>
+
+<p>Much cheaper than traditional brokerage but doesn&#8217;t offer financial
+advice.</p>
+
+<h1>Open-ended mutual funds</h1>
+
+<p>Open-ended in that if you buy into a mutual fund, the shares granted to
+you are created out of thin air, and the price of the share is based on
+the total market value divided by the number of shares present.</p>
+
+<h1>Intestacy</h1>
+
+<p>State of having died but not written a will. Intestacy law deals with
+divvying up inheritance for folks who didn&#8217;t write wills.</p>
+
+<h1>Estate tax</h1>
+
+<p>Only the largest 0.2% estates in US pay estate tax since it&#8217;s exempt up
+to $5.5 million.</p>
+
+<h1>Traditional IRA</h1>
+
+<ul>
+<li>put in money tax free when you&#8217;re in a high tax bracket</li>
+<li>withdraw money taxed at a (presumably) lower tax bracket when you&#8217;re older</li>
+</ul>
+
+
+<h1>Forvo.com</h1>
+
+<p>Pronunciation dictionary; let&#8217;s people upload recordings of
+pronunciation into a map so that you can see how different regions
+pronounce things.</p>
+
+<h1>Inner Join conditions via WHERE/JOIN</h1>
+
+<p>Already know you can do</p>
+
+<pre><code>SELECT a,b WHERE a.wat = b.foo AND a.bleh &gt; 5;
+</code></pre>
+
+<p>But you can also move the join conditions to the JOIN &#8230; ON:</p>
+
+<pre><code>SELECT a INNER JOIN b ON (a.wat = b.foo) WHERE a.bleh &gt; 5;
+</code></pre>
+
+<p>These are equivalent, whichever you choose is a matter of style.</p>
+
+<p>Note that it only applies to INNER joins: the WHERE version of the above
+only produces INNER joins; if you want outer, use the OUTER JOIN ON
+syntax.</p>
+
+<blockquote><p>The ON or USING clause of an outer join is not equivalent to a WHERE condition, because it results in the addition of rows (for unmatched input rows) as well as the removal of rows in the final result.</p></blockquote>
+
+<p>Whereas INNER joins are reduced unions of both tables, and hence
+expressable as WHERE, which is used for filtering out rows. In other
+words, you can&#8217;t <em>add</em> rows to a result set with WHERE; WHERE is only
+used for filtering, and OUTER joins can add rows to the result set.</p>
+
+<h1>The WHERE clause</h1>
+
+<p>Typically references at least one column referenced in table generated
+in the FROM clause.</p>
+
+<h1>GROUP BY</h1>
+
+<blockquote><p>Grouping without aggregate expressions effectively calculates the set of distinct values in a col- umn. This can also be achieved using the DISTINCT clause (see Section 7.3.3).</p></blockquote>
+
+<p>Makes sense.</p>
+
+<p>We can actually verify that the postgres evaluator reduces this to the
+exact same query plan:</p>
+
+<pre><code>diff &lt;(psql -c "EXPLAIN SELECT DISTINCT name FROM foos") \
+     &lt;(psql -c "EXPLAIN SELECT * FROM foos GROUP BY name")
+</code></pre>
+
+<h1>Objects instead of .publish().connect()</h1>
+
+<pre><code>Ember.Object.extend({
+  firstName: "alex",
+  lastName:  "matchneer",
+
+  // using lazy computed properties
+  fullName: computed('firstName', 'lastName', function() {
+    return `${this.get('firstName') ${this.get('lastName')}`;
+  }),
+
+  // using lazy computed properties
+  fullName: computed(function() {
+    return zip('firstName', 'lastName', (first, last) =&gt; `${first} ${last}`);
+  }).live(),
+
+  time: service(),
+  completedInWords: computed('completedAt', 'time.sharedTicker', function(completedAt) {
+    // hmm this doesn't need to be live
+    return moment(this.get('completedAt')).agoInWords();
+  }),
+
+  liveTimer: liveComputed(function() {
+    return this.ref('firstName').flatMapLatest((firstName) =&gt; {
+      return Observable.interval(500);
+    });
+  }),
+
+  startWeighing() {
+    this.set('isWeighing', true);
+  },
+
+  isWeighing: false,
+  rawWeights: computed('isWeighing', function() {
+    if (this.get('isWeighing')) {
+      return interval(200).map(() =&gt; Math.random());
+    } else{
+      return null; // or empty observable
+    }
+  }),
+
+  // by subscribing to 'this', we're subscribing to lifetime of object.
+  // so we're guaranteed that this gets evaluated immediately upon creation.
+  // We want this behavior here
+  isStillReceivingData: computed('this', function() {
+    return this.ref('rawWeights').flatMapLatest(() =&gt; {
+      return timer(500).map(_ =&gt; false).startWith(true);
+    });
+  }),
+
+  doStuff: computed(function() {
+  }).subscribe(), // this means is live for lifetime of object
+                  // you know what else is live during lifetime of object?
+                  // action handlers...
+
+  doStuff: subscribe('actions.startDoingStuff', function() {
+    alert("wat");
+  }),
+});
+
+
+let Timer = Ember.Object.extend({
+  hasElapsed: false,
+  ms: 0,
+  init() {
+    this._super();
+    this.timerId = Ember.later(() =&gt; {
+
+    }, 500);
+  }
+});
+
+Ember.Object.extend({
+  hasReceivedDataTimer: computed('foo', function() {
+    return Timer.create({ ms: 100 });
+  }),
+  hasReceivedDataRecently: alias('hasReceivedDataTimer.hasElapsed'),
+});
+</code></pre>
+
+<h2>Maybe about to push the envelope</h2>
+
+<p>https://en.wikipedia.org/wiki/Semantic_satiation</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Help me with Observables]]></title>
@@ -6432,2042 +7492,6 @@ or do you always have to save it to some state?</p>
 It&#8217;s a spiky weird thing that bloats out when aroused. Other similarly
 animals have them, like lizards. Sharks have two &#8220;penises&#8221; but they&#8217;re
 called claspers.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Learnin Clojure]]></title>
-    <link href="http://machty.github.com/blog/2014/12/17/learnin-clojure/"/>
-    <updated>2014-12-17T12:52:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/12/17/learnin-clojure</id>
-    <content type="html"><![CDATA[<h2>Joy of Clojure</h2>
-
-<ul>
-<li>Imperative
-
-<ul>
-<li>a sequence of statements mutates program state</li>
-</ul>
-</li>
-<li>maenad (maenadic): wild and unrestrained: a female follower of
-Bacchus, traditionally associated with divine possession and frenzied
-rites</li>
-<li>expression problem
-
-<ul>
-<li>&#8220;The Expression Problem is a new name for an old problem. The
-goal is to define a datatype by cases, where one can add new cases
-to the datatype and new functions over the datatype, without
-recompiling existing code, and while retaining static type safety
-(e.g., no casts).&#8221;</li>
-<li>Java requires these to be declared up front, suffers</li>
-<li>Why the &#8220;expression&#8221; problem? &#8216;The label &#8220;Expression Problem&#8221; puns on expression = &#8220;how much can your language express&#8221; and expression = &#8220;the terms you are trying to represent are language expressions&#8221;.&#8217;</li>
-</ul>
-</li>
-</ul>
-
-
-<!--more-->
-
-
-<h2>Protocols</h2>
-
-<p>Almost like defining global functions but require that first arg(?)
-adheres to a given protocol.</p>
-
-<pre><code>(defprotocol Searchable
-  (search [this query]))
-</code></pre>
-
-<p>then</p>
-
-<pre><code>(extend-type String
-  Searchable
-  (search [this] 
-    (search [this query]
-      (someshit))))
-</code></pre>
-
-<blockquote><p>The resulting functions dispatch on the type of their first argument, and thus must have at least one argument</p></blockquote>
-
-<p>MAKES SENSE.</p>
-
-<h2>Expression Problem</h2>
-
-<p>You have</p>
-
-<ul>
-<li>a set of abstract methods you&#8217;d like to implement&#8230;</li>
-<li>&#8230;for an existing concrete class&#8230;</li>
-<li>&#8230;without changing the code for either the existing abstract methods
-or the concrete class</li>
-</ul>
-
-
-<p>Ruby&#8217;s solution means reopening the class, possibly monkey patching.
-Clojure&#8217;s solution is protocols&#8230; defining functions that dispatch
-based on the type of the first arg.</p>
-
-<p>Ruby suffers a namespacing issue, hence the danger of monkey patching.
-In Ruby everything is a message, easy to accidentally overwrite a method
-handler. Maybe there&#8217;s a namespace issue in Clojure too, if you&#8217;re not
-careful, but whatever I just need to learn more shit.</p>
-
-<h2>Clojure: namespaces</h2>
-
-<p><code>(ns dumb.shit)</code></p>
-
-<p>and you have <code>defn-</code> macros to declare private methods.</p>
-
-<p>Namespaces encapsulate, but you can also use lexical closures for
-encapsulation.</p>
-
-<h2>Keywords</h2>
-
-<p><code>:asd</code> is not a symbol, it&#8217;s a &#8220;keyword&#8221;. <code>asd</code> is a symbol, and is
-substituted with some underlying value.</p>
-
-<h2>Collections</h2>
-
-<h3>Lists</h3>
-
-<p><code>(a b c)</code> is just a list. When it gets evaluated, <code>a</code> will be treated
-as a function, macro, or operator.</p>
-
-<p>Vectors&#8230; don&#8217;t get evaluated? Why don&#8217;t they make a bigger deal about
-this?</p>
-
-<pre><code>[1 2 3]
-(vector 1 2 3)
-</code></pre>
-
-<h2>Commas are whitespace</h2>
-
-<pre><code>user=&gt; { 1 1 2, 2 }
-{1 1, 2 2}
-</code></pre>
-
-<h2>prefix/infix</h2>
-
-<pre><code>+ 1 2 3 4 5 6 7
-</code></pre>
-
-<p>vs</p>
-
-<pre><code>1 + 2 + 3 + 4 + 5 + 6 + 7
-</code></pre>
-
-<p>Prefix allows any number of args.</p>
-
-<p>Also, when everything is prefix, no question of operator precedence.</p>
-
-<h2>Vars</h2>
-
-<p>don&#8217;t need to be bound</p>
-
-<pre><code>user=&gt; (def y)
-#'user/y
-user=&gt; y
-#&lt;Unbound Unbound: #'user/y&gt;
-</code></pre>
-
-<h2>Special form</h2>
-
-<p>A Clojure expression that&#8217;s part of core language but not created via
-normal functions, types, or macros.</p>
-
-<h2>Lisp</h2>
-
-<p>stands for &#8220;LISt Processing&#8221;</p>
-
-<h2>def defn</h2>
-
-<p><code>def</code> associates a symbol w Clojure data (could be some primitive, or a
-function, or whatever).</p>
-
-<pre><code>(def a (fn [] (println "wat")))
-</code></pre>
-
-<p><code>defn</code> is a macro that wraps the above (and also lets you apply
-documentation).</p>
-
-<pre><code>(defn a "i am a stupid fn" [] (println "wat"))
-(defn a [] (println "wat"))
-</code></pre>
-
-<p>You can use <code>defn</code> for multi-arity fns</p>
-
-<pre><code>user=&gt; (defn a ([a] #{a}) ([a b] #{a b}))
-#'user/a
-user=&gt; (a 2)
-#{2}
-user=&gt; (a 2 3)
-#{3 2}
-user=&gt; (a 2 3 4)
-ArityException Wrong number of args (3) passed to: user/a  clojure.lang.AFn.throwArity (AFn.java:429)
-</code></pre>
-
-<p>What&#8217;s weird about this is <code>([n] #{n})</code>&#8230; if you&#8217;re evaluating this,
-won&#8217;t it try to immediate run <code>[n]</code> as if it were a fn? Yes! But we&#8217;re
-not evaluating&#8230; we&#8217;re in a macro! Eval rules don&#8217;t apply while shit is
-getting reorganized by the macro code. Kiiiinda fuckin weird.</p>
-
-<p>Multi-arity accomplished via</p>
-
-<pre><code>(defn a [&amp; x] (apply vector x))
-</code></pre>
-
-<h2>Homoiconicity</h2>
-
-<p>http://en.wikipedia.org/wiki/Homoiconicity</p>
-
-<p>It means your program&#8217;s AST is the same as its syntax, basically.
-Homoiconicity is a feature of Clojure.</p>
-
-<h2>Reader features</h2>
-
-<p>Like C++ preprocessor macros, rearrange shit (but somehow isn&#8217;t a
-macro?). <code>#()</code> is an inplace function reader feature that gets replaced
-with special form <code>def</code>.</p>
-
-<pre><code>user=&gt; (def a #(vector %1 %3))
-#'user/a
-user=&gt; (a 1 2 3)
-[1 3]
-</code></pre>
-
-<p>The above example shows that you can skip an numbered arg and still wind
-up with an arity of 3.</p>
-
-<pre><code>(def a #(vector % % %))
-user=&gt; (a 1)
-[1 1 1]
-</code></pre>
-
-<h2>Blocks</h2>
-
-<p>do blocks, usually side-effecty</p>
-
-<pre><code>user=&gt; (do
-  #_=&gt; (println "wat")
-  #_=&gt; (println "omg")
-  #_=&gt; 3)
-wat
-omg
-3
-</code></pre>
-
-<h2>Locals (not variables)</h2>
-
-<p>Useless:</p>
-
-<pre><code>(let [] (println "wat"))
-</code></pre>
-
-<p>Useful</p>
-
-<pre><code>(let [a 5] (println "a is" a))
-</code></pre>
-
-<p>Why a vector and not a map? I guess because let internally needs to loop
-through each thing?</p>
-
-<p>Note the use of &#8220;form&#8221;. It&#8217;s <code>let</code> form, it&#8217;s a <code>do</code> form. <code>def</code> is a
-special form&#8230; still need to tease this out. I guess form just means
-language pattern building block that depends on basic Closure types
-(functions, primitives, etc).</p>
-
-<h2>Loops</h2>
-
-<p>Use tail recursion. <code>recur</code> is a special form.</p>
-
-<p>BEFORE I MENTION THAT THOUGH I figured out how to rewrite a fn that runs
-a callback twice</p>
-
-<pre><code>user=&gt; (defn twice ([some-fn] (twice some-fn true)) ([some-fn first] (some-fn) (when (true? first) (twice some-fn false) ) ))
-#'user/twice
-user=&gt; (twice #(println "hello"))
-hello
-hello
-</code></pre>
-
-<p>Could have also used special form <code>fn</code>:</p>
-
-<pre><code>(twice (fn [] (println "hello")))
-</code></pre>
-
-<h2>Android camera bug</h2>
-
-<p>Only on Nexus 5, we had a bug where switching between front and back
-camera failed, reason being something to do with the fact that there&#8217;s
-no guarantee that front and back will have the same aspect ratio /
-resolution, so you need to reinitialize some shits. ISN&#8217;T ANDROID
-FUN?!?!?!?!?!</p>
-
-<h2>Clojure <code>set!</code></h2>
-
-<pre><code>(def a (java.awt.Point. 0 0))
-(.-x a)
-; 0
-(set! (.-x a) 1)
-; 1
-(.-x a)
-; 1
-</code></pre>
-
-<p>So you can think of <code>(.-x a)</code> as a descriptor that <code>set!</code> can operate
-on. Hmm does that mean <code>set!</code> is a macro?</p>
-
-<p>http://clojure.org/java_interop#Java%20Interop-The%20Dot%20special%20form-%28set!%20%28.%20Classname-symbol%20staticFieldName-symbol%29%20expr%29</p>
-
-<p>Apparently it&#8217;s a special form.</p>
-
-<h2>Abstract Window Toolkit</h2>
-
-<p>java.awt stands for Abstract Window Toolkit.</p>
-
-<h2>Capture output</h2>
-
-<pre><code>(with-out-str (println "fuckles"))
-; "fuckles"
-</code></pre>
-
-<p>You can also use this to capture the output of <code>doc</code>, which gets
-docstring:</p>
-
-<pre><code>(defn a "a dumb thing" [] (println()))
-(doc a)
-(with-out-string (doc a))
-</code></pre>
-
-<h2>What are all the special forms?</h2>
-
-<p>They&#8217;re like special hooked-into compiler macros that do special things
-you couldn&#8217;t do with macros.</p>
-
-<pre><code>clojure.lang.Compiler/specials
-{&amp; nil, monitor-exit #&lt;Parser clojure.lang.Compiler$MonitorExitExpr$Parser@14483946&gt;, case* #&lt;Parser clojure.lang.Compiler$CaseExpr$Parser@3826c025&gt;, try #&lt;Parser clojure.lang.Compiler$TryExpr$Parser@1a54177e&gt;, reify* #&lt;ReifyParser clojure.lang.Compiler$NewInstanceExpr$ReifyParser@5d473d44&gt;, finally nil, loop* #&lt;Parser clojure.lang.Compiler$LetExpr$Parser@770f1aba&gt;, do #&lt;Parser clojure.lang.Compiler$BodyExpr$Parser@86b7485&gt;, letfn* #&lt;Parser clojure.lang.Compiler$LetFnExpr$Parser@5e223ed2&gt;, if #&lt;Parser clojure.lang.Compiler$IfExpr$Parser@10668c26&gt;, clojure.core/import* #&lt;Parser clojure.lang.Compiler$ImportExpr$Parser@3636d04a&gt;, new #&lt;Parser clojure.lang.Compiler$NewExpr$Parser@39c8704e&gt;, deftype* #&lt;DeftypeParser clojure.lang.Compiler$NewInstanceExpr$DeftypeParser@17f1292f&gt;, let* #&lt;Parser clojure.lang.Compiler$LetExpr$Parser@59c6d8f0&gt;, fn* nil, recur #&lt;Parser clojure.lang.Compiler$RecurExpr$Parser@75c7b6d7&gt;, set! #&lt;Parser clojure.lang.Compiler$AssignExpr$Parser@77a7ed63&gt;, . #&lt;Parser clojure.lang.Compiler$HostExpr$Parser@615e29b9&gt;, var #&lt;Parser clojure.lang.Compiler$TheVarExpr$Parser@7c8deca3&gt;, quote #&lt;Parser clojure.lang.Compiler$ConstantExpr$Parser@79dce7a9&gt;, catch nil, throw #&lt;Parser clojure.lang.Compiler$ThrowExpr$Parser@cbff27f&gt;, monitor-enter #&lt;Parser clojure.lang.Compiler$MonitorEnterExpr$Parser@567fbf5a&gt;, def #&lt;Parser clojure.lang.Compiler$DefExpr$Parser@3a450e&gt;}
-</code></pre>
-
-<p>Or just</p>
-
-<pre><code>(sort (keys clojure.lang.Compiler/specials))
-(&amp; . case* catch def deftype* do finally fn* if let* letfn* loop* monitor-enter monitor-exit new quote recur reify* set! throw try var clojure.core/import*)
-</code></pre>
-
-<h2>Java <code>..</code> interop macro</h2>
-
-<pre><code>(.. (java.util.Date.) toString (endsWith "2014"))
-</code></pre>
-
-<p>Could also write</p>
-
-<pre><code>(.. (java.util.Date.) (toString) (endsWith "2014"))
-</code></pre>
-
-<p>TLDR the <code>..</code> macro will unwrap each argument and treat as fn
-invocation.</p>
-
-<h2>ligsigsegv</h2>
-
-<p>http://www.gnu.org/software/libsigsegv/</p>
-
-<p><code>clisp</code> uses this&#8230; it&#8217;s a way you can implement virtual memory in user
-space. Probably some clever shit that clisp and other zany interpreters
-use.</p>
-
-<h2>Namespace</h2>
-
-<p>Cutting to that Chase™.</p>
-
-<h2>What is &amp;?</h2>
-
-<pre><code>user=&gt; [&amp; asd]
-CompilerException java.lang.RuntimeException: Unable to resolve symbol: &amp; in this context, compiling:(NO_SOURCE_PATH:0:0)
-</code></pre>
-
-<p>so when can you use it?</p>
-
-<pre><code>(fn [&amp; asd])
-</code></pre>
-
-<p>this is a fn that takes any number of args:</p>
-
-<pre><code>((fn [&amp; asd]))
-((fn [&amp; asd]) 1)
-((fn [&amp; asd]) 1 2)
-</code></pre>
-
-<p>Basically fn is a macro and can rearrange &amp;, which is just a symbol.</p>
-
-<h2>Anaphoric Macros</h2>
-
-<p>http://amalloy.hubpages.com/hub/Unhygenic-anaphoric-Clojure-macros-for-fun-and-profit</p>
-
-<p>TL;DR useful in some cases for code generation.</p>
-
-<p>Basically you should always use backtick <code>\`` (for fully qualified
-symbols) rather thaaaaaaan boring ol single quote</code>&#8217;`.</p>
-
-<h2>Destructuring</h2>
-
-<p>Programming language concept of breaking apart some data structure into
-assigned variables. Pattern matching in Haskell is a form of this.
-Ruby&#8217;s array destructuring assignment has</p>
-
-<pre><code>a,b = [1,2]
-</code></pre>
-
-<p>Apparently even Firefox has some o dat shit</p>
-
-<pre><code>var a,b;
-[a,b] = [1,2];
-</code></pre>
-
-<p>In Clojure, you don&#8217;t have pattern matching a la Haskell but you still
-have parameter destructuring, the difference being (I think) that
-vanilla Clojure won&#8217;t match an argument signature and decide which
-version of the fn to run (unless you add the <code>core.match</code> module, which
-might be a core feature at some point).</p>
-
-<p>Basically Clojure has similar features to Ruby.</p>
-
-<h2>npm pretest</h2>
-
-<pre><code>"pretest": "ember build",
-"test": "bin/run-tests.js",
-</code></pre>
-
-<p>TL;DR when testing ember repo (and the server is already running), just
-directly run <code>/bin/run-tests.js</code>.</p>
-
-<h2>:keys</h2>
-
-<pre><code>{:keys [a b c]}
-</code></pre>
-
-<p>This isn&#8217;t meaningful on its own; it&#8217;s just a map. But it matches one of
-the patterns expected by the <code>let</code> macro.</p>
-
-<pre><code>(let [{:keys [a b c]} {:a "wat" :b "the" :c "hell"}]
-  (println a b c))
-</code></pre>
-
-<p>That doesn&#8217;t rename anything, but if you wanna do that:</p>
-
-<pre><code>(let [{x :a y :b z :c} {:a "wat" :b "the" :c "hell"}]
-  (println x y z))
-</code></pre>
-
-<p>The key thing to remember is that the symbol needs to be on the left:
-<code>{x :a y :b z :c}</code>.</p>
-
-<p>Means you could also do</p>
-
-<pre><code>(defn a [{a :first-name b :last-name} h]
-  (println "HAHA" a " " b))
-</code></pre>
-
-<p>WRONG because of <code>h</code>. These are fn params, not <code>let</code> args that are
-presented up front, so we actually want:</p>
-
-<pre><code>(defn a [{a :first-name b :last-name}]
-  (println "HAHA" a " " b))
-</code></pre>
-
-<p>followed by</p>
-
-<pre><code>(a {:first-name "Wat" :last-name "McMatchneer"})
-</code></pre>
-
-<h2>rationalize</h2>
-
-<p>Converts, say, a float to a fraction.</p>
-
-<h2>Clojure keywords as fns</h2>
-
-<pre><code>user=&gt; (def a { :a 123 })
-#'user/a
-user=&gt; (:a a)
-123
-</code></pre>
-
-<p>If a keyword is in fn position, it does a lookup of itself on the hash
-arg passed to it. Otherwise you&#8217;d have to do:</p>
-
-<pre><code>user=&gt; (get a :a)
-123
-</code></pre>
-
-<h2>So many seqs</h2>
-
-<p><code>Collection</code>: a composite data type: sequence, map, or set.</p>
-
-<p><code>Sequential</code>: ordered series of values (as opposed to, say, a set or a
-map)</p>
-
-<p><code>Sequence</code>: a sequential collection that may or may not exist yet, e.g.
-it could be a vector or it could be a lazy-seq of yet-to-be-computed
-thunks.</p>
-
-<p><code>Seq</code>: an API for navigating collections: <code>first</code>, <code>rest</code>, nil, and
-<code>()</code>. Basically, vectors, lists, PersistentLists are all <code>seq</code>s.</p>
-
-<p><code>seq</code>, of <code>clojure.core/seq</code>, is a fn that returns an object
-implementing <code>Seq</code> API, or nil if collection is empty. <code>seq</code> returns &#8220;an
-immutable variant of an iterator/enumerator`</p>
-
-<h2>Equality partition</h2>
-
-<p>Collections are partitioned into the following categories:</p>
-
-<ul>
-<li>Sequentials</li>
-<li>Map</li>
-<li>Set</li>
-</ul>
-
-
-<p><code>(=)</code> of two objects from different partitions is always false; e.g.
-vector compared w hash w same objs is false.</p>
-
-<p>Within a partition, different concrete types might equal each other:</p>
-
-<pre><code>(= [:a :b :c] '(:a :b :c))
-true
-</code></pre>
-
-<h2>cons-cell</h2>
-
-<p>Two-cell structure upon which Lisps build their data types. Maps to
-first and rest in Clojureland.</p>
-
-<p>Pretty sure this is how sequences are implemented (immutable/persistent
-data structures).</p>
-
-<h2>(class) and .getClass</h2>
-
-<p>Same thing? Maybe?</p>
-
-<pre><code>user=&gt; (class (java.awt.Point.))
-java.awt.Point
-user=&gt; (.getClass (java.awt.Point.))
-java.awt.Point
-</code></pre>
-
-<h2>map</h2>
-
-<p>GOD this shit is so cool.</p>
-
-<p><code>map</code> takes a fn and any number of collections afterward, applies a
-function to the first items, then second items, etc.</p>
-
-<p>It&#8217;s like a zip. But with a map. SO COOL.</p>
-
-<pre><code>(map #(apply + %&amp;) [1 2 3] [4 5 6] '(7 8 9))
-</code></pre>
-
-<p>or</p>
-
-<pre><code>(map vector (range 5) (range 6) (range 7))
-([0 0 0] [1 1 1] [2 2 2] [3 3 3] [4 4 4])
-</code></pre>
-
-<h2>vec or vector</h2>
-
-<pre><code>user=&gt; (vec [1 2 3 4 5])
-user=&gt; (apply vector '(1 2 3 4 5))
-</code></pre>
-
-<p>Basically <code>vec</code> accepts a single collection arg whereas <code>vector</code> accepts
-multiple args. Both create vectors.</p>
-
-<p>Hence</p>
-
-<pre><code>(vec (map char (range 65 76)))
-</code></pre>
-
-<p>Many ways to look up a value in vector.</p>
-
-<ul>
-<li>nth</li>
-<li>get</li>
-<li>vector as fn</li>
-</ul>
-
-
-<p>BARF BARF BARF</p>
-
-<pre><code>user=&gt; (assoc [4 5 6] 0 "wat")
-["wat" 5 6]
-</code></pre>
-
-<p>REMEMBER that defn let&#8217;s you define multiple fn bodies per arity.
-You see this when the arg vector doesn&#8217;t immediately follow the name,
-but a list (starting w arg vector) does.</p>
-
-<p>e.g.</p>
-
-<pre><code>(defn mach-inc
-  ([n] (mach-inc n 1))
-  ([n i] (+ n i)))
-</code></pre>
-
-<p>So now I&#8217;ve made an inc fn that takes an optional increment amount, but
-defaults to 1. If it were just a single-body fn, it&#8217;d be all</p>
-
-<pre><code>(defn mach-inc-single [n]
-  (+ n 1))
-
-user=&gt; (mach-inc-single 5)
-6
-</code></pre>
-
-<p>How to curry? Use partial. This adds two to everything.</p>
-
-<pre><code>(map (partial + 2) (range 10))
-</code></pre>
-
-<p>Rad. Radsauce!</p>
-
-<p>Vectors as stacks: <code>conj</code> and <code>pop</code>. Use <code>peek</code> a lot since <code>pop</code>
-returns new immutable fucker.</p>
-
-<h2><code>map</code> in Lisps, conj vs cons</h2>
-
-<p>Apparently Clojure&#8217;s mapping over collections is more efficient because
-it kinda lets you cheat w vectors. In Lisps without vectors you just
-have lisps, and as you push to an accumulator</p>
-
-<p>Ah ok let&#8217;s talk about cons vs conj.</p>
-
-<p><code>cons</code> unshifts and returns a seq (or a <code>clojure.lang.Cons</code>?):</p>
-
-<pre><code>user=&gt; (cons 4 [1 2 3])
-(4 1 2 3)
-user=&gt; (class (cons 4 [1 2 3]))
-clojure.lang.Cons
-</code></pre>
-
-<p>Same thing if you pass in a list</p>
-
-<pre><code>ArityException Wrong number of args (1) passed to: core/cons  clojure.lang.AFn.throwArity (AFn.java:429)
-user=&gt; (cons 4 `(1 2 3))
-(4 1 2 3)
-</code></pre>
-
-<p>WAAT apparently backtick does some implicit cons</p>
-
-<pre><code>user=&gt; (class '(1 2 3))
-clojure.lang.PersistentList
-user=&gt; (class `(1 2 3))
-clojure.lang.Cons
-user=&gt; (class (quote (1 2 3)))
-clojure.lang.PersistentList
-</code></pre>
-
-<p>Anyyyyway, <code>conj</code> returns a collection as close to the input collection
-as possible. And it &#8220;push&#8221;es.</p>
-
-<pre><code>user=&gt; (conj #{1 2 3} 4)
-#{1 4 3 2}
-user=&gt; (conj [1 2 3] 4)
-[1 2 3 4]
-user=&gt; (conj '(1 2 3) 4)
-(4 1 2 3)
-</code></pre>
-
-<p>Ah HAH! In fact it DOESN&#8217;T always push&#8230; it inserts at the end that
-makes the most sense given the data type (&#8220;in the most efficient way&#8221;):</p>
-
-<pre><code>user=&gt; (conj [1 2 3] 4)
-[1 2 3 4]
-user=&gt; (conj '(1 2 3) 4)
-(4 1 2 3)
-</code></pre>
-
-<p>SOOO</p>
-
-<ul>
-<li>cons
-
-<ul>
-<li>NOT homogeneous; no guarantee <code>next</code> chain will be list</li>
-<li>only guarantee is that <code>next</code> is a seq. Which means you can append
-to the beginning of any stupid thing. That&#8217;s why there&#8217;s
-<code>clojure.lang.Cons</code> as its own type; it could point to anything.
-<code>(class (next some-cons))</code> could be aaaany number of things
-depending on how you composed the <code>cons</code>.</li>
-</ul>
-</li>
-<li>conj
-
-<ul>
-<li>homogeneous: <code>next</code> is always the same type as wha you created it
-with, whether list or vector or chunked seq from a vector, etc.</li>
-<li><code>nil</code> starting list defaults to a PersistentList (but an empty vec
-will be a vec, lol)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Unfortunately all seqs print w parentheses, but they could by all sorts
-of different types of shit.</p>
-
-<pre><code>user=&gt; (class (seq [1 2 3]))
-clojure.lang.PersistentVector$ChunkedSeq
-user=&gt; (class (seq '(1 2 3)))
-clojure.lang.PersistentList
-</code></pre>
-
-<h2>recur</h2>
-
-<p>http://clojure.org/special_forms#recur</p>
-
-<blockquote><p>Note that recur is the only non-stack-consuming looping construct in Clojure. There is no tail-call optimization and the use of self-calls for looping of unknown bounds is discouraged. recur is functional and its use in tail-position is verified by the compiler.</p></blockquote>
-
-<p>Interesting.</p>
-
-<h2>No shift/unshift</h2>
-
-<p>Why? Because internally the fns that manipulate the left side of a
-vector return <code>seq</code>s, not vectors, which severs the ability to use
-vector fns in an optimized way, reusing datastructures, etc.</p>
-
-<p>So if you have</p>
-
-<pre><code>user=&gt; (vec (range 5))
-[0 1 2 3 4]
-</code></pre>
-
-<p>then doing</p>
-
-<pre><code>user=&gt; (rest (vec (range 5)))
-(1 2 3 4)
-
-user=&gt; (class (rest (vec (range 5))))
-clojure.lang.PersistentVector$ChunkedSeq
-</code></pre>
-
-<p>So you have a sequence <em>based</em> on a vector, but it&#8217;s not the original
-vector, so you don&#8217;t have the same vetor fns available. If you want to
-convert to vector again to get all those tasty shits, it&#8217;ll be O(n),
-probably both time and space.</p>
-
-<p>You can&#8217;t subvec a vec unexpect the original vec to be garbage collected
-because subvec maintains a reference.</p>
-
-<h2>PersistentList</h2>
-
-<ul>
-<li>singly-linked</li>
-<li>every node knows distance from end</li>
-<li><p>can only traverse from left to right</p>
-
-<p>  (defmethod print-method clojure.lang.PersistentQueue</p>
-
-<pre><code>[q w]
-(print-method '&lt;- w)
-(print-method (seq q) w)
-(print-method '-&lt; w))
-</code></pre></li>
-</ul>
-
-
-<h2>Shitty things</h2>
-
-<p>It doesn&#8217;t seem like Clojure will yell at you if you mess up and use the
-wrong kind of function for a collection. e.g. <code>rest</code> and <code>pop</code> do
-similar things to a PersistentQueue, but <code>rest</code> yields a <code>seq</code>, and
-<code>pop</code> yields a Queue, the former which gets rid of a lot of performance
-improvements. The behavior you&#8217;ll see, since all <code>seq</code>s seem to
-implement the same fns</p>
-
-<h2>What the hell</h2>
-
-<pre><code>(some #( if (even? %) % nil ) [1 3 4])
-</code></pre>
-
-<p>Sets and maps can behave like predicates.</p>
-
-<pre><code>(#{4 9 10} 9)
-9
-user=&gt;     (#{4 9 10} 11)
-nil
-</code></pre>
-
-<p>So you can use this idiom:</p>
-
-<pre><code>(some #{:b} [:a 1 :b 2])
-</code></pre>
-
-<p>this runs through each collection on the right and checks to see if each
-element is in the collection on the left, because the collection on the
-left acts like a predicate.</p>
-
-<h2>APR</h2>
-
-<p>Annual Percentage Rate. Based on prime rate, e.g. add 12.74% to prime
-rate to determine purchase annual percentage rate.</p>
-
-<p>You can have a credit card and not pay interest if you pay in full all
-the time. You must always pay the minimum rate, or else you get a
-penalty. But the idea is that you can pay your minimum rate, and
-anything above that is subject to an APR. Penalty APR might apply
-indefinitely. Again, doesn&#8217;t matter (other than a shitty credit score)
-if you always pay the full balance after that (APR only affects the
-unpaid balance).</p>
-
-<p>Balance transfers are transferring outstanding balances between cards,
-likely from one w a higher APR to one w lower. New cardholders might be
-offered 0% balance transfer API with the idea that you&#8217;ll transfer money
-to it right away because you&#8217;re so hopelessly in debt. APR applies
-differently to different types of debits on your account, and balance is
-one kind of debit, so if you had a balance transfer APR 5% higher than
-purchase APR, that&#8217;s basically discouraging you from putting balance
-transfers into that new account (makes sense, it&#8217;s kind of a risky thing
-if you&#8217;re just adopting new CCs and constantly transferring balances to
-them; then again it&#8217;ll also be limited by your max credit line. There&#8217;s
-also per-transaction fees, e.g. <code>max($5, 3%)</code>.</p>
-
-<p>Cash transfer is when you debit one card, credit another. Different than
-balance transfer because in one you&#8217;re trading a debt, in the other
-you&#8217;re trading credit (cash). Per-transaction fee is <code>max($10, 3%)</code>.</p>
-
-<p>Overdraft Advance is the ability to automatically withdraw from a credit
-card if your debit card / check bounces. You have to go through the
-hoops and set it up online, linking to a checking account.</p>
-
-<p>US Prime Rate is 300 points above federal funds rate.</p>
-
-<blockquote><p>In general, the United States prime rate runs approximately 300 basis points (or 3 percent) above the federal funds rate. The Federal Open Market Committee (FOMC) meets eight times per year wherein they set a target for the federal funds rate. Other rates, including the prime rate, derive from this base rate.</p></blockquote>
-
-<p>Credit cards actually talk about referencing the prime rate printed in
-the Wall Street Journal; &#8220;If WSJ stops publishing the Prime Rate, we
-will select a similar preference rate.&#8221;</p>
-
-<p>Variable rate just means it might change if the prime rate changes, or
-other reasons.</p>
-
-<p>Cash advances mean ATM withdrawals among other things.</p>
-
-<p>Any amount over the minimum payment account gets applied to payment APR
-first, and descending to other APR types (which might be higher or
-lower). It trickles down.</p>
-
-<h2>Interest charges</h2>
-
-<p>Daily balance approach is common:</p>
-
-<ul>
-<li>take starting balance and add
-
-<ul>
-<li>interest charge from prior day (compounding interest)</li>
-<li>new transactions/debits</li>
-</ul>
-</li>
-<li>subtract payments/credits</li>
-<li>daily balance = max(0, balance) (net credit balance treated as zero)</li>
-<li>Daily interest rate = APR/365.</li>
-<li>Multiply each type of APR by applicable balance type (payments are
-different than balance transfers, etc)</li>
-<li>If interest > 0, interest = max(MinimumInterest, interest)
-
-<ul>
-<li>MinimumInterest is often 0</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>Clojure: into</h2>
-
-<p>Pour values into collections:</p>
-
-<pre><code>(into {} {:a 1 :b 2})
-{:b 2, :a 1}
-(into {} [[:a 1] [:b 2]])
-{:a 1, :b 2}
-</code></pre>
-
-<p>The latter stems from the fact that providing a map to <code>seq</code> generates a
-shit:</p>
-
-<pre><code>(seq {:a 1 :b 2})
-([:b 2] [:a 1])
-</code></pre>
-
-<h2>Clojure maps</h2>
-
-<p><code>{}</code> is actually ArrayMap, but most common is HashMap:</p>
-
-<pre><code>(hash-map :a 123)
-</code></pre>
-
-<p><code>zipmap</code> takes a keys and values array</p>
-
-<pre><code>(zipmap [:k0 :k1] [:v0 :v1])
-{:k1 :v1, :k0 :v0}
-
-(zipmap [:k0 :k1] [:v0 :v1 :v2])
-{:k1 :v1, :k0 :v0}
-
-(zipmap [:k0 :k1 :k2] [:v0 :v1])
-{:k1 :v1, :k0 :v0}
-</code></pre>
-
-<p>The latter two demonstrate that it stops at the smallest array.</p>
-
-<h2>second</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>user=&gt; (doc second)
-</span><span class='line'>-------------------------
-</span><span class='line'>clojure.core/second
-</span><span class='line'>([x])
-</span><span class='line'>  Same as (first (next x))</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>invariant</h2>
-
-<p>Assertions in functional land.</p>
-
-<h2>equality</h2>
-
-<p>Meaningless in a mutable system. If you&#8217;re not guaranteed to be equal to
-another object forever, then you&#8217;re not equal.</p>
-
-<p>Ooo unrelated by <code>let</code> locals can refer to previous ones in the same let
-binding vector:</p>
-
-<pre><code>(let [v [4 5 6] a (first v)] (println a))
-4
-</code></pre>
-
-<p>Anyway, immutable objects share data:</p>
-
-<pre><code>(let [v [4 5 6] v0 (cons 1 v) v1 (cons 2 v)] (= (rest v0) (rest v1)))
-</code></pre>
-
-<p>aaaaand they&#8217;re actually identical:</p>
-
-<pre><code>(let [v [4 5 6] v0 (cons 1 v) v1 (cons 2 v)] (identical? (rest v0) (rest v1)))
-false
-</code></pre>
-
-<p>WHOOPSY DAISY: this is apparently wrong because I&#8217;m using a vector and
-not a list&#8230; why? Let&#8217;s see what class they are</p>
-
-<pre><code>(let [v [4 5 6] v0 (cons 1 v) v1 (cons 2 v)] (map class (map next [v0 v1])) )
-(clojure.lang.PersistentVector$ChunkedSeq clojure.lang.PersistentVector$ChunkedSeq)
-</code></pre>
-
-<p>So <code>cons</code> casts the provided collection to a <code>seq</code>, and the vector
-obliges by giving it a chunked sequence, which loses all the vector-y
-stuff about it. No casting needs to take place if it&#8217;s already a seq
-though, hence lists work.</p>
-
-<p>CONFUSING SHIT:</p>
-
-<pre><code>user=&gt; (def h {:a 1})
-#'user/h
-user=&gt; (h :a)
-1
-user=&gt; (:a h)
-1
-</code></pre>
-
-<p>Basically, both keywords and collections themselves can behave like fns.</p>
-
-<h2>&#8220;changes&#8221; in immutable structures</h2>
-
-<p>A new root &#8220;node&#8221; is always returned, whether you&#8217;re pushing to a
-vector, etc, but it might point to the same things.</p>
-
-<h2>lazy-seq, thunks</h2>
-
-<p>A thunk is a description of an operation, usually one step in an
-iteration. Lazy-seq presumably rearranges your eager seq operations
-into lazy thungs.</p>
-
-<p>If you hold onto the head of a lazy sequence though, you can lose all
-the benefits because the head (and the rest of the sequence) won&#8217;t be
-garbage collected. <code>lazy-seq</code> is only useful when intermediate
-calculations can be forgotten, hence the difference between the
-following:</p>
-
-<pre><code>(let [r (range 1e10)]
-  (first r) 
-  (last r))
-
-(let [r (range 1e10)]
-  (last r)   ; r still needed for following calc, so clojure doesn't clear it
-  (first r))
-</code></pre>
-
-<p>Basically we broke the rule of holding onto to the head, which means
-things might not get garbage collected the way we&#8217;d like; this can
-happen in any case where we do bindings, whether let or fn arg bindings.</p>
-
-<p>So while Clojure&#8217;s smart enough to aggressively clear out (for GC)
-locals it no longer needs, it won&#8217;t rearrange code for us because it has
-no way of knowing whether <code>first</code> and <code>last</code> are pure, which might make
-it unsafe to re-order; note that Haskell doesn&#8217;t have this problem
-because it&#8217;s purely functional.</p>
-
-<h2>iterate</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>user=&gt; (doc iterate)
-</span><span class='line'>-------------------------
-</span><span class='line'>clojure.core/iterate
-</span><span class='line'>([f x])
-</span><span class='line'>  Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Ah so x doesn&#8217;t even need to be a liast, could just be a number.</p>
-
-<pre><code>(second (iterate inc 1))
-2 
-</code></pre>
-
-<h2><code>-&gt;</code></h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>clojure.core/-&gt;
-</span><span class='line'>([x & forms])
-</span><span class='line'>Macro
-</span><span class='line'>  Threads the expr through the forms. Inserts x as the
-</span><span class='line'>  second item in the first form, making a list of it if it is not a
-</span><span class='line'>  list already. If there are more forms, inserts the first form as the
-</span><span class='line'>  second item in second form, etc.</span></code></pre></td></tr></table></div></figure>
-
-
-<p>I have no fucking idea.</p>
-
-<h2>take</h2>
-
-<pre><code>user=&gt; (take 5 (iterate inc 1))
-(1 2 3 4 5)
-user=&gt; (take 5 (range))
-(0 1 2 3 4)
-user=&gt; (take 5 (filter even? (range)))
-(0 2 4 6 8)
-</code></pre>
-
-<p>Ruby/Rails kept making me thing something like <code>.first(5)</code>, but <code>take</code>
-is the functional thing I was looking for.</p>
-
-<p>Unrelated, but</p>
-
-<pre><code>user=&gt; (/ 5)
-1/5
-</code></pre>
-
-<blockquote><p>If no denominators are supplied, returns 1/numerator,</p></blockquote>
-
-<h2>Quicksort</h2>
-
-<p>I forgot quicksort, so here I go remembering it:</p>
-
-<ul>
-<li>Take your array and choose an element in the array (the pivot)</li>
-<li>loop through O(n) and swap elements such that all <code>&lt;</code> elements are to
-the left of the pivot and all <code>&gt;=</code> elements are to the right.</li>
-<li><p>Recurse into the unsorted partitions and do to the same thing.</p>
-
-<p>  4 9 1 3 7 2 8</p>
-
-<pre><code>          P
-        &lt; P
-      &lt;   P
-    &lt;     P
-  &lt;       P
-&gt;         P
-2       8 9
-</code></pre>
-
-  4 2 1 3 7 8 9
-  &lt;         P
-
-<pre><code>        |
-        | 9   -- sorted
-    &lt; P |
-  &lt;   P |
-&lt;     P |
-</code></pre>
-
-  &lt;       P |
-  4 2 1 3 7 8 9
-
-<pre><code>  &lt; P | |
-&lt;   P | |
-</code></pre>
-
-<blockquote><pre><code>P | |
-</code></pre>
-
-<p>  1 2 3 4 | |
-  &#8230;blahblahblah&#8230;
-  1 2 3 4 7 8 9</p></blockquote></li>
-</ul>
-
-
-<p>It is sorrrrted. Divide and conquer babeh, like mergesort.</p>
-
-<h2><code>list</code> and <code>list*</code></h2>
-
-<pre><code>user=&gt; (list 1 2 3 4)
-(1 2 3 4)
-user=&gt; (list [1 2 3 4])
-([1 2 3 4])
-user=&gt; (list (range 5))
-((0 1 2 3 4))
-user=&gt; (apply list (range 5))
-(0 1 2 3 4)
-user=&gt; (list* () () () ())
-(() () ())
-user=&gt; (list* () () () '(6 7 8))
-(() () () 6 7 8)
-user=&gt; (list* 3 2 1 '(6 7 8))
-(3 2 1 6 7 8)
-</code></pre>
-
-<p>So <code>list*</code> is just <code>list</code> where the final arg is a sequence.</p>
-
-<p>unrelated:</p>
-
-<pre><code>user=&gt; (let [a 3 fn #(&lt; % a)] (filter fn '(1 2 3 6)))
-(1 2)
-user=&gt; (let [a 3 fn #(&lt; % a)] (remove fn '(1 2 3 6)))
-(3 6)
-
-(defn sort-parts [work]
-  (lazy-seq
-    (loop [[part &amp; parts] work]
-      (println "work:" work)
-      (println "part:" part)
-      (if-let [[pivot &amp; xs] (seq part)]
-        (let [smaller? #(&lt; % pivot)]
-          (recur (list*
-            (filter smaller? xs)
-            pivot
-            (remove smaller? xs)
-            parts)))
-      (when-let [[x &amp; parts] parts]
-        (cons x (sort-parts parts)))))))
-
-(sort-parts (list [9 1 4 2 6]))
-
-work: ([9 1 4 2 6])
-part: [9 1 4 2 6]
-work: ([9 1 4 2 6])
-part: (1 4 2 6)
-work: ([9 1 4 2 6])
-part: ()
-work: ((4 2 6) 9 ())
-part: (4 2 6)
-work: ((4 2 6) 9 ())
-art: (2)
-work: ((4 2 6) 9 ())
-part: ()
-work: (() 4 (6) 9 ())
-part: ()
-work: ((6) 9 ())
-part: (6)
-work: ((6) 9 ())
-part: ()
-work: (() 9 ())
-part: ()
-work: (())
-part: ()
-</code></pre>
-
-<p>AH HAH this is fucked up because I was thinking <code>recur</code> was going to
-somehow rewrite the value of <code>work</code>. It won&#8217;t. It&#8217;ll change the
-&#8220;l-values&#8221;, whereas <code>work</code> is just meant as the initial value of the
-&#8220;l-values&#8221;. So it should actually be:</p>
-
-<pre><code>(defn sort-parts [work]
-  (lazy-seq
-    (loop [[part &amp; parts] work]
-      (println "part/recur'd min:" part)
-      (println "parts:           " parts)
-      (if-let [[pivot &amp; xs] (seq part)]
-        (let [smaller? #(&lt; % pivot)]
-          (recur (list*
-            (filter smaller? xs)
-            pivot
-            (remove smaller? xs)
-            parts)))
-      (when-let [[x &amp; parts] parts]
-        (println "FULLRECURSE this has been sorted:" x)
-        (cons x (sort-parts parts)))))))
-
-(sort-parts (list [9 1 4 2 6]))
-</code></pre>
-
-<p>Ahh so the final <code>(cons x (sort-parts parts))</code> is how we return one
-sorted element at a time, because <code>cons</code> returns a Cons and is capable
-of being lazy. Can you do a lazy-seq with a recur? Probably not, since
-recur is almost just a looping construct. The cons as a return value
-makes sense, because it returns (cons x lazy-seq).</p>
-
-<p>REMEMBER: destructuring means the &#8220;rest&#8221; list will be nil if nothing&#8217;s
-there.</p>
-
-<pre><code>user=&gt; (let [[x &amp; xs] '(1)] (println xs))
-nil
-</code></pre>
-
-<p>What&#8217;s the difference between a PersistentList <code>()</code> and a seq?</p>
-
-<p>A seq is any collection that implements the <code>Seq</code> api, i.e. you can call
-<code>first</code> and <code>rest</code> on it.</p>
-
-<pre><code>user=&gt; (class (seq '(1)))
-clojure.lang.PersistentList
-user=&gt; (class '(1))
-clojure.lang.PersistentList
-</code></pre>
-
-<p>Sometimes collections need to be cast in some way into some derivative
-class to efficiently implement <code>seq</code>, e.g. vectors:</p>
-
-<pre><code>user=&gt; (class (seq [1]))
-clojure.lang.PersistentVector$ChunkedSeq
-
-user=&gt; (class (rest [1 2 3 4]))
-clojure.lang.PersistentVector$ChunkedSeq
-</code></pre>
-
-<p>So that <code>recur (list *...</code> bit&#8230; <code>list*</code> won&#8217;t flatten the args you
-pass to it, so if the filters/removes yield <code>()</code>, then it might recur
-with <code>() 5 ()</code>, which then gets split into <code>part=() parts=(5 ())</code>.
-Then the <code>if-let</code> will fail because <code>(seq ())</code> yields nil, and then
-when-let does&#8230; wait</p>
-
-<p>What&#8217;s the difference between <code>if</code> and <code>when</code>?</p>
-
-<p>https://groups.google.com/forum/#!topic/clojure/WDIZ6VDhSr0</p>
-
-<p>Basically, <code>if</code> is sa special form with format <code>(if test then else?)</code>.
-You must always pass a <code>then</code>, but <code>else</code> is optional, but else is
-always the arg right after then. So if you wanted to do multiple things
-in <code>then</code>, you&#8217;d need to use a <code>do</code>. e.g.</p>
-
-<pre><code>(if true
-  (do
-    (println "holy")
-    (println "shit")))
-
-(if false
-  (do
-    (println "holy")
-    (println "shit"))
-  (println "FALSE!!!"))
-</code></pre>
-
-<p>But the format of <code>when</code> doesn&#8217;t have an else based on the number of
-args because there&#8217;s an implicit do. It&#8217;s a macro. <code>(source when)</code>:</p>
-
-<pre><code>(defmacro when
-  "Evaluates test. If logical true, evaluates body in an implicit do."
-  {:added "1.0"}
-  [test &amp; body]
-  (list 'if test (cons 'do body)))
-</code></pre>
-
-<h2>cond :else</h2>
-
-<p>http://stackoverflow.com/a/6323249/914123</p>
-
-<p>Things to remember:</p>
-
-<ol>
-<li>:else only seems to idiomatically show up with <code>cond</code></li>
-<li><p>:else could be replaced by any truthy thing; Clojure / cond don&#8217;t
-specifically look out for it, but because it&#8217;s truthy, it&#8217;ll get
-evaluated.</p>
-
-<p> user=>     (cond true 123 true 456)
- 123
- user=>     (cond false 123 true 456)
- 456</p>
-
-<p> user=> (cond (= 4 5) &#8220;haha&#8221; (= 7 9) &#8220;lol&#8221; :else &#8220;HORSES ASS&#8221;)
- &#8220;HORSES ASS&#8221;
- user=> (cond (= 4 5) &#8220;haha&#8221; (= 7 9) &#8220;lol&#8221; :IAMAMONKEYSASSHOLE &#8220;HORSES ASS&#8221;)
- &#8220;HORSES ASS&#8221;
- user=> (cond (= 4 5) &#8220;haha&#8221; (= 7 9) &#8220;lol&#8221; false &#8220;HORSES ASS&#8221;)
- nil</p></li>
-</ol>
-
-
-<h2>Moscow Mule</h2>
-
-<p>A vodka + ginger beer + lemon juice mixed drink in a copper mug.</p>
-
-<p>http://en.wikipedia.org/wiki/Moscow_mule</p>
-
-<p>Invented in the 50s. There was a vodka craze in the 50s.</p>
-
-<p>http://www.thenibble.com/reviews/main/cocktails/vodka-history.asp</p>
-
-<p>Apparently The Mule kicked off the vodka craze. Then came 60s Bond
-saying Vodka Martini, shaken not stirred.</p>
-
-<h2>A fish rots from the head down</h2>
-
-<p>I guess it means that whoever&#8217;s in charge sets the example.</p>
-
-<p>http://www.zdnet.com/article/lennart-poetterings-linus-torvalds-rant/</p>
-
-<blockquote><p>&#8220;If Linux had success, then that certainly happened despite, not because of this [Torvald&#8217;s] behavior. I am pretty sure the damage being done by this is quite obvious, it not only sours the tone in the Linux community, it is also teaches new contributors to adopt the same style, but that&#8217;s only if it doesn&#8217;t scare them away in the first place. In other words: A fish rots from the head down.&#8221;</p></blockquote>
-
-<p>Or &#8220;When an organization or state fails, it is the leadership that is
-the root cause.&#8221;</p>
-
-<p>And it&#8217;s not true; guts rot before anything near the fish&#8217;s head.</p>
-
-<h2>We aren&#8217;t all comely young women</h2>
-
-<p>http://www.reddit.com/r/pics/comments/2qdubq/we_arent_all_comely_young_women_some_of_are_old/</p>
-
-<p>comely: pleasant to look at</p>
-
-<h2>systemd</h2>
-
-<p>http://en.wikipedia.org/wiki/Systemd</p>
-
-<p>systemd replaces the <code>init</code> daemon, but also refers to the suite of low
-level software surrounding this low level tool for</p>
-
-<h2>Clojure: seq cons list</h2>
-
-<ul>
-<li>(seq): returns a seq on the passed-in collection. A seq is just
-something that&#8217;s guaranteed to implement <code>first</code> and <code>rest</code>, which is
-all you need to iterate through a collection. KEY THING: it doesn&#8217;t
-append anything, it just converts to a seq. Note that seq returns
-whatever&#8217;s passed to it if it&#8217;s already a seq:
-<code>(let [a []] (= (seq a) (seq (seq a))))</code></li>
-<li><p>(cons): returns a new seq where x is first el and seq is the rest.</p>
-
-<p>  user=> (def a (lazy-seq (range)))
-  user=> (class a)
-  clojure.lang.LazySeq</p></li>
-<li><p>(list) isn&#8217;t just an API of first/rest but is an actual datatype, a
-singly linked list where every item knows its distance from the end.</p>
-
-<p>  user=> (let [a (list 1)] (= a ( seq (seq a))))
-  true</p></li>
-</ul>
-
-
-<p>Ughhh how is this possible? It seems like a list is already a seq and
-hence doesn&#8217;t need to change in any way to be a seq? A list is a
-concrete implementation of seq, one that is so close that no translation
-needs to take place in the way a vector would.</p>
-
-<h2>Collections as functions</h2>
-
-<pre><code>([6 7 8] 2)
-({:a 123} :a)
-</code></pre>
-
-<p>Collections act as functions. Not only can collections act as functions,
-but functions can act as data, dem FIRST CLASS SHITS.</p>
-
-<p>First class means</p>
-
-<ul>
-<li>createable on demand</li>
-<li>can be stored in data structure</li>
-<li>can be passed into a fn</li>
-<li>can be returned from fn</li>
-</ul>
-
-
-<p>Compose w comp</p>
-
-<pre><code>(def fifth (comp first rest rest rest))
-</code></pre>
-
-<p>Create on demand nth fn</p>
-
-<pre><code>(defn fnth [n]
-  (apply comp
-     (cons first
-           (take (dec n) (repeat rest)))))
-
-((fnth 5) '[a b c d e])
-</code></pre>
-
-<p>So why is this ok?</p>
-
-<pre><code>user=&gt; (class '[123])
-clojure.lang.PersistentVector
-user=&gt; (class [123])
-clojure.lang.PersistentVector
-</code></pre>
-
-<p>Basically the quote means things won&#8217;t be evaluated. You&#8217;re quoting.
-Which means you can return symbols without them being evaluated.</p>
-
-<p>Anyway, you apply to comp a cons of (first rest rest rest rest)</p>
-
-<pre><code>user=&gt; (map {:a 3 :b 5} [:a :b])
-(3 5)
-user=&gt; (map (comp keyword #(.toLowerCase %) name) '(a B C))
-(:a :b :c)
-</code></pre>
-
-<h2>CURRYING in clojure</h2>
-
-<p>Use <code>partial</code>, but partial isn&#8217;t exactly what you might think.
-Specifically, it is not currying because currying keeps returning new
-functions until concrete args have been provided for all of its args,
-whereas with partial, there&#8217;s no concept of a fixed number of args, but
-once you&#8217;ve constructed a function with partial, once you invoke that
-partial, it immediately tries to evaluate.</p>
-
-<h2>Complement</h2>
-
-<pre><code>((complement even?) 3)
-((comp not even?) 3)
-(#(not (even? %)) 3)
-</code></pre>
-
-<h2>metadata</h2>
-
-<pre><code>(defn join
-  {:test (fn []
-            (assert
-              (= (join "," [1 2 3]) "1,3,3")))}
-  [sep s]
-  (apply str (interpose sep s)))
-</code></pre>
-
-<p>That&#8217;s kinda rad. There&#8217;s also shorthand:</p>
-
-<pre><code>(defn ^:woot ^:yeah fn-name [] (println "yeah"))
-
-(defn fn-name 
-  { :woot true, :yeah true }
-  [] (println "yeah"))
-</code></pre>
-
-<h2>Higher order fn</h2>
-
-<p>one that either</p>
-
-<ul>
-<li>takes 1+ fns as args</li>
-<li>returns a fn</li>
-</ul>
-
-
-<h2>holy shit</h2>
-
-<pre><code>user=&gt;    (sort-by second [[:a 7] [:c 31] [:b 21]])
-([:a 7] [:b 21] [:c 31])
-</code></pre>
-
-<p>or comparing different types as if they were strings</p>
-
-<pre><code>(sort-by str [:b :a {} 5 1 2 "c" "a"])
-</code></pre>
-
-<p>or treating keywords as fns</p>
-
-<pre><code>(sort-by :lastname [{ :lastname "Match" } { :lastname "Borf" } { :lastname "Sally" }])
-</code></pre>
-
-<p>Remember the function-like things! Like keywords.</p>
-
-<h2>EFT</h2>
-
-<p>Electronic Funds Transfer, a means of payment for various sites that
-often just means withdrawing from your checking account, so you gotta
-enter routing number account number blah blah blah.</p>
-
-<h2>Pure fn</h2>
-
-<ul>
-<li>always returns same result given same arguments</li>
-<li>no side effects</li>
-</ul>
-
-
-<h2>referential transparency</h2>
-
-<p>The reference to the function is transparent to time. Time has no
-effect. It always does the same thing. But if it changes some internal
-(or external) state, then you lose it.</p>
-
-<h2>recursion</h2>
-
-<ul>
-<li>mundane: explicitly named recursion, rather than mutual or recur</li>
-<li>linear: e.g. one stack per iteration</li>
-</ul>
-
-
-<p>Tail-recursive pow</p>
-
-<pre><code>(defn pow [base exp]
-  (letfn [(kapow [base exp acc]
-             (if (zero? exp)
-                acc
-                (recur base (dec exp) (* base acc))))]
-         (kapow base exp 1)))
-</code></pre>
-
-<p>Two techniques for mundane recursion to tail recursion:</p>
-
-<ul>
-<li>use internal helper fn</li>
-<li>helper fn uses an accumulator</li>
-</ul>
-
-
-<p>Another way to avoid stack overflow exceptions with mundane recursion is
-to pair w lazy-seq.</p>
-
-<h2>Arrow</h2>
-
-<p>The &#8220;thread-first&#8221; macro (AKA &#8220;thrush&#8221; operator?)</p>
-
-<pre><code>http://clojuredocs.org/clojure.core/-%3E
-
-user=&gt; (+ 3 (+ 4 (+ 5)))
-12
-user=&gt; (-&gt; 5
-  #_=&gt;     (+ 4)
-  #_=&gt;     (+ 3))
-12
-</code></pre>
-
-<p>It basically inverts nestings:</p>
-
-<pre><code>user=&gt; (-&gt; "a b c d" 
-           .toUpperCase 
-           (.replace "A" "X") 
-           (.split " ") 
-           first)
-</code></pre>
-
-<p>Useful for pulling values out of deeply nested shits:</p>
-
-<pre><code>user=&gt; (let [h {:a {:b {:c 123}}}] (-&gt; h :a :b :c))
-123
-</code></pre>
-
-<h2>Partition</h2>
-
-<pre><code>user=&gt; (partition 2 [1 2 3])
-((1 2))
-user=&gt; (partition 2 [1 2 3 4])
-((1 2) (3 4))
-</code></pre>
-
-<p>It&#8217;s like <code>in_groups_of</code>.</p>
-
-<h2>letfn</h2>
-
-<p>Special form. Like <code>let</code> (also a special form), but let bindings are
-serial (later bindings can refer to previous bindings, but there are no
-forward bindings). <code>letfn</code> bindings can all refer to each other.</p>
-
-<pre><code>(letfn [(a [] (b)) 
-        (b [] (println "b"))] 
-          (a))
-</code></pre>
-
-<p>Prints &#8216;b&#8217;.</p>
-
-<h2>trampoline</h2>
-
-<p>If you have an algo where you&#8217;d like to keep returning 0-arity fns until
-finally it returns a non-fn value, trampoline is your source for
-non-stack-consuming mutual recursion. Mutual recursion means rather <code>a</code>
-calling <code>a</code>, <code>a</code> might call <code>b</code> might call <code>a</code> might call <code>b</code>, etc.
-It&#8217;s actually not that crazy of a fn to understand via <code>(source trampoline)</code>.</p>
-
-<pre><code>(defn trampoline
-  ([f]
-     (let [ret (f)]
-       (if (fn? ret)
-         (recur ret)
-         ret)))
-  ([f &amp; args]
-     (trampoline #(apply f args))))
-</code></pre>
-
-<p><code>trampoline</code> is meant to accept a 0-arity fn. The 2 lines at the bottom
-just convert a 2+arity call to trampoline to a call with a zero-arity
-fn. Trampoline will</p>
-
-<ul>
-<li>call <code>f</code> (with supplied args)</li>
-<li>if value returned is a fn, recur (preventing stack consumption)</li>
-<li>else return value</li>
-</ul>
-
-
-<p>Wow preeeeeetty freakin simple, and recur makes stuff pretty obvious.</p>
-
-<p>So if I do</p>
-
-<pre><code>(defn do-some-crap []
-  (letfn [(a [x] (b x))
-          (b [x] (c x))
-          (c [x] (d x))
-          (d [x] x) ]
-            (trampoline a 123)))
-</code></pre>
-
-<p>This returns 123 and the chain of a-b-c-d only consumes one stack frame.
-Pretty cool. Ahh nevermind I&#8217;m an idiot, i&#8217;m returning values, not
-functions, fixed:</p>
-
-<pre><code>(defn do-some-crap []
-  (letfn [(a [x] #(b x))
-          (b [x] #(c x))
-          (c [x] #(d x))
-          (d [x] x) ]
-            (trampoline a 123)))
-</code></pre>
-
-<p>Useful for implementing state machines.</p>
-
-<h2>identity</h2>
-
-<p>Returns its arg:</p>
-
-<pre><code>(identity 5)
-</code></pre>
-
-<h2>FICO</h2>
-
-<p>FICO credit scores. Fair Isaac Corporation. Started in 58. Fannie and
-Freddie started using their scores in 95. Ubiquitous as fuck.</p>
-
-<p>http://en.wikipedia.org/wiki/FICO</p>
-
-<p>FICO score introduced in 89, based on 3 credit files</p>
-
-<ul>
-<li>Experian</li>
-<li>Equifax</li>
-<li>TransUnion</li>
-</ul>
-
-
-<p>(so people don&#8217;t refer to FICO, but rather FICO polls the 3 above?)</p>
-
-<p>http://en.wikipedia.org/wiki/Credit_score_in_the_United_States#mediaviewer/File:Credit-score-chart.svg</p>
-
-<p>Score composed of</p>
-
-<ul>
-<li>35% payment history, presence of derogatory info (defaults, bankruptcies)</li>
-<li>30% debt burden, including credit card debt to limit ratio (e.g. if
-I&#8217;m $100 in credit card debt, the FICO penalty is smaller if I have a
-higher limit).</li>
-<li>15% length of credit history: average age of accounts, and age of
-oldest account (hence a new CC might temporarily lower score since it
-decreases average age).</li>
-<li>10% types/diversity of credit:</li>
-<li>10% recent searches
-
-<ul>
-<li>hard inquiries:
-
-<ul>
-<li>applications for loans/CCs count against you, but then again these
-are coalesced within 30-45 days as a single query if you&#8217;re &#8220;rate
-shopping&#8221;</li>
-</ul>
-</li>
-<li>soft inquiries:
-
-<ul>
-<li>consumer queries</li>
-<li>applying to rent an apartment</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Hard inquiries look bad because maybe you&#8217;re desperate for credit or
-maybe they&#8217;re so frequently because past hard inquiries led to your
-rejection. Limit to 1-2 times a year to minimize penalty.</p>
-
-<p>When people say triple credit score, they mean they&#8217;ll show you your
-Experian, Equifax, and TransUnion scores.</p>
-
-<p>FICO scores are out of 850. 280 is shitty, 700 is &#8220;good&#8221;, 760+ is
-excellent.</p>
-
-<h2>Mortgage</h2>
-
-<p>http://en.wikipedia.org/wiki/Mortgage_loan</p>
-
-<p>The distinguishing characteristic is that real or personal property is
-put up as collateral for the loan in the case of default.</p>
-
-<p>Real property refers to legally defined property mixed with human
-effort, e.g. houses, roads, etc. Usually means &#8220;land and anything
-affixed to it&#8221;, vs private property (&#8220;clothing, furniture, money&#8221;).</p>
-
-<h2>Alternative Financial Services</h2>
-
-<p>http://en.wikipedia.org/wiki/Alternative_financial_services</p>
-
-<p>Pawn shops, paycheck advancements.</p>
-
-<p>In impoverished countries, microfinancing also falls under this
-category.</p>
-
-<h2>Catfish</h2>
-
-<p>http://www.urbandictionary.com/define.php?term=catfish</p>
-
-<blockquote><p>A catfish is someone who pretends to be someone they&#8217;re not
-using Facebook or other social media to create false identities,
-particularly to pursue deceptive online romances.</p></blockquote>
-
-<h2>Installment Credit / Fixed Credit</h2>
-
-<p>Installment: type of credit that has fixed no of payments.</p>
-
-<p>Revolving credit: no fixed payments, can withdraw from balance,
-transfer, etc, e.g. credit cards.</p>
-
-<h2>Clojure riddle</h2>
-
-<pre><code>(take 1 (map (fn [a] (println a)) (range)))
-(take 32 (map (fn [a] (println a)) (range)))
-</code></pre>
-
-<p>Both of these print 0 to 31.</p>
-
-<pre><code>(take 32 (map (fn [a] (println a)) (range)))
-</code></pre>
-
-<p>This prints 0-63. Why? I think it has something to do with 32 legged
-tries something something. Or chunks. Or something.</p>
-
-<h2>IRAs</h2>
-
-<p>Individual Retirement Account</p>
-
-<p>http://www.rothira.com/traditional-ira-vs-roth-ira</p>
-
-<p>Traditional IRA:</p>
-
-<ul>
-<li>deposit pre-tax assets</li>
-<li>no income limits</li>
-<li>started in 1974 in some congressional act</li>
-</ul>
-
-
-<p>Roth IRA:</p>
-
-<ul>
-<li>deposit post-tax assets</li>
-<li>early withdraw has 10% penalty, with some exceptions for first house,
-education expenses, etc</li>
-<li>maximum income enforced of 114k-128k before you can&#8217;t contribute</li>
-<li>desirable if you think you&#8217;ll be in a higher tax bracket if you&#8217;re
-older (relative to IRA where you&#8217;re taxed when you withdraw, so if
-you&#8217;re withdrawing at a higher tax bracket then you&#8217;re boned).</li>
-<li>largely targets younger, lower income</li>
-<li>established in 1997 after proposed in 89 by someone and senator
-William Roth</li>
-</ul>
-
-
-<p>In general there&#8217;s penalties for early withdraw until 59.5 years of age
-(who decides this shit?).</p>
-
-<p>401k is where an employee deducts from employee&#8217;s paycheck (optionally
-matching) and makes a tax-free deposit. Withdraws are taxed though, like
-a traditional IRA.</p>
-
-<p>401k different from IRAs in it&#8217;s a plan optionally provided by an
-employer. eg A freelancer can&#8217;t take advantage of a 401k, and not all
-employees can take advantage of a company&#8217;s 401k.</p>
-
-<p>All of this to encourage people to save and invest and prepare ourselves
-for retirement.</p>
-
-<p>Both IRAs and 401ks have the minimum penalty distribution (withdrawals)
-age of 59 1/2 years.</p>
-
-<p>IRAs have limits like $5,500 per a given year. This might change from
-year to year though.</p>
-
-<h2>Smart Folder</h2>
-
-<p>http://www.cultofmac.com/48911/100-tips-19-what-are-smart-folders/</p>
-
-<p>AMAZINGLY I have no idea what this is.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Xorblasm]]></title>
-    <link href="http://machty.github.com/blog/2014/12/10/xorblasm/"/>
-    <updated>2014-12-10T11:04:00-05:00</updated>
-    <id>http://machty.github.com/blog/2014/12/10/xorblasm</id>
-    <content type="html"><![CDATA[<h2>Frameless App</h2>
-
-<p>Chromeless app, nothing more than a webview really, for quick
-prototyping of mobile web apps.</p>
-
-<p>https://itunes.apple.com/us/app/frameless-full-screen-web/id933580264?mt=8</p>
-
-<h2>Servo</h2>
-
-<p>Parallel browser project written in Rust for parallel execution, memory
-safety, etc. Doesn&#8217;t intend to be a full on user-facing browser, but
-intends to have other folk build on top of it.</p>
-
-<p>http://blog.servo.org/</p>
-
-<h2>&#8220;use strict&#8221;; as opposed to sloppy</h2>
-
-<p>Non <code>"use strict";</code> mode is AKA sloppy mode.</p>
-
-<h2>Safari inspector learnings</h2>
-
-<p>There are THREE TABS:</p>
-
-<ul>
-<li>Resources (ctrl + 1)</li>
-<li>Timelines (ctrl + 2)</li>
-<li>Debugger (ctrl + 3)</li>
-</ul>
-
-
-<p>They control the middle view, but when active they can be clicked again
-to remove the left panel. THAT IS KINDA FUCKED UI, PEOPLE.</p>
-
-<p>Pressing Escape a bunch of times always yields Console, for which there
-is a full on console tab, but in Resources (1) and Debugger (2) you can
-open a debugger on the bottom, but on Timelines I guess it doesn&#8217;t make
-sense to embed that console. Alt+Command+C opens the full on console.
-Functionality on full screen console and embedded console seems the
-same.</p>
-
-<p>Filter vs Search resources:</p>
-
-<ul>
-<li>filter: filename only</li>
-<li>search: searches file contents</li>
-</ul>
-
-
-<h2>TIL <code>sessionStorage</code></h2>
-
-<p>Ridiculous, why is this useful? Why is this fundamentally different than
-a global var?</p>
-
-<h2>(Safari) Webarchive</h2>
-
-<p>http://en.wikipedia.org/wiki/Webarchive</p>
-
-<p>Save all resources associated w a document, used by Safari.</p>
-
-<p>You can go to Resources tab and click the down arrow to download a
-webarchive.</p>
-
-<h2>Tiled Rendering</h2>
-
-<p>Android and pretty much everyone uses tiled rendering.</p>
-
-<p>http://en.wikipedia.org/wiki/Tiled_rendering#cite_note-1</p>
-
-<p>&#8220;Show composited layer borders&#8221; in chrome will show you all the layers
-that get uploaded to the GPU, after which the GPU does compositing. So
-you paint w CPU and then composite on the GPU.</p>
-
-<h2>Continuous Repaint</h2>
-
-<p>Repaints don&#8217;t happen all the time, but you still might want to identify
-which parts of the page are slow to paint, so you can force the renderer
-to repaint all the things all the time by enabling this setting, showing
-and removing sections.</p>
-
-<p>https://developer.chrome.com/devtools/docs/rendering-settings</p>
-
-<h2>Chrome Timeline Counters</h2>
-
-<ul>
-<li>Listeners: [1:4]</li>
-</ul>
-
-
-<p>means that at the start of listening, there was 1 listener, and at the
-end, there were 4.</p>
-
-<h2>Sysdig</h2>
-
-<p>http://www.sysdig.org/</p>
-
-<blockquote><p>Think of it as strace + tcpdump + lsof + awesome sauce.</p></blockquote>
-
-<h2>Gradle daemon and parallel</h2>
-
-<p>Add this to your <code>gradle.properties</code>:</p>
-
-<pre><code>org.gradle.daemon=true
-org.gradle.parallel=true
-</code></pre>
-
-<p>IT DOES WHAT YOU THINK IT DOES.</p>
-
-<h2>Comme de Garcons</h2>
-
-<p>http://en.wikipedia.org/wiki/Comme_des_Gar%C3%A7ons</p>
-
-<p>Heart with eyes logo.</p>
-
-<h2>Cul-de-sac</h2>
-
-<p>http://en.wikipedia.org/wiki/Cul-de-sac</p>
-
-<p>It just means a fucking dead end. DEAD END.</p>
-
-<p>One of these shits:</p>
-
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/b/b2/Cul-de-Sac_cropped.jpg" alt="cul de sac" /></p>
-
-<h2>Live updates in Cordova</h2>
-
-<ul>
-<li>HTTP caching
-
-<ul>
-<li>Make sure the WebView is set up to cache</li>
-<li>Do we have control over that though? What if webview ejects these
-items from cache? Can we prevent that?</li>
-<li>Assuming full, non-forgetting HTTP caching is an option:
-
-<ul>
-<li>user session GET query returns assets that the user should use</li>
-<li>webview downloads them; assets are aggressively cached</li>
-</ul>
-</li>
-<li>But what about</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>HTMLBars attr interpolation</h2>
-
-<pre><code>&lt;div attr=&gt;
-</code></pre>
-
-<p>vs
-,[</p>
-
-<pre><code>&lt;div attr=""&gt;
-</code></pre>
-
-<p>The rule is that quotes ALWAYS means string interpolation. Even if the
-above evals to the same thing, the latter goes through a layer of string
-interpolation.</p>
-
-<h2>Broccoli funnel</h2>
-
-<p>subset of a tree, matched by regex.</p>
-
-<p>https://www.npmjs.com/package/broccoli-funnel</p>
-
-<h2>Ember-cli-addons</h2>
-
-<p>Hahah of course, just including an ember-cli addon doesn&#8217;t mean</p>
-
-<h2>No property syntax in ES6 class syntax</h2>
-
-<p>This is intentional. You have to set all your properties in the
-<code>constructor()</code>.</p>
-
-<h2>popState, router stuff</h2>
-
-<p>I need to fix this:</p>
-
-<p>https://github.com/emberjs/ember.js/pull/9752</p>
-
-<p>Transitions need to be undoable.</p>
-
-<ul>
-<li>pushState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
-
-<ul>
-<li>undo: popState</li>
-</ul>
-</li>
-<li>replaceState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
-
-<ul>
-<li>undo: replaceState(&#8216;bar&#8217;)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>No such support for back button w HashLocation.</p>
-
-<blockquote><p>Clicking back and then clicking forward, and aborting the transition in the willTransition is still broken. The reason is that when I hit back I now the previous route, but when I hit back and then forward again I don&#8217;t have that info.</p></blockquote>
-
-<p>You don&#8217;t have &#8220;forward&#8221;. Like, the URL you&#8217;re going to?</p>
-
-<h2>onpopstate fires for all changes?</h2>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#The_popstate_event</p>
-
-<p>Weird.</p>
-
-<p>http://jsbin.com/coxega/1#foo</p>
-
-<p>Poorly named?</p>
-
-<blockquote><p>Browsers tend to handle the popstate event differently on page load. Chrome (prior to v34) and Safari always emit a popstate event on page load, but Firefox doesn&#8217;t.</p></blockquote>
-
-<h2>.npmignore defaults to .gitignore</h2>
-
-<p>nuff said.</p>
-
-<h2>How do preview a publish?</h2>
-
-<p><code>npm pack</code></p>
-
-<p>Then inspect the tgz.</p>
 ]]></content>
   </entry>
   

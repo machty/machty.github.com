@@ -1,0 +1,564 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>tarpit  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Tarpit</h2>
+	<div class="entry-content"><p>Notes from tarpit reading: http://shaffner.us/cs/papers/tarpit.pdf</p>
+
+<p>OOP: intentionally couple state to related behavior</p>
+
+<p>No Silver Bullet, what makes software hard: Complexity, Conformity, Changeability, Invisibility</p>
+
+<p>Dijkstra: testing is hopelessly inadequate&#8230; it can be used very effectively to show the presence of bugs but never to show their absence.</p>
+
+<p>State hinders Informal Reasoning, reasoning about expected behavior from the inside, with knowledge of internal code.</p>
+
+<p>Control Complexity: complexity due to having to be concerned about the order of events. Languages with explicit flow control make you think about this.</p>
+
+<p>a = b + 3
+c = d + 2
+e = f * 4</p>
+
+<p>No reason for this flow, but programmer has to over-specify it (and compilers have to go to lengths to know that the order can be safely ignored). Accidental complexity:</p>
+
+<ol>
+<li>artificial, totally ignorable ordering imposed on programmer</li>
+<li>compiler work is done to optimize it away</li>
+</ol>
+
+
+<p>Note that these two forms of complexity only apply given the assumption that the above code is for an imperative language with guarantees about order of execution; Oz is an example of a programming language that didn&#8217;t specify this.</p>
+
+<p>&#8220;Running a test in the presence of concurrency with a known initial state and set of inputs tells you nothing at all about what will happen the next time you run that very same test with the very same inputs and the very same starting state&#8230; and things can’t really get any worse than that.&#8221;</p>
+
+<p>CLOS: Common Lisp Object System, with multiple dispatch (methods can specialize on any/all required arguments, unlike classic OOP single dispatch).</p>
+
+<p>Problems with OOP encapsulation:</p>
+
+<ul>
+<li>access to state can still be spread all over the place, e.g. in presence of inheritance</li>
+<li>encapsulation strongly biased toward single-object constraints; not a lot of help in coordinating multiple object states</li>
+</ul>
+
+
+<p>Identity and State</p>
+
+<p>Object identity: in OOP, each object is considered uniquely identifiable regardless of attributes. This is intensional identity (as opposed to extensional where objects are the same if their attributes are). Intensional identity opposes relational algebra view of the world.</p>
+
+<p>But OOP is complicated when mutability isn&#8217;t needed, and you add concepts like Value Objects where equality is based on values and not identity (in other words, it brings back extensional identity).</p>
+
+<p>https://en.wikipedia.org/wiki/Value_object</p>
+
+<p>Immutable small objects whose equality is not based on identity. In int is an int forever, but objects can be mutated, so if you want an object that acts like, say, an int, you want a value object.</p>
+
+<p>TL;DR C++ has copy-by-value because C does, hence both support value objects. Java has no native support for value objects, but you can get a functionally similar/equivalent thing by passing around references to immutable objects (VALJO, VALue Java Object, where all attributes of the obj are final and doesn&#8217;t contain other objects w mutable state).</p>
+
+<p>Object Identity exists because state exists, and is a source of error due to mental switching between the meaning of equality. (TODO: why isn&#8217;t this a problem in Clojure? You have to mentally switch between values and atoms&#8230; how is that any different?).</p>
+
+<p>Hmm I feel like there&#8217;s something I&#8217;m not quite grasping about what people mean when they say state. Seems like everything has state? I dunno.</p>
+
+<p>Summary: conventional OOP suffers from state-derived and control-derived complexity.</p>
+
+<p>Functional Languages</p>
+
+<p>Pure: Haskell. Impure: ML, in that it advocates avoiding but still permits state.</p>
+
+<p>Referential transparency: an expression (e.g. function calls) are replaceable by a value&#8230; nope, i guess it&#8217;s just that a function called with the same args will always return the same value.</p>
+
+<p>Control:</p>
+
+<p>Still an implicit left-to-right sequencing of operations, but fortunately control flow like loops are avoided in favor of fold/map.</p>
+
+<p>Kinds of state</p>
+
+<p>When most people talk about state they really mean mutable state.</p>
+
+<p>Stateful methods can be replaced by functions where the state is passed in, and a new version of the state is returned, with the expectation that the new state must be passed in again to future calls (because referential transparency means the same function invocation always returns the same thing).</p>
+
+<p>This paper seems to distinguish b/w procedures and functions based on a procedure having state&#8230; it runs and can manipulate inner state. But a functional only returns values based on what was passed in and has new inner state.</p>
+
+<p>BUT, this is just using FP to simulate state. In principle, you could build functional programs by just passing in the global god state of the app into every function and just chaining it along, which brings back the problem of single pool of global variables. Ref transparency++, ease of reasoning&#8211;. But this is an extreme example.</p>
+
+<p>Argument: state increases modularity:</p>
+
+<p>&#8220;Working within a stateful framework it is possible to add state to any component without adjusting the components which invoke it.&#8221;</p>
+
+<p>With FP, you have ripple effects where adding &#8220;state&#8221; to a function means that state needs to be provided by a caller of a caller of a caller, etc, e.g. adding that extra state parameter.</p>
+
+<p>It&#8217;s a tradeoff between hiding state and FP where you know exactly what will happen.</p>
+
+<p>But in stateful PLs, you never know if there will be side-effects; you have to inspect all code to really know.</p>
+
+<p>&#8220;As with the discipline of (static) typing, it is trading a one-off up-front cost for continuing future gains and safety (“one-off” because each piece of code is written once but is read, reasoned about and tested on a continuing basis).&#8221;</p>
+
+<p>In other words, it&#8217;s convenient in the moment to have state (the one-off time you write that stateful code), but for all future readers/reasoners, they have to deal with the fallout of losing the guarantee of statelessness.</p>
+
+<p>Monads are kind of a way to have the cake and it it too, but makes it possible to create a stateful sub-language within Haskell, even if technically it&#8217;s properly typed as such. But still, monads have been insufficient in helping widespread FP adoption.</p>
+
+<p>Logic Programming</p>
+
+<p>State your axioms and desired goals, let the system build the formal proof for each solution. Prolog is seminal logic PL.</p>
+
+<p>&#8220;It is worth noting that a single Prolog program can be both correct when read in the first way, and incorrect (for example due to non-termination) when read in the second.&#8221;</p>
+
+<p>This is because Prolog axioms aren&#8217;t read as purely logical axioms but are applied sequentially, which is why the order of axioms can affect the outcome.</p>
+
+<p>Control issues</p>
+
+<p>LTR and top to bottom dependencies exist. Also, extra-logical features such as cuts (which prevent a restriction of control flow, presumably to prevent non-termination) add complexity.</p>
+
+<p>Oz gives you flexibility of control rather than depth-first prolog, but rather than sprinkling these into the code, it&#8217;s at a separate level; in other words, the way you execute code is configurable, not within the code itself (a contamination of control complexity).</p>
+
+<p>Classifying state:</p>
+
+<p>Goal: determine origins of state, hope that most state turns out to be accidental.</p>
+
+<p>All data is either directly provided to system (input) or derived.</p>
+
+<p>Derived data is either immutable (used only for display) or mutable (because requirements specify user should update that data)</p>
+
+<p>But just because all user input data is essential does not mean it must result in essential state. If it&#8217;s avoidable, it&#8217;s accidental state.</p>
+
+<p>Input Data:</p>
+
+<ul>
+<li>there&#8217;s a possibility of referring to that data in the future: essential state</li>
+<li>there is no possibility (e.g. it&#8217;s used to cause some side effect but then can be forgotten)</li>
+</ul>
+
+
+<p>Essential Derived Data - immutable</p>
+
+<p>Always rederivable, accidental state if stored.</p>
+
+<p>Essential Derived Data - mutable</p>
+
+<p>I don&#8217;t understand this.</p>
+
+<p>Accidental Derived Data</p>
+
+<p>Ideal world:</p>
+
+<p>No caches, no stores of derived calculations of any kind. Result: all state is visible to the user (or tester) of the system, since (disallowed) caching is the main source of hidden state. If you&#8217;re not caching, then everything you calculate is presented to the user.</p>
+
+<p>Control</p>
+
+<p>Control is accidental since it&#8217;s rare if ever that requirements are a view of execution.</p>
+
+<p>Concurrency is accidental; assuming zero time computation, user doesn&#8217;t care whether something happens in sequence or parallel.</p>
+
+<p>Real world</p>
+
+<ul>
+<li>state is required because most systems have state as part of their true essence (wtf does this mean?)</li>
+<li>control is accidental, but practically (and for efficiency purposes) it is needed, same goes w state (caching and what not)</li>
+</ul>
+
+
+<p>Formal Specification</p>
+
+<ul>
+<li>property-based: <em>what</em> is required rather than how. Includes algebraic approaches such as Larch and OBJ</li>
+<li>model-based / state-based: construct a model, often stateful, and specify how it must behave. Implies a stateful approach for how to solve the problem.</li>
+</ul>
+
+
+<p>Sometimes ideal world approach (no accidental state, derive everything) does not best model program. Example: derived data is dependent on both series of user inputs over time, AND its own previous values. In such a case it can help to maintain accidental state (I don&#8217;t get this&#8230; why is this different than the conveniences of storing derived state that isn&#8217;t strictly historical?). Example: position of computer controlled opponent in interactive game: technically position is derivable as f(initialPosition, allMovementsSince), but &#8220;this is not the way it is most naturally expressed&#8221;. Go fuck yourself and your loose definition of what is natural.</p>
+
+<p>Required Accidental Complexity:</p>
+
+<ul>
+<li>perf
+
+<ul>
+<li>avoid explicit management of accidental state; instead: simply declare what accidental state should be use, leave to separate infrastructure to maintain.</li>
+</ul>
+</li>
+<li>ease of expression: (e.g. position of computer controlled opponent)
+
+<ul>
+<li>solution: pretend user is typing in this derived state, i.e. pretend that it is essential input</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Relational Model</p>
+
+<ul>
+<li>structure of data</li>
+<li>manipulating data</li>
+<li>maintaining integrity and consistency of state</li>
+<li>insistence on separation b/w logical and physical layers of system</li>
+</ul>
+
+
+<p>Data independence: app / logical model is separate from the data is actually stored</p>
+
+<p>Structure: use of relations to represent all data
+Manipulation: a means to specify derived data
+Integrity: constraints
+Data Independence: clear separation is enforced b/w logical data and physical representation</p>
+
+<p>Base Relations: raw tables
+Derived Relations: Views: defined in terms of other relations</p>
+
+<p>Access path independence:</p>
+
+<p>Relational structuring allows you to defer access paths (how the data will be queried, join, etc). Before relational model, you had to decide up front, e.g, whether employees would live inside top level departments, or departments within top level employees. This is the hierarchical approach. The network approach is a little better in that you can add cycles but in the end you&#8217;re still defining the primary retrieval requirements up front at the expense of not knowing what secondary/future retrieval requirements you&#8217;ll have. Again, joining is the canonical example.</p>
+
+<p>OOP and XML suffer same hierarchical problems. Nesting. Who owns what. etc.</p>
+
+<p>Manipulation: relational algebra</p>
+
+<p>Restrict: unary operation for selecting subset (where clause?)
+Project: unary op which creates a new relation w various attributes removed (not added?)
+Product: cartesian product of tables (e.g. SELECT FROM foo, wat;)
+Union: binary operation, creates relation w all records in either arg relation
+Intersection: binary operation, creates a relation consisting of all records in both
+Difference: xor
+Join: binary operation construction all possible records that result from identical attrs
+Divide: ternary operation returning all records of first arg with occur in second arg associated w each record of 3rd arg (wat?</p>
+
+<p>Functional Relational Programming</p>
+
+<p>All essential state comes in the form of relations, and essential logic is expressed using relational algebra extended w pure user defined functions</p>
+
+<p>Step 1, specify each of the following</p>
+
+<p>Essential State: relational definition of stateful components
+Essential Logic: Derived-relation defitions, integrity constraints, and pure functions
+Accidental State and Control: declarative specification of a set of perf optimizations for the system
+Other: user and system interfaces for the outside world</p>
+
+<p>Essential state</p>
+
+<p>Relations, tables, columns (the schema, not actual rows/records)
+Data should only be considered essential if directly input by user.</p>
+
+<p>Essential Logic</p>
+
+<p>Pure functions about data transformation, set of db constraints.</p>
+
+<p>Note that we ignore &#8220;denormalization for perf&#8221; for now because we&#8217;re just talking about formal specifications; the physical storage may or may not mirror what&#8217;s being specified here.</p>
+
+<p>Accidental State and Control</p>
+
+<p>Specify 1) what state should exist, 2) what physical storage mechanism used</p>
+
+<ul>
+<li>state-related hint: e.g. some derived-relvar should be stored rather than recalculated</li>
+<li>second kind of state-related hint: infrequently used subset of relvar should be stored elsewhere (e.g. partitioning a table)</li>
+</ul>
+
+
+<p>Control side:</p>
+
+<ul>
+<li>tweaking the evaluator</li>
+</ul>
+
+
+<p>TL;DRs:</p>
+
+<p>Declarative lets infrastructure optimize for you, e.g. avoid relational <code>intersection</code> if it can be determined that two groups are mutually exclusive, not possible/easy with imperative.</p>
+
+<p>Normalized relational everything: avoids subjective bias about data access paths. OOP and XML generally force you to do the opposite, choosing nestings ahead of time and other things.</p>
+
+<p>Control is <em>avoided</em>  relational approach (think of SQL; no order of evaluation; this is intentional).</p>
+
+<p>Explicit parallelism is avoided, but allows for possibility for separated accidental control if required; whether it&#8217;s parallel or not shouldn&#8217;t matter to anyone other than implementor, i.e. if it really improves things, it&#8217;ll be parallel, but functionally it&#8217;s the same interface for infrastructure consumers.</p>
+
+<p>Code Volume</p>
+
+<p>Focus on true essentials avoids accidental complexity.</p>
+
+<p>Data Abstraction</p>
+
+<p>Creation of compound data types; to be avoided. Why:</p>
+
+<ul>
+<li><p>Subjective: like baking in data paths in OOP/XML-ish representation of data, is brittle to future use cases. Pre-existing bias will force future use cases into inappropriate reuse of pre-established biased structures. (I like this; this is a source of refactors, when you know what you&#8217;re doing is gross because of some new use case)</p></li>
+<li><p>Data Hiding: constructing giant objects often causes unneeded, irrelevant data to be supplied to function, and <em>which</em> data actually gets used is hidden at call site, hurts informal reasoning and testability. Avoiding composite objects helps avoiding this problem.</p></li>
+</ul>
+
+
+<p>FRP (func rel) opens door to</p>
+
+<ul>
+<li>perf (decided by infrastructure)</li>
+<li>different dev teams focusing on different components (by components we mean accidental vs essential vs interfacing)&#8230; this arg seems weak, or i don&#8217;t really understand it</li>
+</ul>
+
+
+<p>Allowed Types</p>
+
+<p>Can create limited types for essential state/logic components:</p>
+
+<ul>
+<li>disjoint union / enumeration types</li>
+<li>NO product types (types w subsidiary components)</li>
+</ul>
+
+
+<p>https://en.wikipedia.org/wiki/Algebraic_data_type</p>
+
+<p>Algebraic data type is a kind of composite type; type formed by combining other types. Product types (tuples and records), and sum types (disjoint unions or variant types). So you can have things like</p>
+
+<p>Action = UserClickEvent | UserDragEvent | Blah</p>
+
+<p>This is a sum type; the total values an Action could be are the total possible values of its variants, summed.</p>
+
+<p>A Product type is, say, a type, e.g. (Int, String), where the total possible values are all the possible values of variants, multiplied (hence product).</p>
+
+<p>Why sum and not product? because Sums don&#8217;t add new data types, really, they just categorize for pattern matching and other things. Whereas products create new compound datatypes.</p>
+
+<p>Example app</p>
+
+<p>Derived internal relations:</p>
+
+<ul>
+<li>RoomInfo, extend(Room, (roomSize = width*breadth))
+
+<ul>
+<li>so it&#8217;s a room info with another type</li>
+</ul>
+</li>
+<li>Acceptance takes accepted Decisions and strips away accepted bool. So an Acceptance is a Decision without an accepted flag. I like this because we&#8217;re keeping the domain simple; if we&#8217;re dealing with Acceptances, we don&#8217;t have to worry that it&#8217;s an acceptance that&#8217;s not an acceptance; the domain is constrained properly.</li>
+<li>Rejection is the opposite, but has the same attrs</li>
+</ul>
+
+
+<p>Accidental state and control</p>
+
+<p>This part is interesting because it suggests that defining relations (like you do when designing/committing a DB schema) is a premature accidental complexity. This paper suggests that you take your essential state types and hint that some of them should be cached. In relational databases, if you CREATE TABLE, you&#8217;re creating a cache. I guess this should be obvious. But the thing to note is that what this paper is suggesting is that there is a level above this at which we should be thinking. Everything below is accidental. Whether you CREATE TABLE or recompute on the fly is accidental. The user doesn&#8217;t care.</p>
+
+<p>So, hints:</p>
+
+<p>declare store PropertyInfo : create a cache / table for PropertyInfo rather than re-calc</p>
+
+<p>declare store shared Room Floor : denormalize Room and Floor into shared storage structure (hmm, why? is this a join table?)</p>
+
+<p>declare store separate Property (photo) : split out photo from other properties (perf hint).</p>
+
+<p>TODO: read Kow79</p>
+
+<p>Simple Made Easy</p>
+
+<p>Classes as namespaces = bad.</p>
+
+<p>Syntax is inferior to data.</p>
+
+<p>Switching/pattern matching allegedly complects multiple pairs of who&#8217;s going to do something and what happens&#8230; how is this different than multi-methods?</p>
+
+<p>variables complect value and time (they are state i guess)</p>
+
+<p>for loops complecting by explicitly specifying how to do something.</p>
+
+<p>folds still complect because they go from left to right&#8230;</p>
+
+<p>Polymorphism a la cart, via Clojure protocols. 1) define data structures, 2) definitions of sets of functions, and 3) connect them together.</p>
+
+<p>Favor declarative Prolog-ish logic programming to littering conditionals all over the place.</p>
+
+<p>Resource contention is inherent complexity, not your fault.</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-29T09:41:00-05:00" pubdate data-updated="true">Dec 29<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/12/29/tarpit/';
+        var disqus_url = 'http://machty.github.com/blog/2015/12/29/tarpit/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

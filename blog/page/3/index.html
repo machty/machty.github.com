@@ -112,6 +112,329 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/12/17/learnin-clojure/">
+		
+			Learnin Clojure</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Joy of Clojure</h2>
+
+<ul>
+<li>Imperative
+
+<ul>
+<li>a sequence of statements mutates program state</li>
+</ul>
+</li>
+<li>maenad (maenadic): wild and unrestrained: a female follower of
+Bacchus, traditionally associated with divine possession and frenzied
+rites</li>
+<li>expression problem
+
+<ul>
+<li>&#8220;The Expression Problem is a new name for an old problem. The
+goal is to define a datatype by cases, where one can add new cases
+to the datatype and new functions over the datatype, without
+recompiling existing code, and while retaining static type safety
+(e.g., no casts).&#8221;</li>
+<li>Java requires these to be declared up front, suffers</li>
+<li>Why the &#8220;expression&#8221; problem? &#8216;The label &#8220;Expression Problem&#8221; puns on expression = &#8220;how much can your language express&#8221; and expression = &#8220;the terms you are trying to represent are language expressions&#8221;.&#8217;</li>
+</ul>
+</li>
+</ul>
+
+
+
+		
+		<a href="/blog/2014/12/17/learnin-clojure/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T12:52:00-05:00" pubdate data-updated="true">Dec 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/12/10/xorblasm/">
+		
+			Xorblasm</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Frameless App</h2>
+
+<p>Chromeless app, nothing more than a webview really, for quick
+prototyping of mobile web apps.</p>
+
+<p>https://itunes.apple.com/us/app/frameless-full-screen-web/id933580264?mt=8</p>
+
+<h2>Servo</h2>
+
+<p>Parallel browser project written in Rust for parallel execution, memory
+safety, etc. Doesn&#8217;t intend to be a full on user-facing browser, but
+intends to have other folk build on top of it.</p>
+
+<p>http://blog.servo.org/</p>
+
+<h2>&#8220;use strict&#8221;; as opposed to sloppy</h2>
+
+<p>Non <code>"use strict";</code> mode is AKA sloppy mode.</p>
+
+<h2>Safari inspector learnings</h2>
+
+<p>There are THREE TABS:</p>
+
+<ul>
+<li>Resources (ctrl + 1)</li>
+<li>Timelines (ctrl + 2)</li>
+<li>Debugger (ctrl + 3)</li>
+</ul>
+
+
+<p>They control the middle view, but when active they can be clicked again
+to remove the left panel. THAT IS KINDA FUCKED UI, PEOPLE.</p>
+
+<p>Pressing Escape a bunch of times always yields Console, for which there
+is a full on console tab, but in Resources (1) and Debugger (2) you can
+open a debugger on the bottom, but on Timelines I guess it doesn&#8217;t make
+sense to embed that console. Alt+Command+C opens the full on console.
+Functionality on full screen console and embedded console seems the
+same.</p>
+
+<p>Filter vs Search resources:</p>
+
+<ul>
+<li>filter: filename only</li>
+<li>search: searches file contents</li>
+</ul>
+
+
+<h2>TIL <code>sessionStorage</code></h2>
+
+<p>Ridiculous, why is this useful? Why is this fundamentally different than
+a global var?</p>
+
+<h2>(Safari) Webarchive</h2>
+
+<p>http://en.wikipedia.org/wiki/Webarchive</p>
+
+<p>Save all resources associated w a document, used by Safari.</p>
+
+<p>You can go to Resources tab and click the down arrow to download a
+webarchive.</p>
+
+<h2>Tiled Rendering</h2>
+
+<p>Android and pretty much everyone uses tiled rendering.</p>
+
+<p>http://en.wikipedia.org/wiki/Tiled_rendering#cite_note-1</p>
+
+<p>&#8220;Show composited layer borders&#8221; in chrome will show you all the layers
+that get uploaded to the GPU, after which the GPU does compositing. So
+you paint w CPU and then composite on the GPU.</p>
+
+<h2>Continuous Repaint</h2>
+
+<p>Repaints don&#8217;t happen all the time, but you still might want to identify
+which parts of the page are slow to paint, so you can force the renderer
+to repaint all the things all the time by enabling this setting, showing
+and removing sections.</p>
+
+<p>https://developer.chrome.com/devtools/docs/rendering-settings</p>
+
+<h2>Chrome Timeline Counters</h2>
+
+<ul>
+<li>Listeners: [1:4]</li>
+</ul>
+
+
+<p>means that at the start of listening, there was 1 listener, and at the
+end, there were 4.</p>
+
+<h2>Sysdig</h2>
+
+<p>http://www.sysdig.org/</p>
+
+<blockquote><p>Think of it as strace + tcpdump + lsof + awesome sauce.</p></blockquote>
+
+<h2>Gradle daemon and parallel</h2>
+
+<p>Add this to your <code>gradle.properties</code>:</p>
+
+<pre><code>org.gradle.daemon=true
+org.gradle.parallel=true
+</code></pre>
+
+<p>IT DOES WHAT YOU THINK IT DOES.</p>
+
+<h2>Comme de Garcons</h2>
+
+<p>http://en.wikipedia.org/wiki/Comme_des_Gar%C3%A7ons</p>
+
+<p>Heart with eyes logo.</p>
+
+<h2>Cul-de-sac</h2>
+
+<p>http://en.wikipedia.org/wiki/Cul-de-sac</p>
+
+<p>It just means a fucking dead end. DEAD END.</p>
+
+<p>One of these shits:</p>
+
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/b/b2/Cul-de-Sac_cropped.jpg" alt="cul de sac" /></p>
+
+<h2>Live updates in Cordova</h2>
+
+<ul>
+<li>HTTP caching
+
+<ul>
+<li>Make sure the WebView is set up to cache</li>
+<li>Do we have control over that though? What if webview ejects these
+items from cache? Can we prevent that?</li>
+<li>Assuming full, non-forgetting HTTP caching is an option:
+
+<ul>
+<li>user session GET query returns assets that the user should use</li>
+<li>webview downloads them; assets are aggressively cached</li>
+</ul>
+</li>
+<li>But what about</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>HTMLBars attr interpolation</h2>
+
+<pre><code>&lt;div attr=&gt;
+</code></pre>
+
+<p>vs
+,[</p>
+
+<pre><code>&lt;div attr=""&gt;
+</code></pre>
+
+<p>The rule is that quotes ALWAYS means string interpolation. Even if the
+above evals to the same thing, the latter goes through a layer of string
+interpolation.</p>
+
+<h2>Broccoli funnel</h2>
+
+<p>subset of a tree, matched by regex.</p>
+
+<p>https://www.npmjs.com/package/broccoli-funnel</p>
+
+<h2>Ember-cli-addons</h2>
+
+<p>Hahah of course, just including an ember-cli addon doesn&#8217;t mean</p>
+
+<h2>No property syntax in ES6 class syntax</h2>
+
+<p>This is intentional. You have to set all your properties in the
+<code>constructor()</code>.</p>
+
+<h2>popState, router stuff</h2>
+
+<p>I need to fix this:</p>
+
+<p>https://github.com/emberjs/ember.js/pull/9752</p>
+
+<p>Transitions need to be undoable.</p>
+
+<ul>
+<li>pushState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
+
+<ul>
+<li>undo: popState</li>
+</ul>
+</li>
+<li>replaceState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
+
+<ul>
+<li>undo: replaceState(&#8216;bar&#8217;)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>No such support for back button w HashLocation.</p>
+
+<blockquote><p>Clicking back and then clicking forward, and aborting the transition in the willTransition is still broken. The reason is that when I hit back I now the previous route, but when I hit back and then forward again I don&#8217;t have that info.</p></blockquote>
+
+<p>You don&#8217;t have &#8220;forward&#8221;. Like, the URL you&#8217;re going to?</p>
+
+<h2>onpopstate fires for all changes?</h2>
+
+<p>https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#The_popstate_event</p>
+
+<p>Weird.</p>
+
+<p>http://jsbin.com/coxega/1#foo</p>
+
+<p>Poorly named?</p>
+
+<blockquote><p>Browsers tend to handle the popstate event differently on page load. Chrome (prior to v34) and Safari always emit a popstate event on page load, but Firefox doesn&#8217;t.</p></blockquote>
+
+<h2>.npmignore defaults to .gitignore</h2>
+
+<p>nuff said.</p>
+
+<h2>How do preview a publish?</h2>
+
+<p><code>npm pack</code></p>
+
+<p>Then inspect the tgz.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-10T11:04:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/12/08/808s-and-android-heartbreak/">
 		
 			808s and Android Heartbreak</a>
@@ -2735,402 +3058,6 @@ fine, since hardlinks are only used concat output and not root files.</p>
 
 
 <time datetime="2014-11-06T16:00:00-05:00" pubdate data-updated="true">Nov 6<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/11/05/oss-cards-against-humanity/">
-		
-			OSS Cards Against Humanity</a>
-	</h2>
-	<div class="entry-content">
-		<p>Why not.</p>
-
-<h2>Black Cards</h2>
-
-<ul>
-<li>&#8220;GamerGate: it&#8217;s actually about <code>__________</code>&#8221;</li>
-<li>&#8220;Ember.js: a framework for creating <code>_________</code>&#8221;</li>
-</ul>
-
-
-<h2>White Cards</h2>
-
-<ul>
-<li>Ethics in video game journalism</li>
-<li><h1>GamerGate</h1></li>
-<li>Thought Leadership</li>
-<li>Brogrammers</li>
-<li>Cracking the Nut</li>
-<li>Destroy All Software</li>
-<li>Ember.js</li>
-<li>AngularJS</li>
-<li>React</li>
-<li>Two-way data-binding</li>
-<li>Unidirectional Data Flow</li>
-<li>Handlebars templates</li>
-<li>Functional reactive programming</li>
-<li>Hacker News</li>
-<li>Stability without Stagnation</li>
-<li>Ambitious Web Applications</li>
-<li>Thirsty Randos</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-05T12:40:00-05:00" pubdate data-updated="true">Nov 5<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/10/31/troll-toll-to-get-into-this-journal/">
-		
-			Troll Toll to Get Into This Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>HDIutil</h2>
-
-<p>Trying to make some ramdisks on OS X</p>
-
-<pre><code>hdiutil attach -nomount ram://8388608
-</code></pre>
-
-<p><code>hdiutil</code> attach will normally try to attach and mount a file system.</p>
-
-<ul>
-<li>attach: map a hardware device to some <code>/dev/wat</code> device file</li>
-<li>mount: try to read the device, discover its file system, and mount it
-as a directory so that you can actually cd into it, access files, etc</li>
-</ul>
-
-
-<p>So <code>-nomount</code> prevents the second step and just generates a dev file
-mapped to ram.</p>
-
-<pre><code>diskutil erasevolume HFS+ 'RAM Disk' /dev/wat
-</code></pre>
-
-<h2>What is a volume?</h2>
-
-<p>Seems like a higher-level abstraction over disks and partitions.</p>
-
-<p>http://tldp.org/HOWTO/LVM-HOWTO/whatisvolman.html</p>
-
-<ul>
-<li>Move things around more easily</li>
-<li>give things better names than <code>/dev/sda</code> / sdb etc</li>
-</ul>
-
-
-<p>Basically let&#8217;s you overlay logical volumes on top of physical drives.
-Makes it easy to move space around between various drives, make things
-more sane.</p>
-
-<pre><code>    hda1   hdc1      (PV:s on partitions or whole disks)                        
-       \   /                                                                    
-        \ /                                                                     
-       diskvg        (VG)                                                       
-       /  |  \                                                                  
-      /   |   \                                                                 
-  usrlv rootlv varlv (LV:s)
-    |      |     |                                                              
- ext2  reiserfs  xfs (filesystems)                                        
-</code></pre>
-
-<p>Use LVM2 in Linux land.</p>
-
-<h2>tcpdump</h2>
-
-<p>Ahhh got it to work</p>
-
-<pre><code>$ sudo tcpdump -t 'host machty.com'
-$ ping machty.com
-IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 0, length 64
-IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 0, length 64
-IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 1, length 64
-IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 1, length 64
-IP 192.168.109.90 &gt; pages.github.com: ICMP echo request, id 24129, seq 2, length 64
-IP pages.github.com &gt; 192.168.109.90: ICMP echo reply, id 24129, seq 2, length 64
-</code></pre>
-
-<h2>UDP can broad/multicast</h2>
-
-<p>And TCP cannot?</p>
-
-<h2>Sequenced-packet sockets</h2>
-
-<p>Combined aspects of UDP/TCP.</p>
-
-<ul>
-<li>Connection oriented</li>
-<li>Datagram oriented (message boundaries preserved)</li>
-<li>Reliable</li>
-</ul>
-
-
-<p><code>SOCK_SEQPACKET</code> type, available in UNIX domain. TCP/UDP do not support
-it, but SCTP does.</p>
-
-<p>Stream Control Transmission Protocol. Allows stream multiplexing,
-preserves message boundaries unlike TCP.</p>
-
-<pre><code>socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-</code></pre>
-
-<p>So, TCP isn&#8217;t the only internet-domain stream protocol; SCTP is too.
-It&#8217;s a stream of messages. Rather than bytes.</p>
-
-<p>UDP + congestion controller = DCCP, Datagram Congestion Control
-Protocol.</p>
-
-<h2>Alternative IO</h2>
-
-<ul>
-<li><code>select</code>/<code>poll</code> to watch multiple fds for availability;
-
-<ul>
-<li>benefit over alternatives is that you don&#8217;t have to manually poll w non-blocking
-reads.</li>
-<li>doesn&#8217;t scale well w hundreds+ of FDs</li>
-</ul>
-</li>
-<li>signal-driven IO; kernel notifies when IO ready, process can do other
-still til its ready for IO; benefit over select/poll is that it
-doesn&#8217;t block</li>
-<li>epoll
-
-<ul>
-<li>application can monitor many file descriptors</li>
-<li>linux specific but BSD has kqueue, and there are others</li>
-<li>avoids complexities w signal programming</li>
-</ul>
-</li>
-</ul>
-
-
-<p>There&#8217;s also POSIX async IO (AIO); perform IO but don&#8217;t block, get
-notified later when it goes through. Linux has thread implementation but
-might have it on kernel now, who knows.</p>
-
-<p>Since <code>epoll</code> is Linux specific, use a lib that provides a portal
-evented layer to you process: use epoll if present, else fall back to
-select/pool; <code>libevent</code> is one such lib.</p>
-
-<ul>
-<li>libevent
-
-<ul>
-<li>libev: high perf event loop based on libevent but without bugs
-
-<ul>
-<li>only ran on Unix, so node (which originally use libev) needed a
-solution</li>
-</ul>
-</li>
-<li>libuv: abstraction around libev or IOCP (Windows-based IO Completion
-Port)
-
-<ul>
-<li>used in node</li>
-<li>used in rust</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Two types of readiness notifications:</p>
-
-<ul>
-<li>level-triggered: fd is actually ready, now, for IO
-
-<ul>
-<li>poll/select &amp; epoll</li>
-<li>Allows you to repeat the poll operation after a small read; no need
-to read everything in a buffer at once</li>
-</ul>
-</li>
-<li>edge-triggered: IO has occurred since last poll (but it&#8217;s possible
-someone else already took care of it)
-
-<ul>
-<li>signals &amp; epoll</li>
-<li>Try and read as much as possible because you have no way of knowing
-whether there&#8217;s more data (without a non-blocking fail), usually by
-non-blocking reads in a loop until EAGAIN or EWOULDBLOCK.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Note that epoll can do both. These constraints impact program design.</p>
-
-<p>Non-blocking IO + edge-triggered notifications is common because there
-are so many cases where blocking IO will screw you; better to non-block
-in a lop and check if data is actually there.</p>
-
-<p><code>poll</code> is like <code>select</code> but instead of grouping by operation you just
-provide a list of FDs objects and say which type of IO you&#8217;re interested
-in per object.</p>
-
-<p>Readiness means an operation will not block. It doesn&#8217;t mean data will
-transfer as it could mean EOF or error. The only guarantee is
-non-blockage.</p>
-
-<p>Downsides w poll/select when large number of FDs</p>
-
-<ul>
-<li>Need to initialize large structures to pass to kernel</li>
-<li>Kernel needs to loop through all file descriptors</li>
-<li>Program must inspect all returned FDs</li>
-</ul>
-
-
-<h2>Stripe</h2>
-
-<p>You can do a one time charge, or you can save card to a customer.</p>
-
-<p>You can create a Card in their API, but you must specify a customer or
-recipient.</p>
-
-<p>An OAuth access token acts like a secret API key:</p>
-
-<blockquote><p>To swap this for an access_token, which acts like a secret API key&#8230;</p></blockquote>
-
-<p>https://stripe.com/docs/connect/getting-started</p>
-
-<p>So this error: https://support.stripe.com/questions/connect-publishable-key-error-with-shared-customers</p>
-
-<p>Background: every Stripe API request sends in your app&#8217;s secret key for
-authentication.</p>
-
-<pre><code>Stripe.api_key = ENV['YOUR_DUMBASS_STRIPE_SECRET_KEY']
-</code></pre>
-
-<p>This makes it send automatically, but you can also override per API
-request by providing a second parameter.</p>
-
-<pre><code>charge = Stripe::Charge.create({
-  ...
-}, some_api_key)
-</code></pre>
-
-<p>In this case, the issue was that my implicitly provided app api key was
-being provided to the API request to make a charge using a token
-generated by the connected account.</p>
-
-<p>I don&#8217;t really know why this is a problem; seems like something you
-should be able to do, right? But actually you have to provide that
-second parameter as the access token from when the account connected to
-your app.</p>
-
-<p>Trickay.</p>
-
-<h2>Who&#8217;s using ports in OS X?</h2>
-
-<pre><code>sudo lsof -nP -iTCP -sTCP:LISTEN
-</code></pre>
-
-<p>Figured I&#8217;d be able to use netstat for this, should probably look into
-why I can&#8217;t.</p>
-
-<h2>Self pipes</h2>
-
-<p>Because <code>pselect</code> isn&#8217;t widely supported, you can use the self pipe
-trick to get rid of race conditions surrounding signal handlers and
-select. Recall the common race condition:</p>
-
-<ul>
-<li>Install signal handler that sets global flag to true</li>
-<li>Run an IO loop that checks this global flag in order to decide whether
-to perform some action.</li>
-</ul>
-
-
-<p>But if a signal arrives between these steps then you might start looping
-without checking the flag, etc.</p>
-
-<p>So you can self-pipe to get around this:</p>
-
-<ol>
-<li>Create a unix domain pipe, non-blocking on both ends to prevent any
-sort of queueing/blocking behavior.</li>
-<li>Within a signal handler, write a single byte into the pipe; <code>write</code>
-is async signal safe, so we&#8217;re cool.</li>
-<li>Include the pipe in <code>select</code>, always check if self-pipe is in
-<code>readfs</code></li>
-</ol>
-
-
-<p>Unicorn uses a self pipe.</p>
-
-<pre><code># We use SELF_PIPE differently in the master and worker processes:
-#
-# * The master process never closes or reinitializes this once
-# initialized.  Signal handlers in the master process will write to
-# it to wake up the master from IO.select in exactly the same manner
-# djb describes in http://cr.yp.to/docs/selfpipe.html
-#
-# * The workers immediately close the pipe they inherit.  See the
-# Unicorn::Worker class for the pipe workers use.
-</code></pre>
-
-<blockquote><p>Richard Stevens&#8217;s 1992 book &#8220;Advanced programming in the UNIX environment&#8221; says that you can&#8217;t safely mix select() or poll() with SIGCHLD (or other signals). The SIGCHLD might go off while select() is starting, too early to interrupt it, too late to change its timeout.</p></blockquote>
-
-<p>This just means race conditions; anyway, Unicorn doesn&#8217;t mix select with
-other FDs; rather it uses it as parent-child process communication; the
-master will sleep/block on a select of the self pipe, and only the self
-pipe, and will awaken, clear the pipe, and continue onward.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-31T06:45:00-04:00" pubdate data-updated="true">Oct 31<span>st</span>, 2014</time></div>
 	
 
 

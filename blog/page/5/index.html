@@ -112,6 +112,836 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/09/17/daily-journeaux/">
+		
+			Daily Journeaux</a>
+	</h2>
+	<div class="entry-content">
+		<h2>nginx book</h2>
+
+<p>This is nice: http://aosabook.org/en/nginx.html</p>
+
+<p>Some random notes:</p>
+
+<p>For CPU-bound loads, number of nginx workers should equal the number of
+cores (&#8220;TCP/IP, doing SSL, or compression&#8221;). For IO-bound stuff
+(&#8220;serving different sets of content from storage, or heavy proxying&#8221; &#8211;
+presumably teh &#8220;different sets&#8221; is important because if it were
+the same stuff, it&#8217;d probably be cached which I guess means the IO would
+be negligible? unsure) &#8211; you might want 1.5-2 times the number of
+cores.</p>
+
+<h2>SSL/TLS random questions:</h2>
+
+<p>I have so many misconceptions? For anyone who reads this, this is stream
+of thought as I try to answer my own questions before looking shit up.</p>
+
+<p>How come domains are signed and not IPs?</p>
+
+<p>Reasoned guess: first off, everyone can encrypt data. It&#8217;s just that the
+key thing that TLS brings in is certification of a sending. It&#8217;s not
+enough to say &#8220;yo here&#8217;s my public key&#8221;, you still have to answer the
+question &#8220;uh ok yes but who are you?&#8221;. Certificate authority to the
+rescue.</p>
+
+<p>So what if CA&#8217;s certified IPs, rather than domain names (maybe they do,
+I don&#8217;t actually know at this point)? Some ideas come to mind:</p>
+
+<ul>
+<li>DNS can map to multiple IPs, and a single IP might load balance to
+many different servers, all of which should be able to (de)/encrypt
+incoming traffic.</li>
+</ul>
+
+
+<p>That&#8217;s actually probably the only reason. I was originally thinking
+that since IPs can change, you might certify server A and then the next
+day the IP changes to server B, and that that would mean the CA is
+giving a stamp of approval to the wrong server, but then, duh, it&#8217;s key
+pairs that are being validated, and server B wouldn&#8217;t have these keys
+and wouldn&#8217;t know how to do the handshake. I think this is close to
+correct, it&#8217;s just I&#8217;m forgetting everything that happens internally
+within the handshake.</p>
+
+<p>http://en.wikipedia.org/wiki/Transport_Layer_Security</p>
+
+<h2>Symmetric Key</h2>
+
+<p>A single key encrypts plaintext and decrypts the ciphertext generated
+from the encryption.</p>
+
+<p>Example: AES.</p>
+
+<h2>Cipher suite</h2>
+
+<p>https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4</p>
+
+<p>A triple of</p>
+
+<ul>
+<li>authentication</li>
+<li>encryption</li>
+<li>and message authentication c</li>
+</ul>
+
+
+<h2>SSL / TLS</h2>
+
+<p>Lots of people use them interchaangeably, but SSL was originally created
+at Netscape and used to be implemented at the application layer, living
+on top of TCP. When it was IETF standardized, it was renamed TLS and
+moved out of the application layer.</p>
+
+<p>TLS provides:</p>
+
+<ul>
+<li>encryption
+
+<ul>
+<li>obfuscate data transmitted from one computer to another</li>
+<li>example: plaintext means zero encryption and easily breakable
+ciphertext means shitty encryption</li>
+</ul>
+</li>
+<li>authentication</li>
+<li>verify that you&#8217;re talking to who you think you&#8217;re talking to</li>
+<li>example: the CA validates the certificate that a server sends you</li>
+<li>integrity
+
+<ul>
+<li>detect message forgery or tampering</li>
+<li>example:</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Beware the intermediaries</h2>
+
+<p>Intermediaries are caching servers, gateways, web accelerators, content
+filters, blah blah blah, all the stuff that&#8217;s come out to aid and extend
+HTTP. They&#8217;re often transparent to the end user, but they come with the
+limitation that if you start wanting to deviate from HTTP on port 80 in some
+application specific way, you&#8217;re boned. And it&#8217;s kinda rare to find
+other ports that are open: 80 and 443 (HTTPS) are usually open but
+everything else is often closed. These intermediaries might improperly
+try to apply their logic to the non HTTP, etc, there&#8217;s no easy way to
+detect when or when not to apply.</p>
+
+<p>Solution: HTTPS tunnel all the things. All data is obfuscated from
+intermediaries and intermediaries have no way of known whether the
+encrypted data is HTTP or some custom proprietary crazy thing.</p>
+
+<h2>Self-signed certificates</h2>
+
+<p>http://www.akadia.com/services/ssh_test_certificate.html</p>
+
+<p>Things learned:</p>
+
+<ul>
+<li>&#8220;If the private key is no longer encrypted, it is critical that this file only be readable by the root user!&#8221;</li>
+<li>You can remove the DES from the private key so that you don&#8217;t have to
+type in the password all the god damn time when your server starts.
+(Verified this with a node app)</li>
+</ul>
+
+
+<p>Turns out you could also just run the following:</p>
+
+<pre><code>openssl req -new 
+</code></pre>
+
+<p>So why is DES required at all? I&#8217;m guessing it&#8217;s possible to generate a
+CSR without it, right?</p>
+
+<h2>ALPN: Application-Layer Protocol Negotiation</h2>
+
+<p>Note to dummy: there&#8217;s no TLS 3 way handshake. You&#8217;re thinking of TCP
+ACK SYN SYNACK that has to happen before app data is exchanged.</p>
+
+<p>ALPN takes place during the</p>
+
+<h2>SNI: Server Name Indication</h2>
+
+<p><a href="https://www.ietf.org/rfc/rfc3546.txt">rfc, page 8</a></p>
+
+<p>If you have a server that you want to host multiple sites with their own
+respective TLS certificates,</p>
+
+<h2>self-signed-certificate</h2>
+
+<p>Useful for testing SSL before you go ahead and buy a certificate for 3rd
+party validation.</p>
+
+<h2>AES vs RSA</h2>
+
+<p>AES is symmetric, and generally speaking symmetric encryption/decryption
+is a lot faster than assymetric, hence AES is used for the
+encryption/decryption of data.</p>
+
+<h2>Sprite gotchas</h2>
+
+<p>I used to think sprites were bitchin; save HTTP requests, combine all
+your images into one. Obviously, these are lame application-level
+optimizations/hacks to cover the ass of the transport layer&#8217;s (HTTP&#8217;s)
+shortcomings (addressed in SPDY / HTTP 2.0).</p>
+
+<p>Downsides of sprites:</p>
+
+<ul>
+<li>all the application-layer crap you have to do to handle it</li>
+<li>change a single pixel of a single image and you&#8217;ve busted a massive
+cached of all the other images in the sprite</li>
+<li>memory intensive; you might not be using each image but you have to
+load all of it in memory, might be too much for mobile clients</li>
+</ul>
+
+
+<h2>Octet</h2>
+
+<p>It means byte. Saw it all over the place in the
+<a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-http2/?include_text=1">HTTP 2 spec draft</a></p>
+
+<h2>nginx</h2>
+
+<p>After <code>brew install nginx</code></p>
+
+<pre><code>Docroot is: /usr/local/var/www
+
+The default port has been set in /usr/local/etc/nginx/nginx.conf to 8080 so that
+nginx can run without sudo.
+
+To have launchd start nginx at login:
+    ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
+Then to load nginx now:
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.nginx.plist
+Or, if you don't want/need launchctl, you can just run:
+    nginx
+
+WARNING: launchctl will fail when run under tmux.
+</code></pre>
+
+<p>What is docroot?</p>
+
+<ul>
+<li>It&#8217;s a file&#8230; not a directory?</li>
+<li>But you can delete it and replace with a directory and put an
+index.html in there and it works</li>
+<li>So I guess there&#8217;s some default configuration of nginx that just hosts
+static files from this doc root directory</li>
+</ul>
+
+
+<p>What do them commands does?</p>
+
+<pre><code>ln -sfv /usr/local/opt/nginx/*.plist ~/Library/LaunchAgents
+</code></pre>
+
+<p>What are launchd and launchctl?</p>
+
+<p><code>launchd</code> is a daemon (conventions dictate that daemons end in a <code>d</code>).
+<code>launchctl</code> is what you use to control that daemon. So if you want to
+schedule something to start</p>
+
+<p>What&#8217;s the <code>mxcl</code> in <code>homebrew.mxcl.redis.plist</code>?</p>
+
+<p>It refers to <code>mxcl</code>, maintainer of Homebrew. Just normal reverse domain
+name notation. So does that mean any homebrew-installed domains get
+prefixed like that? I&#8217;m guessing <code>mxcl</code> also made the Redis recipe.
+Or maybe every homebrew daemon gets prefixed like that? Not sure, who
+cares.</p>
+
+<pre><code> In the launchd lexicon, a "daemon" is, by definition, a system-wide service of
+ which there is one instance for all clients. An "agent" is a service that runs
+ on a per-user basis. Daemons should not attempt to display UI or interact
+ directly with a user's login session. Any and all work that involves interacting
+ with a user should be done through agents.
+</code></pre>
+
+<p><a href="https://developer.apple.com/library/mac/technotes/tn2083/_index.html">TN2083 - Daemons and Agents</a></p>
+
+<p>Wow, &#8220;Daemonomicon&#8221; is an awesome word: &#8220;formal definition of the types
+of bg programs you can write&#8221;.</p>
+
+<ul>
+<li>bootstrap server: launchd</li>
+<li>root session: first and last session. Boot-time processes and daemons
+live here. User-independent. e.g. <code>mDNSResponder</code></li>
+<li>login session: proceses launched by or for a user live in login
+session. Login sessions are associated w authenticated users. Each
+user</li>
+</ul>
+
+
+<p>If I</p>
+
+<h2>Origins of TTY</h2>
+
+<p>http://www.linusakesson.net/programming/tty/</p>
+
+<ul>
+<li>stock tickers, then ASCII teletype within a network called Telex.</li>
+<li>Telex was a network that used level of current to respresent different
+characters, vs different voltages used by analog telephone shit</li>
+<li>Telex existed before integration w computers</li>
+<li>When command lines became the norm, teletypes were used as input and
+output since they were readily available on the market</li>
+<li>Lots of different models, needed to standardize in some way; UNIX
+philosophy dictated letting kernel handle low level word length, baud
+rate, flow control, etc., later things like color output, cursor
+movement, etc, was left to application (not kernel)</li>
+<li>Line editing is managed by OS-provided line discipline. Default is
+cooked/canonical mode. raw mode disables things like editing,
+backspace, and generally disables any IO processing within the line
+discipline.</li>
+</ul>
+
+
+<p>Skipping ahead, you can force your terminal into stty raw mode via</p>
+
+<pre><code>stty raw #enable
+stty -raw #disable
+</code></pre>
+
+<p>Now I know how to write a Ruby impl of Press Any Key</p>
+
+<pre><code>print "Press any key... "
+
+begin
+  system("stty raw -echo")
+  c = STDIN.getc
+ensure
+  # re-enable
+  system("stty -raw echo")
+end
+
+puts "Thanks!"
+</code></pre>
+
+<p>Note that it&#8217;ll consume CTRL-C as well rather than signalling an
+interrupt (hence CTRL-C prints &#8220;Thanks!&#8221; rather than terminating
+immediately).</p>
+
+<p>This is also how any text editor functions.</p>
+
+<p>This must be what&#8217;s happening when I kill some script when it doesn&#8217;t
+expect it and then my terminals fucked. Typing in <code>stty -raw</code> even
+though I can&#8217;t see it probably would fix it&#8230; need to try.</p>
+
+<p>Back to the thing:</p>
+
+<ul>
+<li>Kernel provides many line disciplines, only one attached to serial
+device at a time. Default is <code>n_tty</code>. I guess that&#8217;s what we&#8217;re
+configuring when we futz w <code>stty</code></li>
+<li>Other disciplines are for things like packet switched data</li>
+<li><a href="http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/drivers/char/n_tty.c">tty C source code</a></li>
+<li>UART (Universal Async Receiver and Transmitter): converts teletype
+signal into bytes that the OS can process. OS has a UART driver.</li>
+<li>TTY driver: allows user to kill/suspend an infinite looped program,
+bg processes can process til they try to write to terminal (at which
+point they suspend), and user input to fg process only.
+(implemented in <code>tty_io.c</code>)</li>
+<li>TTY Device: triplet of UART driver, line discipline, and TTY driver.</li>
+<li>TTY devices live in <code>/dev</code> w file mode <code>c</code> for &#8220;Character special
+file&#8221;. To manipulate one, you need ownership of the device file
+(e.g. via <code>login</code>).</li>
+<li>TTYs are just objects. Not alive. Other things plug into it. Those
+other things have execution contexts.</li>
+<li>pty = pseudoterminal, as opposed to TTY.</li>
+</ul>
+
+
+<p><code>ps -o stat</code> prints out <code>Ss</code> <code>Ss+</code>, etc&#8230; here&#8217;s what the capital
+letters mean:</p>
+
+<pre><code>R   Running or runnable (on run queue)
+D   Uninterruptible sleep (waiting for some event)
+S   Interruptible sleep (waiting for some event or signal)
+T   Stopped, either by a job control signal or because it is being traced by a debugger.
+Z   Zombie process, terminated but not yet reaped by its parent.
+</code></pre>
+
+<p>Most things are in <code>S</code>. An example of <code>R</code>:</p>
+
+<pre><code>ruby -e 'loop {}'
+</code></pre>
+
+<p><code>s</code> means session group leader. <code>+</code> means process is part of foreground
+process group.</p>
+
+<ul>
+<li>Ctrl Z suspends a process, puts it in <code>T</code> state.</li>
+</ul>
+
+
+<p>Jobs, e.g. <code>fg</code> and <code>bg</code> are just process groups. Consider</p>
+
+<pre><code>ruby -e 'loop {}'  | grep a | grep a | grep a
+</code></pre>
+
+<p>This causes as CPU-intensive loop and will be in R state.</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 45754 45014 45754      0    4 R+   s045    7:03.43 ruby -e loop {}
+machty 45755 45014 45754      0    4 S+   s045    0:00.00 grep a
+machty 45756 45014 45754      0    4 S+   s045    0:00.00 grep a
+machty 45757 45014 45754      0    4 S+   s045    0:00.00 grep a
+</code></pre>
+
+<p>and when I suspend:</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 45754 45014 45754      0    4 T    s045    7:29.05 ruby -e loop {}
+machty 45755 45014 45754      0    4 T    s045    0:00.00 grep a
+machty 45756 45014 45754      0    4 T    s045    0:00.00 grep a
+machty 45757 45014 45754      0    4 T    s045    0:00.00 grep a
+</code></pre>
+
+<p>Everything below it suspends.</p>
+
+<p><code>jobs</code> are tied to session leaders, and terminals are session leaders.
+If I go to another tmux pane and type <code>jobs</code>, the suspended job <em>won&#8217;t</em>
+show up; I have to be in the same terminal that started it. TODO: can I
+change session IDs?</p>
+
+<p>If I <code>bg 1</code>, the following happens:</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 45754 45014 45754      0    4 R    s045    7:39.63 ruby -e loop {}
+machty 45755 45014 45754      0    4 S    s045    0:00.00 grep a
+machty 45756 45014 45754      0    4 S    s045    0:00.00 grep a
+machty 45757 45014 45754      0    4 S    s045    0:00.00 grep a
+</code></pre>
+
+<p>Note how it&#8217;s back to running, but note the missing foreground <code>+</code>. <code>fg 1</code>
+would bring it back.</p>
+
+<p>Note that we could turn one of those greps into <code>R</code> if it was actively
+processing data, e.g.</p>
+
+<pre><code>USER     PID  PPID  PGID   SESS JOBC STAT   TT       TIME COMMAND
+machty 46054 45014 46054      0    4 R+   s045    0:37.84 ruby -e loop { puts "a" }
+machty 46055 45014 46054      0    4 R+   s045    0:45.56 grep a
+machty 46056 45014 46054      0    4 R+   s045    0:27.01 grep b
+machty 46057 45014 46054      0    4 S+   s045    0:00.00 grep a
+</code></pre>
+
+<p>(Actually, the first 3 R&#8217;s might be S&#8217;s if you re-run this command;
+there&#8217;s a race condition as to whether the CPU is actually running code
+or whether it&#8217;s blocked on an IO syscall waiting for piped data to come
+in, but the last grep is always S+ because it never gets output from the
+<code>grep b</code>).</p>
+
+<p>A Job is a Processs Group.</p>
+
+<p>If you&#8217;re just starting/stopping/piping processes, all those child
+processes with have a parent process ID of <code>bash</code>&#8217;s pid.</p>
+
+<p>What constitutes a job/process group? Piped commands for one.
+Let&#8217;s see about Process Subsitution. Answer: process substitution
+doesn&#8217;t consider it as a pipe. It considers it as a shit of epic
+fartitude. In other words, process substitution ends up being miserably
+old and mortal and definitely going to die. In other words, process
+substitution is not in the same process group. It&#8217;s its own process
+group. If you do <code>echo &lt;(some long living thing)</code>, the long living thing
+will survive as a sibling process, in its own process GROUP WHO CARES.</p>
+
+<p>You can only read from  / write to TTY if you&#8217;re foreground. If you&#8217;re
+not <code>fg</code> and you try and write to TTY, kernel will suspend your ass.</p>
+
+<ul>
+<li><code>ioctl</code> is the UNIX swiss army knife; manipulates special files like
+terminals.</li>
+<li><code>ioctl</code> requests must be initated from processes, so the kernel can&#8217;t
+asyncly communicate w an application unless the app asked for it.</li>
+<li>Signals are how kernel communicates asyncly w a process. Messy and
+error prone they are.</li>
+</ul>
+
+
+<p>Question: nohup detaches into its own session id to prevent closing on
+SIGHUP&#8230; why does it have to do that? Why can&#8217;t it just ignore that
+signal? Let&#8217;s see.</p>
+
+<pre><code>Signal.trap(:HUP) do
+  puts "I WILL NOT"
+end
+sleep
+</code></pre>
+
+<p>If I ssh localhost and run that in background (with <code>&amp;</code>) and then
+logout, it stays running, PPID changes to 1 (root). So how is that
+different than nohup? TODO: find out. Something with setsid, etc.</p>
+
+<p>SIGINT&#8217;s originate from the terminal&#8230; is it correct to say they
+originate from TTY? I think it is based on the <code>n_tty.c</code> code.
+Also, in raw mode it doesn&#8217;t even fire. COOL.</p>
+
+<ul>
+<li>SIGPIPE isn&#8217;t just an error but also a way to know whoever was
+listening to you has stopped listening to you, e.g. <code>yes | head</code>.</li>
+<li>SIGSTOP is to SIGTSTP as SIGKILL is to SIGQUIT.</li>
+<li>SIGCONT can be sent to a ^Z-suspended process. It behaves as if you
+started the process with <code>&amp;</code>. It&#8217;s running, but it&#8217;s bg. In other
+words, if you have a suspended process 12345, <code>bg 1</code> or
+<code>kill -CONT 12345</code> would do the same thing; it&#8217;d start running in the
+background, spitting out output</li>
+<li>You can break shit with
+<code>ruby -e 'Signal.trap(:TTIN) { puts "wat" }; sleep 1; gets' &amp;</code>
+(recursive SIGTTIN). You try and write to TTY in the background and
+then keep ignoring the signal that it&#8217;s failing. I don&#8217;t know what
+causes the deadlock though, but <em>something</em> screwing up sounds right.</li>
+<li>If you press ^Z, that sends a message to the foreground process group.
+The line discipline sends <code>SIGTSTP</code> to the foreground process group.
+This will suspend the whole process group, whatever the main</li>
+</ul>
+
+
+<p>Question: if you use pipes combined with <code>&amp;</code>, what gets put into the
+background? All tasks? Answer (I think): <code>&amp;</code> ultimately results in a
+process group getting put into the background, and a process group
+contains any pipes, child processes, etc, so it <em>must</em> apply to all of
+the different processes as a whole, and there&#8217;s no way to say that only
+one of the pipe segments runs in the background.</p>
+
+<p>Fun fact: you can reimplement the default ^Z behavior as follows:</p>
+
+<pre><code>has_ignored = false
+Signal.trap(:TSTP) do
+  if has_ignored
+    Process.kill(:STOP, Process.getpgrp)
+  else
+    has_ignored = true
+    puts "ignoring"
+  end
+end
+
+sleep
+</code></pre>
+
+<p>TL;DR the default SIGTSTP ^Z handler fires a STOP. You can catch TSTP
+and immediately do the same for the same effect.</p>
+
+<p>Vim&#8217;s source code (and probably everyone&#8217;s) does some variant of</p>
+
+<pre><code>settmode(TMODE_COOK);
+kill(0, SIGTSTP);       /* send ourselves a STOP signal */
+</code></pre>
+
+<p>So, you return TTY mode to cook mode.</p>
+
+<ul>
+<li>If you run something like <code>echo "wat" | less &amp;</code>, you&#8217;ll immediately
+see <code>[2]+  Stopped   echo "wat" | less</code> because <code>less</code> is always going
+to try and write to TTY in a raw manner&#8230;?</li>
+<li>If you suspend, say, vim, vim will catch the SIGTSTP, move the cursor
+to the last line of the screen w control signals (it&#8217;s still attached
+to TTY) and then fires a SIGSTOP.</li>
+<li>Once stopped, a SIGCHLD is sent to the session leader with the pid of
+the suspended process. When all processes in fg have been suspended
+(T&#8217;d), the current TTY config is stashed for later restoration
+(<code>stty -g</code> is one way of doing this).</li>
+</ul>
+
+
+<p>So why doesn&#8217;t ^Z suspend bash?</p>
+
+<p>Ahh, so here&#8217;s how you get TTOU to fire (and cause a process to suspend)</p>
+
+<pre><code>ruby -r "io/console" -e "IO.console.raw { puts 'wat' }" &amp;
+</code></pre>
+
+<p>Note that if we hadn&#8217;t used <code>.raw</code> to put TTY in raw mode, it would have
+just printed &#8220;wat&#8221; into the same terminal even though the process is
+running in the background, but if you grab full control of the TTY with
+<code>raw</code>, it&#8217;ll cause a TTOU.</p>
+
+<p>You can go in and configure another TTY to update its rows/cols. I can
+fuck w the vim in another tmux pane, tell it its skinnier/wider than it
+is, but once i resized a tmux pane then BOOM it fires its own tty
+commands, and tty fires a SIGWINCH, and then that causes vim to query
+the tty for the current width and repaint.</p>
+
+<p>Ah: realization: the ultimate decider in whether TTOU fires is whether
+topstop</p>
+
+<h2><code>read</code></h2>
+
+<pre><code>read words &lt; &lt;(echo "wat")
+echo $words
+</code></pre>
+
+<h2>resetting the keyboard when things go crazy</h2>
+
+<p><code>reset</code>, or typing Escape and c.</p>
+
+<pre><code>stty raw
+reset
+</code></pre>
+
+<p>and we&#8217;re back. It resets your TTY driver, I guess.</p>
+
+<h2><code>yes</code></h2>
+
+<p>Repeatedly enter <code>y</code> for saying yes to everything. Like the dropper bird
+from the simpsons when homer gets fat. You can also do <code>yes no</code> to say
+other things.</p>
+
+<h2>Ack</h2>
+
+<p>is written in Perl.</p>
+
+<h2>100 Continue status</h2>
+
+<p>An HTTP 1.1 mechanism.</p>
+
+<p>http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html</p>
+
+<p>In some cases, a server knows just by looking at request headers that it
+won&#8217;t process the request, making it potentially wasteful for the client to send a
+giant doomed-to-fail payload. In these cases, the client can decide not
+the send the full payload unless the server has told it &#8220;based on your
+headers, you should Continue sending this full payload because I don&#8217;t
+see any reason why it should fail, just by looking at the headers.&#8221;</p>
+
+<p>To opt into this, the client must provide the following header:</p>
+
+<pre><code>Expect: 100-continue
+</code></pre>
+
+<p>The server will see this, decide if the request will succeed, and if so,
+it send back 100 Continue and keeps reading from the input stream.
+Client then sends the whole payload.</p>
+
+<p>Proxies can reject if it knows the next-hop server is HTTP 1.0 or less
+with a 417 Expectation Failed.</p>
+
+<h2>IOS8 breaks file uploads in Safari</h2>
+
+<p>http://blog.fineuploader.com/2014/09/10/ios8-presents-serious-issues-that-prevent-file-uploading/</p>
+
+<p>Jesus. No workaround? Apple, you suck.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T08:08:00-04:00" pubdate data-updated="true">Sep 17<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/09/15/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>FTP</h2>
+
+<p>Plaintext, unless you&#8217;re using SFTP or some variant.</p>
+
+<p>FTP uses multiple connections: 1 control connection for sending
+commands and tracking current directory, etc, and a connection for
+actually streaming the file data.</p>
+
+<p>How the second connection (data) is established depends on active vs
+passive mode: in active mode, the server will try to connect back to the
+client at PORT+1, and in most modern cases, this will fail due to NATs
+and firewalls, hence passive mode (via PASV) command is meant to get
+around this. In passive mode, the client requests an IP and port from
+the server (via the control connection), and then the client makes the
+second connection to whatever the server returns. This works as clients can
+generally connect to servers without NAT/firewall issues.</p>
+
+<p>Note that active connections are rare. The man page for <code>ftp</code> is
+telling:</p>
+
+<pre><code>-A          Force active mode ftp.  By default, ftp will try to use passive mode
+            ftp and fall back to active mode if passive is not supported by the
+            server.  This option causes ftp to always use an active connection.
+            It is only useful for connecting to very old servers that do not
+            implement passive mode properly.
+</code></pre>
+
+<h2>Application-level gateway</h2>
+
+<p>http://en.wikipedia.org/wiki/Application-level_gateway</p>
+
+<p>TODO: learn more.</p>
+
+<h2>Process per connection</h2>
+
+<p>One way of handling a new connection is to fork and let the forked
+process handle that connection. Makes sense for the parent instance to
+use Ruby&#8217;s <code>Process.detach</code>, which doesn&#8217;t have a native kernel
+equivalent but is just a Ruby convenience that spins up a thread that
+calls <code>wait()</code> on the forked process to prevent it from becoming a
+zombie if the parent process exits before the forked one.</p>
+
+<p>Remember that forking isn&#8217;t available on Windows or JRuby.</p>
+
+<p><code>shotgun</code> is a Ruby server that forks per connection. Why? Isn&#8217;t this
+wasteful (relative to pre-forking solutions like Unicorn)? Yes, but it
+has specific purpose: assuming it&#8217;s not painfully expensive to spin up
+your server (like Rails), and that you don&#8217;t have a mechanism for
+reloading after code changes (like Rails), <code>shotgun</code> will fork per
+connection and entirely reload / spin up the rack server, less reloading
+the latest version of any Ruby code, thus not requiring you to manually
+restart your server.</p>
+
+<h2>Thread per connection</h2>
+
+<p>Typical state-sharing caveats apply when working with threads, hence
+it&#8217;s useful to thing about the simple unit of concurrency that will keep
+your threads isolate and minimize their access to shared data. That unit
+would be a connection; each thread should get its own connection object.
+Create a connection object, immediately create a new thread, and let
+that connection object fall out of scope in the creator thread so that
+only the newly spawned thread has access to it. Simple enough.</p>
+
+<h2>How to verify your code is on multiple cores</h2>
+
+<p>You have to dig in a little bit to verify that Ruby code you&#8217;re writing
+is actually being processed on multiple CPU cores. There are many
+variables:</p>
+
+<ol>
+<li>Does your system even have more than one core? (try <code>system_profiler | grep 'Total Number of Cores'</code> to find out, probably some other ways too)</li>
+<li>Does your Ruby have a GIL? (MRI does, Rubinius and JRuby don&#8217;t)</li>
+<li>Some third thing to pad my arbitrary list of bullshit.</li>
+</ol>
+
+
+<p>Anyway, one easy way is to run the following code:</p>
+
+<pre><code>NUM_CORES = 2
+
+threads = []
+NUM_CORES.times do |t|
+  threads &lt;&lt; Thread.new do
+    log_every = 1000000
+    i = 0
+    loop do
+      i += 1
+      if i == log_every
+        i = 0
+        putc t.to_s
+      end
+    end
+  end
+end
+
+threads.each(&amp;:join)
+</code></pre>
+
+<p>Running this on MRI Ruby results in 100% CPU usage. Running in JRuby
+yields 200%, which means two cores are operating at 100%. Pretty rad,
+yes?</p>
+
+<p>CPU usage reported by activity monitor or <code>top -o cpu</code>.</p>
+
+<h2>Preforking</h2>
+
+<p>e.g Unicorn</p>
+
+<p>What&#8217;s nice is that the kernel will handle load-balancing for us: when
+there are no incoming requests, you have N forked instances blocked on
+<code>accept</code>, and the kernel will choose which instance gets the next
+incoming request. If all forked instances are busy, the kernel will just
+queue up the request internally. If the queue gets full, you&#8217;ll get an
+ECONNREFUSED. Easy peazy.</p>
+
+<p>Unicorn (and probably Rainbows) does some extra tracking on child
+processes to make sure it&#8217;s not getting stuck on long requests, etc.</p>
+
+<p>Main disadvantage is memory usage. By the time you fork, if the parent
+process is 100 mb, then 4 forks and you&#8217;re at 500 mb&#8230; unless 1) your
+OS has COW and 2) you don&#8217;t write to it all that much.</p>
+
+<h2>Reactor</h2>
+
+<p>e.g. Node.js, Twisted, EventMachine</p>
+
+<p>High levels of concurrency (not necessarily parallelism) achievable,
+relative to threading/forking models, which hit their RAM limit much
+faster (Reactor patterns mean that everything is just heap allocations
+on the same thread).</p>
+
+<p>Impacts on programming model:</p>
+
+<ul>
+<li>No processes/threads, so no shared memory, synchronization, etc, to
+have to worry about</li>
+<li>Don&#8217;t block the single Reactor thread (because nothing else will be able to
+run). You wouldn&#8217;t have to worry about this in thread/processland.
+This is why if you&#8217;re using EventMachine, your gems must be
+event-machine aware, otherwise they&#8217;ll block (which would be fine in a
+threading/forking environment).</li>
+</ul>
+
+
+<h2>Node cluster</h2>
+
+<p>http://nodejs.org/api/cluster.html</p>
+
+<p>Based on the fact that you can use child process forking to split heavy
+duty work into process that can each live on a different core, if that&#8217;s
+what you&#8217;re about.</p>
+
+<p>Note that there&#8217;s no C-like or Ruby-like fork in Node; you can&#8217;t just
+call fork and then have both the parent and newly forked child process
+continue execution from that <code>fork()</code> invocation&#8230;</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T19:57:00-04:00" pubdate data-updated="true">Sep 15<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/09/06/daily-journal/">
 		
 			Daily Journal</a>
@@ -1888,214 +2718,6 @@ inline CSS. This wouldn&#8217;t be a problem if web components.</p>
 
 
 <time datetime="2014-07-29T07:50:00-04:00" pubdate data-updated="true">Jul 29<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/28/daily-journal-2/">
-		
-			Daily Journal 2</a>
-	</h2>
-	<div class="entry-content">
-		<h2>User and Kernel</h2>
-
-<p>http://blog.codinghorror.com/understanding-user-and-kernel-mode/</p>
-
-<p>Non-idle tasks.</p>
-
-<p>The CPU graph is tasty. Red means kernel.</p>
-
-<p>CPU hardware knows all about kernels n shit. It isn&#8217;t just a software
-divide. CPU instructions and certain memory locations can only be
-accessed by the kernel, enforced by hardware. User mode makes it so that
-only the app crashes, not the entire system.</p>
-
-<p>http://en.wikipedia.org/wiki/Ring_(computer_security)</p>
-
-<p>Interesrserseting.</p>
-
-<p>x86 CPU hardware:</p>
-
-<ul>
-<li>0 is kernel</li>
-<li>3 is user</li>
-</ul>
-
-
-<p>1 and 2 are device drivers but they&#8217;re not often used. On Windows,
-device drivers can be user or kernel mode, mostly to the user, but video
-cards are often kernel level since they so perfy. In Vista+, the Windows
-Driver Display Model is such that only kernel mode is used for executing
-the GPU commands, but the translation from API to GPU now takes place in
-userland.</p>
-
-<p>Exceptions fire in kernel land I guess? Sometimes?</p>
-
-<h2>Old Foreman Orphans Sidekiq</h2>
-
-<p>After lots of starts/stops of foreman, I noticed lots of sidekiq
-instances with ppid 1. They was orphans. I killed em.</p>
-
-<h2>fspawn</h2>
-
-<p>Refers to the fork+exec approach to spawning a process.</p>
-
-<h2>Daemons</h2>
-
-<p>https://github.com/ghazel/daemons</p>
-
-<p>Library of fun little trinkets.</p>
-
-<ul>
-<li>given some-server.rb, let&#8217;s you write a some-server-control.rb</li>
-<li>inline the server inside such a daemon (you can still run it
-without forking via <code>run</code> command)</li>
-<li>manage multiple daemons</li>
-<li>Ability to take existing server and daemonize it; you do lose control
-over the daemon unless you&#8217;re a <code>ps</code>/<code>kill</code> JOURNEYMAN.
-
-<ul>
-<li>this takes advantage of the <code>fork</code> <code>getsid</code></li>
-</ul>
-</li>
-</ul>
-
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons.rb#L45-L53</p>
-
-<pre><code># 1.  Forks a child (and exits the parent process, if needed)
-# 2.  Becomes a session leader (which detaches the program from
-#     the controlling terminal).
-# 3.  Forks another child process and exits first child. This prevents
-#     the potential of acquiring a controlling terminal.
-# 4.  Changes the current working directory to "/".
-# 5.  Clears the file creation mask (sets +umask+ to 0000).
-# 6.  Closes file descriptors (reopens +STDOUT+ and +STDERR+ to point to a logfile if
-#     possible).
-</code></pre>
-
-<p>Controlling terminal:</p>
-
-<p>http://www.gnu.org/software/libc/manual/html_node/Controlling-Terminal.html</p>
-
-<blockquote><p>An individual process disconnects from its controlling terminal when it calls setsid to become the leader of a new session.</p></blockquote>
-
-<p>Ah I get it:</p>
-
-<ul>
-<li>first fork is to orphan the child, but it&#8217;s still connected to a
-controlling terminal/session.</li>
-</ul>
-
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L201</p>
-
-<p>They actually loop through all known IO files to close file
-descriptors using ObjectSpace:</p>
-
-<p>http://www.ruby-doc.org/core-2.1.2/ObjectSpace.html</p>
-
-<p>https://github.com/ghazel/daemons/blob/master/lib/daemons/daemonize.rb#L221</p>
-
-<p>That&#8217;s pretty rad. I guess the GC uses it too.</p>
-
-<h2>.pid file</h2>
-
-<p>It&#8217;s a file in a well known location that contains only the pid of
-some running process, usually a daemon. Useful because daemons are often
-hard to detect, kinda look like forgotten orphan processes, and there
-might be multiple similar ones. But pid files let you look up the pid of
-the running process so that you can send it signals.</p>
-
-<h2><code>$0</code> or <code>$PROGRAM_NAME</code></h2>
-
-<p>If you run this script</p>
-
-<pre><code>fork {
-  $PROGRAM_NAME = "WAT"
-  sleep
-}
-</code></pre>
-
-<p>then <code>ps | grep WOOT</code> yields</p>
-
-<pre><code>62724 ttys022    0:00.00 WOOT
-</code></pre>
-
-<p>Woot wat wat wotasoasdas lol.</p>
-
-<h2><code>pidof</code></h2>
-
-<pre><code>brew install pidof
-
-$ pidof bash
-754 1246 1748 2308 2498 5380 20397 23552 26224 26973 48454 79258 81847 5226 5346 5443 5851 10659 25008 26375 27009 52684 88768 88882 18853 19116 19246 20275 20476 21364 43211 52269 52390 52637 54869 54974 58037 58950 59080
-</code></pre>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-28T20:43:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/28/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Them processes</h2>
-
-<p>Kernel</p>
-
-
-		
-		<a href="/blog/2014/07/28/daily-journal/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-28T08:16:00-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time></div>
 	
 
 

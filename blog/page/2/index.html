@@ -112,6 +112,789 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/03/25/shiggity-wat/">
+		
+			Shiggity Wat</a>
+	</h2>
+	<div class="entry-content">
+		<h2>IP Spoofing</h2>
+
+<p>What&#8217;s to stop you from sending out packets with someone else&#8217;s IP as
+the source?</p>
+
+<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
+
+<ul>
+<li>packet filtering
+
+<ul>
+<li>ingress: gateway blocks incoming packets with source IP that can
+only belong to someone inside of the network</li>
+<li>egress: gateway blocking outgoing packets with source IP from
+outside of the network (altruistic since it prevents hackers from
+hacking folk outside of the network)</li>
+</ul>
+</li>
+<li>upper layer protocol
+
+<ul>
+<li>TCP prevents IP spoofing by use of sequence numbers; an attacker
+would have to guess at a correct sequence number in order for it to
+be considered valid</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>RxJS</h2>
+
+<h3>generate</h3>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, // terminate condition
+    function (x) { return x + 1; }, // step fn
+    function (x) { return x*2; }    // map fn for values emitted...?
+);
+</code></pre>
+
+<p>The last fn is weird&#8230; seems like the above is the equivalent of:</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 3; }, 
+    function (x) { return x + 1; },
+    function (x) { return x; }    
+).map(x =&gt; x*2);
+</code></pre>
+
+<p>So why embed the <code>map</code> operator? or as they call it the select.</p>
+
+<pre><code>Rx.Observable.prototype.map === Rx.Observable.prototype.select // true
+</code></pre>
+
+<h3>generateWith relative/absolute time</h3>
+
+<p>Like <code>generate</code> but adds a time selector fn: for each value you can
+decide when it should fire. So you could feasible reverse the firing
+time of a series of events, e.g. 1,2,3,4,5 fires in the reverse order:</p>
+
+<pre><code>var source = Rx.Observable.generateWithRelativeTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return 100 * (5-x); }
+);
+
+"Next: 1"
+"Next: 2"
+"Next: 3"
+"Completed"
+</code></pre>
+
+<p>NOPE I was wrong; the time selector generates the time <em>between</em> events,
+not the time relative to the start of observation. I&#8217;m guessing that can
+be accomplished via the absolute form:</p>
+
+<pre><code>var now = Date.now();
+var source = Rx.Observable.generateWithAbsoluteTime(
+    1,
+    function (x) { return x &lt; 4; },
+    function (x) { return x + 1; },
+    function (x) { return x; },
+    function (x) { return now + 100 * (5-x); }
+).timeInterval();
+
+"Next: 1:402"
+"Next: 2:6"
+"Next: 3:2"
+"Completed"
+</code></pre>
+
+<p>WRONG AGAIN! Order is preserved, with the already-elapsed events firing
+immediately once the first one fires.</p>
+
+<h3>generate as for loops:</h3>
+
+<p>Instead of</p>
+
+<pre><code>for (var x = 0; x &lt; 10; ++x) {
+  console.log(x*2);
+}
+</code></pre>
+
+<p>you do</p>
+
+<pre><code>var source = Rx.Observable.generate(
+    0,
+    function (x) { return x &lt; 10; }, 
+    function (x) { return x + 1; },  // ++x
+    function (x) { return x*2; }  
+);
+
+// or source.subscribe
+source.forEach((val) =&gt; {
+  console.log(val);
+});
+</code></pre>
+
+<p>Keep in mind that</p>
+
+<pre><code>Rx.Observable.prototype.forEach === Rx.Observable.prototype.subscribe
+</code></pre>
+
+<p>They&#8217;re aliases of each other, they both:</p>
+
+<ul>
+<li>activate an observable</li>
+<li>are intended to cause some sort of side effects</li>
+</ul>
+
+
+<p>Why write in observable form?</p>
+
+<ul>
+<li>composability</li>
+<li>much harder to troll yourself w &#8220;global&#8221; mutable vars used for iteration</li>
+<li>you&#8217;re writing in a way that can effortlessly handle the dimension of time</li>
+</ul>
+
+
+<h2>Subscriber stack</h2>
+
+<p>How would you get more explicit bubbling behavior that we&#8217;re familiar
+with from bubbling actions in Ember?</p>
+
+<p>Basically I want there to be some root subject/observable on a parent
+route, and then child routes can push their subscription onto that
+observable&#8217;s stack of subscriptions, and only the subscription at the
+top of the stack.</p>
+
+<p>This doesn&#8217;t accomplish bubbling per se; it&#8217;s a non-bubbling form of
+first-responder. Do we want bubbling?</p>
+
+<p>Actually yeah I think we want bubbling; what we don&#8217;t want is routes
+accidentally getting actions invoked on them because at some point later
+in the game a child route invokes an action (just string names) and it
+accidentally leaks out, causing havoc on parent routes, etc.</p>
+
+<p>But to be able to pass on the action is probably nice.</p>
+
+<pre><code>// within child route
+someParentRoute.observableStack.subscribe((e) =&gt; {
+  if (canHandle(e.value)) {
+    // do stuff
+  } else {
+    e.bubble();
+  }
+});
+</code></pre>
+
+<p>and this subscription would be <code>dispose</code>d upon route deactivation so it
+cleans itself up.</p>
+
+<p>The problem with this is once you start needing to apply operators, you
+need some way of signalling the bubble later on?</p>
+
+<pre><code>someParentRoute.observableStack
+               .delay(1000)
+               .map((e) =&gt; someCopyThatStillPreservesBubbleFn})
+               .subscribe((e) =&gt; {
+                 if (canHandle(e.value)) {
+                   // do stuff
+                 } else {
+                   e.bubble();
+                 }
+               });
+</code></pre>
+
+<h2>Alex versus invalidation</h2>
+
+<p>https://github.com/ef4/liquid-fire/issues/222</p>
+
+<h2>iOS 7 and 8 usage</h2>
+
+<p>As of 3/29/2015:</p>
+
+<ul>
+<li>iOS 8: 77%</li>
+<li>iOS 7: 20%</li>
+<li>Earlier: 3%</li>
+</ul>
+
+
+<h2>WKWebView</h2>
+
+<p>Only in iOS 8, comes with Nitro engine and bunch of other things.</p>
+
+<p>http://nshipster.com/wkwebkit/</p>
+
+<ul>
+<li>https://github.com/Telerik-Verified-Plugins/WKWebView
+
+<ul>
+<li>probably the best stab at a working plugin</li>
+<li>there are many issues (i would not use it at this point)</li>
+<li>spins up an embedded server in order to:
+
+<ul>
+<li>bypass CORS</li>
+<li>allow querying file:// protocol</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>It&#8217;s also only iOS8+; the plugin is smart enough to fall back to
+UIWebView, but then you&#8217;ve just bumped an exponent on complexity, more
+shit to test.</p>
+
+<p>There is also Ludei Cocoonjs. But Iiiii couldn&#8217;t get it to work. :)</p>
+
+<h2>Rx: switch</h2>
+
+<p>When you already have an Observable of Observables, you can call
+<code>.switch()</code> to produce an Observable that only emits values from the
+most recent observable :) isn&#8217;t terminology fun.</p>
+
+<p>So this:</p>
+
+<pre><code>obs.map((val) =&gt; someObservableBasedOnVal)
+   .switch();
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>obs.flatMapLatest((val) =&gt; someObservableBasedOnVal);
+</code></pre>
+
+<h2>Multiple cursors, DevTools and Vim</h2>
+
+<p>Command click: multiple cursors</p>
+
+<p>Cmd+D selects the next instance (effectively adding a multiple cursor).
+Really a cursor is a selection with zero chars selected.</p>
+
+<p>Just downloaded https://github.com/terryma/vim-multiple-cursors</p>
+
+<p>Ctrl-n: select next occurrence of hovered word</p>
+
+<p>Ctrl-p: undo most recent selection</p>
+
+<p>Ctrl-x: skip current selection</p>
+
+<p>MultipleCursorsFind: optionally select range in v mode, then type a
+regex to select them shits as multiple cursors.</p>
+
+<p>NOTE: in visual mode, <code>o</code> swaps the cursor to the other side to let you
+modify the selection from the other end.</p>
+
+<h2>Why flatMapLatest always trips me up</h2>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>console.clear();
+
+Rx.Observable.just(1)
+  .takeUntil(Rx.Observable.timer(10))
+  .doOnCompleted(() =&gt; console.log("doOnCompleted"))
+  .flatMapLatest(() =&gt; {
+    return Rx.Observable.timer(500);
+  })
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"doOnCompleted"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>This sequence might seem obvious here but I ALWAYS make the mistake of
+thinking that because there&#8217;s a takeUntil on the source observable,
+that&#8217;ll somehow cause all subscribing observables to immediately
+complete. NOPE. If that were the case, then promise chains wouldn&#8217;t work
+since they&#8217;re just single value observables that complete after their
+first value, and if completion force completed any subscribers then you
+couldn&#8217;t have async chains of logic. Anyway.</p>
+
+<p>So I guess that means you really need to gate at every potential side
+effect via takeUntil? e.g.</p>
+
+<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
+
+<pre><code>Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"one"
+"two"
+"three"
+"EVENT"
+"COMPLETE"
+</code></pre>
+
+<p>I guess I could dispose the sub, but then no onCompletes get fired
+(and it&#8217;s also just bad style).</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.dispose();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+</code></pre>
+
+<p>WHOA if I do onCompleted, then it skips all the shit in the middle
+and still runs the completion handler!</p>
+
+<p>http://jsbin.com/nupafu/4/edit</p>
+
+<pre><code>console.clear();
+
+var sub = Rx.Observable.interval(200)
+  .takeUntil(Rx.Observable.timer(250))
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"))
+  .subscribe(() =&gt; {
+    console.log("EVENT");
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+setTimeout(() =&gt; {
+  sub.onCompleted();
+}, 250);
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>"start"
+"COMPLETE"
+</code></pre>
+
+<p>Question: is there a way to construct your observables, without
+resorting to chaining takeUntil&#8217;s before every side-effect, such that
+some onComplete along the way skips everyone else&#8217;s?</p>
+
+<p>http://jsbin.com/nupafu/6/edit</p>
+
+<pre><code>console.clear();
+var o = Rx.Observable.interval(200)
+  .do(() =&gt; console.log("start"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("one"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("two"))
+  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
+  .do(() =&gt; console.log("three"));
+
+o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    console.log("EVENT " + v);
+    if (v === false) {
+      this.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+
+"start"
+"EVENT false"
+"COMPLETE"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+"start"
+...
+</code></pre>
+
+<p>Why? Does <code>this.onCompleted()</code> not kill the current subscription?</p>
+
+<p>This works:</p>
+
+<pre><code>var sub = o.merge(Rx.Observable.timer(250).map(false))
+  .subscribe(function(v) {
+    if (v === false) {
+      sub.onCompleted();
+    }
+  }, null,
+  () =&gt; {
+    console.log("COMPLETE");
+  });
+</code></pre>
+
+<p>Apparently sub !== this. sub is an auto-detach observer, this is an
+anonymous observer. Some rxjs internals I don&#8217;t wanna go into right now.</p>
+
+<p>Maybe there&#8217;s a merge first operator that&#8217;ll work here.</p>
+
+<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/amb.md</p>
+
+<p><code>amb</code> is close, but once a value is produced from the flatMapChain, then
+the terminating observable is ignored. I want something that stops on
+the first completed thing.</p>
+
+<p>Note that <code>amb</code> has <a href="http://www.randomhacks.net/2005/10/11/amb-operator/">roots in Lisp</a>.
+The base functionality in RxJS I guess can be used to approximate
+something like</p>
+
+<p>Oh man, I might be a HUGE idiot&#8230; I JUST NEED TO FUCKING PUT THE
+TAKEUNTIL AT THE END OMG</p>
+
+<h2>I&#8217;m waiting</h2>
+
+<p>http://i.imgur.com/4ETXzun.webm</p>
+
+<h2>Observable.using</h2>
+
+<p>Resource/disposable + observable = using</p>
+
+<pre><code>Rx.Observable.
+  using(
+    function () { return openFile('temp.txt', 'w+'); },
+    function (fd) {
+      return Rx.Observable.range(0, 10000)
+        .map(function (v) { return Buffer(v); })
+        .flatMap(function (buffer) {
+          return appendAsync(fd, buffer);
+        });
+    }
+  )
+  .subscribe();
+</code></pre>
+
+<p><code>using</code> makes it clear what the resource/disposable. Otherwise you might
+mix the two awkwardly in the body of the fn passed to
+<code>Observable.create</code>.</p>
+
+<h2>Rx grammar</h2>
+
+<p>Observable sequences have the following grammar:</p>
+
+<pre><code>onNext* (onCompleted|onError)?
+</code></pre>
+
+<p>0 or more <code>onNext</code>s followed by an optional <code>onCompleted</code> OR <code>onError</code>.
+Infinite sequences or disposed sequences might never see <code>onCompleted</code>
+or <code>onError</code>.</p>
+
+<h2>Observable.defer vs Observable.create</h2>
+
+<p>Defer wraps another underlying observable in a factory function and
+guarantees that each subscription to the outer observable gets a fresh
+subscription to a totally newly-generated inner observable&#8230; but how is
+this different from cold observables in general?</p>
+
+<p>Well before I say that, lemme just say <code>defer</code> is a useful pattern for
+when you want to kick off a sequence but don&#8217;t really know which
+observable to start with; a lame attempt to do this is via</p>
+
+<pre><code>Rx.Observable.just()
+  .flatMap(() =&gt; {
+    if (wat) {
+      return oneObservable;
+    } else {
+      return anotherObservable;
+    }
+  })
+</code></pre>
+
+<p>This could more clearly be written as</p>
+
+<pre><code>Rx.Observable.defer(() =&gt; {
+  if (wat) {
+    return oneObservable;
+  } else {
+    return anotherObservable;
+  }
+});
+</code></pre>
+
+<p>But hey, observables are cold&#8230; how is this different than writing</p>
+
+<pre><code>var obs = wat ? oneObservable : anotherObservable;
+return obs; // someone will subscribe to it
+</code></pre>
+
+<p>The difference is the decision as to which observable to use is set once
+and for all for all future subscribers. HORRIBLE ENGRISH MR MATCHNEER.
+In other words: either all subscribers get oneObservable or they get
+anotherObservable. If you wanted to <em>defer</em> that decision until each
+subscription, that&#8217;s when you use defer.</p>
+
+<p>So why not just use a factory function without using <code>defer</code>, e.g.</p>
+
+<pre><code>function getObservable() {
+  var obs = wat ? oneObservable : anotherObservable;
+}
+
+// then anyone who wants to subscribe:
+getObservable().subscribe();
+getObservable().subscribe();
+getObservable().subscribe();
+</code></pre>
+
+<p>These all get fresh observables. But then if you did</p>
+
+<pre><code>var obs = getObservable();
+obs.subscribe();
+obs.subscribe();
+obs.subscribe();
+</code></pre>
+
+<p>then these would all get the same observable decided by the single  call
+to getObservable.</p>
+
+<p>TL;DR, Rx is REALLY HARD. You have seemingly simple primitives of
+observers and observables (saying nothing of that
+almost-namespace-collision), but the way scalar things become vectors,
+merged back into scalars, and not just at the events level but in the
+primitives themselves, and how things are hot and cold. Jesus Christ.</p>
+
+<h2>iOS Permissions</h2>
+
+<ul>
+<li>iOS7
+
+<ul>
+<li>no camera permissions</li>
+<li>location permissions, but doesn&#8217;t distinguish b/w foreground/background</li>
+<li>once denied, permissions dialog won&#8217;t show up</li>
+</ul>
+</li>
+<li>iOS8
+
+<ul>
+<li>permissions for audio and video, separately</li>
+<li>location
+
+<ul>
+<li>global location shutdown in addition to</li>
+<li>app-specific:
+
+<ul>
+<li>authorized for &#8220;When in use&#8221;</li>
+<li>authorized for background</li>
+<li>denied</li>
+</ul>
+</li>
+<li>if you change permissions
+
+<ul>
+<li>app will NOT restart</li>
+<li>if you&#8217;re disabling geolocation, when you come back
+into the app, you won&#8217;t get an error code about lack</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>for all permissions:
+
+<ul>
+<li>once denied, permissions dialog won&#8217;t show up
+
+<ul>
+<li>You can open Settings via settings url w some instructions
+telling user to reset</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-25T11:15:00-04:00" pubdate data-updated="true">Mar 25<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/03/19/today-i-learn-top/">
+		
+			Today I Learn Top</a>
+	</h2>
+	<div class="entry-content">
+		<h2>top</h2>
+
+<p>PR is priority, which is dynamic; a running process will get less and
+less priority over time. NI is nice value; the fixed value that adds to
+priority.</p>
+
+<h2>Ruby mem</h2>
+
+<p>http://samsaffron.com/archive/2014/04/08/ruby-2-1-garbage-collection-ready-for-production</p>
+
+<ul>
+<li>Ruby tracks malloc&#8217;s</li>
+<li>classically, every <code>RUBY_GC_MALLOC_LIMIT</code> bytes,</li>
+</ul>
+
+
+<p>Heaps</p>
+
+<ul>
+<li>Ruby maintains heaps of RVALUES.</li>
+<li>RVALUES are c union structs, variable size depending on x64, x32, etc,
+that are low level representations of ruby objects</li>
+<li>require &#8216;objspace&#8217; lets you access ObjectSpace, which exposes the
+linked list of free Ruby objects.</li>
+<li>RVALUES are collected and reused; mallocs only happen when you expand
+beyong the RVALUE list.</li>
+</ul>
+
+
+<p>GC minor/major sweeps:</p>
+
+<p>Flow is this:</p>
+
+<ul>
+<li><p><code>Object.allocate</code> (in the course of calling <code>new</code>)</p>
+
+<ul>
+<li>gimme a free RVALUE
+
+<ul>
+<li>if no free RVALUES, do a sweep</li>
+<li>figure out along the way if it needs to be a major sweep</li>
+<li>blah blah blah i don&#8217;t want to keep doing this</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>major sweep: run when malloc limit is hit (used to be 8MB, now it&#8217;s a
+moving target)</p>
+
+<ul>
+<li>so you can malloc a bunch of times but once you hit malloc limit
+it&#8217;s time for a major GC</li>
+</ul>
+</li>
+<li>minor: run whenever heap slots run out
+
+<ul>
+<li>presumably, if this doesn&#8217;t free up enough mem, a malloc needs to
+happen? or maybe a malloc always happens, and the minor sweep frees
+up things for a future allocation attempts? either seem fine.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>http://samsaffron.com/archive/2013/11/22/demystifying-the-ruby-gc</p>
+
+
+		
+		<a href="/blog/2015/03/19/today-i-learn-top/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-19T09:18:00-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/02/21/post-with-the-most/">
 		
 			Post With the Most</a>
@@ -1027,329 +1810,6 @@ you complete, it&#8217;ll immediately schedule another one.</li>
 
 
 <time datetime="2015-01-02T16:27:00-05:00" pubdate data-updated="true">Jan 2<span>nd</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/17/learnin-clojure/">
-		
-			Learnin Clojure</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Joy of Clojure</h2>
-
-<ul>
-<li>Imperative
-
-<ul>
-<li>a sequence of statements mutates program state</li>
-</ul>
-</li>
-<li>maenad (maenadic): wild and unrestrained: a female follower of
-Bacchus, traditionally associated with divine possession and frenzied
-rites</li>
-<li>expression problem
-
-<ul>
-<li>&#8220;The Expression Problem is a new name for an old problem. The
-goal is to define a datatype by cases, where one can add new cases
-to the datatype and new functions over the datatype, without
-recompiling existing code, and while retaining static type safety
-(e.g., no casts).&#8221;</li>
-<li>Java requires these to be declared up front, suffers</li>
-<li>Why the &#8220;expression&#8221; problem? &#8216;The label &#8220;Expression Problem&#8221; puns on expression = &#8220;how much can your language express&#8221; and expression = &#8220;the terms you are trying to represent are language expressions&#8221;.&#8217;</li>
-</ul>
-</li>
-</ul>
-
-
-
-		
-		<a href="/blog/2014/12/17/learnin-clojure/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-17T12:52:00-05:00" pubdate data-updated="true">Dec 17<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/12/10/xorblasm/">
-		
-			Xorblasm</a>
-	</h2>
-	<div class="entry-content">
-		<h2>Frameless App</h2>
-
-<p>Chromeless app, nothing more than a webview really, for quick
-prototyping of mobile web apps.</p>
-
-<p>https://itunes.apple.com/us/app/frameless-full-screen-web/id933580264?mt=8</p>
-
-<h2>Servo</h2>
-
-<p>Parallel browser project written in Rust for parallel execution, memory
-safety, etc. Doesn&#8217;t intend to be a full on user-facing browser, but
-intends to have other folk build on top of it.</p>
-
-<p>http://blog.servo.org/</p>
-
-<h2>&#8220;use strict&#8221;; as opposed to sloppy</h2>
-
-<p>Non <code>"use strict";</code> mode is AKA sloppy mode.</p>
-
-<h2>Safari inspector learnings</h2>
-
-<p>There are THREE TABS:</p>
-
-<ul>
-<li>Resources (ctrl + 1)</li>
-<li>Timelines (ctrl + 2)</li>
-<li>Debugger (ctrl + 3)</li>
-</ul>
-
-
-<p>They control the middle view, but when active they can be clicked again
-to remove the left panel. THAT IS KINDA FUCKED UI, PEOPLE.</p>
-
-<p>Pressing Escape a bunch of times always yields Console, for which there
-is a full on console tab, but in Resources (1) and Debugger (2) you can
-open a debugger on the bottom, but on Timelines I guess it doesn&#8217;t make
-sense to embed that console. Alt+Command+C opens the full on console.
-Functionality on full screen console and embedded console seems the
-same.</p>
-
-<p>Filter vs Search resources:</p>
-
-<ul>
-<li>filter: filename only</li>
-<li>search: searches file contents</li>
-</ul>
-
-
-<h2>TIL <code>sessionStorage</code></h2>
-
-<p>Ridiculous, why is this useful? Why is this fundamentally different than
-a global var?</p>
-
-<h2>(Safari) Webarchive</h2>
-
-<p>http://en.wikipedia.org/wiki/Webarchive</p>
-
-<p>Save all resources associated w a document, used by Safari.</p>
-
-<p>You can go to Resources tab and click the down arrow to download a
-webarchive.</p>
-
-<h2>Tiled Rendering</h2>
-
-<p>Android and pretty much everyone uses tiled rendering.</p>
-
-<p>http://en.wikipedia.org/wiki/Tiled_rendering#cite_note-1</p>
-
-<p>&#8220;Show composited layer borders&#8221; in chrome will show you all the layers
-that get uploaded to the GPU, after which the GPU does compositing. So
-you paint w CPU and then composite on the GPU.</p>
-
-<h2>Continuous Repaint</h2>
-
-<p>Repaints don&#8217;t happen all the time, but you still might want to identify
-which parts of the page are slow to paint, so you can force the renderer
-to repaint all the things all the time by enabling this setting, showing
-and removing sections.</p>
-
-<p>https://developer.chrome.com/devtools/docs/rendering-settings</p>
-
-<h2>Chrome Timeline Counters</h2>
-
-<ul>
-<li>Listeners: [1:4]</li>
-</ul>
-
-
-<p>means that at the start of listening, there was 1 listener, and at the
-end, there were 4.</p>
-
-<h2>Sysdig</h2>
-
-<p>http://www.sysdig.org/</p>
-
-<blockquote><p>Think of it as strace + tcpdump + lsof + awesome sauce.</p></blockquote>
-
-<h2>Gradle daemon and parallel</h2>
-
-<p>Add this to your <code>gradle.properties</code>:</p>
-
-<pre><code>org.gradle.daemon=true
-org.gradle.parallel=true
-</code></pre>
-
-<p>IT DOES WHAT YOU THINK IT DOES.</p>
-
-<h2>Comme de Garcons</h2>
-
-<p>http://en.wikipedia.org/wiki/Comme_des_Gar%C3%A7ons</p>
-
-<p>Heart with eyes logo.</p>
-
-<h2>Cul-de-sac</h2>
-
-<p>http://en.wikipedia.org/wiki/Cul-de-sac</p>
-
-<p>It just means a fucking dead end. DEAD END.</p>
-
-<p>One of these shits:</p>
-
-<p><img src="http://upload.wikimedia.org/wikipedia/commons/b/b2/Cul-de-Sac_cropped.jpg" alt="cul de sac" /></p>
-
-<h2>Live updates in Cordova</h2>
-
-<ul>
-<li>HTTP caching
-
-<ul>
-<li>Make sure the WebView is set up to cache</li>
-<li>Do we have control over that though? What if webview ejects these
-items from cache? Can we prevent that?</li>
-<li>Assuming full, non-forgetting HTTP caching is an option:
-
-<ul>
-<li>user session GET query returns assets that the user should use</li>
-<li>webview downloads them; assets are aggressively cached</li>
-</ul>
-</li>
-<li>But what about</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>HTMLBars attr interpolation</h2>
-
-<pre><code>&lt;div attr=&gt;
-</code></pre>
-
-<p>vs
-,[</p>
-
-<pre><code>&lt;div attr=""&gt;
-</code></pre>
-
-<p>The rule is that quotes ALWAYS means string interpolation. Even if the
-above evals to the same thing, the latter goes through a layer of string
-interpolation.</p>
-
-<h2>Broccoli funnel</h2>
-
-<p>subset of a tree, matched by regex.</p>
-
-<p>https://www.npmjs.com/package/broccoli-funnel</p>
-
-<h2>Ember-cli-addons</h2>
-
-<p>Hahah of course, just including an ember-cli addon doesn&#8217;t mean</p>
-
-<h2>No property syntax in ES6 class syntax</h2>
-
-<p>This is intentional. You have to set all your properties in the
-<code>constructor()</code>.</p>
-
-<h2>popState, router stuff</h2>
-
-<p>I need to fix this:</p>
-
-<p>https://github.com/emberjs/ember.js/pull/9752</p>
-
-<p>Transitions need to be undoable.</p>
-
-<ul>
-<li>pushState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
-
-<ul>
-<li>undo: popState</li>
-</ul>
-</li>
-<li>replaceState transition from &#8216;foo&#8217; -> &#8216;bar&#8217;
-
-<ul>
-<li>undo: replaceState(&#8216;bar&#8217;)</li>
-</ul>
-</li>
-</ul>
-
-
-<p>No such support for back button w HashLocation.</p>
-
-<blockquote><p>Clicking back and then clicking forward, and aborting the transition in the willTransition is still broken. The reason is that when I hit back I now the previous route, but when I hit back and then forward again I don&#8217;t have that info.</p></blockquote>
-
-<p>You don&#8217;t have &#8220;forward&#8221;. Like, the URL you&#8217;re going to?</p>
-
-<h2>onpopstate fires for all changes?</h2>
-
-<p>https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#The_popstate_event</p>
-
-<p>Weird.</p>
-
-<p>http://jsbin.com/coxega/1#foo</p>
-
-<p>Poorly named?</p>
-
-<blockquote><p>Browsers tend to handle the popstate event differently on page load. Chrome (prior to v34) and Safari always emit a popstate event on page load, but Firefox doesn&#8217;t.</p></blockquote>
-
-<h2>.npmignore defaults to .gitignore</h2>
-
-<p>nuff said.</p>
-
-<h2>How do preview a publish?</h2>
-
-<p><code>npm pack</code></p>
-
-<p>Then inspect the tgz.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-10T11:04:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2014</time></div>
 	
 
 

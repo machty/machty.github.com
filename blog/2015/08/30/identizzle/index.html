@@ -1,0 +1,890 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>identizzle  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Identizzle</h2>
+	<div class="entry-content"><h2>Half-open connections</h2>
+
+<p>http://blog.stephencleary.com/2009/05/detection-of-half-open-dropped.html</p>
+
+<p>TL;DR: if you don&#8217;t write, you have no way of knowing whether your
+connection is still alive.</p>
+
+<h2>Does setTimeout wait til until the end of the event loop to start ticking?</h2>
+
+<p>No, it doesn&#8217;t:</p>
+
+<pre><code>  var endOfEventLoop;
+
+  setTimeout(function() {
+    console.log("" + (+new Date() - endOfEventLoop) + " ms after end of event loop");
+  }, 1000);
+
+  var now = +new Date();
+  while((+ new Date()) - now &lt; 900) { /* spin for 900ms */ }
+  endOfEventLoop = +new Date();
+</code></pre>
+
+<p>yields:</p>
+
+<pre><code>  101ms later
+</code></pre>
+
+<p>Why is this important?</p>
+
+<p>Because if you&#8217;re using magic numbers to, say, open a popup after some
+animation has occurred, you&#8217;re opening yourself up to disaster / timing
+errors if, after setting your timeout, a lot of slow computation /
+rendering logic eats up a chunk of that timer.</p>
+
+<h2>Primary Key</h2>
+
+<p>A primary key is just a column with the follow constraints:</p>
+
+<ul>
+<li>NOT NULL</li>
+<li>UNIQUE</li>
+</ul>
+
+
+<p>Note: you can have multiple NOT NULL / UNIQUE columns, but only one can
+be marked as PRIMARY.</p>
+
+<h2>observeOn vs subscribeOn</h2>
+
+<p>http://reactivex.io/documentation/scheduler.html</p>
+
+<blockquote><p>As shown in this illustration, the SubscribeOn operator designates which thread the Observable will begin operating on, no matter at what point in the chain of operators that operator is called. ObserveOn, on the other hand, affects the thread that the Observable will use below where that operator appears. For this reason, you may call ObserveOn multiple times at various points during the chain of Observable operators in order to change on which threads certain of those operators operate.</p></blockquote>
+
+<h1>Roth IRA</h1>
+
+<p>&#8220;IRA&#8221; stannds for Individual Retirement Account.</p>
+
+<p>http://www.rothira.com/roth-ira-taxes-and-tax-issues</p>
+
+<blockquote><p>Roth IRA contributions are not taxed at the time you contribute the funds to your Roth IRA. However, your contributions come from post-tax income. You pay taxes on your income today, but not in the future.</p></blockquote>
+
+<p>What does post-tax income mean? If I make 80k pre-tax, let&#8217;s say my
+post-tax income is 60k. If I want to put $5k into a Roth IRA, then I&#8217;m
+down to 75k and 55k. OH I get it&#8230; I think. The amount the government
+takes from me grows as I make more money. I&#8217;d benefit me if I were able
+to put 5k into Roth before I was taxed, so that then my taxable income
+would be 75k, and I&#8217;d have to pay the gov less than if I were taxed
+based on 80k.</p>
+
+<h1>Random acts of optimization</h1>
+
+<p>http://engineering.riotgames.com/news/random-acts-optimization</p>
+
+<h1>Readline</h1>
+
+<p>TODO: figure out how to get your tmux / bash setup working. Shouldn&#8217;t
+be rocket science. Goal: get irb and psql working.</p>
+
+<h1>ORDBMS</h1>
+
+<p>Object-relational database management system. Postgres is this. MySQL is
+not; MySQL is just RDBMS.</p>
+
+<blockquote><p>An object-relational database (ORD), or object-relational database management system (ORDBMS), is a database management system (DBMS) similar to a relational database, but with an object-oriented database model: objects, classes and inheritance are directly supported in database schemas and in the query language. In addition, just as with pure relational systems, it supports extension of the data model with custom data-types and methods.</p></blockquote>
+
+<p>An Object Database leverages pointers over joins for collecting data,
+where as a the relational approach leverages foreign keys,
+denormalizing, and storing everything in tabular format. Pros to Object
+Database include no mental model mismatch between your programming model
+(often OOP) and database storage; create an obj, modify an obj, save an
+obj &#8211; no need to figure out how to express your object in tabular
+format.</p>
+
+<p>Disadvantages are that any sort of reporting / querying needs to be
+programmed in, whereas relational databases follow set/relational theory
+and if you&#8217;ve got things stored in a tabular format you have way more
+flexibility to modify / query your database in the future.</p>
+
+<h1>Postgres</h1>
+
+<p>Developed at Berkeley as POSTGRES, pioneered many concepts later adopted by
+commercial databases. Sponsored by DARPA. Didn&#8217;t have SQL (btw SQL has
+been around since the 70s). SQL added in Postgres95, became PostgreSQL.</p>
+
+<p>Comes with a bunch of binaries:</p>
+
+<p><code>postgres</code> the server; accepts connection and then starts a worker
+process to handle that connection. (Can verify this; spinning up a
+rails console creates one more postgres worker instance).</p>
+
+<blockquote><p>Thus, the master server process is always running, waiting for client connections</p></blockquote>
+
+<p><code>psql</code> shell looks like <code>mydb=&gt;</code> for regular users, <code>mydb=#</code> for
+superuser.</p>
+
+<p>Commands prefixed with <code>\h</code> are not SQL; everything else is SQL.</p>
+
+<p>A relation = mathemtical term for table.</p>
+
+<p>https://en.wikipedia.org/wiki/Relational_model</p>
+
+<p>All data sets represented as tuples, grouped into relations.</p>
+
+<blockquote><p>&#8220;A relation is a data structure which consists of a heading and an unordered set of tuples which share the same type,&#8221;</p></blockquote>
+
+<h1>Deviations of SQL from relational model</h1>
+
+<p>https://en.wikipedia.org/wiki/Relational_model#SQL_and_the_relational_model</p>
+
+<ul>
+<li>SQL allows duplicate rows; relational model does not. Practically
+though this is avoided by auto-incrementing.</li>
+</ul>
+
+
+<p>SQL apparently also allows anonymous columns, duplicate rows, etc, which
+make things impossible to reference due to indistinguishability.</p>
+
+<p>SQL includes &#8220;NULL&#8221; to imply missing data; comparison of NULL with
+itself is not true, but NULL. (Comparison of anything with NULL yields
+NULL; it means unknown, not determinable). And hence it&#8217;s a form of
+three-valued logic, rather than just boolean.</p>
+
+<p>Law of exclude middle: It states that for any proposition, either that proposition is true, or its negation is true.</p>
+
+<p>Relational model depends on this law, but SQL does not, since it allows
+for NULL. Apparently Codd (relational model inventor) eventually
+suggested a 4-valued logic, probably to differentiate NULL from UNKNOWN,
+only to have a bunch of smug guys suggesting 19 or even 21-valued logic.
+WAT. So Postgres just stuck w 3 valued logic.</p>
+
+<p>SQL also uses NULL for other things than value unknown: the sum of an
+empty set is NULL.</p>
+
+<p>Rows are grouped into tables/relations. Relations grouped into database.
+Databases managed by a single Postgres server instance is a cluster.</p>
+
+<h1>Joins</h1>
+
+<pre><code>SELECT * FROM wats, foos;
+</code></pre>
+
+<p>Gives you a combination</p>
+
+<pre><code> name | name | wat
+------+------+------
+ foo1 | bar1 | wat1
+ foo1 | bar2 | wat2
+ foo2 | bar1 | wat1
+ foo2 | bar2 | wat2
+ foo3 | bar1 | wat1
+ foo3 | bar2 | wat2
+</code></pre>
+
+<p>Or even</p>
+
+<pre><code> name | name | wat  | bazname
+------+------+------+---------
+ foo1 | bar1 | wat1 | baz1
+ foo1 | bar1 | wat1 | baz2
+ foo1 | bar2 | wat2 | baz1
+ foo1 | bar2 | wat2 | baz2
+ foo2 | bar1 | wat1 | baz1
+ foo2 | bar1 | wat1 | baz2
+ foo2 | bar2 | wat2 | baz1
+ foo2 | bar2 | wat2 | baz2
+ foo3 | bar1 | wat1 | baz1
+ foo3 | bar1 | wat1 | baz2
+ foo3 | bar2 | wat2 | baz1
+ foo3 | bar2 | wat2 | baz2
+</code></pre>
+
+<p>If any of those tables had zero rows then zero rows would be selected
+even if there&#8217;s data in the other tables.</p>
+
+<blockquote><p>It is widely considered good style to qualify all column names in a
+join query, so that the query won’t fail if a duplicate column name
+is later added to one of the tables.</p></blockquote>
+
+<p>You could also rewrite the first one as</p>
+
+<pre><code>SELECT * FROM foos INNER JOIN bars ON true;
+</code></pre>
+
+<p>So selecting * seems to select from all relations/tables involved.</p>
+
+<p>Aggregate functions can&#8217;t be used in WHERE clauses, since WHERE clauses
+are limit the input rows, recursive infinite etc blah blah.</p>
+
+<pre><code>SELECT city FROM weather WHERE temp_lo = max(temp_lo);
+</code></pre>
+
+<p>You can change this to a subquery</p>
+
+<pre><code>SELECT city FROM weather
+    WHERE temp_lo = (SELECT max(temp_lo) FROM weather);
+</code></pre>
+
+<p>Aggregates play nicely with GROUP BY clauses: here&#8217;s how you&#8217;d count
+many rows had the same values.</p>
+
+<pre><code>SELECT name, count(*) FROM bars GROUP BY name;
+</code></pre>
+
+<p><code>HAVING</code> is like a WHERE clause for grouping / aggregate functions.
+Specifically, WHERE filters the input rows, and HAVING filters the
+results after aggregation has taken place:</p>
+
+<p>http://stackoverflow.com/a/287496/914123</p>
+
+<h2>Referential integrity</h2>
+
+<p>Making sure foreign keys point to objects in the table.</p>
+
+<h2>Window functions</h2>
+
+<p>Similar to GROUP BY, but instead preserves each input row in the
+output set rather than coalescing them down to just one row; in other
+words, instead of boiling down to a single answer per group, window
+functions add that answer to as a column to each of the input rows.</p>
+
+<pre><code>SELECT depname, empno, salary, avg(salary) OVER (PARTITION BY depname) FROM empsalary;
+</code></pre>
+
+<p>Whoa this is pretty awesome:</p>
+
+<pre><code>SELECT depname, empno, salary,
+       rank() OVER (PARTITION BY depname ORDER BY salary DESC)
+FROM empsalary;
+</code></pre>
+
+<p>&#8220;For each row, the window function is computed across the rows that fall into the same partition as the current row.&#8221;</p>
+
+<p>Kinda like how aggregate functions are computed using rows with the same
+GROUP BY value.</p>
+
+<p>There partitions and there are window frames&#8230;</p>
+
+<p>A window frame is a subset of a partition (or the whole partition
+itself). Many window functions use window frame rows, though some
+use partition rows. By default, if ORDER BY is supplied <em>to the
+over clause, not the whole query</em>, then the window frame consists
+of the all rows from start of the partition through to current row,
+plus any following rows that have same ORDER BY value&#8230;</p>
+
+<p>WAT.</p>
+
+<p>There must be some good reason for this. Can&#8217;t think of it now.</p>
+
+<pre><code>SELECT salary, sum(salary) OVER (ORDER BY salary) FROM empsalary;
+</code></pre>
+
+<p>But the thing to keep in mind I guess is that the <code>ORDER BY</code> here is
+just another way to configure the partition + window frame. Maybe that&#8217;s
+the way to think of it: <code>OVER</code> clauses are used to specify both
+partitions and window frames all in one shot. PARTITION BY is one way,
+that specifies a partition where window frame is the partition, and
+ORDER BY is another, where the PARTITION is all the rows (filtered by
+WHERE) and window set is from start to current row.</p>
+
+<p>Window functions can only be used in the SELECT list and in ORDER BY. I
+guess that makes sense. Can&#8217;t use them in GROUP BY, HAVING, or WHERE,
+since they logically execute after those things.</p>
+
+<h2>Aggregate expressions</h2>
+
+<pre><code>---                   direct arguments                   aggregated arguments
+aggregate_name ( [ expression [ , ... ] ] ) WITHIN GROUP ( order_by_clause ) [ FILTER ...
+</code></pre>
+
+<blockquote><p>The argument expressions preceding WITHIN GROUP, if any, are called direct arguments to distinguish them from the aggregated arguments listed in the order_by_clause. Unlike normal aggregate arguments, direct arguments are evaluated only once per aggregate call, not once per input row.</p></blockquote>
+
+<p>So the stuff in <code>WITHIN GROUP(...)</code> are evaluated once per input row. So
+ideally we should minimize the stuff we put in there.</p>
+
+<blockquote><p>This means that they (direct arguments) can contain variables only if those variables are grouped by GROUP BY;this restriction is the same as if the direct arguments were not inside an aggregate expression at all.</p></blockquote>
+
+<pre><code>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY income) FROM households;
+ percentile_disc
+-----------------
+           50489
+</code></pre>
+
+<p>0.5 is a direct argument; it makes no sense for it to be substituted
+with a value that varies across rows.</p>
+
+<p>So for example you could do:</p>
+
+<pre><code>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums;
+ percentile_disc
+-----------------
+               3
+</code></pre>
+
+<p><code>percentile_disc</code> is an aggregate function. It&#8217;s going to spit out
+values that are the result of coalescing rows. It wouldn&#8217;t make sense
+for me to try and add the column <code>name</code> to this result, because the
+<code>percentile_disc</code> result is based on coalesced rows:</p>
+
+<pre><code>SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums;
+ERROR:  column "nums.name" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num...
+               ^
+</code></pre>
+
+<p>The only way that&#8217;d make sense would be to GROUP BY <code>name</code> so that the
+aggregate function is only being applied to groups grouped by name
+rather than all of the input rows at once:</p>
+
+<pre><code>SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums GROUP BY name;
+  name  | percentile_disc
+--------+-----------------
+ alex   |               3
+ justin |               2
+(2 rows)
+</code></pre>
+
+<p>Wow this stuff is weird to talk about.</p>
+
+<p>Note that <code>count</code> is not an &#8220;ordered set&#8221; aggregate:</p>
+
+<pre><code>SELECT name, count(*) WITHIN GROUP (ORDER BY num) from nums GROUP BY name;
+ERROR:  count is not an ordered-set aggregate, so it cannot have WITHIN GROUP
+LINE 1: SELECT name, count(*) WITHIN GROUP (ORDER BY num) from nums ...
+                     ^
+</code></pre>
+
+<p>It barfs because I tried to provide a <code>WITHIN GROUP</code> clause to a non
+ordered set aggregate <code>count</code>. If I remove my WITHIN GROUP clause, I
+get:</p>
+
+<pre><code>SELECT name, count(*) from nums GROUP BY name;
+  name  | count
+--------+-------
+ alex   |     6
+ justin |     3
+(2 rows)
+</code></pre>
+
+<p>So what is an ordered set aggregate? It just means an aggregate fn
+whereby performing the computation requires some kind of ordering. My
+hunch is that ORDER BY inside of WITHIN GROUP isn&#8217;t used just for
+&#8220;sorting&#8221; the rows, but for defining the key by which they&#8217;ll be
+grouped. Or that&#8217;s just my bullshit way of fitting it into my brain.</p>
+
+<pre><code>SELECT count(*) as unfiltered, count(*) FILTER (WHERE i &lt; 5) as filtered FROM generate_series(1,10) AS s(i);
+ unfiltered | filtered
+------------+----------
+         10 |        4
+</code></pre>
+
+<p>So why <code>count(*)</code> and not <code>count()</code>? Because <code>count</code> is an aggregate
+function I guess, and that&#8217;s one why to distinguish it from something,
+say, <code>version()</code>.</p>
+
+<h2>Type casts</h2>
+
+<pre><code>CAST ( expression AS type )
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>expression::type
+</code></pre>
+
+<p>You can cast any string literal:</p>
+
+<pre><code>select '4.123'::real;
+ float4
+--------
+  4.123
+(1 row)
+</code></pre>
+
+<p>Postgres implicitly casts things for you, e.g. assigning values to
+columns (because the column type is obviously known). In some cases you
+have to be explicit; Postgres works this way so as to not surprise you
+with silent type casts.</p>
+
+<h2>Collation</h2>
+
+<p>http://stackoverflow.com/questions/4538732/what-does-collation-mean</p>
+
+<p>It means how words/letters/phonemes are stored.</p>
+
+<h2>Arrays</h2>
+
+<p>must be rectangular</p>
+
+<pre><code>SELECT ARRAY[ARRAY[1],ARRAY[1,2]];
+ERROR:  multidimensional arrays must have array expressions with matching dimensions
+</code></pre>
+
+<h2>Composites</h2>
+
+<pre><code>CREATE TYPE myrowtype AS (f1 int, f2 text);
+SELECT ('1',2)::myrowtype;
+</code></pre>
+
+<h2>Order of expression evaluation</h2>
+
+<p>Left-to-right short-circuit eval is not a thing:</p>
+
+<pre><code>SELECT true OR somefunc();
+</code></pre>
+
+<p>Hence the above <em>probably</em> won&#8217;t run <code>somefunc</code>, but not because it&#8217;s on
+the right and the left side evals to true, but because the evaluator&#8217;s
+already gone thrugh and decided that it can do less work by only using
+the left side.</p>
+
+<p>CASE constructs defeat optimizations by forcing evaluation, so you could
+write the above as</p>
+
+<pre><code>SELECT CASE WHEN true THEN true ELSE somefunc() END;
+</code></pre>
+
+<p>or</p>
+
+<pre><code>SELECT CASE WHEN true THEN true ELSE false END;
+</code></pre>
+
+<p>That&#8217;s pretty awesome. Declarative all the way. Let the evaluator figure
+out the best way to go.</p>
+
+<p>One gotcha is though is that the evaluator might try and simplify
+constant subexpressions (subexpressions that don&#8217;t depend on any rows
+being looked up), so something like this:</p>
+
+<pre><code>SELECT CASE WHEN num &gt; 0 THEN num ELSE 1/0 END FROM nums;
+ERROR:  division by zero
+</code></pre>
+
+<p>This happens because <code>num</code> is dynamic and the evaluator will evaluate
+the <code>1/0</code> before even running the query, causing the divide by zero
+error.</p>
+
+<h2>Foreign keys</h2>
+
+<blockquote><p>A foreign key must reference columns that either are a primary key or form a unique constraint. This means that the referenced columns always have an index (the one underlying the primary key or unique constraint); so checks on whether a referencing row has a match will be efficient.</p></blockquote>
+
+<p>Makes sense:</p>
+
+<pre><code>CREATE TABLE lols ( thing_id integer REFERENCES nums(num) );
+ERROR:  there is no unique constraint matching given keys for referenced table "nums"
+</code></pre>
+
+<blockquote><p>Since a DELETE of a row from the referenced table or an UPDATE of a referenced column will require a scan of the referencing table for rows matching the old value, it is often a good idea to index the referencing columns too.</p>
+
+<p>Because this is not always needed, and there are many choices available on how to index, declaration of a foreign key constraint does not automatically create an index on the referencing columns.</p></blockquote>
+
+<p>So if an article has many comments, then <code>comments.article_id</code> is an FK,
+hence <code>article.id</code> must have unique constraint. But if the referenced
+article is deleted, then postgres needs to scan the <code>comments</code> table for
+all rows referencing the deleted article to perform some logic on it. So
+you probably want to index <code>comments.article_id</code>. That said you probably
+want to index it anyway since you&#8217;ll be doing many comment lookups for a
+given article.</p>
+
+<h2>Postgres wiki</h2>
+
+<p>https://wiki.postgresql.org/wiki/Main_Page</p>
+
+<p>This seems surprisingly badass.</p>
+
+<h2>Schemas / clusters</h2>
+
+<p>The only data shared b/w databases is users and groups.</p>
+
+<p>But schemas aren&#8217;t kept so separate; a database can have multiple
+schemas, multiple schemas can have tables w the same name.</p>
+
+<h2>Table Expressions</h2>
+
+<p>Think of WHERE, GROUP BY, HAVING and others as modifiers that ultimately
+produce a table that you can select from. Holy shit that would have made
+my life so much easier if I knew that.</p>
+
+<h2>Joins</h2>
+
+<pre><code>FROM T1 CROSS JOIN T2isequivalenttoFROM T1 INNER JOIN T2 ON TRUE
+</code></pre>
+
+<p>Note that <code>WHERE</code> filtering happens after <code>ON</code> criteria. Again this is a
+case of JOIN just being a thing that produces another virtual table and
+WHERE filters whatever table.</p>
+
+<h2>Subqueries</h2>
+
+<p>Use them when you can&#8217;t use joins:</p>
+
+<ul>
+<li>subquery is a grouping / aggregation</li>
+</ul>
+
+
+<p>VALUES can also be a subquery.</p>
+
+<h1>Sedition</h1>
+
+<p>conduct or speech inciting rebellion against an authority or monarch</p>
+
+<h1>Discount brokerage</h1>
+
+<p>https://en.wikipedia.org/wiki/Discount_brokerage</p>
+
+<p>Much cheaper than traditional brokerage but doesn&#8217;t offer financial
+advice.</p>
+
+<h1>Open-ended mutual funds</h1>
+
+<p>Open-ended in that if you buy into a mutual fund, the shares granted to
+you are created out of thin air, and the price of the share is based on
+the total market value divided by the number of shares present.</p>
+
+<h1>Intestacy</h1>
+
+<p>State of having died but not written a will. Intestacy law deals with
+divvying up inheritance for folks who didn&#8217;t write wills.</p>
+
+<h1>Estate tax</h1>
+
+<p>Only the largest 0.2% estates in US pay estate tax since it&#8217;s exempt up
+to $5.5 million.</p>
+
+<h1>Traditional IRA</h1>
+
+<ul>
+<li>put in money tax free when you&#8217;re in a high tax bracket</li>
+<li>withdraw money taxed at a (presumably) lower tax bracket when you&#8217;re older</li>
+</ul>
+
+
+<h1>Forvo.com</h1>
+
+<p>Pronunciation dictionary; let&#8217;s people upload recordings of
+pronunciation into a map so that you can see how different regions
+pronounce things.</p>
+
+<h1>Inner Join conditions via WHERE/JOIN</h1>
+
+<p>Already know you can do</p>
+
+<pre><code>SELECT a,b WHERE a.wat = b.foo AND a.bleh &gt; 5;
+</code></pre>
+
+<p>But you can also move the join conditions to the JOIN &#8230; ON:</p>
+
+<pre><code>SELECT a INNER JOIN b ON (a.wat = b.foo) WHERE a.bleh &gt; 5;
+</code></pre>
+
+<p>These are equivalent, whichever you choose is a matter of style.</p>
+
+<p>Note that it only applies to INNER joins: the WHERE version of the above
+only produces INNER joins; if you want outer, use the OUTER JOIN ON
+syntax.</p>
+
+<blockquote><p>The ON or USING clause of an outer join is not equivalent to a WHERE condition, because it results in the addition of rows (for unmatched input rows) as well as the removal of rows in the final result.</p></blockquote>
+
+<p>Whereas INNER joins are reduced unions of both tables, and hence
+expressable as WHERE, which is used for filtering out rows. In other
+words, you can&#8217;t <em>add</em> rows to a result set with WHERE; WHERE is only
+used for filtering, and OUTER joins can add rows to the result set.</p>
+
+<h1>The WHERE clause</h1>
+
+<p>Typically references at least one column referenced in table generated
+in the FROM clause.</p>
+
+<h1>GROUP BY</h1>
+
+<blockquote><p>Grouping without aggregate expressions effectively calculates the set of distinct values in a col- umn. This can also be achieved using the DISTINCT clause (see Section 7.3.3).</p></blockquote>
+
+<p>Makes sense.</p>
+
+<p>We can actually verify that the postgres evaluator reduces this to the
+exact same query plan:</p>
+
+<pre><code>diff &lt;(psql -c "EXPLAIN SELECT DISTINCT name FROM foos") \
+     &lt;(psql -c "EXPLAIN SELECT * FROM foos GROUP BY name")
+</code></pre>
+
+<h1>Objects instead of .publish().connect()</h1>
+
+<pre><code>Ember.Object.extend({
+  firstName: "alex",
+  lastName:  "matchneer",
+
+  // using lazy computed properties
+  fullName: computed('firstName', 'lastName', function() {
+    return `${this.get('firstName') ${this.get('lastName')}`;
+  }),
+
+  // using lazy computed properties
+  fullName: computed(function() {
+    return zip('firstName', 'lastName', (first, last) =&gt; `${first} ${last}`);
+  }).live(),
+
+  time: service(),
+  completedInWords: computed('completedAt', 'time.sharedTicker', function(completedAt) {
+    // hmm this doesn't need to be live
+    return moment(this.get('completedAt')).agoInWords();
+  }),
+
+  liveTimer: liveComputed(function() {
+    return this.ref('firstName').flatMapLatest((firstName) =&gt; {
+      return Observable.interval(500);
+    });
+  }),
+
+  startWeighing() {
+    this.set('isWeighing', true);
+  },
+
+  isWeighing: false,
+  rawWeights: computed('isWeighing', function() {
+    if (this.get('isWeighing')) {
+      return interval(200).map(() =&gt; Math.random());
+    } else{
+      return null; // or empty observable
+    }
+  }),
+
+  // by subscribing to 'this', we're subscribing to lifetime of object.
+  // so we're guaranteed that this gets evaluated immediately upon creation.
+  // We want this behavior here
+  isStillReceivingData: computed('this', function() {
+    return this.ref('rawWeights').flatMapLatest(() =&gt; {
+      return timer(500).map(_ =&gt; false).startWith(true);
+    });
+  }),
+
+  doStuff: computed(function() {
+  }).subscribe(), // this means is live for lifetime of object
+                  // you know what else is live during lifetime of object?
+                  // action handlers...
+
+  doStuff: subscribe('actions.startDoingStuff', function() {
+    alert("wat");
+  }),
+});
+
+
+let Timer = Ember.Object.extend({
+  hasElapsed: false,
+  ms: 0,
+  init() {
+    this._super();
+    this.timerId = Ember.later(() =&gt; {
+
+    }, 500);
+  }
+});
+
+Ember.Object.extend({
+  hasReceivedDataTimer: computed('foo', function() {
+    return Timer.create({ ms: 100 });
+  }),
+  hasReceivedDataRecently: alias('hasReceivedDataTimer.hasElapsed'),
+});
+</code></pre>
+
+<h2>Maybe about to push the envelope</h2>
+
+<p>https://en.wikipedia.org/wiki/Semantic_satiation</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T13:32:00-04:00" pubdate data-updated="true">Aug 30<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2015/08/30/identizzle/';
+        var disqus_url = 'http://machty.github.com/blog/2015/08/30/identizzle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

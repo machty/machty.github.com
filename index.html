@@ -112,6 +112,1120 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2015/12/29/tarpit/">
+		
+			Tarpit</a>
+	</h2>
+	<div class="entry-content">
+		<p>Notes from tarpit reading: http://shaffner.us/cs/papers/tarpit.pdf</p>
+
+<p>OOP: intentionally couple state to related behavior</p>
+
+<p>No Silver Bullet, what makes software hard: Complexity, Conformity, Changeability, Invisibility</p>
+
+<p>Dijkstra: testing is hopelessly inadequate&#8230; it can be used very effectively to show the presence of bugs but never to show their absence.</p>
+
+<p>State hinders Informal Reasoning, reasoning about expected behavior from the inside, with knowledge of internal code.</p>
+
+<p>Control Complexity: complexity due to having to be concerned about the order of events. Languages with explicit flow control make you think about this.</p>
+
+<p>a = b + 3
+c = d + 2
+e = f * 4</p>
+
+<p>No reason for this flow, but programmer has to over-specify it (and compilers have to go to lengths to know that the order can be safely ignored). Accidental complexity:</p>
+
+<ol>
+<li>artificial, totally ignorable ordering imposed on programmer</li>
+<li>compiler work is done to optimize it away</li>
+</ol>
+
+
+<p>Note that these two forms of complexity only apply given the assumption that the above code is for an imperative language with guarantees about order of execution; Oz is an example of a programming language that didn&#8217;t specify this.</p>
+
+<p>&#8220;Running a test in the presence of concurrency with a known initial state and set of inputs tells you nothing at all about what will happen the next time you run that very same test with the very same inputs and the very same starting state&#8230; and things can’t really get any worse than that.&#8221;</p>
+
+<p>CLOS: Common Lisp Object System, with multiple dispatch (methods can specialize on any/all required arguments, unlike classic OOP single dispatch).</p>
+
+<p>Problems with OOP encapsulation:</p>
+
+<ul>
+<li>access to state can still be spread all over the place, e.g. in presence of inheritance</li>
+<li>encapsulation strongly biased toward single-object constraints; not a lot of help in coordinating multiple object states</li>
+</ul>
+
+
+<p>Identity and State</p>
+
+<p>Object identity: in OOP, each object is considered uniquely identifiable regardless of attributes. This is intensional identity (as opposed to extensional where objects are the same if their attributes are). Intensional identity opposes relational algebra view of the world.</p>
+
+<p>But OOP is complicated when mutability isn&#8217;t needed, and you add concepts like Value Objects where equality is based on values and not identity (in other words, it brings back extensional identity).</p>
+
+<p>https://en.wikipedia.org/wiki/Value_object</p>
+
+<p>Immutable small objects whose equality is not based on identity. In int is an int forever, but objects can be mutated, so if you want an object that acts like, say, an int, you want a value object.</p>
+
+<p>TL;DR C++ has copy-by-value because C does, hence both support value objects. Java has no native support for value objects, but you can get a functionally similar/equivalent thing by passing around references to immutable objects (VALJO, VALue Java Object, where all attributes of the obj are final and doesn&#8217;t contain other objects w mutable state).</p>
+
+<p>Object Identity exists because state exists, and is a source of error due to mental switching between the meaning of equality. (TODO: why isn&#8217;t this a problem in Clojure? You have to mentally switch between values and atoms&#8230; how is that any different?).</p>
+
+<p>Hmm I feel like there&#8217;s something I&#8217;m not quite grasping about what people mean when they say state. Seems like everything has state? I dunno.</p>
+
+<p>Summary: conventional OOP suffers from state-derived and control-derived complexity.</p>
+
+<p>Functional Languages</p>
+
+<p>Pure: Haskell. Impure: ML, in that it advocates avoiding but still permits state.</p>
+
+<p>Referential transparency: an expression (e.g. function calls) are replaceable by a value&#8230; nope, i guess it&#8217;s just that a function called with the same args will always return the same value.</p>
+
+<p>Control:</p>
+
+<p>Still an implicit left-to-right sequencing of operations, but fortunately control flow like loops are avoided in favor of fold/map.</p>
+
+<p>Kinds of state</p>
+
+<p>When most people talk about state they really mean mutable state.</p>
+
+<p>Stateful methods can be replaced by functions where the state is passed in, and a new version of the state is returned, with the expectation that the new state must be passed in again to future calls (because referential transparency means the same function invocation always returns the same thing).</p>
+
+<p>This paper seems to distinguish b/w procedures and functions based on a procedure having state&#8230; it runs and can manipulate inner state. But a functional only returns values based on what was passed in and has new inner state.</p>
+
+<p>BUT, this is just using FP to simulate state. In principle, you could build functional programs by just passing in the global god state of the app into every function and just chaining it along, which brings back the problem of single pool of global variables. Ref transparency++, ease of reasoning&#8211;. But this is an extreme example.</p>
+
+<p>Argument: state increases modularity:</p>
+
+<p>&#8220;Working within a stateful framework it is possible to add state to any component without adjusting the components which invoke it.&#8221;</p>
+
+<p>With FP, you have ripple effects where adding &#8220;state&#8221; to a function means that state needs to be provided by a caller of a caller of a caller, etc, e.g. adding that extra state parameter.</p>
+
+<p>It&#8217;s a tradeoff between hiding state and FP where you know exactly what will happen.</p>
+
+<p>But in stateful PLs, you never know if there will be side-effects; you have to inspect all code to really know.</p>
+
+<p>&#8220;As with the discipline of (static) typing, it is trading a one-off up-front cost for continuing future gains and safety (“one-off” because each piece of code is written once but is read, reasoned about and tested on a continuing basis).&#8221;</p>
+
+<p>In other words, it&#8217;s convenient in the moment to have state (the one-off time you write that stateful code), but for all future readers/reasoners, they have to deal with the fallout of losing the guarantee of statelessness.</p>
+
+<p>Monads are kind of a way to have the cake and it it too, but makes it possible to create a stateful sub-language within Haskell, even if technically it&#8217;s properly typed as such. But still, monads have been insufficient in helping widespread FP adoption.</p>
+
+<p>Logic Programming</p>
+
+<p>State your axioms and desired goals, let the system build the formal proof for each solution. Prolog is seminal logic PL.</p>
+
+<p>&#8220;It is worth noting that a single Prolog program can be both correct when read in the first way, and incorrect (for example due to non-termination) when read in the second.&#8221;</p>
+
+<p>This is because Prolog axioms aren&#8217;t read as purely logical axioms but are applied sequentially, which is why the order of axioms can affect the outcome.</p>
+
+<p>Control issues</p>
+
+<p>LTR and top to bottom dependencies exist. Also, extra-logical features such as cuts (which prevent a restriction of control flow, presumably to prevent non-termination) add complexity.</p>
+
+<p>Oz gives you flexibility of control rather than depth-first prolog, but rather than sprinkling these into the code, it&#8217;s at a separate level; in other words, the way you execute code is configurable, not within the code itself (a contamination of control complexity).</p>
+
+<p>Classifying state:</p>
+
+<p>Goal: determine origins of state, hope that most state turns out to be accidental.</p>
+
+<p>All data is either directly provided to system (input) or derived.</p>
+
+<p>Derived data is either immutable (used only for display) or mutable (because requirements specify user should update that data)</p>
+
+<p>But just because all user input data is essential does not mean it must result in essential state. If it&#8217;s avoidable, it&#8217;s accidental state.</p>
+
+<p>Input Data:</p>
+
+<ul>
+<li>there&#8217;s a possibility of referring to that data in the future: essential state</li>
+<li>there is no possibility (e.g. it&#8217;s used to cause some side effect but then can be forgotten)</li>
+</ul>
+
+
+<p>Essential Derived Data - immutable</p>
+
+<p>Always rederivable, accidental state if stored.</p>
+
+<p>Essential Derived Data - mutable</p>
+
+<p>I don&#8217;t understand this.</p>
+
+<p>Accidental Derived Data</p>
+
+<p>Ideal world:</p>
+
+<p>No caches, no stores of derived calculations of any kind. Result: all state is visible to the user (or tester) of the system, since (disallowed) caching is the main source of hidden state. If you&#8217;re not caching, then everything you calculate is presented to the user.</p>
+
+<p>Control</p>
+
+<p>Control is accidental since it&#8217;s rare if ever that requirements are a view of execution.</p>
+
+<p>Concurrency is accidental; assuming zero time computation, user doesn&#8217;t care whether something happens in sequence or parallel.</p>
+
+<p>Real world</p>
+
+<ul>
+<li>state is required because most systems have state as part of their true essence (wtf does this mean?)</li>
+<li>control is accidental, but practically (and for efficiency purposes) it is needed, same goes w state (caching and what not)</li>
+</ul>
+
+
+<p>Formal Specification</p>
+
+<ul>
+<li>property-based: <em>what</em> is required rather than how. Includes algebraic approaches such as Larch and OBJ</li>
+<li>model-based / state-based: construct a model, often stateful, and specify how it must behave. Implies a stateful approach for how to solve the problem.</li>
+</ul>
+
+
+<p>Sometimes ideal world approach (no accidental state, derive everything) does not best model program. Example: derived data is dependent on both series of user inputs over time, AND its own previous values. In such a case it can help to maintain accidental state (I don&#8217;t get this&#8230; why is this different than the conveniences of storing derived state that isn&#8217;t strictly historical?). Example: position of computer controlled opponent in interactive game: technically position is derivable as f(initialPosition, allMovementsSince), but &#8220;this is not the way it is most naturally expressed&#8221;. Go fuck yourself and your loose definition of what is natural.</p>
+
+<p>Required Accidental Complexity:</p>
+
+<ul>
+<li>perf
+
+<ul>
+<li>avoid explicit management of accidental state; instead: simply declare what accidental state should be use, leave to separate infrastructure to maintain.</li>
+</ul>
+</li>
+<li>ease of expression: (e.g. position of computer controlled opponent)
+
+<ul>
+<li>solution: pretend user is typing in this derived state, i.e. pretend that it is essential input</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Relational Model</p>
+
+<ul>
+<li>structure of data</li>
+<li>manipulating data</li>
+<li>maintaining integrity and consistency of state</li>
+<li>insistence on separation b/w logical and physical layers of system</li>
+</ul>
+
+
+<p>Data independence: app / logical model is separate from the data is actually stored</p>
+
+<p>Structure: use of relations to represent all data
+Manipulation: a means to specify derived data
+Integrity: constraints
+Data Independence: clear separation is enforced b/w logical data and physical representation</p>
+
+<p>Base Relations: raw tables
+Derived Relations: Views: defined in terms of other relations</p>
+
+<p>Access path independence:</p>
+
+<p>Relational structuring allows you to defer access paths (how the data will be queried, join, etc). Before relational model, you had to decide up front, e.g, whether employees would live inside top level departments, or departments within top level employees. This is the hierarchical approach. The network approach is a little better in that you can add cycles but in the end you&#8217;re still defining the primary retrieval requirements up front at the expense of not knowing what secondary/future retrieval requirements you&#8217;ll have. Again, joining is the canonical example.</p>
+
+<p>OOP and XML suffer same hierarchical problems. Nesting. Who owns what. etc.</p>
+
+<p>Manipulation: relational algebra</p>
+
+<p>Restrict: unary operation for selecting subset (where clause?)
+Project: unary op which creates a new relation w various attributes removed (not added?)
+Product: cartesian product of tables (e.g. SELECT FROM foo, wat;)
+Union: binary operation, creates relation w all records in either arg relation
+Intersection: binary operation, creates a relation consisting of all records in both
+Difference: xor
+Join: binary operation construction all possible records that result from identical attrs
+Divide: ternary operation returning all records of first arg with occur in second arg associated w each record of 3rd arg (wat?</p>
+
+<p>Functional Relational Programming</p>
+
+<p>All essential state comes in the form of relations, and essential logic is expressed using relational algebra extended w pure user defined functions</p>
+
+<p>Step 1, specify each of the following</p>
+
+<p>Essential State: relational definition of stateful components
+Essential Logic: Derived-relation defitions, integrity constraints, and pure functions
+Accidental State and Control: declarative specification of a set of perf optimizations for the system
+Other: user and system interfaces for the outside world</p>
+
+<p>Essential state</p>
+
+<p>Relations, tables, columns (the schema, not actual rows/records)
+Data should only be considered essential if directly input by user.</p>
+
+<p>Essential Logic</p>
+
+<p>Pure functions about data transformation, set of db constraints.</p>
+
+<p>Note that we ignore &#8220;denormalization for perf&#8221; for now because we&#8217;re just talking about formal specifications; the physical storage may or may not mirror what&#8217;s being specified here.</p>
+
+<p>Accidental State and Control</p>
+
+<p>Specify 1) what state should exist, 2) what physical storage mechanism used</p>
+
+<ul>
+<li>state-related hint: e.g. some derived-relvar should be stored rather than recalculated</li>
+<li>second kind of state-related hint: infrequently used subset of relvar should be stored elsewhere (e.g. partitioning a table)</li>
+</ul>
+
+
+<p>Control side:</p>
+
+<ul>
+<li>tweaking the evaluator</li>
+</ul>
+
+
+<p>TL;DRs:</p>
+
+<p>Declarative lets infrastructure optimize for you, e.g. avoid relational <code>intersection</code> if it can be determined that two groups are mutually exclusive, not possible/easy with imperative.</p>
+
+<p>Normalized relational everything: avoids subjective bias about data access paths. OOP and XML generally force you to do the opposite, choosing nestings ahead of time and other things.</p>
+
+<p>Control is <em>avoided</em>  relational approach (think of SQL; no order of evaluation; this is intentional).</p>
+
+<p>Explicit parallelism is avoided, but allows for possibility for separated accidental control if required; whether it&#8217;s parallel or not shouldn&#8217;t matter to anyone other than implementor, i.e. if it really improves things, it&#8217;ll be parallel, but functionally it&#8217;s the same interface for infrastructure consumers.</p>
+
+<p>Code Volume</p>
+
+<p>Focus on true essentials avoids accidental complexity.</p>
+
+<p>Data Abstraction</p>
+
+<p>Creation of compound data types; to be avoided. Why:</p>
+
+<ul>
+<li><p>Subjective: like baking in data paths in OOP/XML-ish representation of data, is brittle to future use cases. Pre-existing bias will force future use cases into inappropriate reuse of pre-established biased structures. (I like this; this is a source of refactors, when you know what you&#8217;re doing is gross because of some new use case)</p></li>
+<li><p>Data Hiding: constructing giant objects often causes unneeded, irrelevant data to be supplied to function, and <em>which</em> data actually gets used is hidden at call site, hurts informal reasoning and testability. Avoiding composite objects helps avoiding this problem.</p></li>
+</ul>
+
+
+<p>FRP (func rel) opens door to</p>
+
+<ul>
+<li>perf (decided by infrastructure)</li>
+<li>different dev teams focusing on different components (by components we mean accidental vs essential vs interfacing)&#8230; this arg seems weak, or i don&#8217;t really understand it</li>
+</ul>
+
+
+<p>Allowed Types</p>
+
+<p>Can create limited types for essential state/logic components:</p>
+
+<ul>
+<li>disjoint union / enumeration types</li>
+<li>NO product types (types w subsidiary components)</li>
+</ul>
+
+
+<p>https://en.wikipedia.org/wiki/Algebraic_data_type</p>
+
+<p>Algebraic data type is a kind of composite type; type formed by combining other types. Product types (tuples and records), and sum types (disjoint unions or variant types). So you can have things like</p>
+
+<p>Action = UserClickEvent | UserDragEvent | Blah</p>
+
+<p>This is a sum type; the total values an Action could be are the total possible values of its variants, summed.</p>
+
+<p>A Product type is, say, a type, e.g. (Int, String), where the total possible values are all the possible values of variants, multiplied (hence product).</p>
+
+<p>Why sum and not product? because Sums don&#8217;t add new data types, really, they just categorize for pattern matching and other things. Whereas products create new compound datatypes.</p>
+
+<p>Example app</p>
+
+<p>Derived internal relations:</p>
+
+<ul>
+<li>RoomInfo, extend(Room, (roomSize = width*breadth))
+
+<ul>
+<li>so it&#8217;s a room info with another type</li>
+</ul>
+</li>
+<li>Acceptance takes accepted Decisions and strips away accepted bool. So an Acceptance is a Decision without an accepted flag. I like this because we&#8217;re keeping the domain simple; if we&#8217;re dealing with Acceptances, we don&#8217;t have to worry that it&#8217;s an acceptance that&#8217;s not an acceptance; the domain is constrained properly.</li>
+<li>Rejection is the opposite, but has the same attrs</li>
+</ul>
+
+
+<p>Accidental state and control</p>
+
+<p>This part is interesting because it suggests that defining relations (like you do when designing/committing a DB schema) is a premature accidental complexity. This paper suggests that you take your essential state types and hint that some of them should be cached. In relational databases, if you CREATE TABLE, you&#8217;re creating a cache. I guess this should be obvious. But the thing to note is that what this paper is suggesting is that there is a level above this at which we should be thinking. Everything below is accidental. Whether you CREATE TABLE or recompute on the fly is accidental. The user doesn&#8217;t care.</p>
+
+<p>So, hints:</p>
+
+<p>declare store PropertyInfo : create a cache / table for PropertyInfo rather than re-calc</p>
+
+<p>declare store shared Room Floor : denormalize Room and Floor into shared storage structure (hmm, why? is this a join table?)</p>
+
+<p>declare store separate Property (photo) : split out photo from other properties (perf hint).</p>
+
+<p>TODO: read Kow79</p>
+
+<p>Simple Made Easy</p>
+
+<p>Classes as namespaces = bad.</p>
+
+<p>Syntax is inferior to data.</p>
+
+<p>Switching/pattern matching allegedly complects multiple pairs of who&#8217;s going to do something and what happens&#8230; how is this different than multi-methods?</p>
+
+<p>variables complect value and time (they are state i guess)</p>
+
+<p>for loops complecting by explicitly specifying how to do something.</p>
+
+<p>folds still complect because they go from left to right&#8230;</p>
+
+<p>Polymorphism a la cart, via Clojure protocols. 1) define data structures, 2) definitions of sets of functions, and 3) connect them together.</p>
+
+<p>Favor declarative Prolog-ish logic programming to littering conditionals all over the place.</p>
+
+<p>Resource contention is inherent complexity, not your fault.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-29T09:41:00-05:00" pubdate data-updated="true">Dec 29<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/08/30/identizzle/">
+		
+			Identizzle</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Half-open connections</h2>
+
+<p>http://blog.stephencleary.com/2009/05/detection-of-half-open-dropped.html</p>
+
+<p>TL;DR: if you don&#8217;t write, you have no way of knowing whether your
+connection is still alive.</p>
+
+<h2>Does setTimeout wait til until the end of the event loop to start ticking?</h2>
+
+<p>No, it doesn&#8217;t:</p>
+
+<pre><code>  var endOfEventLoop;
+
+  setTimeout(function() {
+    console.log("" + (+new Date() - endOfEventLoop) + " ms after end of event loop");
+  }, 1000);
+
+  var now = +new Date();
+  while((+ new Date()) - now &lt; 900) { /* spin for 900ms */ }
+  endOfEventLoop = +new Date();
+</code></pre>
+
+<p>yields:</p>
+
+<pre><code>  101ms later
+</code></pre>
+
+<p>Why is this important?</p>
+
+<p>Because if you&#8217;re using magic numbers to, say, open a popup after some
+animation has occurred, you&#8217;re opening yourself up to disaster / timing
+errors if, after setting your timeout, a lot of slow computation /
+rendering logic eats up a chunk of that timer.</p>
+
+<h2>Primary Key</h2>
+
+<p>A primary key is just a column with the follow constraints:</p>
+
+<ul>
+<li>NOT NULL</li>
+<li>UNIQUE</li>
+</ul>
+
+
+<p>Note: you can have multiple NOT NULL / UNIQUE columns, but only one can
+be marked as PRIMARY.</p>
+
+<h2>observeOn vs subscribeOn</h2>
+
+<p>http://reactivex.io/documentation/scheduler.html</p>
+
+<blockquote><p>As shown in this illustration, the SubscribeOn operator designates which thread the Observable will begin operating on, no matter at what point in the chain of operators that operator is called. ObserveOn, on the other hand, affects the thread that the Observable will use below where that operator appears. For this reason, you may call ObserveOn multiple times at various points during the chain of Observable operators in order to change on which threads certain of those operators operate.</p></blockquote>
+
+<h1>Roth IRA</h1>
+
+<p>&#8220;IRA&#8221; stannds for Individual Retirement Account.</p>
+
+<p>http://www.rothira.com/roth-ira-taxes-and-tax-issues</p>
+
+<blockquote><p>Roth IRA contributions are not taxed at the time you contribute the funds to your Roth IRA. However, your contributions come from post-tax income. You pay taxes on your income today, but not in the future.</p></blockquote>
+
+<p>What does post-tax income mean? If I make 80k pre-tax, let&#8217;s say my
+post-tax income is 60k. If I want to put $5k into a Roth IRA, then I&#8217;m
+down to 75k and 55k. OH I get it&#8230; I think. The amount the government
+takes from me grows as I make more money. I&#8217;d benefit me if I were able
+to put 5k into Roth before I was taxed, so that then my taxable income
+would be 75k, and I&#8217;d have to pay the gov less than if I were taxed
+based on 80k.</p>
+
+<h1>Random acts of optimization</h1>
+
+<p>http://engineering.riotgames.com/news/random-acts-optimization</p>
+
+<h1>Readline</h1>
+
+<p>TODO: figure out how to get your tmux / bash setup working. Shouldn&#8217;t
+be rocket science. Goal: get irb and psql working.</p>
+
+<h1>ORDBMS</h1>
+
+<p>Object-relational database management system. Postgres is this. MySQL is
+not; MySQL is just RDBMS.</p>
+
+<blockquote><p>An object-relational database (ORD), or object-relational database management system (ORDBMS), is a database management system (DBMS) similar to a relational database, but with an object-oriented database model: objects, classes and inheritance are directly supported in database schemas and in the query language. In addition, just as with pure relational systems, it supports extension of the data model with custom data-types and methods.</p></blockquote>
+
+<p>An Object Database leverages pointers over joins for collecting data,
+where as a the relational approach leverages foreign keys,
+denormalizing, and storing everything in tabular format. Pros to Object
+Database include no mental model mismatch between your programming model
+(often OOP) and database storage; create an obj, modify an obj, save an
+obj &#8211; no need to figure out how to express your object in tabular
+format.</p>
+
+<p>Disadvantages are that any sort of reporting / querying needs to be
+programmed in, whereas relational databases follow set/relational theory
+and if you&#8217;ve got things stored in a tabular format you have way more
+flexibility to modify / query your database in the future.</p>
+
+<h1>Postgres</h1>
+
+<p>Developed at Berkeley as POSTGRES, pioneered many concepts later adopted by
+commercial databases. Sponsored by DARPA. Didn&#8217;t have SQL (btw SQL has
+been around since the 70s). SQL added in Postgres95, became PostgreSQL.</p>
+
+<p>Comes with a bunch of binaries:</p>
+
+<p><code>postgres</code> the server; accepts connection and then starts a worker
+process to handle that connection. (Can verify this; spinning up a
+rails console creates one more postgres worker instance).</p>
+
+<blockquote><p>Thus, the master server process is always running, waiting for client connections</p></blockquote>
+
+<p><code>psql</code> shell looks like <code>mydb=&gt;</code> for regular users, <code>mydb=#</code> for
+superuser.</p>
+
+<p>Commands prefixed with <code>\h</code> are not SQL; everything else is SQL.</p>
+
+<p>A relation = mathemtical term for table.</p>
+
+<p>https://en.wikipedia.org/wiki/Relational_model</p>
+
+<p>All data sets represented as tuples, grouped into relations.</p>
+
+<blockquote><p>&#8220;A relation is a data structure which consists of a heading and an unordered set of tuples which share the same type,&#8221;</p></blockquote>
+
+<h1>Deviations of SQL from relational model</h1>
+
+<p>https://en.wikipedia.org/wiki/Relational_model#SQL_and_the_relational_model</p>
+
+<ul>
+<li>SQL allows duplicate rows; relational model does not. Practically
+though this is avoided by auto-incrementing.</li>
+</ul>
+
+
+<p>SQL apparently also allows anonymous columns, duplicate rows, etc, which
+make things impossible to reference due to indistinguishability.</p>
+
+<p>SQL includes &#8220;NULL&#8221; to imply missing data; comparison of NULL with
+itself is not true, but NULL. (Comparison of anything with NULL yields
+NULL; it means unknown, not determinable). And hence it&#8217;s a form of
+three-valued logic, rather than just boolean.</p>
+
+<p>Law of exclude middle: It states that for any proposition, either that proposition is true, or its negation is true.</p>
+
+<p>Relational model depends on this law, but SQL does not, since it allows
+for NULL. Apparently Codd (relational model inventor) eventually
+suggested a 4-valued logic, probably to differentiate NULL from UNKNOWN,
+only to have a bunch of smug guys suggesting 19 or even 21-valued logic.
+WAT. So Postgres just stuck w 3 valued logic.</p>
+
+<p>SQL also uses NULL for other things than value unknown: the sum of an
+empty set is NULL.</p>
+
+<p>Rows are grouped into tables/relations. Relations grouped into database.
+Databases managed by a single Postgres server instance is a cluster.</p>
+
+<h1>Joins</h1>
+
+<pre><code>SELECT * FROM wats, foos;
+</code></pre>
+
+<p>Gives you a combination</p>
+
+<pre><code> name | name | wat
+------+------+------
+ foo1 | bar1 | wat1
+ foo1 | bar2 | wat2
+ foo2 | bar1 | wat1
+ foo2 | bar2 | wat2
+ foo3 | bar1 | wat1
+ foo3 | bar2 | wat2
+</code></pre>
+
+<p>Or even</p>
+
+<pre><code> name | name | wat  | bazname
+------+------+------+---------
+ foo1 | bar1 | wat1 | baz1
+ foo1 | bar1 | wat1 | baz2
+ foo1 | bar2 | wat2 | baz1
+ foo1 | bar2 | wat2 | baz2
+ foo2 | bar1 | wat1 | baz1
+ foo2 | bar1 | wat1 | baz2
+ foo2 | bar2 | wat2 | baz1
+ foo2 | bar2 | wat2 | baz2
+ foo3 | bar1 | wat1 | baz1
+ foo3 | bar1 | wat1 | baz2
+ foo3 | bar2 | wat2 | baz1
+ foo3 | bar2 | wat2 | baz2
+</code></pre>
+
+<p>If any of those tables had zero rows then zero rows would be selected
+even if there&#8217;s data in the other tables.</p>
+
+<blockquote><p>It is widely considered good style to qualify all column names in a
+join query, so that the query won’t fail if a duplicate column name
+is later added to one of the tables.</p></blockquote>
+
+<p>You could also rewrite the first one as</p>
+
+<pre><code>SELECT * FROM foos INNER JOIN bars ON true;
+</code></pre>
+
+<p>So selecting * seems to select from all relations/tables involved.</p>
+
+<p>Aggregate functions can&#8217;t be used in WHERE clauses, since WHERE clauses
+are limit the input rows, recursive infinite etc blah blah.</p>
+
+<pre><code>SELECT city FROM weather WHERE temp_lo = max(temp_lo);
+</code></pre>
+
+<p>You can change this to a subquery</p>
+
+<pre><code>SELECT city FROM weather
+    WHERE temp_lo = (SELECT max(temp_lo) FROM weather);
+</code></pre>
+
+<p>Aggregates play nicely with GROUP BY clauses: here&#8217;s how you&#8217;d count
+many rows had the same values.</p>
+
+<pre><code>SELECT name, count(*) FROM bars GROUP BY name;
+</code></pre>
+
+<p><code>HAVING</code> is like a WHERE clause for grouping / aggregate functions.
+Specifically, WHERE filters the input rows, and HAVING filters the
+results after aggregation has taken place:</p>
+
+<p>http://stackoverflow.com/a/287496/914123</p>
+
+<h2>Referential integrity</h2>
+
+<p>Making sure foreign keys point to objects in the table.</p>
+
+<h2>Window functions</h2>
+
+<p>Similar to GROUP BY, but instead preserves each input row in the
+output set rather than coalescing them down to just one row; in other
+words, instead of boiling down to a single answer per group, window
+functions add that answer to as a column to each of the input rows.</p>
+
+<pre><code>SELECT depname, empno, salary, avg(salary) OVER (PARTITION BY depname) FROM empsalary;
+</code></pre>
+
+<p>Whoa this is pretty awesome:</p>
+
+<pre><code>SELECT depname, empno, salary,
+       rank() OVER (PARTITION BY depname ORDER BY salary DESC)
+FROM empsalary;
+</code></pre>
+
+<p>&#8220;For each row, the window function is computed across the rows that fall into the same partition as the current row.&#8221;</p>
+
+<p>Kinda like how aggregate functions are computed using rows with the same
+GROUP BY value.</p>
+
+<p>There partitions and there are window frames&#8230;</p>
+
+<p>A window frame is a subset of a partition (or the whole partition
+itself). Many window functions use window frame rows, though some
+use partition rows. By default, if ORDER BY is supplied <em>to the
+over clause, not the whole query</em>, then the window frame consists
+of the all rows from start of the partition through to current row,
+plus any following rows that have same ORDER BY value&#8230;</p>
+
+<p>WAT.</p>
+
+<p>There must be some good reason for this. Can&#8217;t think of it now.</p>
+
+<pre><code>SELECT salary, sum(salary) OVER (ORDER BY salary) FROM empsalary;
+</code></pre>
+
+<p>But the thing to keep in mind I guess is that the <code>ORDER BY</code> here is
+just another way to configure the partition + window frame. Maybe that&#8217;s
+the way to think of it: <code>OVER</code> clauses are used to specify both
+partitions and window frames all in one shot. PARTITION BY is one way,
+that specifies a partition where window frame is the partition, and
+ORDER BY is another, where the PARTITION is all the rows (filtered by
+WHERE) and window set is from start to current row.</p>
+
+<p>Window functions can only be used in the SELECT list and in ORDER BY. I
+guess that makes sense. Can&#8217;t use them in GROUP BY, HAVING, or WHERE,
+since they logically execute after those things.</p>
+
+<h2>Aggregate expressions</h2>
+
+<pre><code>---                   direct arguments                   aggregated arguments
+aggregate_name ( [ expression [ , ... ] ] ) WITHIN GROUP ( order_by_clause ) [ FILTER ...
+</code></pre>
+
+<blockquote><p>The argument expressions preceding WITHIN GROUP, if any, are called direct arguments to distinguish them from the aggregated arguments listed in the order_by_clause. Unlike normal aggregate arguments, direct arguments are evaluated only once per aggregate call, not once per input row.</p></blockquote>
+
+<p>So the stuff in <code>WITHIN GROUP(...)</code> are evaluated once per input row. So
+ideally we should minimize the stuff we put in there.</p>
+
+<blockquote><p>This means that they (direct arguments) can contain variables only if those variables are grouped by GROUP BY;this restriction is the same as if the direct arguments were not inside an aggregate expression at all.</p></blockquote>
+
+<pre><code>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY income) FROM households;
+ percentile_disc
+-----------------
+           50489
+</code></pre>
+
+<p>0.5 is a direct argument; it makes no sense for it to be substituted
+with a value that varies across rows.</p>
+
+<p>So for example you could do:</p>
+
+<pre><code>SELECT percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums;
+ percentile_disc
+-----------------
+               3
+</code></pre>
+
+<p><code>percentile_disc</code> is an aggregate function. It&#8217;s going to spit out
+values that are the result of coalescing rows. It wouldn&#8217;t make sense
+for me to try and add the column <code>name</code> to this result, because the
+<code>percentile_disc</code> result is based on coalesced rows:</p>
+
+<pre><code>SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums;
+ERROR:  column "nums.name" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num...
+               ^
+</code></pre>
+
+<p>The only way that&#8217;d make sense would be to GROUP BY <code>name</code> so that the
+aggregate function is only being applied to groups grouped by name
+rather than all of the input rows at once:</p>
+
+<pre><code>SELECT name, percentile_disc(0.5) WITHIN GROUP (ORDER BY num) from nums GROUP BY name;
+  name  | percentile_disc
+--------+-----------------
+ alex   |               3
+ justin |               2
+(2 rows)
+</code></pre>
+
+<p>Wow this stuff is weird to talk about.</p>
+
+<p>Note that <code>count</code> is not an &#8220;ordered set&#8221; aggregate:</p>
+
+<pre><code>SELECT name, count(*) WITHIN GROUP (ORDER BY num) from nums GROUP BY name;
+ERROR:  count is not an ordered-set aggregate, so it cannot have WITHIN GROUP
+LINE 1: SELECT name, count(*) WITHIN GROUP (ORDER BY num) from nums ...
+                     ^
+</code></pre>
+
+<p>It barfs because I tried to provide a <code>WITHIN GROUP</code> clause to a non
+ordered set aggregate <code>count</code>. If I remove my WITHIN GROUP clause, I
+get:</p>
+
+<pre><code>SELECT name, count(*) from nums GROUP BY name;
+  name  | count
+--------+-------
+ alex   |     6
+ justin |     3
+(2 rows)
+</code></pre>
+
+<p>So what is an ordered set aggregate? It just means an aggregate fn
+whereby performing the computation requires some kind of ordering. My
+hunch is that ORDER BY inside of WITHIN GROUP isn&#8217;t used just for
+&#8220;sorting&#8221; the rows, but for defining the key by which they&#8217;ll be
+grouped. Or that&#8217;s just my bullshit way of fitting it into my brain.</p>
+
+<pre><code>SELECT count(*) as unfiltered, count(*) FILTER (WHERE i &lt; 5) as filtered FROM generate_series(1,10) AS s(i);
+ unfiltered | filtered
+------------+----------
+         10 |        4
+</code></pre>
+
+<p>So why <code>count(*)</code> and not <code>count()</code>? Because <code>count</code> is an aggregate
+function I guess, and that&#8217;s one why to distinguish it from something,
+say, <code>version()</code>.</p>
+
+<h2>Type casts</h2>
+
+<pre><code>CAST ( expression AS type )
+</code></pre>
+
+<p>is the same as</p>
+
+<pre><code>expression::type
+</code></pre>
+
+<p>You can cast any string literal:</p>
+
+<pre><code>select '4.123'::real;
+ float4
+--------
+  4.123
+(1 row)
+</code></pre>
+
+<p>Postgres implicitly casts things for you, e.g. assigning values to
+columns (because the column type is obviously known). In some cases you
+have to be explicit; Postgres works this way so as to not surprise you
+with silent type casts.</p>
+
+<h2>Collation</h2>
+
+<p>http://stackoverflow.com/questions/4538732/what-does-collation-mean</p>
+
+<p>It means how words/letters/phonemes are stored.</p>
+
+<h2>Arrays</h2>
+
+<p>must be rectangular</p>
+
+<pre><code>SELECT ARRAY[ARRAY[1],ARRAY[1,2]];
+ERROR:  multidimensional arrays must have array expressions with matching dimensions
+</code></pre>
+
+<h2>Composites</h2>
+
+<pre><code>CREATE TYPE myrowtype AS (f1 int, f2 text);
+SELECT ('1',2)::myrowtype;
+</code></pre>
+
+<h2>Order of expression evaluation</h2>
+
+<p>Left-to-right short-circuit eval is not a thing:</p>
+
+<pre><code>SELECT true OR somefunc();
+</code></pre>
+
+<p>Hence the above <em>probably</em> won&#8217;t run <code>somefunc</code>, but not because it&#8217;s on
+the right and the left side evals to true, but because the evaluator&#8217;s
+already gone thrugh and decided that it can do less work by only using
+the left side.</p>
+
+<p>CASE constructs defeat optimizations by forcing evaluation, so you could
+write the above as</p>
+
+<pre><code>SELECT CASE WHEN true THEN true ELSE somefunc() END;
+</code></pre>
+
+<p>or</p>
+
+<pre><code>SELECT CASE WHEN true THEN true ELSE false END;
+</code></pre>
+
+<p>That&#8217;s pretty awesome. Declarative all the way. Let the evaluator figure
+out the best way to go.</p>
+
+<p>One gotcha is though is that the evaluator might try and simplify
+constant subexpressions (subexpressions that don&#8217;t depend on any rows
+being looked up), so something like this:</p>
+
+<pre><code>SELECT CASE WHEN num &gt; 0 THEN num ELSE 1/0 END FROM nums;
+ERROR:  division by zero
+</code></pre>
+
+<p>This happens because <code>num</code> is dynamic and the evaluator will evaluate
+the <code>1/0</code> before even running the query, causing the divide by zero
+error.</p>
+
+<h2>Foreign keys</h2>
+
+<blockquote><p>A foreign key must reference columns that either are a primary key or form a unique constraint. This means that the referenced columns always have an index (the one underlying the primary key or unique constraint); so checks on whether a referencing row has a match will be efficient.</p></blockquote>
+
+<p>Makes sense:</p>
+
+<pre><code>CREATE TABLE lols ( thing_id integer REFERENCES nums(num) );
+ERROR:  there is no unique constraint matching given keys for referenced table "nums"
+</code></pre>
+
+<blockquote><p>Since a DELETE of a row from the referenced table or an UPDATE of a referenced column will require a scan of the referencing table for rows matching the old value, it is often a good idea to index the referencing columns too.</p>
+
+<p>Because this is not always needed, and there are many choices available on how to index, declaration of a foreign key constraint does not automatically create an index on the referencing columns.</p></blockquote>
+
+<p>So if an article has many comments, then <code>comments.article_id</code> is an FK,
+hence <code>article.id</code> must have unique constraint. But if the referenced
+article is deleted, then postgres needs to scan the <code>comments</code> table for
+all rows referencing the deleted article to perform some logic on it. So
+you probably want to index <code>comments.article_id</code>. That said you probably
+want to index it anyway since you&#8217;ll be doing many comment lookups for a
+given article.</p>
+
+<h2>Postgres wiki</h2>
+
+<p>https://wiki.postgresql.org/wiki/Main_Page</p>
+
+<p>This seems surprisingly badass.</p>
+
+<h2>Schemas / clusters</h2>
+
+<p>The only data shared b/w databases is users and groups.</p>
+
+<p>But schemas aren&#8217;t kept so separate; a database can have multiple
+schemas, multiple schemas can have tables w the same name.</p>
+
+<h2>Table Expressions</h2>
+
+<p>Think of WHERE, GROUP BY, HAVING and others as modifiers that ultimately
+produce a table that you can select from. Holy shit that would have made
+my life so much easier if I knew that.</p>
+
+<h2>Joins</h2>
+
+<pre><code>FROM T1 CROSS JOIN T2isequivalenttoFROM T1 INNER JOIN T2 ON TRUE
+</code></pre>
+
+<p>Note that <code>WHERE</code> filtering happens after <code>ON</code> criteria. Again this is a
+case of JOIN just being a thing that produces another virtual table and
+WHERE filters whatever table.</p>
+
+<h2>Subqueries</h2>
+
+<p>Use them when you can&#8217;t use joins:</p>
+
+<ul>
+<li>subquery is a grouping / aggregation</li>
+</ul>
+
+
+<p>VALUES can also be a subquery.</p>
+
+<h1>Sedition</h1>
+
+<p>conduct or speech inciting rebellion against an authority or monarch</p>
+
+<h1>Discount brokerage</h1>
+
+<p>https://en.wikipedia.org/wiki/Discount_brokerage</p>
+
+<p>Much cheaper than traditional brokerage but doesn&#8217;t offer financial
+advice.</p>
+
+<h1>Open-ended mutual funds</h1>
+
+<p>Open-ended in that if you buy into a mutual fund, the shares granted to
+you are created out of thin air, and the price of the share is based on
+the total market value divided by the number of shares present.</p>
+
+<h1>Intestacy</h1>
+
+<p>State of having died but not written a will. Intestacy law deals with
+divvying up inheritance for folks who didn&#8217;t write wills.</p>
+
+<h1>Estate tax</h1>
+
+<p>Only the largest 0.2% estates in US pay estate tax since it&#8217;s exempt up
+to $5.5 million.</p>
+
+<h1>Traditional IRA</h1>
+
+<ul>
+<li>put in money tax free when you&#8217;re in a high tax bracket</li>
+<li>withdraw money taxed at a (presumably) lower tax bracket when you&#8217;re older</li>
+</ul>
+
+
+<h1>Forvo.com</h1>
+
+<p>Pronunciation dictionary; let&#8217;s people upload recordings of
+pronunciation into a map so that you can see how different regions
+pronounce things.</p>
+
+<h1>Inner Join conditions via WHERE/JOIN</h1>
+
+<p>Already know you can do</p>
+
+<pre><code>SELECT a,b WHERE a.wat = b.foo AND a.bleh &gt; 5;
+</code></pre>
+
+<p>But you can also move the join conditions to the JOIN &#8230; ON:</p>
+
+<pre><code>SELECT a INNER JOIN b ON (a.wat = b.foo) WHERE a.bleh &gt; 5;
+</code></pre>
+
+<p>These are equivalent, whichever you choose is a matter of style.</p>
+
+<p>Note that it only applies to INNER joins: the WHERE version of the above
+only produces INNER joins; if you want outer, use the OUTER JOIN ON
+syntax.</p>
+
+<blockquote><p>The ON or USING clause of an outer join is not equivalent to a WHERE condition, because it results in the addition of rows (for unmatched input rows) as well as the removal of rows in the final result.</p></blockquote>
+
+<p>Whereas INNER joins are reduced unions of both tables, and hence
+expressable as WHERE, which is used for filtering out rows. In other
+words, you can&#8217;t <em>add</em> rows to a result set with WHERE; WHERE is only
+used for filtering, and OUTER joins can add rows to the result set.</p>
+
+<h1>The WHERE clause</h1>
+
+<p>Typically references at least one column referenced in table generated
+in the FROM clause.</p>
+
+<h1>GROUP BY</h1>
+
+<blockquote><p>Grouping without aggregate expressions effectively calculates the set of distinct values in a col- umn. This can also be achieved using the DISTINCT clause (see Section 7.3.3).</p></blockquote>
+
+<p>Makes sense.</p>
+
+<p>We can actually verify that the postgres evaluator reduces this to the
+exact same query plan:</p>
+
+<pre><code>diff &lt;(psql -c "EXPLAIN SELECT DISTINCT name FROM foos") \
+     &lt;(psql -c "EXPLAIN SELECT * FROM foos GROUP BY name")
+</code></pre>
+
+<h1>Objects instead of .publish().connect()</h1>
+
+<pre><code>Ember.Object.extend({
+  firstName: "alex",
+  lastName:  "matchneer",
+
+  // using lazy computed properties
+  fullName: computed('firstName', 'lastName', function() {
+    return `${this.get('firstName') ${this.get('lastName')}`;
+  }),
+
+  // using lazy computed properties
+  fullName: computed(function() {
+    return zip('firstName', 'lastName', (first, last) =&gt; `${first} ${last}`);
+  }).live(),
+
+  time: service(),
+  completedInWords: computed('completedAt', 'time.sharedTicker', function(completedAt) {
+    // hmm this doesn't need to be live
+    return moment(this.get('completedAt')).agoInWords();
+  }),
+
+  liveTimer: liveComputed(function() {
+    return this.ref('firstName').flatMapLatest((firstName) =&gt; {
+      return Observable.interval(500);
+    });
+  }),
+
+  startWeighing() {
+    this.set('isWeighing', true);
+  },
+
+  isWeighing: false,
+  rawWeights: computed('isWeighing', function() {
+    if (this.get('isWeighing')) {
+      return interval(200).map(() =&gt; Math.random());
+    } else{
+      return null; // or empty observable
+    }
+  }),
+
+  // by subscribing to 'this', we're subscribing to lifetime of object.
+  // so we're guaranteed that this gets evaluated immediately upon creation.
+  // We want this behavior here
+  isStillReceivingData: computed('this', function() {
+    return this.ref('rawWeights').flatMapLatest(() =&gt; {
+      return timer(500).map(_ =&gt; false).startWith(true);
+    });
+  }),
+
+  doStuff: computed(function() {
+  }).subscribe(), // this means is live for lifetime of object
+                  // you know what else is live during lifetime of object?
+                  // action handlers...
+
+  doStuff: subscribe('actions.startDoingStuff', function() {
+    alert("wat");
+  }),
+});
+
+
+let Timer = Ember.Object.extend({
+  hasElapsed: false,
+  ms: 0,
+  init() {
+    this._super();
+    this.timerId = Ember.later(() =&gt; {
+
+    }, 500);
+  }
+});
+
+Ember.Object.extend({
+  hasReceivedDataTimer: computed('foo', function() {
+    return Timer.create({ ms: 100 });
+  }),
+  hasReceivedDataRecently: alias('hasReceivedDataTimer.hasElapsed'),
+});
+</code></pre>
+
+<h2>Maybe about to push the envelope</h2>
+
+<p>https://en.wikipedia.org/wiki/Semantic_satiation</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T13:32:00-04:00" pubdate data-updated="true">Aug 30<span>th</span>, 2015</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2015/08/26/help-me-with-observables/">
 		
 			Help Me With Observables</a>
@@ -2296,789 +3410,6 @@ logs, and then it can forward it on to an elasticsearch cluster..</p>
 
 
 <time datetime="2015-04-15T14:13:00-04:00" pubdate data-updated="true">Apr 15<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/03/25/shiggity-wat/">
-		
-			Shiggity Wat</a>
-	</h2>
-	<div class="entry-content">
-		<h2>IP Spoofing</h2>
-
-<p>What&#8217;s to stop you from sending out packets with someone else&#8217;s IP as
-the source?</p>
-
-<p>http://en.wikipedia.org/wiki/IP_address_spoofing</p>
-
-<ul>
-<li>packet filtering
-
-<ul>
-<li>ingress: gateway blocks incoming packets with source IP that can
-only belong to someone inside of the network</li>
-<li>egress: gateway blocking outgoing packets with source IP from
-outside of the network (altruistic since it prevents hackers from
-hacking folk outside of the network)</li>
-</ul>
-</li>
-<li>upper layer protocol
-
-<ul>
-<li>TCP prevents IP spoofing by use of sequence numbers; an attacker
-would have to guess at a correct sequence number in order for it to
-be considered valid</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>RxJS</h2>
-
-<h3>generate</h3>
-
-<pre><code>var source = Rx.Observable.generate(
-    0,
-    function (x) { return x &lt; 3; }, // terminate condition
-    function (x) { return x + 1; }, // step fn
-    function (x) { return x*2; }    // map fn for values emitted...?
-);
-</code></pre>
-
-<p>The last fn is weird&#8230; seems like the above is the equivalent of:</p>
-
-<pre><code>var source = Rx.Observable.generate(
-    0,
-    function (x) { return x &lt; 3; }, 
-    function (x) { return x + 1; },
-    function (x) { return x; }    
-).map(x =&gt; x*2);
-</code></pre>
-
-<p>So why embed the <code>map</code> operator? or as they call it the select.</p>
-
-<pre><code>Rx.Observable.prototype.map === Rx.Observable.prototype.select // true
-</code></pre>
-
-<h3>generateWith relative/absolute time</h3>
-
-<p>Like <code>generate</code> but adds a time selector fn: for each value you can
-decide when it should fire. So you could feasible reverse the firing
-time of a series of events, e.g. 1,2,3,4,5 fires in the reverse order:</p>
-
-<pre><code>var source = Rx.Observable.generateWithRelativeTime(
-    1,
-    function (x) { return x &lt; 4; },
-    function (x) { return x + 1; },
-    function (x) { return x; },
-    function (x) { return 100 * (5-x); }
-);
-
-"Next: 1"
-"Next: 2"
-"Next: 3"
-"Completed"
-</code></pre>
-
-<p>NOPE I was wrong; the time selector generates the time <em>between</em> events,
-not the time relative to the start of observation. I&#8217;m guessing that can
-be accomplished via the absolute form:</p>
-
-<pre><code>var now = Date.now();
-var source = Rx.Observable.generateWithAbsoluteTime(
-    1,
-    function (x) { return x &lt; 4; },
-    function (x) { return x + 1; },
-    function (x) { return x; },
-    function (x) { return now + 100 * (5-x); }
-).timeInterval();
-
-"Next: 1:402"
-"Next: 2:6"
-"Next: 3:2"
-"Completed"
-</code></pre>
-
-<p>WRONG AGAIN! Order is preserved, with the already-elapsed events firing
-immediately once the first one fires.</p>
-
-<h3>generate as for loops:</h3>
-
-<p>Instead of</p>
-
-<pre><code>for (var x = 0; x &lt; 10; ++x) {
-  console.log(x*2);
-}
-</code></pre>
-
-<p>you do</p>
-
-<pre><code>var source = Rx.Observable.generate(
-    0,
-    function (x) { return x &lt; 10; }, 
-    function (x) { return x + 1; },  // ++x
-    function (x) { return x*2; }  
-);
-
-// or source.subscribe
-source.forEach((val) =&gt; {
-  console.log(val);
-});
-</code></pre>
-
-<p>Keep in mind that</p>
-
-<pre><code>Rx.Observable.prototype.forEach === Rx.Observable.prototype.subscribe
-</code></pre>
-
-<p>They&#8217;re aliases of each other, they both:</p>
-
-<ul>
-<li>activate an observable</li>
-<li>are intended to cause some sort of side effects</li>
-</ul>
-
-
-<p>Why write in observable form?</p>
-
-<ul>
-<li>composability</li>
-<li>much harder to troll yourself w &#8220;global&#8221; mutable vars used for iteration</li>
-<li>you&#8217;re writing in a way that can effortlessly handle the dimension of time</li>
-</ul>
-
-
-<h2>Subscriber stack</h2>
-
-<p>How would you get more explicit bubbling behavior that we&#8217;re familiar
-with from bubbling actions in Ember?</p>
-
-<p>Basically I want there to be some root subject/observable on a parent
-route, and then child routes can push their subscription onto that
-observable&#8217;s stack of subscriptions, and only the subscription at the
-top of the stack.</p>
-
-<p>This doesn&#8217;t accomplish bubbling per se; it&#8217;s a non-bubbling form of
-first-responder. Do we want bubbling?</p>
-
-<p>Actually yeah I think we want bubbling; what we don&#8217;t want is routes
-accidentally getting actions invoked on them because at some point later
-in the game a child route invokes an action (just string names) and it
-accidentally leaks out, causing havoc on parent routes, etc.</p>
-
-<p>But to be able to pass on the action is probably nice.</p>
-
-<pre><code>// within child route
-someParentRoute.observableStack.subscribe((e) =&gt; {
-  if (canHandle(e.value)) {
-    // do stuff
-  } else {
-    e.bubble();
-  }
-});
-</code></pre>
-
-<p>and this subscription would be <code>dispose</code>d upon route deactivation so it
-cleans itself up.</p>
-
-<p>The problem with this is once you start needing to apply operators, you
-need some way of signalling the bubble later on?</p>
-
-<pre><code>someParentRoute.observableStack
-               .delay(1000)
-               .map((e) =&gt; someCopyThatStillPreservesBubbleFn})
-               .subscribe((e) =&gt; {
-                 if (canHandle(e.value)) {
-                   // do stuff
-                 } else {
-                   e.bubble();
-                 }
-               });
-</code></pre>
-
-<h2>Alex versus invalidation</h2>
-
-<p>https://github.com/ef4/liquid-fire/issues/222</p>
-
-<h2>iOS 7 and 8 usage</h2>
-
-<p>As of 3/29/2015:</p>
-
-<ul>
-<li>iOS 8: 77%</li>
-<li>iOS 7: 20%</li>
-<li>Earlier: 3%</li>
-</ul>
-
-
-<h2>WKWebView</h2>
-
-<p>Only in iOS 8, comes with Nitro engine and bunch of other things.</p>
-
-<p>http://nshipster.com/wkwebkit/</p>
-
-<ul>
-<li>https://github.com/Telerik-Verified-Plugins/WKWebView
-
-<ul>
-<li>probably the best stab at a working plugin</li>
-<li>there are many issues (i would not use it at this point)</li>
-<li>spins up an embedded server in order to:
-
-<ul>
-<li>bypass CORS</li>
-<li>allow querying file:// protocol</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>It&#8217;s also only iOS8+; the plugin is smart enough to fall back to
-UIWebView, but then you&#8217;ve just bumped an exponent on complexity, more
-shit to test.</p>
-
-<p>There is also Ludei Cocoonjs. But Iiiii couldn&#8217;t get it to work. :)</p>
-
-<h2>Rx: switch</h2>
-
-<p>When you already have an Observable of Observables, you can call
-<code>.switch()</code> to produce an Observable that only emits values from the
-most recent observable :) isn&#8217;t terminology fun.</p>
-
-<p>So this:</p>
-
-<pre><code>obs.map((val) =&gt; someObservableBasedOnVal)
-   .switch();
-</code></pre>
-
-<p>is the same as</p>
-
-<pre><code>obs.flatMapLatest((val) =&gt; someObservableBasedOnVal);
-</code></pre>
-
-<h2>Multiple cursors, DevTools and Vim</h2>
-
-<p>Command click: multiple cursors</p>
-
-<p>Cmd+D selects the next instance (effectively adding a multiple cursor).
-Really a cursor is a selection with zero chars selected.</p>
-
-<p>Just downloaded https://github.com/terryma/vim-multiple-cursors</p>
-
-<p>Ctrl-n: select next occurrence of hovered word</p>
-
-<p>Ctrl-p: undo most recent selection</p>
-
-<p>Ctrl-x: skip current selection</p>
-
-<p>MultipleCursorsFind: optionally select range in v mode, then type a
-regex to select them shits as multiple cursors.</p>
-
-<p>NOTE: in visual mode, <code>o</code> swaps the cursor to the other side to let you
-modify the selection from the other end.</p>
-
-<h2>Why flatMapLatest always trips me up</h2>
-
-<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
-
-<pre><code>console.clear();
-
-Rx.Observable.just(1)
-  .takeUntil(Rx.Observable.timer(10))
-  .doOnCompleted(() =&gt; console.log("doOnCompleted"))
-  .flatMapLatest(() =&gt; {
-    return Rx.Observable.timer(500);
-  })
-  .subscribe(() =&gt; {
-    console.log("EVENT");
-  }, null,
-  () =&gt; {
-    console.log("COMPLETE");
-  });
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>"doOnCompleted"
-"EVENT"
-"COMPLETE"
-</code></pre>
-
-<p>This sequence might seem obvious here but I ALWAYS make the mistake of
-thinking that because there&#8217;s a takeUntil on the source observable,
-that&#8217;ll somehow cause all subscribing observables to immediately
-complete. NOPE. If that were the case, then promise chains wouldn&#8217;t work
-since they&#8217;re just single value observables that complete after their
-first value, and if completion force completed any subscribers then you
-couldn&#8217;t have async chains of logic. Anyway.</p>
-
-<p>So I guess that means you really need to gate at every potential side
-effect via takeUntil? e.g.</p>
-
-<p>http://jsbin.com/nupafu/1/edit?html,js,console</p>
-
-<pre><code>Rx.Observable.interval(200)
-  .takeUntil(Rx.Observable.timer(250))
-  .do(() =&gt; console.log("start"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("one"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("two"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("three"))
-  .subscribe(() =&gt; {
-    console.log("EVENT");
-  }, null,
-  () =&gt; {
-    console.log("COMPLETE");
-  });
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>"start"
-"one"
-"two"
-"three"
-"EVENT"
-"COMPLETE"
-</code></pre>
-
-<p>I guess I could dispose the sub, but then no onCompletes get fired
-(and it&#8217;s also just bad style).</p>
-
-<pre><code>console.clear();
-
-var sub = Rx.Observable.interval(200)
-  .takeUntil(Rx.Observable.timer(250))
-  .do(() =&gt; console.log("start"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("one"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("two"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("three"))
-  .subscribe(() =&gt; {
-    console.log("EVENT");
-  }, null,
-  () =&gt; {
-    console.log("COMPLETE");
-  });
-
-setTimeout(() =&gt; {
-  sub.dispose();
-}, 250);
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>"start"
-</code></pre>
-
-<p>WHOA if I do onCompleted, then it skips all the shit in the middle
-and still runs the completion handler!</p>
-
-<p>http://jsbin.com/nupafu/4/edit</p>
-
-<pre><code>console.clear();
-
-var sub = Rx.Observable.interval(200)
-  .takeUntil(Rx.Observable.timer(250))
-  .do(() =&gt; console.log("start"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("one"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("two"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("three"))
-  .subscribe(() =&gt; {
-    console.log("EVENT");
-  }, null,
-  () =&gt; {
-    console.log("COMPLETE");
-  });
-
-setTimeout(() =&gt; {
-  sub.onCompleted();
-}, 250);
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>"start"
-"COMPLETE"
-</code></pre>
-
-<p>Question: is there a way to construct your observables, without
-resorting to chaining takeUntil&#8217;s before every side-effect, such that
-some onComplete along the way skips everyone else&#8217;s?</p>
-
-<p>http://jsbin.com/nupafu/6/edit</p>
-
-<pre><code>console.clear();
-var o = Rx.Observable.interval(200)
-  .do(() =&gt; console.log("start"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("one"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("two"))
-  .flatMapLatest(() =&gt; { return Rx.Observable.timer(500); })
-  .do(() =&gt; console.log("three"));
-
-o.merge(Rx.Observable.timer(250).map(false))
-  .subscribe(function(v) {
-    console.log("EVENT " + v);
-    if (v === false) {
-      this.onCompleted();
-    }
-  }, null,
-  () =&gt; {
-    console.log("COMPLETE");
-  });
-
-"start"
-"EVENT false"
-"COMPLETE"
-"start"
-"start"
-"start"
-"start"
-"start"
-"start"
-"start"
-"start"
-"start"
-...
-</code></pre>
-
-<p>Why? Does <code>this.onCompleted()</code> not kill the current subscription?</p>
-
-<p>This works:</p>
-
-<pre><code>var sub = o.merge(Rx.Observable.timer(250).map(false))
-  .subscribe(function(v) {
-    if (v === false) {
-      sub.onCompleted();
-    }
-  }, null,
-  () =&gt; {
-    console.log("COMPLETE");
-  });
-</code></pre>
-
-<p>Apparently sub !== this. sub is an auto-detach observer, this is an
-anonymous observer. Some rxjs internals I don&#8217;t wanna go into right now.</p>
-
-<p>Maybe there&#8217;s a merge first operator that&#8217;ll work here.</p>
-
-<p>https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/amb.md</p>
-
-<p><code>amb</code> is close, but once a value is produced from the flatMapChain, then
-the terminating observable is ignored. I want something that stops on
-the first completed thing.</p>
-
-<p>Note that <code>amb</code> has <a href="http://www.randomhacks.net/2005/10/11/amb-operator/">roots in Lisp</a>.
-The base functionality in RxJS I guess can be used to approximate
-something like</p>
-
-<p>Oh man, I might be a HUGE idiot&#8230; I JUST NEED TO FUCKING PUT THE
-TAKEUNTIL AT THE END OMG</p>
-
-<h2>I&#8217;m waiting</h2>
-
-<p>http://i.imgur.com/4ETXzun.webm</p>
-
-<h2>Observable.using</h2>
-
-<p>Resource/disposable + observable = using</p>
-
-<pre><code>Rx.Observable.
-  using(
-    function () { return openFile('temp.txt', 'w+'); },
-    function (fd) {
-      return Rx.Observable.range(0, 10000)
-        .map(function (v) { return Buffer(v); })
-        .flatMap(function (buffer) {
-          return appendAsync(fd, buffer);
-        });
-    }
-  )
-  .subscribe();
-</code></pre>
-
-<p><code>using</code> makes it clear what the resource/disposable. Otherwise you might
-mix the two awkwardly in the body of the fn passed to
-<code>Observable.create</code>.</p>
-
-<h2>Rx grammar</h2>
-
-<p>Observable sequences have the following grammar:</p>
-
-<pre><code>onNext* (onCompleted|onError)?
-</code></pre>
-
-<p>0 or more <code>onNext</code>s followed by an optional <code>onCompleted</code> OR <code>onError</code>.
-Infinite sequences or disposed sequences might never see <code>onCompleted</code>
-or <code>onError</code>.</p>
-
-<h2>Observable.defer vs Observable.create</h2>
-
-<p>Defer wraps another underlying observable in a factory function and
-guarantees that each subscription to the outer observable gets a fresh
-subscription to a totally newly-generated inner observable&#8230; but how is
-this different from cold observables in general?</p>
-
-<p>Well before I say that, lemme just say <code>defer</code> is a useful pattern for
-when you want to kick off a sequence but don&#8217;t really know which
-observable to start with; a lame attempt to do this is via</p>
-
-<pre><code>Rx.Observable.just()
-  .flatMap(() =&gt; {
-    if (wat) {
-      return oneObservable;
-    } else {
-      return anotherObservable;
-    }
-  })
-</code></pre>
-
-<p>This could more clearly be written as</p>
-
-<pre><code>Rx.Observable.defer(() =&gt; {
-  if (wat) {
-    return oneObservable;
-  } else {
-    return anotherObservable;
-  }
-});
-</code></pre>
-
-<p>But hey, observables are cold&#8230; how is this different than writing</p>
-
-<pre><code>var obs = wat ? oneObservable : anotherObservable;
-return obs; // someone will subscribe to it
-</code></pre>
-
-<p>The difference is the decision as to which observable to use is set once
-and for all for all future subscribers. HORRIBLE ENGRISH MR MATCHNEER.
-In other words: either all subscribers get oneObservable or they get
-anotherObservable. If you wanted to <em>defer</em> that decision until each
-subscription, that&#8217;s when you use defer.</p>
-
-<p>So why not just use a factory function without using <code>defer</code>, e.g.</p>
-
-<pre><code>function getObservable() {
-  var obs = wat ? oneObservable : anotherObservable;
-}
-
-// then anyone who wants to subscribe:
-getObservable().subscribe();
-getObservable().subscribe();
-getObservable().subscribe();
-</code></pre>
-
-<p>These all get fresh observables. But then if you did</p>
-
-<pre><code>var obs = getObservable();
-obs.subscribe();
-obs.subscribe();
-obs.subscribe();
-</code></pre>
-
-<p>then these would all get the same observable decided by the single  call
-to getObservable.</p>
-
-<p>TL;DR, Rx is REALLY HARD. You have seemingly simple primitives of
-observers and observables (saying nothing of that
-almost-namespace-collision), but the way scalar things become vectors,
-merged back into scalars, and not just at the events level but in the
-primitives themselves, and how things are hot and cold. Jesus Christ.</p>
-
-<h2>iOS Permissions</h2>
-
-<ul>
-<li>iOS7
-
-<ul>
-<li>no camera permissions</li>
-<li>location permissions, but doesn&#8217;t distinguish b/w foreground/background</li>
-<li>once denied, permissions dialog won&#8217;t show up</li>
-</ul>
-</li>
-<li>iOS8
-
-<ul>
-<li>permissions for audio and video, separately</li>
-<li>location
-
-<ul>
-<li>global location shutdown in addition to</li>
-<li>app-specific:
-
-<ul>
-<li>authorized for &#8220;When in use&#8221;</li>
-<li>authorized for background</li>
-<li>denied</li>
-</ul>
-</li>
-<li>if you change permissions
-
-<ul>
-<li>app will NOT restart</li>
-<li>if you&#8217;re disabling geolocation, when you come back
-into the app, you won&#8217;t get an error code about lack</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>for all permissions:
-
-<ul>
-<li>once denied, permissions dialog won&#8217;t show up
-
-<ul>
-<li>You can open Settings via settings url w some instructions
-telling user to reset</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-25T11:15:00-04:00" pubdate data-updated="true">Mar 25<span>th</span>, 2015</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2015/03/19/today-i-learn-top/">
-		
-			Today I Learn Top</a>
-	</h2>
-	<div class="entry-content">
-		<h2>top</h2>
-
-<p>PR is priority, which is dynamic; a running process will get less and
-less priority over time. NI is nice value; the fixed value that adds to
-priority.</p>
-
-<h2>Ruby mem</h2>
-
-<p>http://samsaffron.com/archive/2014/04/08/ruby-2-1-garbage-collection-ready-for-production</p>
-
-<ul>
-<li>Ruby tracks malloc&#8217;s</li>
-<li>classically, every <code>RUBY_GC_MALLOC_LIMIT</code> bytes,</li>
-</ul>
-
-
-<p>Heaps</p>
-
-<ul>
-<li>Ruby maintains heaps of RVALUES.</li>
-<li>RVALUES are c union structs, variable size depending on x64, x32, etc,
-that are low level representations of ruby objects</li>
-<li>require &#8216;objspace&#8217; lets you access ObjectSpace, which exposes the
-linked list of free Ruby objects.</li>
-<li>RVALUES are collected and reused; mallocs only happen when you expand
-beyong the RVALUE list.</li>
-</ul>
-
-
-<p>GC minor/major sweeps:</p>
-
-<p>Flow is this:</p>
-
-<ul>
-<li><p><code>Object.allocate</code> (in the course of calling <code>new</code>)</p>
-
-<ul>
-<li>gimme a free RVALUE
-
-<ul>
-<li>if no free RVALUES, do a sweep</li>
-<li>figure out along the way if it needs to be a major sweep</li>
-<li>blah blah blah i don&#8217;t want to keep doing this</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>major sweep: run when malloc limit is hit (used to be 8MB, now it&#8217;s a
-moving target)</p>
-
-<ul>
-<li>so you can malloc a bunch of times but once you hit malloc limit
-it&#8217;s time for a major GC</li>
-</ul>
-</li>
-<li>minor: run whenever heap slots run out
-
-<ul>
-<li>presumably, if this doesn&#8217;t free up enough mem, a malloc needs to
-happen? or maybe a malloc always happens, and the minor sweep frees
-up things for a future allocation attempts? either seem fine.</li>
-</ul>
-</li>
-</ul>
-
-
-<p>http://samsaffron.com/archive/2013/11/22/demystifying-the-ruby-gc</p>
-
-
-		
-		<a href="/blog/2015/03/19/today-i-learn-top/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-03-19T09:18:00-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2015</time></div>
 	
 
 
