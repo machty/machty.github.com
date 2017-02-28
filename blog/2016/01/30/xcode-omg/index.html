@@ -1,0 +1,630 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>xcode omg  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Xcode Omg</h2>
+	<div class="entry-content"><h2>ok iphone</h2>
+
+<p>So many icons to prepare that I&#8217;m losing track of which devices are
+which and when they came out:</p>
+
+<p>http://stackoverflow.com/a/26085718/914123</p>
+
+<ul>
+<li>1x images are for the original iPhone through the 3GS - &#8216;standard&#8217; resolution devices (3.5&#8221; screens)</li>
+<li><p>2x images are for the iPhone 4 and 4S (3.5&#8221; Retina screens) and are also used for the iPhone 6.</p></li>
+<li><p>Retina 4 2x are for the iPhone 5 and 5s (4&#8221; Retina screens)</p></li>
+<li><p>2x, iPhone 5</p></li>
+<li><p>3x, 5.5&#8221;, super-retina</p>
+
+<ul>
+<li>iPhone 6, iPhone 6 Plus (released Sep14)</li>
+<li>iPhone 6S, iPhone 6S Plus (released Sep15)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>https://en.wikipedia.org/wiki/IPhone_6S#Timeline_of_models</p>
+
+<p>Blah blah blah none of this is important. The rule is that Apple
+specifies dimensions via pts, not pixels. Original iPhone was 1 to 1.
+Then retina came out and on retina devices 1 pt is 2 px. And on triple
+retina 1pt is 3px.</p>
+
+<p>When Apple says &#8220;gimme a 60pt icon at 3x&#8221; they want a 180x180 pixel
+image.</p>
+
+<h2>transducer CSP buffer</h2>
+
+<p>Why doesn&#8217;t js-csp allow unbuffered channels + transducers?</p>
+
+<p>https://github.com/ubolonton/js-csp/issues/7#issuecomment-57937657</p>
+
+<blockquote><p>The main issue is that a transducer takes one value, but it may put any number of values into the channel. There is no guarantee that you&#8217;ll only get one.</p></blockquote>
+
+<p>core.async apparently expands buffers sometimes (for &#8220;expanding&#8221;
+transducers like cat). But js-csp is punting on unbuffered transducers.</p>
+
+<h2>backing up redis w shit heroku</h2>
+
+<pre><code>heroku run bash -a ...
+rails c
+&gt; File.write('backup', REDIS.sync)
+# open ngrok tcp connection to port 22
+# enable remote login on mac
+scp -P 12345ngrokport filename whatever.ngrok.io:destfilename
+</code></pre>
+
+<h2>how does trello sync an update?</h2>
+
+<p>Let&#8217;s say you&#8217;re adding a trello card. You type &#8220;wat&#8221;
+into a new card and press enter. Boom. Card created; anyone
+else looking at the board will see it too.</p>
+
+<p>How does this work under the hood?</p>
+
+<p>It uses AJAX and two Websocket receives.</p>
+
+<h3>AJAX POST: https://trello.com/1/cards</h3>
+
+<p>In typical rest fashion it POSTs to https://trello.com/1/cards
+to create a card. Relevant request payload:</p>
+
+<pre><code>{
+    "closed": false,
+
+    // epoch milliseconds time. Corresponds to 2016-04-06 17:02:17 -0400
+    "dateLastActivity": 1459976537279,
+
+    // list of labels (no labels applied)
+    "idLabels": [],
+
+    // the Trello board we're adding to;
+    // this is also the idModelChannel from the WebSockets
+    // subscription that identifies the channel that we're subscribed to
+    "idBoard": "50b2217de9adebf92a003faa",
+
+    // the specific list we're adding the card to
+    "idList": "56f0661ab54cf7e17a3403f4",
+
+    // i don't know what this is
+    "idMembers": [],
+
+    // name of card (what i just typed in -- separate from description)
+    "name": "wat",
+
+    // probably used for ordering cards?
+    "pos": 262143,
+
+    // probably an authentication token since Trello doesn't
+    // seem to use any auth headers
+    "token": "&lt;redacted&gt;"
+}
+</code></pre>
+
+<p>That&#8217;s the request. Here&#8217;s the response</p>
+
+<pre><code>{
+    "badges": { /* numbers for varios badges */ },
+
+    // time of creation
+    "dateLastActivity": "2016-04-06T21:02:17.626Z",
+
+    // blank description because I only provided the title
+    "desc": "",
+    "descData": { "emoji": {}
+    },
+    "due": null,
+
+    // an email address that, when you send stuff to it,
+    // posts the email contents as a comment
+    "email": "&lt;redacted&gt;",
+    "id": "57057959d3730256d4a5391b",
+    "idAttachmentCover": null,
+    "idBoard": "50b2217de9adebf92a003faa",
+    "idChecklists": [],
+    "idLabels": [],
+    "idList": "56f0661ab54cf7e17a3403f4",
+    "idMembers": [],
+    "idShort": 296,
+    "labels": [],
+    "manualCoverAttachment": false,
+    "name": "wat",
+    "pos": 262143,
+    "shortUrl": "https://trello.com/c/7iBjP7iY",
+    "stickers": [],
+    "url": "https://trello.com/c/7iBjP7iY/296-wat"
+}
+</code></pre>
+
+<p>The the first weird thing about this is that this seems like
+a pretty full payload of data, which is likely redundant to
+any data received from the WebSocket. Speaking of which,
+what does the WebSocket get? It seems to get two messages (and
+at no point does it send anything):</p>
+
+<pre><code>{
+    "idModelChannel": "50b2217de9adebf92a003faa",
+    "ixLastUpdateChannel": 5,
+    "notify": {
+        "deltas": [ /* giant blob of data... see below */ ],
+        "event": "updateModels",
+        "tags": [ "allActions", "clientActions" ],
+        "typeName": "Action"
+    }
+}
+</code></pre>
+
+<p>First of note is the idModelChannel, which has the same value as
+idBoard. This tells us what websocket &#8220;channel&#8221; this message corresponds
+to: the channel for all updates that fall under the particular board
+you&#8217;re looking at. This makes sense: when you look at another board
+you should be subscribed to that board, and when you change which board
+you&#8217;re looking at, you probably want to desubscribe from the old and
+subscribe to the new.</p>
+
+<p>This is the challenging thing about rolling your own synchronization
+scheme: you have to define upfront your level of granularity of updates.
+Trello has opted for the simple solution of:</p>
+
+<ol>
+<li>you subscribe to a single websockets connection</li>
+<li>using that connection, you only subscribe to only one channel &#8211; the one
+corresponding to the Trello board.</li>
+<li>this implies that Trello&#8217;s server code is implemented such that any
+changes to any submodels of Board (cards, card lists, etc) need
+to notify the root board model of changes. Usually it&#8217;s pretty
+messy when models have to notify their relationships of changes,
+but since there&#8217;s just one root &#8220;observer&#8221;, the Trello Board model,
+Trello&#8217;s probably avoided lots of ugly spaghetti code from models
+having to notify each other of changes.</li>
+</ol>
+
+
+<p>So anyway, let&#8217;s get back to the websocket message above:</p>
+
+<p><code>ixLastUpdateChannel</code> seems to just be a sequence number for a
+particular websocket message. It is shared between tabs, such that
+if Trello sends a WS message with the same <code>ixLastUpdateChannel</code>,
+you can bet that the contents are the same. Let&#8217;s see if it&#8217;s the
+same between users: YES even between different users is this stuff
+shared. This implies another simplification that Trello can take
+advantage of: because they don&#8217;t see to have ACLs or any other access
+control, they can share a lot more information and maintain a lot
+less subscription state on the server to keep everyone in sync.</p>
+
+<p><code>notify</code> just seems to contain the payload of what has changed.
+<code>event</code> always seems to have the value &#8220;updateModels&#8221;, so we
+can ignore that. <code>tags</code> is &#8220;allActions&#8221; and &#8220;clientActions&#8221;&#8230; I&#8217;m
+guessing this is provided as a means to filter, on the client-side,
+what messages you want to respond to, so for instance, if you&#8217;re
+building an adminstrative app and you want to show a page that
+only responds to changes made from the admin app, you ignore
+messages tagged as &#8220;clientActions&#8221; which presumably are actions
+originating from the main Trello page that Trello customer use
+(this is me just guessing, I have no idea).</p>
+
+<p><code>typeName</code>, in my tests, has any of the following values:
+&#8220;Action&#8221;, &#8220;Card&#8221;, or &#8220;Member&#8221;. It seems to describe which kind
+of model has been updated. If it&#8217;s &#8220;Action&#8221;, then it probably
+corresponds to the activity feed on the right side of the page
+that shows recent modifications to the board. If it&#8217;s a &#8220;Card&#8221;</p>
+
+<p>Let&#8217;s see
+if it is shared between totally different users.</p>
+
+<h2>IPsec</h2>
+
+<p>Security at the Internet layer (rather than TLS at the application layer). So you can secure applications at the IP layer. VPN is an example of this.</p>
+
+<p>  • IPsec can be host to host, host to security gateway, or sec gway to sec gway (i.e. network to network)</p>
+
+<p>https://www.youtube.com/watch?v=TouDblq-sso</p>
+
+<p>  • IPsec is type of VPN
+  • VPN
+  ⁃ enableable on home router
+  ⁃ P2P connections
+  ⁃ remote VPNs: central corporation sets up VPN, other things VPN into it
+  • VPNs from 90s
+  • in 90s, offices had central offices and regional offices
+  • Secure tunnel over public network
+  ⁃ Client to firewall
+  ⁃ Router to router
+  ⁃ Firewall to firewall
+  • Instead of private hardware lines (which are tappable) just use public network
+  • VPN Protocols
+  ⁃ NOTE: link layer == layer 2. The layer where adjacent network nodes transfer data. TCP is between N number nodes, link layer concerns are physical connections between two nodes. Data link protocols concern only that segment between two nodes.
+  ⁃ PPTP (point-to-point tunneling protocol)
+  ⁃ from Microsoft
+  ⁃ secured dialup in early days
+  ⁃ happens on the data link layer
+  ⁃ L2F (layer 2 forwarding protocol)
+  ⁃ from Cisco
+  ⁃ link layer
+  ⁃ almost same as PPTP
+  ⁃ L2TP (Layer 2 Tunneling Protocol)
+  ⁃ Combines above 2. Note the combined names
+  ⁃ IPsec (Internet Protocol security)
+  ⁃ IETF open standard for VPN standards
+  ⁃ operates on Network/Internet layer
+  ⁃ commonly implemented on routers
+  • IPsec
+  ⁃ Layer 3 (IP/Networking layer)
+  ⁃ Everyone uses IP datagrams, you get it for free.
+  ⁃ Protects node<->node, router<->router, whatever<->whatever
+  ⁃ Two modes of operation
+  ⁃ Tunnel
+  ⁃ Transport
+  ⁃ IPsec combines following components (hence it&#8217;s called a &#8220;protocol suite&#8221;)
+  ⁃ Security Associations (SA)
+  ⁃ Authentication headers (AH)
+  ⁃ Encapsulating security payload (ESP)
+  ⁃ Internet Key Exchange (IKE)
+  ⁃ Another component: ISAKMP
+  ⁃ Internet Security Association and Key Management Protocol
+  ⁃ TODO: Wat
+  ⁃ IP Internet Protocol is not secure
+  ⁃ IPsec built into IPv6 protocol (really?)
+  ⁃ IPsec not in IPv4 because 4 was developed in old times when security wasn&#8217;t such an issue
+  ⁃ Security issues w IPv4
+  ⁃ Source spoofing
+  ⁃ replay packets
+  ⁃ no data integrity or confidentiality
+  ⁃ All of above addressed in IPsec
+  ⁃ RC 4301 &#8220;The IP Sec Architecture&#8221;&#8230; defines elements of AH and ESP
+  ⁃ RFC 4302
+  ⁃ Algorithm independent RFC for exportable crypto auth
+  ⁃ AH doesn&#8217;t have any encryption mechanisms
+  ⁃ RFC 4304
+  ⁃ ESP: Encapsulating Security Payload
+  ⁃ Adds encryption to ipv4 and v6 packets
+  ⁃ RFC 2408
+  ⁃ ISAKMP: procedures / packet formats for modifying security associations
+  ⁃ Transferring key auth data b/w two endpoints
+  • Benefits of IPsec
+  ⁃ Confidentiality
+  ⁃ by encrypting data
+  ⁃ available only to limited num of people
+  ⁃ access lists, etc
+  ⁃ no man in middle reading
+  ⁃ Integrity
+  ⁃ Routers at each end check hash/checksum
+  ⁃ Authentication (confirm who you are)
+  ⁃ Signatures and certs
+  ⁃ Compatibility through existing IP networks at Layer 3. Transparent to applications. Hence applications don&#8217;t have to know about IPsec.
+  ⁃ Anti-replay
+  ⁃ Key management
+  ⁃ No way to lose a key
+  ⁃ Ways to recover (?) keys
+  • IPsec modes
+  ⁃ Great image at https://youtu.be/TouDblq-sso?t=1461
+  ⁃ Tunnel
+  ⁃ Entire IP packet is encrypted/encapsulated, becomes datacomponent of new (and larger) IP packet
+  ⁃ Frequently used in IPsec site-to-site VPN
+  ⁃ Encapsulated packet has its own source/destination
+  ⁃ Quite useful for implementing Point to Point, site to site VPN.
+  ⁃ Frequently used in P2P&#8230; WHY?
+  ⁃ So if you&#8217;re trying to tie two networks to each other, then if you&#8217;re 192.168.1.2 and you&#8217;re trying to reach 192.168.1.3, then at the IP layer it can use Tunnel mode to wrap your packet so that source and destination reflect your real external IP source/dest, but the encrypted IPsec contents get used post VPN termination to route to private IP.
+  ⁃ Example:
+  ⁃ before: [IP[TCP[Payload]]]
+  ⁃ i.e. IP header + TCP/UDP + payload
+  ⁃ after: [IPsec[encrypted(IP[TCP[Payload]])]]
+  ⁃ payload becomes (IP header + TCP/UDP + payload). prefixed w ipsec header
+  ⁃ Useful for site-to-site
+  ⁃ New source and dest in header
+  ⁃ Because of this, used in P2P&#8230; (?)
+  ⁃ From https://en.wikipedia.org/wiki/IPsec#Modes_of_operation
+  ⁃ entire IP packet encrypted/auth&#8217;d. Encapsulated into new IP packet.
+  ⁃ NAT traversal supported presumably because old IP header preserved
+  ⁃ NOTE:
+  ⁃ Tunneling in general just means repackaging the data sent so that it can &#8220;fit&#8221; within another kind of network.
+  ⁃ e.g. running ipv6 over ipv4, remotely connecting to VPN, etc
+  ⁃ Transport
+  ⁃ No new packet created
+  ⁃ Just insert IP header&#8230; but somehow preserve size?
+  ⁃ [IP[IPsec[TCP[Payload]]]
+  ⁃ frequently used for remote access to VPNs
+  ⁃ logging into corporate VPN, etc
+  ⁃ probably because you don&#8217;t bloat header too much?
+  ⁃ But what about NAT????
+  ⁃ From https://en.wikipedia.org/wiki/IPsec#Modes_of_operation
+  ⁃ only payload of IP packet is encrypted/auth&#8217;d
+  ⁃ routing (IP header) is untouched
+  ⁃ if AH is used, IP addresses can&#8217;t be NATd, or hash will be invalidated.
+  • IPsec component review
+  ⁃ Security protocols
+  ⁃ AH
+  ⁃ ESP
+  ⁃ Establishing the tunnel
+  ⁃ IKE
+  • Security Associations (SA)
+  ⁃ Used by all other protocols
+  ⁃ A collection of different attributes/parameters associated w secure connections
+  ⁃ If you have IPsec datagram, when it arrives at other interface, which set of params to use?
+  ⁃ Hosts can be connected to many different connections/conversations going on
+  ⁃ Each connection has different set of keys/algos
+  ⁃ An SA has 3 params
+  ⁃ SPI: security parameter index
+  ⁃ IP destination address
+  ⁃ SADB (SA database)
+  ⁃ SA is unidirectional
+  ⁃ Two SAs required for bi-directional communication b/w two endpoints
+  ⁃ A single SA can be used for AH or ESP, but not both
+  ⁃ hence: if you want to use AH and ESP for bi-directional, you need total of 4 SAs
+  ⁃ When a system sends a packet that requires IPsec, server will look up SA in SADB
+  • Setting up SA
+  ⁃ Manual keying
+  ⁃ Configure each node
+  ⁃ Automatically
+  ⁃ Using IKE (Internet Key Exchange)
+  • ISAKMP (RFC 2408)
+  ⁃ Internet Security Association and Key Management Protocol
+  ⁃ Many different SAs being passed forwards and backwards, this protocol helps manage it
+  ⁃ Distinct from key exchange, focuses only on key management
+  ⁃ Many different key exchange protocols, but ISAKMP is used to negotiate what you&#8217;re using so that the protocols can do the rest
+  • Authentication Header (AH)
+  ⁃ Security Protocol, along with ESP; both offer authentication and integrity.
+  ⁃ Typically use only AH or ESP, not both, but if both, AH comes after ESP
+  ⁃ ESP is far more popular today&#8230; AH not even supported in Cisco
+  ⁃ AH authenticates/integrities but doesn&#8217;t encrypt IP traffic.
+  ⁃ ESP encrypts
+  ⁃ ESP/AH are 50/51 in IANA protocol numbers. This number is sent in IP packet header under &#8220;protocol&#8221;
+  • ESP
+  ⁃ Must encrypt and auth per packet
+  ⁃ Encrypt first and then auth
+  • AH for Transport Mode
+  ⁃ before: [original IP][TCP/UDP][Data]
+  ⁃ after: [original IP][AH Header][TCP/UDP][Data]
+  ⁃ AH header authenticates everything except for mutable IP header fields
+  ⁃ Hop-to-hop fields are mutable
+  ⁃ Why use it?
+  ⁃ You wouldn&#8217;t if you need encryption
+  ⁃ but AH is less bandwidth
+  • ESP for transport mode
+  ⁃ https://youtu.be/TouDblq-sso?t=2185
+  ⁃ adds a header and trailer
+  ⁃ TCP payload + ESP trailer is encrypted
+  ⁃ encrypted result and ESP header is authenticated
+  ⁃ ESP authentication comes at the very end
+  • Tunnel mode means bigger packets due to headers/trailers/etc
+  ⁃ You might need to talk to network providers to increase MTU sizes (presently 1500 bytes in most cases)
+  • Internet Key Exchange (IKE)
+  ⁃ automated
+  ⁃ Modes
+  ⁃ Main Mode
+  ⁃ 3 exchanges of info between IPsec peers
+  ⁃ when connecting, 1 peer (initiator) sends one or more proposals to other peer (responder). Responder selects proposal.
+  ⁃ proposal can indicate whether initiator supports Perfect Forward Secrecy (PFS)
+  ⁃ ensures that a session key remains secure even if one of the PKs to derive session key has been compromised. Jesus Christ.
+  ⁃ mainly used for first phase
+  ⁃ Aggressive Mode
+  ⁃ Used during phase 1
+  ⁃ Same thing as main mode but with fewer packets (3)
+  ⁃ Quick Mode
+  ⁃ Negotiates params for IPsec session in Phase 2.
+  ⁃ Phases
+  ⁃ Phase 1
+  ⁃ Establish secure channel (ISAKMP SA) between two endpoints
+  ⁃ Use either main mode/aggressive mode
+  ⁃ Authenticate computer id using certs or pre-shared secret
+  ⁃ Idea behind this:
+  ⁃ each application will have its own security policy. e.g. VPNs, or p2p, etc
+  ⁃ Phase 2
+  ⁃ Establish secure channel between computers intended for transmit of data
+  ⁃ Using quick mode
+  ⁃ Review
+  ⁃ Two endpoints (terminals)
+  ⁃ Phase 1: secure channel
+  ⁃ Negotiate ISALMP SA which will create IPsec SAs
+  ⁃ Step 1: SA negotiation (encryption, hash, auth, DF group)
+  ⁃ Do Diffie Hellman exchange
+  ⁃ two computers generate shared priv key using prime numbers, modulos, exponents, and holy fuck.
+  ⁃ TL;DR, this derives a shared K that is roughly as secure as RSA. Fucking awesome.
+  ⁃ Provide auth information
+  ⁃ Authenticate the peer</p>
+
+<h2>Crypto</h2>
+
+<p>https://www.youtube.com/watch?v=vdr74e7D9IU&amp;nohtml5=False</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-01-30T14:03:00-05:00" pubdate data-updated="true">Jan 30<span>th</span>, 2016</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2017
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2016/01/30/xcode-omg/';
+        var disqus_url = 'http://machty.github.com/blog/2016/01/30/xcode-omg/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

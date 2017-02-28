@@ -1,0 +1,305 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script data-cfasync="false" type="text/javascript" src="//use.typekit.net/axj3cfp.js"></script>
+	<script data-cfasync="false" type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<meta charset="utf-8">
+	<title>Real-time Rails  | machty's thoughtz</title>
+
+<meta name="author" content="Alex Matchneer"> 
+
+<meta name="description" content="I'm on Ember core and contribute to lots of stuff prefixed with "Em"."> <meta name="keywords" content="">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="machty's thoughtz" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.fancybox.pack.js"></script>
+
+<script language="Javascript" type="text/javascript">
+$(document).ready(
+  function() {
+    (function($) {
+      $(".fancybox[data-content-id]").each(function() {
+        this.href = $(this).data('content-id');
+      });
+      $(".fancybox").fancybox({
+        beforeLoad: function() {
+          var el, 
+              id = $(this.element).data('title-id');
+
+          if (id) {
+            el = $('#' + id);
+
+            if (el.length) {
+              this.title = el.html();
+            }
+          }
+          if ($(this).data('content')) {
+            this.content = $(this).data('content');
+          }
+        },
+        helpers: {
+          title: {
+            type: 'inside'
+          }
+        }
+      });
+    })(jQuery);
+  }
+);
+</script>
+
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">machty's thoughtz</a></h1>
+<h4>Ember.js, random thoughts, journal</h4>
+<nav id="main-nav"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul>
+	<li><a href="/">Blog</a></li>
+	<li><a href="/archives">Archive</a></li>
+	<li>
+    <span>
+    <a href="http://www.cram.com/flashcards/alexmatchneercom-4692833" target="_blank">Flashcards</a>
+    </span>
+    <span>
+    (<a href="/blog/2014/04/12/blog-flashcards/">explanation</a>)
+    </span>
+  </li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:machty.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+
+
+</header>
+
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Real-time Rails</h2>
+	<div class="entry-content"><h2>Real-time Rails</h2>
+
+<p>I wanted to hopefully get people interested in an idea for bringing more robust real-time data syncing primitives to Rails without involving a whole slew of third party services and new technologies to make it work.</p>
+
+<h3>Proposition: ActionCable is not robust</h3>
+
+<p>It&#8217;s a beautiful API but it suffers many of the shortcomings described in <a href="https://blog.ably.io/rails-5-actioncable-the-good-and-bad-parts-1b56c3b31404#.ex3iqm7co">this article</a>. In my (and my company&#8217;s) particular experience, the following issues are the worst offenders:</p>
+
+<h4>Connection Loss / Reconnection is poorly handled</h4>
+
+<p>Any messages broadcasted during connection loss are not replayed upon reconnection. This means you have to write your own logic to query or push missed data on client or server or both, perhaps based on some incrementing message sequence or <code>updated_at</code> timestamp for whatever model you&#8217;re subscribing to. It&#8217;s a lot of brittle race-conditiony &#8220;configuration&#8221; where there could be more convention.</p>
+
+<h4>Joins, after_commit hooks, observer-y logic</h4>
+
+<p>ActionCable exposes <a href="http://www.rubydoc.info/github/rails/actioncable/ActionCable%2FChannel%2FStreams%3Astream_for">stream_for</a> (and <code>stream_from</code>) as a convention-over-configuration-y declarative API for subscribing an ActionCable connection to a stream of updates for a given model/channel (e.g. a user with ID=&#8217;machty&#8217;).</p>
+
+<p>Unfortunately, most meaningful payloads broadcasted to clients involve some kind of SQL join of multiple tables to produce a JSON payload to broadcast to a given client; if any one of the tables involved in a join has an update/insert/delete, any live subscriptions / action cables need to be kicked so that they can assemble a freshly queried / joined JSON payload to send to all connected clients.</p>
+
+<p>What this means is that if you&#8217;re building a real-time feature that involves serializing data from some deeply nested &#8220;leaf&#8221; table, <em>something</em> in your code has to make sure that changes to that table/model needs to somehow notify all dependent channels that data has changed and new payloads need to be serialized.</p>
+
+<p>One way to do this is with a bunch of <code>after_commit :broadcast_changes</code> on every table whose data might be indirectly serialized in some ActionCable subscription. But that&#8217;s messy, brittle, and gross, and likely will result in overbroadcasting if multiple records with <code>after_commit</code> hooks are being saved in a single transaction (and afaik there&#8217;s no concept of debouncing broadcasts in ActionCable).</p>
+
+<p>You could also make the argument that it&#8217;s an anti-pattern to use <code>after_commit</code> hooks because it means you&#8217;re mixing multiple responsibilities into a Rails model, and you&#8217;d be half-right: Rails models should NOT have to be sullied by change-broadcasting logic, but then again, it seems obviously bad to choose a solution that opens the door to some, but not all, database changes being broadcasted to clients subscribed (directly or indirectly via joins) to a model.</p>
+
+<p>This is why it&#8217;s not a solution to say &#8220;just use a service object to encapsulate both the mutation to the record and the broadcasting of its mutation to subscribed parties&#8221;; the root problem is keeping data in sync, and if the only way to do this correctly is to always remember to use the correct service object that knows how to do the change-and-notify dance, then you&#8217;re just opening the door to data syncing problems somewhere down the line, either because you or some other new developer forgets to use the class, or, pragmatically, you have to <code>heroku console</code> into prod (hopefully super rarely/never) and fix a value, expecting that the fixed value shows up in all real-time apps.</p>
+
+<h4>&#8220;Dual writes&#8221; as an anti-pattern</h4>
+
+<p>Speaking of which, whether or not you use <code>after_commit</code> hooks all over the place or the service object pattern, both of these are just examples of the Dual Write (anti-)pattern for keeping two data stores in sync, where one data store is your relational database (e.g. Postgres) and the other is ActionCable (and all the clients currently using your real-time app). For an excellent writeup on why this a doomed-to-fail idea, please read <a href="https://www.confluent.io/blog/using-logs-to-build-a-solid-data-infrastructure-or-why-dual-writes-are-a-bad-idea/"><em>Using logs to build a solid data infrastructure (why dual writes are a bad idea.)</em></a></p>
+
+<p>But in short, ActionCable and many other pub-sub Redis queue-y solutions are just sugar over a Dual Write pattern, and I think we can do better.</p>
+
+<h2>My Super Hand-Wave-y Vision for the Future</h2>
+
+<p>Recent versions of PostgresSQL, MySQL, MongoDB, Oracle, and I&#8217;m sure many others, expose a streaming log of committed database transactions, which should be considered the source of truth for driving real-time subscriptions and live queries. I&#8217;ll be using Postgres terminology because it is what I&#8217;m most familiar with.</p>
+
+<p>Since Postgres 9.4 (released 2014-12-18), you can use <a href="https://www.postgresql.org/docs/9.4/static/logicaldecoding-explanation.html">logical decoding</a> to subscribe to PG&#8217;s transaction log and do pretty much anything you&#8217;d want with it, such as:</p>
+
+<ol>
+<li>Replicate the data to a completely different database system</li>
+<li>Write the logs to a file in some proprietary format</li>
+<li><a href="https://github.com/confluentinc/bottledwater-pg">Stream the changes</a> <a href="http://debezium.io/">to Kafka</a> and build other decoupled real-time analytics platforms.</li>
+<li>&#8230;perhaps use this stream to drive arbitrarily complex live real-time queries in some future version of ActionCable?</li>
+</ol>
+
+
+<p>One of the central criticisms of the <a href="https://en.wikipedia.org/wiki/Lambda_architecture#Criticism">Lambda Architecture</a> (whereby one part of your codebase handled servicing real-time queries, and a totally separate stack handled data archiving/analytics) was that keeping the different stacks in agreement about how the data was presented was an (obvious in retrospect) extremely difficult problem to solve. But I actually think Rails is uniquely positioned to leverage a lot of the familiar / classic Rails-y patterns in conjunction with transaction log streams to build out what everyone <em>wished</em> ActionCable was.</p>
+
+<p>My basic idea is that we enhance ActionCable so that it is consistently consuming the database&#8217;s transaction log and servicing live queries. Instead of just <code>stream_for current_user</code> or <code>stream_from "locations:#{user.location_id}"</code>, you could imagine a <code>stream_query</code> to combine an AREL query with a serializer to set up a &#8220;live query&#8221; for broadcasting updates to each user. Something thing:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>def subscribed
+</span><span class='line'>   stream_query User.where(location_id: params[:location_id])
+</span><span class='line'>                    .includes(:comments),
+</span><span class='line'>                PayloadSerializer
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Rather than using AREL to perform a database query <em>right now</em>, we&#8217;re using it to define a <em>live query</em> that ActionCable would be in charge of servicing as database updates come in through the transaction log.</p>
+
+<p>Theoretically, the ActionCable &#8220;engine&#8221; would be able to intelligently monitor/track subscription-impacting changes coming in via the T-log; in the above example, the ActionCable engine is &#8220;taught&#8221; to monitor all the following:</p>
+
+<ul>
+<li>New/updated/deleted users whose location_id is some static value from the action cable subscription</li>
+<li>Comments belonging to any of the above users</li>
+</ul>
+
+
+<p>Any time any of those change, it&#8217;s a signal that a new payload needs to be sent out to clients, which is where the provided <code>PayloadSerializer</code> comes in.</p>
+
+<p>One nice benefit of this is that since AREL queries are declarative/stateless, it would be (hopefully) possible to reuse the same AREL queries and <code>scope</code>s that pre-existing Rails code is already using to service classic HTTP request/responses. This would hopefully prevent a lot of the split-brained APIs/stacks that were inherent in the Lambda Architecture.</p>
+
+<p>Another benefit is that you wouldn&#8217;t have to decide between <code>after_commit</code> and service objects, nor would you be going down the &#8220;Dual Write&#8221; path to data inconsistency in the process; all responsibility for keeping data in sync would be handled by ActionCable or declarative AREL queries.</p>
+
+<h2>Major Caveats</h2>
+
+<p>While Postgres has had logical decoding for 2+ years, I haven&#8217;t found a hosted solution that gives you all the tools you need to make use of it (Heroku Postgres doesn&#8217;t let you access WAL in any way whatsoever, and while Amazon RDS&#8217; Postgres engine <em>does</em> let you use logical decoding, you&#8217;re stuck with built-in &#8220;test_decoder&#8221; which is practically the same as not having exposing the feature at all).</p>
+
+<p>So to even build something like this you&#8217;d likely have to host your own Postgres, which for many startups is a nonstarter to say the least.</p>
+
+<p>Also, I am glossing over so many extremely complex details for query/subscription state management (that would be magically handled by the ActionCable internals) that it&#8217;s not even funny. But I wanted to at least get some nugget of this idea out into the world to see how folk smarter that I might take it and run with it. Or totally shoot it down. I welcome both.</p>
+
+<h2>Inspiration / Resources</h2>
+
+<p>Everyone who uses Apache Kafka or Amazon Kinesis or any stream processor driven by a robust, persistent log-based data system.</p>
+
+<p>Things you should read:</p>
+
+<ul>
+<li><a href="https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying">The Log: What every software engineer should know about real-time data&#8217;s unifying abstraction</a></li>
+<li><a href="https://www.confluent.io/blog/using-logs-to-build-a-solid-data-infrastructure-or-why-dual-writes-are-a-bad-idea/">Using logs to build a solid data infrastructure (or: why dual writes are a bad idea)</a></li>
+<li><a href="https://www.confluent.io/blog/turning-the-database-inside-out-with-apache-samza/">Turning the database inside out with Apache Samza</a></li>
+<li><a href="http://debezium.io/">Debezium: Stream changes from your databases</a></li>
+<li><a href="https://www.confluent.io/blog/bottled-water-real-time-integration-of-postgresql-and-kafka/">Bottled Water: Real-time integration of PostgresSQL and Kafka</a></li>
+</ul>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-02-27T14:03:00-05:00" pubdate data-updated="true">Feb 27<span>th</span>, 2017</time></div>
+	
+
+
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+<!---	<a class="addthis_counter addthis_pill_style"></a> --->
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2017
+
+    Alex Matchneer
+
+<br>
+Powered by Octopress.
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'usefuldude';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://machty.github.com/blog/2017/02/27/realtime-rails/';
+        var disqus_url = 'http://machty.github.com/blog/2017/02/27/realtime-rails/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-49928757-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+</body>
+</html>
+

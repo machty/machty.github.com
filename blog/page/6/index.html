@@ -112,6 +112,318 @@ $(document).ready(
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/2014/08/02/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>NPM is killing me</h2>
+
+<p>Apparently this fixed everything.</p>
+
+<pre><code>npm cache clear &amp;&amp; npm install
+</code></pre>
+
+<p>https://www.npmjs.org/doc/cli/npm-cache.html</p>
+
+<p>npm caches everything in <code>npm config get cache</code>, which for me is:</p>
+
+<pre><code>~/.npm
+</code></pre>
+
+<p>Folder structure is something like</p>
+
+<pre><code>~/.npm/PACKAGE_NAME/VERSION/
+</code></pre>
+
+<p>which contains:</p>
+
+<ul>
+<li>.cache.json
+
+<ul>
+<li>lots of overlap w the project&#8217;s package.json, with additional
+cache-specific things like</li>
+<li>etag, shasum</li>
+<li>deployment-specific data about the package</li>
+</ul>
+</li>
+<li>package.tgz
+
+<ul>
+<li>the original tarball downloaded for this packaage</li>
+</ul>
+</li>
+<li>package/
+
+<ul>
+<li>the unzipped tarball</li>
+</ul>
+</li>
+</ul>
+
+
+<p>In other words</p>
+
+<blockquote><p>Additionally, whenever a registry request is made, a .cache.json file is placed at the corresponding URI, to store the ETag and the requested data. This is stored in {cache}/{hostname}/{path}/.cache.json.</p></blockquote>
+
+<h2>Food Shit</h2>
+
+<p>Pok Pok is a legit ass Thai place I need to check out.</p>
+
+<pre><code>http://pokpokny.com/
+</code></pre>
+
+<h2><code>sed</code> to select lines</h2>
+
+<pre><code>$ git branch
+  cp-qp
+* master
+  new-doctitle
+  setup-controller-qp
+</code></pre>
+
+<p>I wanted to switch to the fourth one without typing
+<code>setup-controller-qp</code>. Here&#8217;s how you could do it by using the line
+number</p>
+
+<pre><code>$ git branch | sed -n '4p' | xargs git checkout
+Switched to branch 'setup-controller-qp'
+</code></pre>
+
+<p>Obviously this is just a dumb exercise since it&#8217;s waaay more typing.
+This is me practicing.</p>
+
+<p>You can also display multiple lines using a syntax similiar to cut&#8217;s
+<code>-f1,2</code> syntax:</p>
+
+<pre><code>$ git branch | sed -n '3,4p' 
+  new-doctitle
+  setup-controller-qp
+</code></pre>
+
+<h2>commissary</h2>
+
+<p>From Orange is the New Black</p>
+
+<blockquote><p>commissary: a restaurant in a movie studio, military base, prison, or other institution.</p></blockquote>
+
+<h2>HRT</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Hormone_replacement_therapy">Hormone replacement therapy</a></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-02T21:24:00-04:00" pubdate data-updated="true">Aug 2<span>nd</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/07/29/daily-journal/">
+		
+			Daily Journal</a>
+	</h2>
+	<div class="entry-content">
+		<h2>tar</h2>
+
+<p>Short for Tape Archives.</p>
+
+<p>Had a tar.xz file, just needed to</p>
+
+<pre><code>tar xf thefile.tar.xz
+</code></pre>
+
+<h2>Dexing</h2>
+
+<p>Convert string names to numbers to be referenced within compiled Java
+whilst packaging android apps.</p>
+
+<h2>Good Food</h2>
+
+<p>Prince St Cafe on Prince and Mott.</p>
+
+<ul>
+<li>Awesome burger</li>
+<li>Awesome lamb thing</li>
+</ul>
+
+
+<h2>ls -l</h2>
+
+<p>Was curious about an <code>@</code> sign I saw next to a .txt file, from <code>ls(1)</code>:</p>
+
+<blockquote><p>The Long Format</p>
+
+<pre><code>If the -l option is given, the following information is displayed for
+each file: file mode, number of links, owner name, group name, number
+of bytes in the file, abbreviated month, day-of-month file was last
+modified, hour file last modified, minute file last modified, and the
+pathname.  In addition, for each directory whose contents are dis-
+played, the total number of 512-byte blocks used by the files in the
+directory is displayed on a line by itself, immediately before the
+information for the files in the directory.  If the file or directory
+has extended attributes, the permissions field printed by the -l
+option is followed by a '@' character.  Otherwise, if the file or
+directory has extended security information (such as an access control
+list), the permissions field printed by the -l option is followed by a
+'+' character.
+</code></pre></blockquote>
+
+<ul>
+<li><code>@</code> extended attributes</li>
+<li><code>+</code> extended security info</li>
+</ul>
+
+
+<h2>Interrupted System Call</h2>
+
+<p>http://infohost.nmt.edu/~eweiss/222_book/222_book/0201433079/ch10lev1sec5.html</p>
+
+<p>I&#8217;m getting some shit about foreman and interrupted system calls. So
+what is it.</p>
+
+<h2>&#8220;data at the edge&#8221;</h2>
+
+<p>Keeping secure data at the edge of your infrastructure, e.g. using
+tokens instead of storing CC&#8217;s in your db.</p>
+
+<h2>PAN (primary account number)</h2>
+
+<p>Bank card number.</p>
+
+<p>http://en.wikipedia.org/wiki/Primary_account_number</p>
+
+<h2>CP (card present)</h2>
+
+<p>e.g AuthorizeNetCP</p>
+
+<p>Cheaper rates if you can prove card present (via CVV).</p>
+
+<h2>TokenEx</h2>
+
+<p>ProcessTransaction</p>
+
+<p>ProcessTransactionWithPAN</p>
+
+<ul>
+<li>pass in all the CC data; no</li>
+</ul>
+
+
+<h2>Levenshtein Distance</h2>
+
+<p>The minimum number of single-element operations (add, remove,
+substitute) between two sequences. Often used for spell-checking
+suggestions.</p>
+
+<p>I was thinking of using it to do an array diffing for React-ish stuff.</p>
+
+<pre><code>Array 1: B C D E F
+Array 2: A B C D E
+</code></pre>
+
+<p>Clearly the answer to how to get from 1 to 2 is</p>
+
+<pre><code>shift A
+delete E
+</code></pre>
+
+<p>But how to programmatically detect that?</p>
+
+<h2>Ruby String Substring Shorthand</h2>
+
+<p>https://speakerdeck.com/headius/jruby-the-hard-parts</p>
+
+<p>I can&#8217;t believe I didn&#8217;t know this&#8230;</p>
+
+<pre><code>s = "alex is quite maudlin"
+s['quite'] = 'very'
+s =&gt; "alex is very maudlin"
+</code></pre>
+
+<p>and if the substring isn&#8217;t in there, then</p>
+
+<pre><code>IndexError: string not matched
+</code></pre>
+
+<p>http://www.ruby-doc.org/core-2.1.2/String.html#method-i-5B-5D-3D</p>
+
+<h2>JRuby the Hard Parts</h2>
+
+<p>Goal: understand this talk https://speakerdeck.com/headius/jruby-the-hard-parts</p>
+
+<h2>Learn about encodings</h2>
+
+<p>I had to resort to this shit:</p>
+
+<pre><code>line = line.force_encoding("iso-8859-1")
+</code></pre>
+
+<p>for a bigass file because I was running into</p>
+
+<pre><code>http://stackoverflow.com/questions/15399530/ruby-match-invalid-byte-sequence-in-utf-8
+</code></pre>
+
+<p>Apparently you can open files as a certain encoding. Seems good.</p>
+
+<h2>Auto-inline CSS with Roadie</h2>
+
+<p>https://github.com/Mange/roadie</p>
+
+<p>Useful for supporting a vast array of shitty email clients that require
+inline CSS. This wouldn&#8217;t be a problem if web components.</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-29T07:50:00-04:00" pubdate data-updated="true">Jul 29<span>th</span>, 2014</time></div>
+	
+
+
+	
+</div></article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/2014/07/28/daily-journal-2/">
 		
 			Daily Journal 2</a>
@@ -2618,103 +2930,6 @@ subsection&#8230; rather, you look up entries in a section of <code>man</code>.<
 	
 </div></article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/13/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<h2>HTML is an API, getAttribute</h2>
-
-<p>HTML is just a string of characters that get converted into DOM. You can
-also create DOM via the JavaScript DOM API. Seems like an obvious thing
-I guess but it just clicked for me.</p>
-
-<p>What&#8217;s an attribute? It&#8217;s any key-value pair (or occasional boolean)
-within an open tag.</p>
-
-<pre><code>&lt;div id="lol" snaggletooth="blorg"&gt;&lt;/div&gt;
-</code></pre>
-
-<p><code>id</code> and <code>snaggletooth</code> are attributes. During HTML parsing, the browser
-will convert this isn&#8217;t an HTML element (which is a node). HTML elements
-have a fixed set of <em>properties</em>. All the <em>attributes</em> you provide in
-your HTML that map to known properties will set the values of those
-properties, hence <code>.id</code> gets set to &#8220;lol&#8221;, but <code>.snaggletooth</code> would
-yield <code>undefined</code>, because that&#8217;s obviously not a real property name.</p>
-
-<p>http://jsbin.com/bejog/1/edit</p>
-
-<p>This also explains why you can set an <code>&lt;input&gt;</code>&#8217;s value to &#8220;wat&#8221;, then
-type in a new value in the input field, and <code>getAttribute("value")</code> will
-still yield <code>"wat"</code> even though <code>inputElement.value</code> will equal whatever
-you typed in.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-13T15:18:00-04:00" pubdate data-updated="true">Jul 13<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2014/07/08/daily-journal/">
-		
-			Daily Journal</a>
-	</h2>
-	<div class="entry-content">
-		<p>This blog left intentionally blank. There are flashcards about browser
-networking attached to it.</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-08T14:31:00-04:00" pubdate data-updated="true">Jul 8<span>th</span>, 2014</time></div>
-	
-
-
-	
-</div></article>
-
 <nav id="pagenavi">
     
         <a href="/blog/page/5/" class="prev">Prev</a>
@@ -2724,7 +2939,7 @@ networking attached to it.</p>
     
     <div class="center"><a href="/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2015
+	<footer id="footer" class="inner">Copyright &copy; 2017
 
     Alex Matchneer
 

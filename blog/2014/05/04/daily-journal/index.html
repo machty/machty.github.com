@@ -240,8 +240,28 @@ just text can be conveyed</p>
 <li>HAL embeds child docs recursively; JSON API flattens the entire graph
 at the top level.</li>
 <li>JSON API uses IDs for linkage (as opposed to HAL&#8217;s what)?</li>
-<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
-https://github.com/json-api/json-api/pull/123/files#r12265234</li>
+<li><p>See <a href="https://github.com/dgeb">Dan Gebhart</a>&#8217;s response here re linkage:
+https://github.com/json-api/json-api/pull/123/files#r12265234</p>
+
+<p>  def update_registration_number</p>
+
+<pre><code>update_registration_number_service.(registration_number)
+if update_registration_number_service.errors.present?
+  render_success
+else
+  render_error
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  def foo(*args, return_something: false)</p>
+
+<pre><code>something = do_command_side_effecty_thing(*args)
+something.output if return_something
+</code></pre>
+
+<p>  end</p></li>
 </ul>
 
 </div>
@@ -294,7 +314,7 @@ https://github.com/json-api/json-api/pull/123/files#r12265234</li>
 </section>
 
 </div>
-	<footer id="footer" class="inner">Copyright &copy; 2015
+	<footer id="footer" class="inner">Copyright &copy; 2017
 
     Alex Matchneer
 

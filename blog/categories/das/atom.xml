@@ -4,7 +4,7 @@
   <title><![CDATA[Category: DAS | machty's thoughtz]]></title>
   <link href="http://machty.github.com/blog/categories/das/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2015-12-29T09:46:15-05:00</updated>
+  <updated>2017-02-28T14:06:26-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -150,8 +150,28 @@ just text can be conveyed</p>
 <li>HAL embeds child docs recursively; JSON API flattens the entire graph
 at the top level.</li>
 <li>JSON API uses IDs for linkage (as opposed to HAL's what)?</li>
-<li>See <a href="https://github.com/dgeb">Dan Gebhart</a>'s response here re linkage:
-https://github.com/json-api/json-api/pull/123/files#r12265234</li>
+<li><p>See <a href="https://github.com/dgeb">Dan Gebhart</a>'s response here re linkage:
+https://github.com/json-api/json-api/pull/123/files#r12265234</p>
+
+<p>  def update_registration_number</p>
+
+<pre><code>update_registration_number_service.(registration_number)
+if update_registration_number_service.errors.present?
+  render_success
+else
+  render_error
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  def foo(*args, return_something: false)</p>
+
+<pre><code>something = do_command_side_effecty_thing(*args)
+something.output if return_something
+</code></pre>
+
+<p>  end</p></li>
 </ul>
 
 ]]></content>

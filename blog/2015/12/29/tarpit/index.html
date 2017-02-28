@@ -423,7 +423,7 @@ Data should only be considered essential if directly input by user.</p>
 <p>Derived internal relations:</p>
 
 <ul>
-<li>RoomInfo, extend(Room, (roomSize = width*breadth))
+<li>RoomInfo, extend(Room, (roomSize = width * breadth))
 
 <ul>
 <li>so it&#8217;s a room info with another type</li>
@@ -467,6 +467,32 @@ Data should only be considered essential if directly input by user.</p>
 <p>Favor declarative Prolog-ish logic programming to littering conditionals all over the place.</p>
 
 <p>Resource contention is inherent complexity, not your fault.</p>
+
+<h2>Taco Bell shell script of the day</h2>
+
+<pre><code>find public/assets/images -type f | xargs basename | xargs -I% bash -c "ack % app &gt; /dev/null || echo unused image %"
+</code></pre>
+
+<p>prints unused images.</p>
+
+<h2>npm shrinkwrap</h2>
+
+<p>https://docs.npmjs.com/cli/shrinkwrap</p>
+
+<p>Generates a shrinkwrap / lockfile of all dependencies&#8217; dependencies&#8217;
+dependencies. It&#8217;s npm&#8217;s lockfile.</p>
+
+<h2>illusion of callcc as the one true primitive</h2>
+
+<p>http://okmij.org/ftp/continuations/against-callcc.html#illusion</p>
+
+<ul>
+<li>confusing</li>
+<li>inefficient</li>
+<li>memory leak prone</li>
+<li>not a function, hence not composable</li>
+</ul>
+
 </div>
 
 
@@ -511,7 +537,7 @@ Data should only be considered essential if directly input by user.</p>
 </section>
 
 </div>
-	<footer id="footer" class="inner">Copyright &copy; 2015
+	<footer id="footer" class="inner">Copyright &copy; 2017
 
     Alex Matchneer
 
