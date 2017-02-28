@@ -138,7 +138,7 @@ $(document).ready(
 
 <p>One of the central criticisms of the <a href="https://en.wikipedia.org/wiki/Lambda_architecture#Criticism">Lambda Architecture</a> (whereby one part of your codebase handled servicing real-time queries, and a totally separate stack handled data archiving/analytics) was that keeping the different stacks in agreement about how the data was presented was an (obvious in retrospect) extremely difficult problem to solve. But I actually think Rails is uniquely positioned to leverage a lot of the familiar / classic Rails-y patterns in conjunction with transaction log streams to build out what everyone <em>wished</em> ActionCable was.</p>
 
-<p>My basic idea is that we enhance ActionCable so that it is consistently consuming the database&#8217;s transaction log and servicing live queries. Instead of just <code>stream_for current_user</code> or <code>stream_from "locations:#{user.location_id}"</code>, you could imagine a <code>stream_query</code> to combine an AREL query with a serializer to set up a &#8220;live query&#8221; for broadcasting updates to each user. Something thing:</p>
+<p>My basic idea is that we enhance ActionCable so that it is consistently consuming the database&#8217;s transaction log and servicing live queries. Instead of just <code>stream_for current_user</code> or <code>stream_from "locations:#{user.location_id}"</code>, you could imagine a <code>stream_query</code> to combine an AREL query with a serializer to set up a &#8220;live query&#8221; for broadcasting updates to each user. Something like:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
