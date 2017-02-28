@@ -4,7 +4,7 @@
   <title><![CDATA[machty's thoughtz]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2017-02-28T14:06:26-05:00</updated>
+  <updated>2017-02-28T14:09:13-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -14,13 +14,11 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Real-time Rails]]></title>
+    <title type="html"><![CDATA[Real-time Rails: Dreams for a Better ActionCable]]></title>
     <link href="http://machty.github.com/blog/2017/02/27/realtime-rails/"/>
     <updated>2017-02-27T14:03:00-05:00</updated>
     <id>http://machty.github.com/blog/2017/02/27/realtime-rails</id>
-    <content type="html"><![CDATA[<h2>Real-time Rails</h2>
-
-<p>I wanted to hopefully get people interested in an idea for bringing more robust real-time data syncing primitives to Rails without involving a whole slew of third party services and new technologies to make it work.</p>
+    <content type="html"><![CDATA[<p>I wanted to hopefully get people interested in an idea for bringing more robust real-time data syncing primitives to Rails without involving a whole slew of third party services and new technologies to make it work.</p>
 
 <h3>Proposition: ActionCable is not robust</h3>
 
