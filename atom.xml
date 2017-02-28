@@ -4,7 +4,7 @@
   <title><![CDATA[machty's blog]]></title>
   <link href="http://machty.github.com/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2017-02-28T16:57:26-05:00</updated>
+  <updated>2017-02-28T18:57:44-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
@@ -18,104 +18,8 @@
     <link href="http://machty.github.com/blog/2017/02/27/realtime-rails/"/>
     <updated>2017-02-27T14:03:00-05:00</updated>
     <id>http://machty.github.com/blog/2017/02/27/realtime-rails</id>
-    <content type="html"><![CDATA[<p>I wanted to hopefully get people interested in an idea for bringing more robust real-time data syncing primitives to Rails without involving a whole slew of third party services and new technologies to make it work.</p>
-
-<h3>Proposition: ActionCable is not robust</h3>
-
-<p>It&#8217;s a beautiful API but it suffers many of the shortcomings described in <a href="https://blog.ably.io/rails-5-actioncable-the-good-and-bad-parts-1b56c3b31404#.ex3iqm7co">this article</a>. In my (and my company&#8217;s) particular experience, the following issues are the worst offenders:</p>
-
-<h4>Connection Loss / Reconnection is poorly handled</h4>
-
-<p>Any messages broadcasted during connection loss are not replayed upon reconnection. This means you have to write your own logic to query or push missed data on client or server or both, perhaps based on some incrementing message sequence or <code>updated_at</code> timestamp for whatever model you&#8217;re subscribing to. It&#8217;s a lot of brittle race-conditiony &#8220;configuration&#8221; where there could be more convention.</p>
-
-<h4>Joins, after_commit hooks, observer-y logic</h4>
-
-<p>ActionCable exposes <a href="http://www.rubydoc.info/github/rails/actioncable/ActionCable%2FChannel%2FStreams%3Astream_for">stream_for</a> (and <code>stream_from</code>) as a convention-over-configuration-y declarative API for subscribing an ActionCable connection to a stream of updates for a given model/channel (e.g. a user with ID=&#8217;machty&#8217;).</p>
-
-<p>Unfortunately, most meaningful payloads broadcasted to clients involve some kind of SQL join of multiple tables to produce a JSON payload to broadcast to a given client; if any one of the tables involved in a join has an update/insert/delete, any live subscriptions / action cables need to be kicked so that they can assemble a freshly queried / joined JSON payload to send to all connected clients.</p>
-
-<p>What this means is that if you&#8217;re building a real-time feature that involves serializing data from some deeply nested &#8220;leaf&#8221; table, <em>something</em> in your code has to make sure that changes to that table/model needs to somehow notify all dependent channels that data has changed and new payloads need to be serialized.</p>
-
-<p>One way to do this is with a bunch of <code>after_commit :broadcast_changes</code> on every table whose data might be indirectly serialized in some ActionCable subscription. But that&#8217;s messy, brittle, and gross, and likely will result in overbroadcasting if multiple records with <code>after_commit</code> hooks are being saved in a single transaction (and afaik there&#8217;s no concept of debouncing broadcasts in ActionCable).</p>
-
-<p>You could also make the argument that it&#8217;s an anti-pattern to use <code>after_commit</code> hooks because it means you&#8217;re mixing multiple responsibilities into a Rails model, and you&#8217;d be half-right: Rails models should NOT have to be sullied by change-broadcasting logic, but then again, it seems obviously bad to choose a solution that opens the door to some, but not all, database changes being broadcasted to clients subscribed (directly or indirectly via joins) to a model.</p>
-
-<p>This is why it&#8217;s not a solution to say &#8220;just use a service object to encapsulate both the mutation to the record and the broadcasting of its mutation to subscribed parties&#8221;; the root problem is keeping data in sync, and if the only way to do this correctly is to always remember to use the correct service object that knows how to do the change-and-notify dance, then you&#8217;re just opening the door to data syncing problems somewhere down the line, either because you or some other new developer forgets to use the class, or, pragmatically, you have to <code>heroku console</code> into prod (hopefully super rarely/never) and fix a value, expecting that the fixed value shows up in all real-time apps.</p>
-
-<h4>&#8220;Dual writes&#8221; as an anti-pattern</h4>
-
-<p>Speaking of which, whether or not you use <code>after_commit</code> hooks all over the place or the service object pattern, both of these are just examples of the Dual Write (anti-)pattern for keeping two data stores in sync, where one data store is your relational database (e.g. Postgres) and the other is ActionCable (and all the clients currently using your real-time app). For an excellent writeup on why this a doomed-to-fail idea, please read <a href="https://www.confluent.io/blog/using-logs-to-build-a-solid-data-infrastructure-or-why-dual-writes-are-a-bad-idea/"><em>Using logs to build a solid data infrastructure (why dual writes are a bad idea.)</em></a></p>
-
-<p>But in short, ActionCable and many other pub-sub Redis queue-y solutions are just sugar over a Dual Write pattern, and I think we can do better.</p>
-
-<h2>My Super Hand-Wave-y Vision for the Future</h2>
-
-<p>Recent versions of PostgresSQL, MySQL, MongoDB, Oracle, and I&#8217;m sure many others, expose a streaming log of committed database transactions, which should be considered the source of truth for driving real-time subscriptions and live queries. I&#8217;ll be using Postgres terminology because it is what I&#8217;m most familiar with.</p>
-
-<p>Since Postgres 9.4 (released 2014-12-18), you can use <a href="https://www.postgresql.org/docs/9.4/static/logicaldecoding-explanation.html">logical decoding</a> to subscribe to PG&#8217;s transaction log and do pretty much anything you&#8217;d want with it, such as:</p>
-
-<ol>
-<li>Replicate the data to a completely different database system</li>
-<li>Write the logs to a file in some proprietary format</li>
-<li><a href="https://github.com/confluentinc/bottledwater-pg">Stream the changes</a> <a href="http://debezium.io/">to Kafka</a> and build other decoupled real-time analytics platforms.</li>
-<li>&#8230;perhaps use this stream to drive arbitrarily complex live real-time queries in some future version of ActionCable?</li>
-</ol>
-
-
-<p>One of the central criticisms of the <a href="https://en.wikipedia.org/wiki/Lambda_architecture#Criticism">Lambda Architecture</a> (whereby one part of your codebase handled servicing real-time queries, and a totally separate stack handled data archiving/analytics) was that keeping the different stacks in agreement about how the data was presented was an (obvious in retrospect) extremely difficult problem to solve. But I actually think Rails is uniquely positioned to leverage a lot of the familiar / classic Rails-y patterns in conjunction with transaction log streams to build out what everyone <em>wished</em> ActionCable was.</p>
-
-<p>My basic idea is that we enhance ActionCable so that it is consistently consuming the database&#8217;s transaction log and servicing live queries. Instead of just <code>stream_for current_user</code> or <code>stream_from "locations:#{user.location_id}"</code>, you could imagine a <code>stream_query</code> to combine an AREL query with a serializer to set up a &#8220;live query&#8221; for broadcasting updates to each user. Something like:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>def subscribed
-</span><span class='line'>   stream_query User.where(location_id: params[:location_id])
-</span><span class='line'>                    .includes(:comments),
-</span><span class='line'>                PayloadSerializer
-</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Rather than using AREL to perform a database query <em>right now</em>, we&#8217;re using it to define a <em>live query</em> that ActionCable would be in charge of servicing as database updates come in through the transaction log.</p>
-
-<p>Theoretically, the ActionCable &#8220;engine&#8221; would be able to intelligently monitor/track subscription-impacting changes coming in via the T-log; in the above example, the ActionCable engine is &#8220;taught&#8221; to monitor all the following:</p>
-
-<ul>
-<li>New/updated/deleted users whose location_id is some static value from the action cable subscription</li>
-<li>Comments belonging to any of the above users</li>
-</ul>
-
-
-<p>Any time any of those change, it&#8217;s a signal that a new payload needs to be sent out to clients, which is where the provided <code>PayloadSerializer</code> comes in.</p>
-
-<p>One nice benefit of this is that since AREL queries are declarative/stateless, it would be (hopefully) possible to reuse the same AREL queries and <code>scope</code>s that pre-existing Rails code is already using to service classic HTTP request/responses. This would hopefully prevent a lot of the split-brained APIs/stacks that were inherent in the Lambda Architecture.</p>
-
-<p>Another benefit is that you wouldn&#8217;t have to decide between <code>after_commit</code> and service objects, nor would you be going down the &#8220;Dual Write&#8221; path to data inconsistency in the process; all responsibility for keeping data in sync would be handled by ActionCable or declarative AREL queries.</p>
-
-<h2>Major Caveats</h2>
-
-<p>While Postgres has had logical decoding for 2+ years, I haven&#8217;t found a hosted solution that gives you all the tools you need to make use of it (Heroku Postgres doesn&#8217;t let you access WAL in any way whatsoever, and while Amazon RDS&#8217; Postgres engine <em>does</em> let you use logical decoding, you&#8217;re stuck with built-in &#8220;test_decoder&#8221; which is practically the same as not having exposing the feature at all).</p>
-
-<p>So to even build something like this you&#8217;d likely have to host your own Postgres, which for many startups is a nonstarter to say the least.</p>
-
-<p>Also, I am glossing over so many extremely complex details for query/subscription state management (that would be magically handled by the ActionCable internals) that it&#8217;s not even funny. But I wanted to at least get some nugget of this idea out into the world to see how folk smarter than I might take it and run with it. Or totally shoot it down. I welcome both.</p>
-
-<h2>Inspiration / Resources</h2>
-
-<p>Everyone who uses Apache Kafka or Amazon Kinesis or any stream processor driven by a robust, persistent log-based data system.</p>
-
-<p>Things you should read:</p>
-
-<ul>
-<li><a href="https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying">The Log: What every software engineer should know about real-time data&#8217;s unifying abstraction</a></li>
-<li><a href="https://www.confluent.io/blog/using-logs-to-build-a-solid-data-infrastructure-or-why-dual-writes-are-a-bad-idea/">Using logs to build a solid data infrastructure (or: why dual writes are a bad idea)</a></li>
-<li><a href="https://www.confluent.io/blog/turning-the-database-inside-out-with-apache-samza/">Turning the database inside out with Apache Samza</a></li>
-<li><a href="http://debezium.io/">Debezium: Stream changes from your databases</a></li>
-<li><a href="https://www.confluent.io/blog/bottled-water-real-time-integration-of-postgresql-and-kafka/">Bottled Water: Real-time integration of PostgresSQL and Kafka</a></li>
-</ul>
-
+    <content type="html"><![CDATA[<p>This article has been moved to
+<a href="https://dunningpostor.com/real-time-rails-dreams-for-a-better-actioncable/">DunningPostor</a></p>
 ]]></content>
   </entry>
   
