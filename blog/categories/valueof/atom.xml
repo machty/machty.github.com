@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: valueOf | machty's thoughtz]]></title>
+  <title><![CDATA[Category: valueOf | machty's blog]]></title>
   <link href="http://machty.github.com/blog/categories/valueof/atom.xml" rel="self"/>
   <link href="http://machty.github.com/"/>
-  <updated>2017-02-28T14:09:13-05:00</updated>
+  <updated>2017-02-28T14:16:13-05:00</updated>
   <id>http://machty.github.com/</id>
   <author>
     <name><![CDATA[Alex Matchneer]]></name>
